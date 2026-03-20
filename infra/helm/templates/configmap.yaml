@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openoncology.fullname" . }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+data:
+  ENVIRONMENT: {{ .Values.api.env.ENVIRONMENT | quote }}
+  KEYCLOAK_URL: {{ printf "https://%s" .Values.ingress.hosts.keycloak | quote }}
+  KEYCLOAK_REALM: {{ .Values.api.env.KEYCLOAK_REALM | quote }}
+  KEYCLOAK_CLIENT_ID: {{ .Values.api.env.KEYCLOAK_CLIENT_ID | quote }}
+  MINIO_ENDPOINT: {{ printf "%s-minio:9000" .Release.Name | quote }}
+  MINIO_SECURE: {{ .Values.api.env.MINIO_SECURE | quote }}
+  MINIO_BUCKET_RAW: {{ .Values.api.env.MINIO_BUCKET_RAW | quote }}
+  MINIO_BUCKET_VCF: {{ .Values.api.env.MINIO_BUCKET_VCF | quote }}
+  MINIO_BUCKET_REPORTS: {{ .Values.api.env.MINIO_BUCKET_REPORTS | quote }}
+  DATABASE_URL: {{ include "openoncology.databaseUrl" . | quote }}
+  REDIS_URL: {{ include "openoncology.redisUrl" . | quote }}
+  # Next.js public vars
+  NEXT_PUBLIC_API_URL: {{ printf "https://%s" .Values.ingress.hosts.api | quote }}
+  NEXT_PUBLIC_KEYCLOAK_URL: {{ printf "https://%s" .Values.ingress.hosts.keycloak | quote }}
+  NEXT_PUBLIC_KEYCLOAK_REALM: {{ .Values.web.env.NEXT_PUBLIC_KEYCLOAK_REALM | quote }}
+  NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: {{ .Values.web.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID | quote }}

@@ -1,0 +1,52 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "openoncology.fullname" . }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hosts.web }}
+        - {{ .Values.ingress.hosts.api }}
+        - {{ .Values.ingress.hosts.keycloak }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.hosts.web }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "openoncology.fullname" . }}-web
+                port:
+                  name: http
+    - host: {{ .Values.ingress.hosts.api }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "openoncology.fullname" . }}-api
+                port:
+                  name: http
+    - host: {{ .Values.ingress.hosts.keycloak }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "openoncology.fullname" . }}-keycloak
+                port:
+                  name: http
+{{- end }}

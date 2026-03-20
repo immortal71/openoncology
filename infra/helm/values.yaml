@@ -1,0 +1,179 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenOncology Helm Values — base (development / staging)
+# Override with values.production.yaml for production deployments.
+# ─────────────────────────────────────────────────────────────────────────────
+
+global:
+  imageRegistry: ""
+  imagePullSecrets: []
+  storageClass: ""
+
+# ── Namespace ─────────────────────────────────────────────────────────────────
+namespace: openoncology
+
+# ── API (FastAPI) ─────────────────────────────────────────────────────────────
+api:
+  image:
+    repository: ghcr.io/openoncology/api
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 8000
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  env:
+    ENVIRONMENT: production
+    KEYCLOAK_REALM: openoncology
+    KEYCLOAK_CLIENT_ID: openoncology-api
+    MINIO_SECURE: "true"
+    MINIO_BUCKET_RAW: openoncology-raw
+    MINIO_BUCKET_VCF: openoncology-vcf
+    MINIO_BUCKET_REPORTS: openoncology-reports
+  # Sensitive values provided via external Secrets (ExternalSecret / sealed-secret)
+  secretRef: openoncology-api-secrets
+
+# ── Web (Next.js) ─────────────────────────────────────────────────────────────
+web:
+  image:
+    repository: ghcr.io/openoncology/web
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 3000
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  env:
+    NEXT_PUBLIC_KEYCLOAK_REALM: openoncology
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: openoncology-web
+
+# ── Celery Workers ────────────────────────────────────────────────────────────
+workers:
+  genomic:
+    replicaCount: 2
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2000m"
+        memory: "4Gi"
+  ai:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: "1000m"
+        memory: "2Gi"
+      limits:
+        cpu: "4000m"
+        memory: "8Gi"
+  notify:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+# ── PostgreSQL (Bitnami sub-chart) ────────────────────────────────────────────
+postgresql:
+  enabled: true
+  auth:
+    username: openoncology
+    database: openoncology
+    existingSecret: openoncology-pg-secret
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+  primary:
+    persistence:
+      enabled: true
+      size: 50Gi
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1000m"
+        memory: "2Gi"
+
+# ── Redis (Bitnami sub-chart) ─────────────────────────────────────────────────
+redis:
+  enabled: true
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: true
+      size: 5Gi
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+# ── MinIO ─────────────────────────────────────────────────────────────────────
+minio:
+  enabled: true
+  image:
+    repository: minio/minio
+    tag: latest
+  persistence:
+    size: 200Gi
+  secretRef: openoncology-minio-secrets
+
+# ── Keycloak ──────────────────────────────────────────────────────────────────
+keycloak:
+  enabled: true
+  image:
+    repository: quay.io/keycloak/keycloak
+    tag: "24.0"
+  replicaCount: 1
+  secretRef: openoncology-keycloak-secrets
+
+# ── Ingress ───────────────────────────────────────────────────────────────────
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  hosts:
+    api: api.openoncology.org
+    web: openoncology.org
+    keycloak: auth.openoncology.org
+  tls:
+    enabled: true
+    secretName: openoncology-tls
+
+# ── Prometheus / Grafana ──────────────────────────────────────────────────────
+monitoring:
+  enabled: true
+  serviceMonitor: true
+
+# ── Service Account ───────────────────────────────────────────────────────────
+serviceAccount:
+  create: true
+  name: openoncology
+  annotations: {}

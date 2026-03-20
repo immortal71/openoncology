@@ -1,0 +1,215 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────
+  # Next.js Frontend  →  http://localhost:3000
+  # ─────────────────────────────────────────────
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+      - NEXT_PUBLIC_KEYCLOAK_REALM=openoncology
+      - NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=openoncology-web
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+    networks:
+      - openoncology
+
+  # ─────────────────────────────────────────────
+  # FastAPI Backend  →  http://localhost:8000
+  # ─────────────────────────────────────────────
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=storage:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=openoncology
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=development
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+      - redis
+      - storage
+    networks:
+      - openoncology
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ─────────────────────────────────────────────
+  # Celery Genomic Worker  →  background
+  # ─────────────────────────────────────────────
+  worker-genomic:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=storage:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - openoncology
+    command: celery -A workers.genomic_worker worker --loglevel=info -Q genomic
+
+  # ─────────────────────────────────────────────
+  # Celery AI Worker  →  background
+  # ─────────────────────────────────────────────
+  worker-ai:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=storage:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - openoncology
+    command: celery -A workers.ai_worker worker --loglevel=info -Q ai
+
+  # ─────────────────────────────────────────────
+  # Celery Notify Worker  →  background
+  # ─────────────────────────────────────────────
+  worker-notify:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - RESEND_API_KEY=${RESEND_API_KEY}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - openoncology
+    command: celery -A workers.notify_worker worker --loglevel=info -Q notify
+
+  # ─────────────────────────────────────────────
+  # PostgreSQL Database  →  localhost:5432
+  # ─────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=openoncology
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=openoncology
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - openoncology
+
+  # ─────────────────────────────────────────────
+  # Redis  →  localhost:6379
+  # ─────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - openoncology
+
+  # ─────────────────────────────────────────────
+  # MinIO Object Storage  →  localhost:9000 / 9001
+  # ─────────────────────────────────────────────
+  storage:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    volumes:
+      - minio_data:/data
+    networks:
+      - openoncology
+    command: server /data --console-address ':9001'
+
+  # ─────────────────────────────────────────────
+  # Keycloak Auth Server  →  localhost:8080
+  # ─────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    ports:
+      - "8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    networks:
+      - openoncology
+    command: start-dev
+
+  # ─────────────────────────────────────────────
+  # Prometheus Metrics  →  localhost:9090
+  # ─────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - openoncology
+
+  # ─────────────────────────────────────────────
+  # Grafana Dashboards  →  localhost:3001
+  # ─────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - openoncology
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  grafana_data:
+
+networks:
+  openoncology:
+    driver: bridge

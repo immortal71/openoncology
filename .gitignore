@@ -1,0 +1,49 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Next.js
+web/node_modules/
+web/.next/
+web/out/
+
+# Nextflow
+pipeline/work/
+pipeline/.nextflow/
+pipeline/.nextflow.log*
+
+# Pipeline outputs (large genomic files)
+pipeline/results/
+*.bam
+*.bai
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# Reference genomes (large, downloaded separately)
+pipeline/references/
+
+# Docker volumes
+postgres_data/
+redis_data/
+minio_data/
+grafana_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

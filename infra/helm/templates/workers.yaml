@@ -1,0 +1,67 @@
+{{/* Celery Worker Deployments — genomic, ai, notify */}}
+{{- $root := . }}
+{{- range $name, $cfg := .Values.workers }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openoncology.fullname" $root }}-worker-{{ $name }}
+  namespace: {{ $root.Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: worker-{{ $name }}
+spec:
+  replicas: {{ $cfg.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" $root | nindent 6 }}
+      app.kubernetes.io/component: worker-{{ $name }}
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" $root | nindent 8 }}
+        app.kubernetes.io/component: worker-{{ $name }}
+    spec:
+      serviceAccountName: {{ include "openoncology.serviceAccountName" $root }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: worker
+          image: "{{ $root.Values.api.image.repository }}:{{ $root.Values.api.image.tag }}"
+          imagePullPolicy: {{ $root.Values.api.image.pullPolicy }}
+          command:
+            - celery
+            - -A
+            - workers.{{ $name }}_worker
+            - worker
+            - --loglevel=info
+            - -Q
+            - {{ $name }}
+            - --concurrency=4
+          envFrom:
+            - configMapRef:
+                name: {{ include "openoncology.fullname" $root }}-config
+            - secretRef:
+                name: {{ $root.Values.api.secretRef }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openoncology-pg-secret
+                  key: password
+          resources:
+            {{- toYaml $cfg.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}

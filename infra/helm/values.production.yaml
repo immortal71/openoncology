@@ -1,0 +1,58 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenOncology Helm Values — PRODUCTION overrides
+# Usage: helm upgrade --install openoncology ./infra/helm \
+#          -f infra/helm/values.yaml \
+#          -f infra/helm/values.production.yaml \
+#          --namespace openoncology
+# ─────────────────────────────────────────────────────────────────────────────
+
+api:
+  replicaCount: 3
+  image:
+    pullPolicy: Always
+  autoscaling:
+    minReplicas: 3
+    maxReplicas: 20
+
+web:
+  replicaCount: 3
+  image:
+    pullPolicy: Always
+
+workers:
+  genomic:
+    replicaCount: 4
+  ai:
+    replicaCount: 2
+  notify:
+    replicaCount: 2
+
+postgresql:
+  primary:
+    persistence:
+      size: 200Gi
+    # Enable read replicas for production
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      size: 200Gi
+
+redis:
+  master:
+    persistence:
+      size: 20Gi
+  replica:
+    replicaCount: 2
+
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/rate-limit: "60"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # HSTS
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Permissions-Policy "geolocation=(), camera=(), microphone=()" always;

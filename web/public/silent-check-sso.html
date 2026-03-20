@@ -1,0 +1,13 @@
+<!--
+  Silent SSO check page for Keycloak.
+  Must be served at /silent-check-sso.html (static file in /public/).
+  Keycloak JS loads this in a hidden iframe to detect an existing session.
+-->
+<!doctype html>
+<html>
+  <body>
+    <script>
+      parent.postMessage(location.href, location.origin);
+    </script>
+  </body>
+</html>

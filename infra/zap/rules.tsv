@@ -1,0 +1,38 @@
+# OWASP ZAP scan rules
+# Format: rule_id TAB action TAB description
+# Actions: IGNORE | WARN | FAIL
+# Reference: https://www.zaproxy.org/docs/desktop/addons/alert-filters/
+
+# ── Informational / false-positives in dev ────────────────────────────────────
+# X-Content-Type-Options — handled by nginx in production
+10021	IGNORE	X-Content-Type-Options Header Missing (handled by nginx)
+
+# Server leaks version in header (nginx strips in prod)
+10036	IGNORE	Server Leaks Version Information
+
+# Cookie without SameSite (Keycloak sets this in SSO flow)
+10054	WARN	Cookie without SameSite Attribute (Keycloak SSO)
+
+# ── Warn (review but don't fail CI) ──────────────────────────────────────────
+# Content Security Policy
+10038	WARN	Content Security Policy (CSP) Header Not Set
+
+# SQL Injection (baseline scan may not trigger — active scan required)
+40018	WARN	SQL Injection
+
+# Cross-Site Scripting
+40012	WARN	Cross Site Scripting (Reflected)
+40014	WARN	Cross Site Scripting (Persistent)
+
+# ── Fail CI on critical findings ──────────────────────────────────────────────
+# Path Traversal
+6	FAIL	Path Traversal
+
+# Remote OS Command Injection
+20018	FAIL	Remote OS Command Injection
+
+# Server-Side Request Forgery
+40046	FAIL	SSRF
+
+# Source Code Disclosure
+41	FAIL	Source Code Disclosure - Git
