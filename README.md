@@ -53,15 +53,15 @@ flowchart TD
     C -- Yes --> E[AI searches for medicine\nAlphaFold + DiffDock + OpenTargets + ChEMBL]
     C -- Yes --> F([General medicine\nin the meantime])
     E --> G{Existing drug near-match found?\nDrug repurposing search}
-    G -- Yes --> H([Option 1\nRepurpose existing drug])
-    G -- "No / patient has funds" --> I[Option 2: Custom drug order\nPlatform connects to pharma companies]
+    G -- Yes --> H([Option 1: Repurpose existing drug\nCheaper · goes straight to treatment])
+    H --> M([Patient receives treatment])
+    G -- No --> I[Option 2: Custom drug order\nPlatform connects to pharma companies]
     I --> J[Pharma companies bid\nTransparent cost · patient chooses]
-    J --> K([Custom medicine manufactured\nPatient-specific mutation])
-    K --> M([Patient receives treatment])
-    H --> N{Can afford it?}
-    N -- Yes --> M
-    N -- No --> L([Crowdfund module])
-    L --> M
+    J --> N{Can patient afford it?}
+    N -- Yes --> K([Custom medicine manufactured\nPatient-specific mutation])
+    N -- No --> L([Crowdfund module\nRaise funds for custom drug])
+    L --> K
+    K --> M
 ```
 
 ---
