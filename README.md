@@ -46,31 +46,22 @@ The first `docker compose up` also runs Alembic migrations and creates MinIO buc
 
 ```mermaid
 flowchart TD
-    A([🧬 Patient submits sample\nBiopsy + germline DNA test]) --> B
-
-    B[🤖 AI genomic analysis\nAlphaFold · AlphaMissense · NGS pipeline]
-
-    B --> C{Targeted mutation found?\nPlatform reports result clearly}
-
-    C -- No --> D([🏥 General medicine])
-
-    C -- Yes --> E[🔬 AI searches for medicine\nAlphaFold + OpenTargets + DrugBank]
-    C -- Yes --> F([🏥 General medicine\nin the meantime])
-
+    A([Patient submits sample\nBiopsy + germline DNA test]) --> B
+    B[AI genomic analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT]
+    B --> C{Targeted mutation found?}
+    C -- No --> D([General medicine])
+    C -- Yes --> E[AI searches for medicine\nAlphaFold + DiffDock + OpenTargets + ChEMBL]
+    C -- Yes --> F([General medicine\nin the meantime])
     E --> G{Existing drug near-match found?\nDrug repurposing search}
-
-    G -- Yes --> H([✅ Option 1\nRepurpose existing drug])
-
-    G -- "No / patient has funds" --> I[💊 Option 2: Custom drug order\nPlatform connects to pharma companies]
-
-    I --> J[🏭 Pharma companies bid\nTransparent cost · patient chooses]
-
-    J --> K([🧪 Custom medicine manufactured\nMade for this patient's specific mutation])
-    J --> L([❓ Can't afford it?\nCrowdfund module])
-
-    K --> M([🎯 Patient receives treatment])
+    G -- Yes --> H([Option 1\nRepurpose existing drug])
+    G -- "No / patient has funds" --> I[Option 2: Custom drug order\nPlatform connects to pharma companies]
+    I --> J[Pharma companies bid\nTransparent cost · patient chooses]
+    J --> K([Custom medicine manufactured\nPatient-specific mutation])
+    K --> M([Patient receives treatment])
+    H --> N{Can afford it?}
+    N -- Yes --> M
+    N -- No --> L([Crowdfund module])
     L --> M
-    H --> M
 ```
 
 ---
