@@ -102,9 +102,13 @@ jobs:
 
       - name: Run Alembic migrations
         run: alembic upgrade head
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
       - name: Run tests
         run: pytest tests/ -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
 
   # ── Docker build check ────────────────────────────────────────────────────
   docker-build:

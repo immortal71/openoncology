@@ -413,45 +413,6 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
   );
 }
 
-
-function ScoreBadge({ score }: { score: number | null | undefined }) {
-  if (score == null) return <span className="text-gray-300">—</span>;
-  const pct = Math.round(score * 100);
-  const color =
-    score >= 0.564
-      ? "bg-red-100 text-red-700"
-      : score <= 0.34
-      ? "bg-green-100 text-green-700"
-      : "bg-yellow-100 text-yellow-700";
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
-      {pct}%
-    </span>
-  );
-}
-
-function ClassBadge({ cls }: { cls: string | null | undefined }) {
-  const map: Record<string, string> = {
-    pathogenic: "bg-red-100 text-red-700",
-    likely_pathogenic: "bg-orange-100 text-orange-700",
-    benign: "bg-green-100 text-green-700",
-    likely_benign: "bg-green-50 text-green-600",
-    uncertain: "bg-gray-100 text-gray-600",
-  };
-  return (
-    <span
-      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-        map[cls as string] ?? "bg-gray-100 text-gray-500"
-      }`}
-    >
-      {cls ?? "unknown"}
-    </span>
-  );
-}
-};
-
-export default function ResultsPage({ params }: { params: { id: string } }) {
-  const { data, isLoading, error } = useQuery({
     queryKey: ["results", params.id],
     queryFn: () => api.getResults(params.id),
     refetchInterval: (data) =>
