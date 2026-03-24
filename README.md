@@ -142,6 +142,7 @@ Patient uploads VCF
 | `MINIO_SECRET_KEY` | ✅ | MinIO root secret |
 | `KEYCLOAK_ADMIN_PASSWORD` | ✅ | Keycloak admin console |
 | `SECRET_KEY` | ✅ | FastAPI JWT signing key (32+ random chars) |
+| `ALLOWED_ORIGINS` | optional | Comma-separated or single URL for CORS origins |
 | `ONCOKB_API_TOKEN` | ✅ | Free academic token from oncokb.org |
 | `OPENAI_API_KEY` | optional | GPT-4o plain-language summaries |
 | `STRIPE_SECRET_KEY` | optional | Enables pharma bidding payments |

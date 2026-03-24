@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     secret_key: str = "dev-secret-key-change-in-production"
+    allowed_origins: list[str] = ["http://localhost:3000"]
 
     # Database
     database_url: str = "postgresql+asyncpg://openoncology:password@localhost:5432/openoncology"
