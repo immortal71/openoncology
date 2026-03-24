@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 /**
  * /marketplace/requests/new — Patient creates a custom drug synthesis request.
  * Pre-fills target_gene and result_id from URL search params when arriving

@@ -29,6 +29,8 @@ import {
 import { CheckCircle, XCircle, ExternalLink, RefreshCw, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
+export const dynamic = "force-dynamic";
+
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 interface PharmaCompany {
@@ -57,7 +59,7 @@ async function fetchJson<T>(url: string, token: string, options?: RequestInit): 
 }
 
 export default function AdminPharmaPage() {
-  const { data: session } = useSession();
+  const { data: session } = useSession() ?? {};
   const qc = useQueryClient();
   const token = (session as any)?.accessToken as string | undefined;
 

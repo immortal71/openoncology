@@ -36,6 +36,8 @@ import {
 import { PlusCircle, Share2, Zap, XCircle, Megaphone } from "lucide-react";
 import { toast } from "sonner";
 
+export const dynamic = "force-dynamic";
+
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 type CampaignStatus = "draft" | "active" | "closed" | "complete";
@@ -114,7 +116,7 @@ function ShareButton({ slug }: { slug: string }) {
 }
 
 export default function DashboardCampaignsPage() {
-  const { data: session } = useSession();
+  const { data: session } = useSession() ?? {};
   const qc = useQueryClient();
   const token = (session as any)?.accessToken as string | undefined;
   const [createOpen, setCreateOpen] = useState(false);
