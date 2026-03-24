@@ -53,7 +53,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
         <div className="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-md">
           <AlertTriangle className="text-orange-400 mx-auto mb-4" size={48} />
           <h2 className="text-xl font-bold text-gray-900 mb-2">No targetable mutations</h2>
-          <p className="text-gray-500 text-sm">{data.message}</p>
+          <p className="text-gray-500 text-sm">{(data as Record<string, unknown>).message as string}</p>
           <Link
             href="/marketplace"
             className="mt-6 block text-blue-600 text-sm hover:underline"

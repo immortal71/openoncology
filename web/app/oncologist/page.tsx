@@ -21,7 +21,7 @@ interface ReviewPayload {
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
-function authHeaders() {
+function authHeaders(): Record<string, string> {
   const token = typeof window !== "undefined" ? sessionStorage.getItem("kc_token") : null;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }

@@ -57,8 +57,8 @@ export default function NewDrugRequestPage() {
       if (maxBudget.trim())
         body.max_budget_usd = Number(maxBudget.trim());
 
-      const req = await api.createDrugRequest(body);
-      router.push(`/marketplace/requests?highlight=${req.id}`);
+      const req = await api.createDrugRequest(body as Parameters<typeof api.createDrugRequest>[0]);
+      router.push(`/marketplace/requests?highlight=${req.drug_request_id}`);
     } catch (e: unknown) {
       setGlobalError(
         e instanceof Error ? e.message : "Could not submit request. Please try again."

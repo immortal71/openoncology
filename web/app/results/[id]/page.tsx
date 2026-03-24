@@ -93,8 +93,10 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["results", params.id],
     queryFn: () => api.getResults(params.id),
-    refetchInterval: (data) =>
-      data?.status !== "complete" && data?.status !== "failed" ? 10000 : false,
+    refetchInterval: (query) => {
+      const d = (query as { state: { data?: { status?: string } } }).state.data;
+      return d?.status !== "complete" && d?.status !== "failed" ? 10000 : false;
+    },
   });
 
   // Fetch repurposing candidates once results are complete and a result_id exists
@@ -375,12 +377,12 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
                 <ShieldCheck className="text-green-600" size={20} />
                 <h3 className="font-bold text-gray-900">Oncologist Review</h3>
               </div>
-              {(data as Record<string, unknown>).oncologist_name && (
+              {Boolean((data as Record<string, unknown>).oncologist_name) && (
                 <div className="text-sm text-gray-600">
                   <span className="font-semibold text-gray-800">
                     {(data as Record<string, unknown>).oncologist_name as string}
                   </span>
-                  {(data as Record<string, unknown>).oncologist_institution && (
+                  {Boolean((data as Record<string, unknown>).oncologist_institution) && (
                     <span className="text-gray-400"> Â· {(data as Record<string, unknown>).oncologist_institution as string}</span>
                   )}
                 </div>

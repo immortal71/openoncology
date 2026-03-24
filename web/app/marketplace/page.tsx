@@ -59,8 +59,8 @@ function BidModal({
   const submit = async (data: BidForm) => {
     await api.submitBid(request.id, {
       price_usd: data.price_usd,
-      estimated_weeks: String(data.estimated_weeks),
-      notes: data.notes ?? null,
+      estimated_weeks: data.estimated_weeks,
+      notes: data.notes ?? undefined,
     });
     queryClient.invalidateQueries({ queryKey: ["open-drug-requests"] });
     setSuccess(true);

@@ -40,8 +40,10 @@ export default function DashboardPage() {
   const { data: submissions, isLoading } = useQuery({
     queryKey: ["submissions"],
     queryFn: api.getAllSubmissions,
-    refetchInterval: (data) =>
-      data?.some((s) => s.status !== "complete" && s.status !== "failed") ? 15000 : false,
+    refetchInterval: (query) => {
+      const submissions = (query as { state: { data?: { status: string }[] } }).state.data;
+      return submissions?.some((s) => s.status !== "complete" && s.status !== "failed") ? 15000 : false;
+    },
   });
 
   return (

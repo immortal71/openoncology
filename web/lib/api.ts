@@ -75,6 +75,7 @@ export const api = {
       result_id: string;
       target_gene: string | null;
       has_targetable_mutation: boolean;
+      message?: string;
       candidates: {
         drug_name: string;
         chembl_id: string;
