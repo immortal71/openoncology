@@ -9,9 +9,56 @@ from sqlalchemy.orm import selectinload
 from database import get_db
 from models.submission import Submission
 from models.patient import Patient
+from models.mutation import Mutation
 from routes.auth import get_current_patient
+from services.storage import generate_presigned_download_url
+from config import settings
 
 router = APIRouter(prefix="/api/results", tags=["results"])
+
+
+@router.get("/{submission_id}/structure")
+async def get_structure_url(
+    submission_id: str,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
+):
+    """
+    Returns a presigned S3/MinIO URL for the 3D protein structure (AlphaFold).
+    """
+    keycloak_id = token_payload.get("sub")
+
+    # Ensure the submission belongs to this patient
+    submission = (await db.execute(
+        select(Submission)
+        .join(Patient)
+        .where(
+            Submission.id == submission_id,
+            Patient.keycloak_id == keycloak_id,
+        )
+        .options(selectinload(Submission.mutations))
+    )).scalar_one_or_none()
+
+    if not submission:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found.")
+
+    # Find the first mutation with a valid structure path
+    mutation = next((m for m in submission.mutations if m.alphafold_structure_path), None)
+
+    if not mutation or not mutation.alphafold_structure_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="3D structure not yet available for this mutation.",
+        )
+
+    # Generate presigned URL from the processed bucket
+    url = generate_presigned_download_url(
+        key=mutation.alphafold_structure_path,
+        bucket=settings.bucket_processed,
+        expires_in=3600,
+    )
+
+    return {"url": url}
 
 
 @router.get("/{submission_id}")
