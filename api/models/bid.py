@@ -7,7 +7,7 @@ bid and proceeds to payment.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, ForeignKey, Float, Text, Enum as SAEnum
+from sqlalchemy import String, DateTime, ForeignKey, Float, Text, Enum as SAEnum, JSON, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
@@ -19,6 +19,13 @@ class BidStatus(str, enum.Enum):
     accepted = "accepted"  # patient accepted this bid
     rejected = "rejected"  # patient rejected this bid
     expired = "expired"  # auction closed with no winner
+
+
+class DiscoveryStatus(str, enum.Enum):
+    queued = "queued"
+    running = "running"
+    complete = "complete"
+    failed = "failed"
 
 
 class PharmaBid(Base):
@@ -38,7 +45,7 @@ class PharmaBid(Base):
 
     # Bid details
     price_usd: Mapped[float] = mapped_column(Float, nullable=False)
-    estimated_weeks: Mapped[int] = mapped_column(String(8), nullable=False)
+    estimated_weeks: Mapped[int] = mapped_column(Integer, nullable=False)
     notes: Mapped[str] = mapped_column(Text, nullable=True)
 
     status: Mapped[BidStatus] = mapped_column(SAEnum(BidStatus), default=BidStatus.open)
@@ -69,8 +76,17 @@ class DrugRequest(Base):
     # Budget ceiling the patient is willing to pay
     max_budget_usd: Mapped[float] = mapped_column(Float, nullable=True)
 
+    # Discovery generation state for custom-drug brief production
+    discovery_status: Mapped[DiscoveryStatus] = mapped_column(
+        SAEnum(DiscoveryStatus), default=DiscoveryStatus.queued, nullable=False
+    )
+    discovery_brief: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    discovery_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    discovery_started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    discovery_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
     # Whether the request is visible to pharma companies
-    is_open: Mapped[bool] = mapped_column(String(8), default=True)
+    is_open: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Winning bid (set when patient accepts a bid)
     accepted_bid_id: Mapped[str] = mapped_column(String, nullable=True)

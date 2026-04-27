@@ -132,6 +132,29 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
                   <ScoreBar value={c.rank_score} />
                 </div>
               </div>
+
+              <div className="mt-4 ml-9 space-y-2">
+                <div>
+                  <p className="text-xs text-gray-400 mb-2">Evidence sources</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source) => (
+                      <span
+                        key={`${c.chembl_id ?? c.drug_name}-${source}`}
+                        className="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700"
+                      >
+                        {source}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {c.matched_terms?.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1">Matched evidence terms</p>
+                    <p className="text-sm text-gray-600">{c.matched_terms.join(", ")}</p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           ))}
         </div>

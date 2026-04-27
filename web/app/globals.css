@@ -4,30 +4,52 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --primary: 221.2 83.2% 53.3%;
+    --background: 208 44% 98%;
+    --foreground: 216 31% 16%;
+    --muted: 210 24% 95%;
+    --muted-foreground: 215 16% 40%;
+    --border: 214 20% 86%;
+    --input: 214 20% 86%;
+    --primary: 197 90% 36%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 202 42% 94%;
+    --secondary-foreground: 214 28% 20%;
+    --accent: 186 48% 92%;
+    --accent-foreground: 214 28% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --ring: 197 90% 36%;
+    --radius: 0.85rem;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(10, 128, 169, 0.09), transparent 36%),
+      radial-gradient(circle at 100% 0%, rgba(6, 182, 212, 0.08), transparent 28%),
+      linear-gradient(180deg, #f8fbff 0%, #f3f8fc 100%);
+    color: hsl(var(--foreground));
+    min-height: 100vh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .clinical-shell {
+    @apply max-w-6xl mx-auto px-4 sm:px-6;
+  }
+
+  .clinical-surface {
+    @apply bg-white/90 backdrop-blur border border-slate-200 rounded-2xl shadow-sm;
   }
 }

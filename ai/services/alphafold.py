@@ -23,6 +23,7 @@ import asyncio
 import base64
 import io
 import logging
+import os
 import re
 import sys
 import tempfile
@@ -38,6 +39,15 @@ UNIPROT_URL = "https://rest.uniprot.org/uniprotkb/search"
 ALPHAFOLD_URL = "https://alphafoldserver.com/api"
 _POLL_INTERVAL = 30   # seconds between polls
 _MAX_POLLS = 60       # 30 min maximum
+
+
+def _alphafold_headers() -> dict[str, str]:
+    """Build AlphaFold request headers with optional bearer auth."""
+    token = os.getenv("ALPHAFOLD_API_KEY", "").strip()
+    headers = {"Content-Type": "application/json"}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
 
 
 def _get_s3_client():
@@ -156,7 +166,7 @@ async def fold_sequence(sequence: str, submission_id: str, gene: str) -> Optiona
             resp = await client.post(
                 f"{ALPHAFOLD_URL}/fold",
                 json=payload,
-                headers={"Content-Type": "application/json"},
+                headers=_alphafold_headers(),
             )
             if resp.status_code in (401, 403):
                 logger.warning("[alphafold] Server requires auth — skipping AlphaFold")

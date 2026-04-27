@@ -119,13 +119,18 @@ def run_ai_analysis(
             # Derive protein variant for AlphaFold (e.g. "L858R" from HGVS p.Leu858Arg)
             top_variant = _hgvs_to_short(top_mutation.hgvs_notation) if top_mutation.hgvs_notation else None
 
-            # Query OpenTargets — passes variant to AlphaFold → DiffDock pipeline
-            drugs, alphafold_pdb_path = _query_opentargets(
-                target_gene, protein_variant=top_variant, submission_id=submission_id
+            # Aggregate candidate drugs from multiple evidence sources, then
+            # score them against the mutation-specific structure when possible.
+            drugs, alphafold_pdb_path = _query_repurposing_candidates(
+                target_gene,
+                protein_variant=top_variant,
+                hgvs=top_mutation.hgvs_notation,
+                cancer_type=cancer_type,
+                submission_id=submission_id,
             )
 
             # Score each drug using the composite ranking algorithm
-            from api.ai.ranking import rank_candidates
+            from ai.ranking import rank_candidates
 
             for drug in drugs[:10]:  # Process top 10 candidates
                 drug["alphamissense_score"] = (
@@ -146,6 +151,8 @@ def run_ai_analysis(
                     "rank_score": d.get("rank_score", 0.0),
                     "approval_status": "Approved" if d.get("is_approved") else f"Phase {d.get('max_phase', '?')}",
                     "mechanism": d.get("mechanism"),
+                    "evidence_sources": d.get("evidence_sources") or [],
+                    "matched_terms": d.get("matched_terms") or [],
                 }
                 for d in ranked
             ]
@@ -320,18 +327,92 @@ def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
         )
         resp.raise_for_status()
         data = resp.json()
-        return {"level": data.get("highestSensitiveLevel", "unknown")}
+        return {
+            "level": data.get("highestSensitiveLevel", "unknown"),
+            "treatments": _extract_oncokb_treatment_names(data.get("treatments") or []),
+        }
     except Exception as exc:
         logger.warning(f"[oncokb] Query failed: {exc}")
         return None
 
 
-def _query_opentargets(
+def _extract_oncokb_treatment_names(treatments: object) -> list[str]:
+    names: set[str] = set()
+
+    def _walk(node: object) -> None:
+        if isinstance(node, dict):
+            drug_name = node.get("drugName")
+            if isinstance(drug_name, str) and drug_name.strip():
+                names.add(drug_name.strip())
+
+            drug_value = node.get("drug")
+            if isinstance(drug_value, str) and drug_value.strip():
+                names.add(drug_value.strip())
+            elif isinstance(drug_value, dict):
+                nested_name = drug_value.get("drugName") or drug_value.get("name")
+                if isinstance(nested_name, str) and nested_name.strip():
+                    names.add(nested_name.strip())
+
+            for value in node.values():
+                if isinstance(value, (dict, list, tuple)):
+                    _walk(value)
+        elif isinstance(node, (list, tuple)):
+            for item in node:
+                _walk(item)
+
+    _walk(treatments)
+    return sorted(names)
+
+
+def _merge_candidate(candidate_bank: dict[str, dict], candidate: dict) -> None:
+    chembl_id = candidate.get("chembl_id")
+    drug_name = (candidate.get("drug_name") or "").strip()
+    if not chembl_id and not drug_name:
+        return
+
+    key = chembl_id or drug_name.lower()
+    existing = candidate_bank.get(key)
+    if not existing:
+        candidate_bank[key] = candidate
+        return
+
+    existing_sources = set(existing.get("evidence_sources") or [])
+    existing_sources.update(candidate.get("evidence_sources") or [])
+    existing["evidence_sources"] = sorted(existing_sources)
+
+    existing_terms = set(existing.get("matched_terms") or [])
+    existing_terms.update(candidate.get("matched_terms") or [])
+    if existing_terms:
+        existing["matched_terms"] = sorted(existing_terms)
+
+    for field in (
+        "drug_name",
+        "chembl_id",
+        "mechanism",
+        "action_type",
+        "max_phase",
+        "is_approved",
+        "opentargets_score",
+        "smiles",
+        "ro5_pass",
+    ):
+        if existing.get(field) in (None, "", [], {}):
+            existing[field] = candidate.get(field)
+
+    current_score = float(existing.get("opentargets_score") or 0)
+    new_score = float(candidate.get("opentargets_score") or 0)
+    if new_score > current_score:
+        existing["opentargets_score"] = new_score
+
+
+def _query_repurposing_candidates(
     gene: str,
     protein_variant: str | None = None,
+    hgvs: str | None = None,
+    cancer_type: str | None = None,
     submission_id: str = "unknown",
 ) -> tuple[list[dict], str | None]:
-    """Query OpenTargets for drugs + ChEMBL SMILES, then run DiffDock scoring.
+    """Query multiple evidence sources for repurposing candidates.
 
     When protein_variant is provided and AlphaFold Server is reachable, the
     mutated protein structure is folded first and passed to DiffDock for
@@ -339,18 +420,86 @@ def _query_opentargets(
 
     Returns (drugs, alphafold_pdb_path) — pdb_path is None if AlphaFold failed.
     """
-    from api.services.opentargets import get_target_id, get_drugs_for_target
-    from api.services.chembl import get_molecule
+    from services.opentargets import get_target_id, get_drugs_for_target
+    from services.chembl import get_molecule, search_molecule_by_name
+    from services.civic import get_civic_evidence
     from ai.diffdock.score import score_binding
 
     async def _fetch() -> tuple[list[dict], str | None]:
         ensg_id = await get_target_id(gene)
+        drugs = await get_drugs_for_target(ensg_id, max_drugs=20) if ensg_id else []
         if not ensg_id:
             logger.warning("[opentargets] No Ensembl ID for gene %s", gene)
-            return []
+        else:
+            logger.info("[opentargets] %d drugs found for %s", len(drugs), gene)
 
-        drugs = await get_drugs_for_target(ensg_id, max_drugs=20)
-        logger.info("[opentargets] %d drugs found for %s", len(drugs), gene)
+        variant_name = _hgvs_to_short(hgvs) if hgvs else None
+        civic_evidence = await get_civic_evidence(gene, variant_name) if variant_name else None
+        oncokb_annotation = _query_oncokb(gene, hgvs)
+
+        candidate_bank: dict[str, dict] = {}
+        for drug in drugs:
+            enriched = {
+                **drug,
+                "evidence_sources": ["OpenTargets"],
+                "matched_terms": [drug.get("drug_name")] if drug.get("drug_name") else [],
+            }
+            _merge_candidate(candidate_bank, enriched)
+
+        civic_drug_names = {
+            drug.get("name", "").strip()
+            for item in (civic_evidence or [])
+            for drug in (item.get("drugs") or [])
+            if isinstance(drug, dict) and drug.get("name")
+        }
+
+        oncokb_drug_names = {
+            name.strip()
+            for name in ((oncokb_annotation or {}).get("treatments") or [])
+            if isinstance(name, str) and name.strip()
+        }
+
+        supplemental_drug_names = sorted(civic_drug_names | oncokb_drug_names)
+        if supplemental_drug_names:
+            logger.info(
+                "[repurpose] %d supplemental drug names found for %s via CIViC/OncoKB",
+                len(supplemental_drug_names),
+                gene,
+            )
+
+        for name in supplemental_drug_names[:20]:
+            matches = await search_molecule_by_name(name, limit=3)
+            for match in matches:
+                chembl_id = match.get("chembl_id")
+                if not chembl_id:
+                    continue
+                molecule = await get_molecule(chembl_id)
+                _merge_candidate(
+                    candidate_bank,
+                    {
+                        "drug_name": match.get("preferred_name") or name,
+                        "chembl_id": chembl_id,
+                        "mechanism": "Evidence-supported repurposing candidate",
+                        "action_type": None,
+                        "max_phase": (molecule or {}).get("max_phase", match.get("max_phase")),
+                        "is_approved": (molecule or {}).get("is_approved", False),
+                        "opentargets_score": 0.0,
+                        "smiles": (molecule or {}).get("smiles"),
+                        "ro5_pass": (molecule or {}).get("ro5_pass"),
+                        "matched_terms": [name],
+                        "evidence_sources": sorted(
+                            [
+                                source
+                                for source in (
+                                    "CIViC" if name in civic_drug_names else None,
+                                    "OncoKB" if name in oncokb_drug_names else None,
+                                    "ChEMBL",
+                                )
+                                if source
+                            ]
+                        ),
+                    },
+                )
 
         # ── AlphaFold: sequence → mutated structure ──────────────────────────
         # 1. get canonical protein sequence by gene name (UniProt REST search)
@@ -387,8 +536,10 @@ def _query_opentargets(
             except Exception as af_exc:
                 logger.warning("[alphafold] Fold pipeline failed: %s", af_exc)
 
+        merged_drugs = list(candidate_bank.values())
+
         # Enrich with ChEMBL SMILES + compute DiffDock binding scores
-        for drug in drugs:
+        for drug in merged_drugs:
             chembl_id = drug.get("chembl_id")
             if not chembl_id:
                 continue
@@ -401,9 +552,15 @@ def _query_opentargets(
             if drug.get("smiles") and uniprot_id:
                 drug["binding_score"] = score_binding(
                     uniprot_id, drug["smiles"], chembl_id,
-                    pre_folded_cif=pre_folded_pdb_key,
+                    pre_folded_structure=pre_folded_pdb_key,
                 )
-        return drugs, pre_folded_pdb_key
+            if drug.get("evidence_sources"):
+                source_note = "/".join(drug["evidence_sources"])
+                mechanism = drug.get("mechanism") or ""
+                if source_note not in mechanism:
+                    drug["mechanism"] = f"{mechanism} [{source_note}]".strip()
+
+        return merged_drugs, pre_folded_pdb_key
 
     drugs, pdb_path = asyncio.run(_fetch())
     return drugs, pdb_path

@@ -19,6 +19,6 @@ resend==0.7.2
 python-dotenv==1.0.1
 
 # Phase 3 — AI / cheminformatics
-rdkit==2024.3.2            # SMILES → SDF conversion for DiffDock inputs
+rdkit==2025.09.1           # SMILES → SDF conversion for DiffDock inputs
 ruff==0.4.4                # linter (also used by CI)
 biopython==1.83            # CIF → PDB conversion for AlphaFold Server outputs

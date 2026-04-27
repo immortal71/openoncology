@@ -18,9 +18,9 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
-from api.models.pharma import PharmaCompany
-from api.routes.auth import get_current_patient
+from database import get_db
+from models.pharma import PharmaCompany
+from routes.auth import get_current_patient
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/pharma", tags=["pharma"])
@@ -55,14 +55,14 @@ class PharmaVerifyRequest(BaseModel):
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
-async def apply(body: PharmaApplyRequest, db: AsyncSession = Depends(get_session)):
+async def apply(body: PharmaApplyRequest, db: AsyncSession = Depends(get_db)):
     """Any pharma company can submit an application. Starts unverified."""
     company = PharmaCompany(
         id=str(uuid.uuid4()),
         name=body.name,
+        country=body.country or "unknown",
         description=body.description,
         contact_email=body.contact_email,
-        logo_url=body.logo_url,
         verified=False,
     )
     db.add(company)
@@ -75,7 +75,7 @@ async def apply(body: PharmaApplyRequest, db: AsyncSession = Depends(get_session
 @router.get("/applications")
 async def list_applications(
     _: dict = Depends(_require_admin),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Admin: list all pharma companies awaiting verification."""
     stmt = select(PharmaCompany).where(PharmaCompany.verified == False).order_by(PharmaCompany.created_at)  # noqa: E712
@@ -88,7 +88,7 @@ async def verify(
     company_id: str,
     body: PharmaVerifyRequest,
     _: dict = Depends(_require_admin),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Admin: approve or reject a pharma company application."""
     company = await db.get(PharmaCompany, company_id)
@@ -104,7 +104,7 @@ async def verify(
 
 
 @router.get("/")
-async def list_verified(db: AsyncSession = Depends(get_session)):
+async def list_verified(db: AsyncSession = Depends(get_db)):
     """Public: list all verified pharma companies."""
     stmt = select(PharmaCompany).where(PharmaCompany.verified == True).order_by(PharmaCompany.name)  # noqa: E712
     companies = (await db.execute(stmt)).scalars().all()
@@ -112,7 +112,7 @@ async def list_verified(db: AsyncSession = Depends(get_session)):
 
 
 @router.get("/{company_id}")
-async def get_company(company_id: str, db: AsyncSession = Depends(get_session)):
+async def get_company(company_id: str, db: AsyncSession = Depends(get_db)):
     """Public: get a single verified pharma company profile."""
     company = await db.get(PharmaCompany, company_id)
     if not company or not company.verified:
@@ -124,9 +124,9 @@ def _serialize(c: PharmaCompany) -> dict:
     return {
         "id": c.id,
         "name": c.name,
+        "country": c.country,
         "description": c.description,
         "contact_email": c.contact_email,
-        "logo_url": c.logo_url,
         "verified": c.verified,
         "stripe_account_id": c.stripe_account_id,
         "created_at": c.created_at.isoformat() if c.created_at else None,

@@ -6,6 +6,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from pydantic import BaseModel, Field
 import stripe
 
@@ -14,12 +15,181 @@ from database import get_db
 from models.pharma import PharmaCompany
 from models.order import Order, OrderStatus
 from models.patient import Patient
-from models.bid import DrugRequest, PharmaBid, BidStatus
+from models.bid import DrugRequest, PharmaBid, BidStatus, DiscoveryStatus
+from models.result import Result
+from models.submission import Submission
+from services.drug_discovery import build_custom_discovery_brief
 from routes.auth import get_current_patient
+from workers.custom_drug_worker import build_custom_drug_brief
 
 router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])
 
 stripe.api_key = settings.stripe_secret_key
+
+
+async def _get_patient_result_context(
+    result_id: str,
+    keycloak_id: str,
+    db: AsyncSession,
+) -> tuple[Result, Submission, Patient]:
+    row = (await db.execute(
+        select(Result, Submission, Patient)
+        .join(Submission, Submission.id == Result.submission_id)
+        .join(Patient, Patient.id == Submission.patient_id)
+        .options(
+            selectinload(Result.repurposing_candidates),
+            selectinload(Submission.mutations),
+        )
+        .where(
+            Result.id == result_id,
+            Patient.keycloak_id == keycloak_id,
+        )
+    )).first()
+
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Result not found.")
+
+    result, submission, patient = row
+    return result, submission, patient
+
+
+def _discovery_brief_to_drug_spec(brief: dict) -> str:
+    leads = brief.get("lead_candidates", [])
+    comps = brief.get("component_library", {})
+    top_leads = [
+        f"- {l.get('drug_name') or 'Unknown'} ({l.get('chembl_id') or 'N/A'}), phase={l.get('max_phase')}, score={l.get('opentargets_score')}"
+        for l in leads[:8]
+    ]
+    scaffolds = comps.get("scaffolds", [])[:12]
+    fragments = comps.get("fragments", [])[:16]
+
+    return "\n".join(
+        [
+            f"Custom discovery request for target gene: {brief.get('target_gene')}",
+            f"Cancer type: {brief.get('cancer_type')}",
+            f"Reason: {brief.get('reason')}",
+            "",
+            "Mutation profile:",
+            *[f"- {m}" for m in (brief.get("mutation_profile") or [])],
+            "",
+            "Lead candidates:",
+            *(top_leads or ["- No direct leads found; use target-first scaffold generation."]),
+            "",
+            "Preferred scaffolds:",
+            *([f"- {s}" for s in scaffolds] or ["- None extracted"]),
+            "",
+            "Preferred fragments:",
+            *([f"- {f}" for f in fragments] or ["- None extracted"]),
+            "",
+            "Design constraints:",
+            "- prioritize target selectivity",
+            "- maintain drug-like properties (Ro5 where feasible)",
+            "- provide synthetic route confidence and estimated timeline",
+            "",
+            "Handoff note:",
+            brief.get("handoff_note", ""),
+        ]
+    )
+
+
+def _discovery_brief_to_report_text(brief: dict) -> str:
+    leads = brief.get("lead_candidates", [])
+    comps = brief.get("component_library", {})
+
+    lines = [
+        "OpenOncology Custom Drug Discovery Report",
+        "========================================",
+        f"Target gene: {brief.get('target_gene')}",
+        f"Cancer type: {brief.get('cancer_type')}",
+        f"Reason: {brief.get('reason')}",
+        "",
+        "Mutation profile:",
+    ]
+    lines += [f"- {m}" for m in (brief.get("mutation_profile") or [])] or ["- Not provided"]
+
+    lines += ["", "Lead candidates:"]
+    if leads:
+        for l in leads[:12]:
+            lines.append(
+                f"- {l.get('drug_name') or 'Unknown'} ({l.get('chembl_id') or 'N/A'}) | "
+                f"phase={l.get('max_phase')} | approved={l.get('is_approved')} | "
+                f"score={l.get('opentargets_score')}"
+            )
+            if l.get("mechanism"):
+                lines.append(f"  mechanism: {l.get('mechanism')}")
+            if l.get("smiles"):
+                lines.append(f"  smiles: {l.get('smiles')}")
+    else:
+        lines.append("- No direct leads found")
+
+    lines += ["", "Scaffold components:"]
+    lines += [f"- {s}" for s in comps.get("scaffolds", [])[:20]] or ["- None extracted"]
+
+    lines += ["", "Fragment components:"]
+    lines += [f"- {f}" for f in comps.get("fragments", [])[:30]] or ["- None extracted"]
+
+    lines += [
+        "",
+        "Design constraints:",
+        "- prioritize target selectivity",
+        "- keep drug-like properties (Ro5 where feasible)",
+        "- provide synthetic route confidence and estimated timeline",
+        "",
+        "Clinical/manufacturing disclaimer:",
+        brief.get("handoff_note", ""),
+    ]
+
+    return "\n".join(lines)
+
+
+def _fallback_computational_synthesis_plan(brief: dict) -> dict:
+    existing = brief.get("computational_synthesis_plan")
+    if isinstance(existing, dict) and existing:
+        return existing
+
+    de_novo = brief.get("de_novo_candidates") or []
+    selected = []
+    for cand in de_novo[:3]:
+        smiles = cand.get("proposed_smiles")
+        precursor_count = max(1, len([p for p in (smiles or "").split(".") if p])) if smiles else 0
+        selected.append(
+            {
+                "candidate_id": cand.get("candidate_id"),
+                "parent_lead": cand.get("parent_lead"),
+                "proposed_smiles": smiles,
+                "precursor_count_estimate": precursor_count,
+                "route_confidence_score": cand.get("feasibility_score"),
+                "route_outline": [
+                    "Retrosynthetic split around core scaffold bonds.",
+                    "Enumerate alternative low-step assembly paths.",
+                    "Rank routes by confidence and synthetic complexity.",
+                ],
+            }
+        )
+
+    return {
+        "mode": "computational_synthesis_planning",
+        "status": "ready_for_medicinal_chemistry_review" if selected else "insufficient_candidates",
+        "summary": "In-silico route hypotheses generated from de novo candidates for chemistry triage.",
+        "selected_candidates": selected,
+        "execution_stages": [
+            {
+                "stage": "retrosynthesis_enumeration",
+                "duration": "5-15 min",
+                "deliverable": "Route trees with precursor sets",
+            },
+            {
+                "stage": "route_ranking",
+                "duration": "2-5 min",
+                "deliverable": "Ranked route shortlist",
+            },
+        ],
+        "constraints": [
+            "In-silico confidence does not guarantee laboratory outcomes.",
+            "Final synthesis decisions require licensed chemist review.",
+        ],
+        "disclaimer": "Computational synthesis planning only; no physical synthesis is performed by the platform.",
+    }
 
 
 @router.get("/pharma")
@@ -93,6 +263,8 @@ async def create_order(
     db.add(order)
     await db.commit()
 
+    synthesis_plan = _fallback_computational_synthesis_plan(brief)
+
     return {
         "order_id": order.id,
         "client_secret": intent["client_secret"],
@@ -111,6 +283,143 @@ class DrugRequestCreate(BaseModel):
     target_gene: str = Field(None, max_length=64)
     max_budget_usd: float = Field(None, gt=0, le=10_000_000)
     result_id: str = Field(None, description="Result ID linking this request to an AI analysis")
+
+
+@router.get("/discovery-brief/{result_id}")
+async def get_custom_discovery_brief(
+    result_id: str,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
+):
+    """Generate a custom discovery brief when repurposing is weak/empty."""
+    keycloak_id = token_payload.get("sub")
+    result, submission, _patient = await _get_patient_result_context(result_id, keycloak_id, db)
+
+    repurposing_candidates = []
+    if result.repurposing_candidates:
+        repurposing_candidates = [
+            {
+                "rank_score": c.rank_score,
+                "drug_name": c.drug_name,
+                "chembl_id": c.chembl_id,
+            }
+            for c in result.repurposing_candidates
+        ]
+
+    mutation_hgvs = [m.hgvs_notation for m in submission.mutations if m.hgvs_notation] if submission.mutations else []
+
+    target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
+    if not target_gene:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+
+    brief = await build_custom_discovery_brief(
+        target_gene=target_gene,
+        cancer_type=submission.cancer_type,
+        mutation_hgvs=mutation_hgvs,
+        repurposing_candidates=repurposing_candidates,
+    )
+    return brief
+
+
+@router.get("/custom-drug-report/{result_id}")
+async def get_custom_drug_report(
+    result_id: str,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
+):
+    """Return a downloadable custom-drug discovery report text for the patient."""
+    keycloak_id = token_payload.get("sub")
+    result, submission, _patient = await _get_patient_result_context(result_id, keycloak_id, db)
+
+    mutation_hgvs = [m.hgvs_notation for m in submission.mutations if m.hgvs_notation] if submission.mutations else []
+    repurposing_candidates = [
+        {"rank_score": c.rank_score, "drug_name": c.drug_name, "chembl_id": c.chembl_id}
+        for c in result.repurposing_candidates
+    ] if result.repurposing_candidates else []
+
+    target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
+    if not target_gene:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+
+    brief = await build_custom_discovery_brief(
+        target_gene=target_gene,
+        cancer_type=submission.cancer_type,
+        mutation_hgvs=mutation_hgvs,
+        repurposing_candidates=repurposing_candidates,
+    )
+
+    return {
+        "result_id": result_id,
+        "filename": f"custom_drug_report_{result_id[:8]}.txt",
+        "report_text": _discovery_brief_to_report_text(brief),
+        "brief": brief,
+    }
+
+
+@router.get("/nearby-pharmacies")
+async def get_nearby_pharmacies():
+    """Temporary nearby pharmacy placeholder list (phase-in feature)."""
+    return {
+        "pharmacies": [
+            {
+                "name": "CityCare Pharmacy",
+                "distance_km": 2.3,
+                "phone": "+1-555-0102",
+                "address": "12 Main Street",
+            },
+            {
+                "name": "Neighborhood Oncology Rx",
+                "distance_km": 4.8,
+                "phone": "+1-555-0161",
+                "address": "88 Health Avenue",
+            },
+        ]
+    }
+
+
+@router.post("/drug-requests/from-result/{result_id}", status_code=status.HTTP_201_CREATED)
+async def create_drug_request_from_result(
+    result_id: str,
+    max_budget_usd: float | None = None,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
+):
+    """Create a persisted custom discovery job and hand it off to the worker queue."""
+    keycloak_id = token_payload.get("sub")
+    result, submission, patient = await _get_patient_result_context(result_id, keycloak_id, db)
+
+    target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
+    if not target_gene:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+
+    req = DrugRequest(
+        patient_id=patient.id,
+        result_id=result_id,
+        target_gene=target_gene,
+        drug_spec="Queued custom discovery job. Detailed brief will be generated by worker.",
+        max_budget_usd=max_budget_usd,
+        is_open=True,
+        discovery_status=DiscoveryStatus.queued,
+    )
+    db.add(req)
+    await db.commit()
+    await db.refresh(req)
+
+    build_custom_drug_brief.apply_async(args=[req.id], queue="ai")
+
+    return {
+        "drug_request_id": req.id,
+        "status": req.discovery_status.value,
+        "mode": "custom_discovery",
+        "target_gene": req.target_gene,
+        "cancer_type": submission.cancer_type,
+        "brief_preview": {
+            "reason": "queued_for_background_generation",
+            "lead_count": 0,
+            "scaffold_count": 0,
+            "fragment_count": 0,
+        },
+    }
 
 
 @router.post("/drug-requests", status_code=status.HTTP_201_CREATED)
@@ -149,17 +458,160 @@ async def list_drug_requests(
     requests = (await db.execute(
         select(DrugRequest).where(DrugRequest.is_open == True)  # noqa: E712
     )).scalars().all()
-    return [
-        {
-            "id": r.id,
-            "target_gene": r.target_gene,
-            "drug_spec": r.drug_spec,
-            "max_budget_usd": r.max_budget_usd,
-            "bid_count": 0,  # populated in detailed view
-            "created_at": r.created_at.isoformat(),
+    return {
+        "requests": [
+            {
+                "drug_request_id": r.id,
+                "id": r.id,
+                "result_id": r.result_id,
+                "target_gene": r.target_gene,
+                "cancer_type": None,
+                "drug_spec": r.drug_spec,
+                "max_budget_usd": r.max_budget_usd,
+                "status": r.discovery_status.value,
+                "bid_count": 0,  # populated in detailed view
+                "created_at": r.created_at.isoformat(),
+            }
+            for r in requests
+        ]
+    }
+
+
+@router.get("/drug-requests/{request_id}")
+async def get_drug_request_detail(
+    request_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a single drug request detail payload used by the custom-drug page."""
+
+    req = (await db.execute(
+        select(DrugRequest).where(DrugRequest.id == request_id)
+    )).scalar_one_or_none()
+
+    if not req:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Drug request not found.")
+
+    result = None
+    submission = None
+    if req.result_id:
+        result = (await db.execute(
+            select(Result).where(Result.id == req.result_id)
+        )).scalar_one_or_none()
+    if result:
+        submission = (await db.execute(
+            select(Submission).where(Submission.id == result.submission_id)
+        )).scalar_one_or_none()
+
+    cancer_type = submission.cancer_type if submission else "Unknown"
+    target_gene = req.target_gene or (result.target_gene if result else None) or "Unknown"
+
+    brief = req.discovery_brief or {}
+    if req.discovery_status == DiscoveryStatus.failed:
+        return {
+            "drug_request_id": req.id,
+            "result_id": req.result_id,
+            "status": req.discovery_status.value,
+            "target_gene": target_gene,
+            "cancer_type": cancer_type,
+            "stage": 2,
+            "message": req.discovery_error or "Custom discovery failed.",
         }
-        for r in requests
-    ]
+
+    if req.discovery_status != DiscoveryStatus.complete:
+        return {
+            "drug_request_id": req.id,
+            "result_id": req.result_id,
+            "status": req.discovery_status.value,
+            "target_gene": target_gene,
+            "cancer_type": cancer_type,
+            "stage": 1 if req.discovery_status == DiscoveryStatus.running else 0,
+            "message": "Custom drug discovery is running in the background. You can return later from My Orders.",
+        }
+
+    synthesis_plan = _fallback_computational_synthesis_plan(brief)
+
+    return {
+        "drug_request_id": req.id,
+        "result_id": req.result_id,
+        "status": req.discovery_status.value,
+        "target_gene": target_gene,
+        "cancer_type": cancer_type,
+        "stage": 2,
+        "message": "Custom drug discovery brief is ready.",
+        "mutation_profile": brief.get("mutation_profile", []),
+        "rationale": brief.get("design_rationale") or brief.get("handoff_note") or "Detailed lead ranking is available in discovery report export.",
+        "live_data_used": bool(brief.get("live_data_used")),
+        "integration_issues": brief.get("integration_issues") or [],
+        "lead_compounds": [
+            {
+                "name": lead.get("drug_name"),
+                "smiles": lead.get("smiles"),
+                "binding_score": lead.get("binding_score"),
+                "design_priority_score": lead.get("design_priority_score"),
+                "oral_exposure_score": lead.get("oral_exposure_score"),
+                "synthesis_feasibility_score": lead.get("synthesis_feasibility_score"),
+                "toxicity_risk": lead.get("toxicity_risk"),
+                "toxicity_flag": (lead.get("toxicity_risk") or 0) >= 55,
+                "mechanism": lead.get("mechanism"),
+                "phase": (
+                    str(lead.get("max_phase"))
+                    if isinstance(lead.get("max_phase"), str)
+                    else f"Phase {lead.get('max_phase')}" if lead.get("max_phase") is not None else "Unknown"
+                ),
+                "evidence_sources": lead.get("evidence_sources") or [],
+                "matched_terms": lead.get("matched_terms") or [],
+                "ensemble_score": lead.get("ensemble_score"),
+                "ensemble_breakdown": lead.get("ensemble_breakdown") or {},
+            }
+            for lead in brief.get("lead_candidates", [])
+        ],
+        "de_novo_candidates": [
+            {
+                "candidate_id": cand.get("candidate_id"),
+                "parent_lead": cand.get("parent_lead"),
+                "design_strategy": cand.get("design_strategy"),
+                "proposed_smiles": cand.get("proposed_smiles"),
+                "selected_scaffold": cand.get("selected_scaffold"),
+                "selected_fragment": cand.get("selected_fragment"),
+                "docking_binding_score": cand.get("docking_binding_score"),
+                "target_fit_score": cand.get("target_fit_score"),
+                "novelty_score": cand.get("novelty_score"),
+                "feasibility_score": cand.get("feasibility_score"),
+                "overall_score": cand.get("overall_score"),
+                "evidence_sources": cand.get("evidence_sources") or [],
+                "matched_terms": cand.get("matched_terms") or [],
+                "ensemble_score": cand.get("ensemble_score"),
+                "ensemble_breakdown": cand.get("ensemble_breakdown") or {},
+                "disclaimer": cand.get("disclaimer"),
+            }
+            for cand in brief.get("de_novo_candidates", [])
+        ],
+        "docking_summary": brief.get("docking_summary") or {},
+        "computational_synthesis_plan": synthesis_plan,
+        "scaffold_summary": {
+            "core_scaffolds": (brief.get("component_library") or {}).get("scaffolds", []),
+            "fragment_hits": (brief.get("component_library") or {}).get("fragments", []),
+            "admet_notes": "Scores shown here are computational heuristics derived from public molecular descriptors and existing repurposing evidence; no wet-lab ADMET has been run by the platform.",
+        },
+        "timeline_weeks": {
+            "target_structure_compute": "1-3 min",
+            "docking_and_ranking": "2-5 min",
+            "de_novo_candidate_assembly": "<1 min",
+        },
+        "next_steps": [
+            "Review generated brief with medicinal chemistry and oncology teams.",
+            "Request bids from verified manufacturers.",
+            "Approve synthesis only after scientific review.",
+        ],
+        "attributions": ["OpenTargets", "ChEMBL", "AlphaFold Server", "DiffDock", "OpenOncology custom discovery worker", "De novo design heuristics"],
+        "scoring_engines_used": brief.get("scoring_engines_used") or [
+            "OpenTargets evidence",
+            "ChEMBL molecular properties",
+            "RDKit descriptor/scaffold extraction",
+            "DiffDock docking (optional)",
+            "OpenOncology ensemble consensus scorer",
+        ],
+    }
 
 
 class BidCreate(BaseModel):

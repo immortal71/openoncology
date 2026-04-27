@@ -47,3 +47,12 @@ grafana_data/
 # OS
 .DS_Store
 Thumbs.db
+
+# SQLite dev databases (runtime state, not source)
+*.db
+*.sqlite3
+
+# Local object-storage mirrors (may contain PHI — never commit)
+local_storage/
+api/local_storage/
+openoncology_dev.db

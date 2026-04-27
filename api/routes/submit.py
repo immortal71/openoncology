@@ -1,7 +1,7 @@
 """
 Submit route — receives patient biopsy PDF + DNA file, queues genomic pipeline.
 """
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -11,6 +11,7 @@ from models.submission import Submission, SubmissionStatus
 from services.storage import upload_encrypted_file
 from workers.genomic_worker import run_genomic_pipeline
 from routes.auth import get_current_patient
+from middleware.rate_limit import limiter, READ_LIMIT, UPLOAD_LIMIT
 
 router = APIRouter(prefix="/api/submit", tags=["submit"])
 
@@ -20,11 +21,15 @@ ALLOWED_DNA_TYPES = {
     "application/gzip",         # FASTQ.gz / VCF.gz
     "application/octet-stream", # BAM / binary VCF
 }
+ALLOWED_BIOPSY_EXT = {"pdf", "jpg", "jpeg", "png", "txt", "doc", "docx", "rtf", "xml", "json"}
+ALLOWED_DNA_EXT = {"vcf", "fastq", "fq", "bam", "gz", "txt", "csv", "tsv", "xml", "json"}
 MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024  # 500 MB
 
 
 @router.post("/", status_code=status.HTTP_202_ACCEPTED)
+@limiter.limit(UPLOAD_LIMIT)
 async def submit_sample(
+    request: Request,
     biopsy_file: UploadFile = File(..., description="Biopsy PDF or image"),
     dna_file: UploadFile = File(..., description="DNA file: VCF, FASTQ, or BAM"),
     cancer_type: str = Form(..., max_length=128),
@@ -44,13 +49,19 @@ async def submit_sample(
             detail="Patient profile not found. Please complete registration.",
         )
 
-    # Validate file types
-    if biopsy_file.content_type not in ALLOWED_BIOPSY_TYPES:
+    # Validate file types with extension fallback for browsers that send generic MIME
+    biopsy_ext = (biopsy_file.filename or "").split(".")[-1].lower()
+    dna_ext = (dna_file.filename or "").split(".")[-1].lower()
+
+    biopsy_ok = (biopsy_file.content_type in ALLOWED_BIOPSY_TYPES) or (biopsy_ext in ALLOWED_BIOPSY_EXT)
+    dna_ok = (dna_file.content_type in ALLOWED_DNA_TYPES) or (dna_ext in ALLOWED_DNA_EXT)
+
+    if not biopsy_ok:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Biopsy file type '{biopsy_file.content_type}' not supported.",
         )
-    if dna_file.content_type not in ALLOWED_DNA_TYPES:
+    if not dna_ok:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"DNA file type '{dna_file.content_type}' not supported.",
@@ -96,7 +107,9 @@ async def submit_sample(
 
 
 @router.get("/{submission_id}/status")
+@limiter.limit(READ_LIMIT)
 async def get_submission_status(
+    request: Request,
     submission_id: str,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),

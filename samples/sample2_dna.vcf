@@ -1,0 +1,7 @@
+##fileformat=VCFv4.2
+##source=OpenOncologySample2
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene symbol">
+##INFO=<ID=HGVS,Number=1,Type=String,Description="Protein HGVS">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+12	25398284	rs121913529	G	A	99	PASS	GENE=KRAS;HGVS=p.G12D
+17	7579472	rs121913343	C	T	95	PASS	GENE=TP53;HGVS=p.R175H

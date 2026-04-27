@@ -9,7 +9,9 @@ class Settings(BaseSettings):
     secret_key: str = "dev-secret-key-change-in-production"
 
     # Database
-    database_url: str = "postgresql+asyncpg://openoncology:password@localhost:5432/openoncology"
+    database_url: str = "sqlite+aiosqlite:///./openoncology_dev.db"
+    bootstrap_schema_in_dev: bool = True
+    local_dev_seed_data: bool = True
 
     # Redis / Celery
     redis_url: str = "redis://localhost:6379/0"
@@ -24,6 +26,7 @@ class Settings(BaseSettings):
     bucket_raw: str = "openoncology-raw"
     bucket_vcf: str = "openoncology-vcf"
     bucket_reports: str = "openoncology-reports"
+    local_storage_dir: str = "./local_storage"
 
     # Keycloak
     keycloak_url: str = "http://localhost:8080"

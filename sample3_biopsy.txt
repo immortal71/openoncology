@@ -1,0 +1,22 @@
+OpenOncology Demo Biopsy Report - Sample 3
+Patient Alias: DEMO-S3
+Specimen: Core needle biopsy, right upper lobe lung lesion
+Collection Date: 2026-04-26
+Referring Diagnosis: Lung adenocarcinoma
+
+Histopathology Summary:
+- Malignant epithelial neoplasm consistent with adenocarcinoma.
+- Moderate nuclear atypia with gland-forming architecture.
+- Tumor cellularity estimate: ~55%.
+
+Immunohistochemistry (IHC):
+- TTF-1: Positive
+- Napsin A: Positive
+- p40: Negative
+- PD-L1 TPS: 25%
+
+Clinical Notes:
+- Sample prepared for molecular profiling and variant interpretation.
+- Correlate with DNA sequencing findings for targeted therapy planning.
+
+This is a synthetic test biopsy file generated for local platform validation only.

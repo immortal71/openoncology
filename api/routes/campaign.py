@@ -25,15 +25,15 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.config import settings
-from api.database import get_session
-from api.models.campaign import Campaign
-from api.models.patient import Patient
-from api.routes.auth import get_current_patient
+from config import settings
+from database import get_db
+from models.campaign import Campaign
+from models.patient import Patient
+from routes.auth import get_current_patient
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/crowdfund", tags=["crowdfund"])
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = settings.stripe_secret_key
 
 _SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _MILESTONES = [25, 50, 75, 100]
@@ -46,7 +46,7 @@ class CampaignCreateRequest(BaseModel):
     slug: str = Field(..., pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
     patient_story: str
     goal_usd: float = Field(..., gt=0)
-    submission_id: Optional[str] = None
+    result_id: Optional[str] = None
 
 
 class DonateRequest(BaseModel):
@@ -64,15 +64,17 @@ async def _get_campaign_or_404(slug: str, db: AsyncSession) -> Campaign:
 
 
 def _campaign_dict(c: Campaign) -> dict:
+    raised = c.raised_usd or 0
+    pct = round((raised / c.goal_usd) * 100, 2) if c.goal_usd else 0
     return {
         "id": c.id,
         "title": c.title,
         "slug": c.slug,
         "patient_story": c.patient_story,
         "goal_usd": c.goal_usd,
-        "raised_usd": c.raised_usd or 0,
-        "percent_complete": c.percent_complete or 0,
-        "status": c.status if hasattr(c, "status") else "active",
+        "raised_usd": raised,
+        "percent_complete": pct,
+        "status": "active" if c.is_active else "closed",
         "created_at": c.created_at.isoformat() if c.created_at else None,
     }
 
@@ -101,7 +103,7 @@ def _check_milestone(old_raised: float, new_raised: float, goal_usd: float, camp
 async def create_campaign(
     body: CampaignCreateRequest,
     claims: dict = Depends(get_current_patient),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Create a new crowdfunding campaign (patient must be authenticated)."""
     # Verify slug is unique
@@ -119,13 +121,14 @@ async def create_campaign(
     campaign = Campaign(
         id=str(uuid.uuid4()),
         patient_id=patient.id,
-        submission_id=body.submission_id,
+        result_id=body.result_id,
         title=body.title,
         slug=body.slug,
         patient_story=body.patient_story,
         goal_usd=body.goal_usd,
         raised_usd=0.0,
-        percent_complete=0.0,
+        is_public=True,
+        is_active=False,
     )
     db.add(campaign)
     await db.commit()
@@ -134,9 +137,17 @@ async def create_campaign(
 
 
 @router.get("/{slug}")
-async def get_campaign(slug: str, db: AsyncSession = Depends(get_session)):
+async def get_campaign(slug: str, db: AsyncSession = Depends(get_db)):
     """Public: view a campaign by slug."""
-    campaign = await _get_campaign_or_404(slug, db)
+    campaign = (await db.execute(
+        select(Campaign).where(
+            Campaign.slug == slug,
+            Campaign.is_public == True,  # noqa: E712
+            Campaign.is_active == True,  # noqa: E712
+        )
+    )).scalar_one_or_none()
+    if not campaign:
+        raise HTTPException(status_code=404, detail="Campaign not found")
     return _campaign_dict(campaign)
 
 
@@ -144,7 +155,7 @@ async def get_campaign(slug: str, db: AsyncSession = Depends(get_session)):
 async def donate(
     slug: str,
     body: DonateRequest,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Create a Stripe PaymentIntent for a donation. No auth required."""
     campaign = await _get_campaign_or_404(slug, db)
@@ -168,7 +179,7 @@ async def donate(
 async def activate_campaign(
     slug: str,
     claims: dict = Depends(get_current_patient),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Patient publishes (activates) their campaign so donations can be received."""
     campaign = await _get_campaign_or_404(slug, db)
@@ -179,9 +190,8 @@ async def activate_campaign(
     if not patient or campaign.patient_id != patient.id:
         raise HTTPException(status_code=403, detail="Not your campaign")
 
-    # Status tracked in a new column — add gracefully
-    if hasattr(campaign, "status"):
-        campaign.status = "active"
+    campaign.is_active = True
+    campaign.is_public = True
     await db.commit()
     return {"id": campaign.id, "slug": slug, "status": "active"}
 
@@ -190,7 +200,7 @@ async def activate_campaign(
 async def close_campaign(
     slug: str,
     claims: dict = Depends(get_current_patient),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Patient or admin closes a campaign (no more donations accepted)."""
     campaign = await _get_campaign_or_404(slug, db)
@@ -204,8 +214,7 @@ async def close_campaign(
     if not is_owner and not is_admin:
         raise HTTPException(status_code=403, detail="Not authorised")
 
-    if hasattr(campaign, "status"):
-        campaign.status = "closed"
+    campaign.is_active = False
     await db.commit()
     return {"id": campaign.id, "slug": slug, "status": "closed"}
 
@@ -215,7 +224,7 @@ async def complete_campaign(
     slug: str,
     pharma_id: str,
     claims: dict = Depends(get_current_patient),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Admin: mark goal reached and trigger pharma payout via Stripe Transfer."""
     roles: list[str] = claims.get("realm_access", {}).get("roles", [])
@@ -224,7 +233,7 @@ async def complete_campaign(
 
     campaign = await _get_campaign_or_404(slug, db)
 
-    from api.models.pharma import PharmaCompany
+    from models.pharma import PharmaCompany
     pharma = await db.get(PharmaCompany, pharma_id)
     if not pharma or not pharma.stripe_account_id:
         raise HTTPException(status_code=400, detail="Pharma company has no Stripe account")
@@ -241,8 +250,7 @@ async def complete_campaign(
         metadata={"campaign_id": campaign.id, "pharma_id": pharma_id},
     )
 
-    if hasattr(campaign, "status"):
-        campaign.status = "complete"
+    campaign.is_active = False
     await db.commit()
 
     logger.info(

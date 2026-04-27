@@ -1,6 +1,7 @@
 """
 Results route — return mutation analysis report for a submission.
 """
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -43,11 +44,17 @@ async def get_results(
         return {
             "submission_id": submission_id,
             "status": submission.status,
-            "message": "Analysis still in progress. Check back soon.",
+            "message": "Analysis is still in progress. No local fallback result is generated in truth-only mode.",
         }
 
     result = submission.result
     mutations = submission.mutations
+    custom_drug_possible = bool((result and result.target_gene) or mutations)
+    custom_drug_reason = (
+        "target_gene_available" if (result and result.target_gene) else
+        "mutation_profile_available" if mutations else
+        "insufficient_genomic_signal"
+    )
 
     return {
         "submission_id": submission_id,
@@ -61,6 +68,8 @@ async def get_results(
         "cosmic_sample_count": result.cosmic_sample_count if result else None,
         "oncologist_reviewed": result.oncologist_reviewed if result else False,
         "oncologist_notes": result.oncologist_notes if result else None,
+        "custom_drug_possible": custom_drug_possible,
+        "custom_drug_reason": custom_drug_reason,
         "mutations": [
             {
                 "gene": m.gene,

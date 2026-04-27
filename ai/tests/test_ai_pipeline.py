@@ -9,6 +9,8 @@ No real network calls — all external I/O is mocked.
 """
 
 import math
+import io
+import sys
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
@@ -218,3 +220,97 @@ class TestScoreBinding:
         result = _parse_confidence(tmp_path)
 
         assert result == 0.5  # sigmoid(0) = 0.5
+
+    def test_score_binding_uses_local_folded_structure(self, tmp_path):
+        """End-to-end smoke: local folded PDB should be used directly."""
+        diffdock_dir = tmp_path / "DiffDock"
+        diffdock_dir.mkdir()
+
+        # Fake DiffDock inference script writes expected output file.
+        (diffdock_dir / "inference.py").write_text(
+            "import argparse, pathlib\n"
+            "p=argparse.ArgumentParser();\n"
+            "p.add_argument('--out_dir');\n"
+            "p.add_argument('--protein_path');\n"
+            "p.add_argument('--ligand');\n"
+            "p.add_argument('--samples_per_complex');\n"
+            "p.add_argument('--batch_size');\n"
+            "p.add_argument('--no_final_step_noise', action='store_true');\n"
+            "args=p.parse_args();\n"
+            "out=pathlib.Path(args.out_dir); out.mkdir(parents=True, exist_ok=True);\n"
+            "(out / 'rank1_confidence1.00.sdf').write_text('ok')\n"
+        )
+
+        local_pdb = tmp_path / "mutated.pdb"
+        local_pdb.write_text("HEADER TEST\\n")
+
+        def _mock_smiles_to_sdf(_smiles, chembl_id, dest_dir):
+            sdf = dest_dir / f"{chembl_id}.sdf"
+            sdf.write_text("$$$$\\n")
+            return sdf
+
+        with patch("ai.diffdock.score.DIFFDOCK_DIR", diffdock_dir), \
+             patch("ai.diffdock.score.DIFFDOCK_PYTHON", Path(sys.executable)), \
+             patch("ai.diffdock.score.smiles_to_sdf", side_effect=_mock_smiles_to_sdf), \
+             patch("ai.diffdock.score.fetch_protein_pdb") as fetch_mock:
+            from ai.diffdock.score import score_binding
+
+            score = score_binding(
+                uniprot_id="P04637",
+                smiles="CCO",
+                chembl_id="CHEMBL545",
+                pre_folded_structure=local_pdb,
+            )
+
+            # Ensure local folded structure path was used (no fallback fetch).
+            fetch_mock.assert_not_called()
+            assert score is not None
+            assert 0.0 <= score <= 1.0
+
+    def test_score_binding_supports_minio_pdb_key(self, tmp_path):
+        """End-to-end smoke: MinIO key for folded PDB should be resolved and used."""
+        diffdock_dir = tmp_path / "DiffDock"
+        diffdock_dir.mkdir()
+
+        (diffdock_dir / "inference.py").write_text(
+            "import argparse, pathlib\n"
+            "p=argparse.ArgumentParser();\n"
+            "p.add_argument('--out_dir');\n"
+            "p.add_argument('--protein_path');\n"
+            "p.add_argument('--ligand');\n"
+            "p.add_argument('--samples_per_complex');\n"
+            "p.add_argument('--batch_size');\n"
+            "p.add_argument('--no_final_step_noise', action='store_true');\n"
+            "args=p.parse_args();\n"
+            "out=pathlib.Path(args.out_dir); out.mkdir(parents=True, exist_ok=True);\n"
+            "(out / 'rank1_confidence0.50.sdf').write_text('ok')\n"
+        )
+
+        def _mock_smiles_to_sdf(_smiles, chembl_id, dest_dir):
+            sdf = dest_dir / f"{chembl_id}.sdf"
+            sdf.write_text("$$$$\\n")
+            return sdf
+
+        class _FakeS3:
+            def get_object(self, Bucket, Key):  # noqa: N803
+                assert Bucket == "openoncology-vcf"
+                assert Key == "structures/sub123/TP53.pdb"
+                return {"Body": io.BytesIO(b"HEADER FROM MINIO\\n")}
+
+        with patch("ai.diffdock.score.DIFFDOCK_DIR", diffdock_dir), \
+             patch("ai.diffdock.score.DIFFDOCK_PYTHON", Path(sys.executable)), \
+             patch("ai.diffdock.score.smiles_to_sdf", side_effect=_mock_smiles_to_sdf), \
+             patch("ai.diffdock.score._get_s3_client", return_value=_FakeS3()), \
+             patch("ai.diffdock.score.fetch_protein_pdb") as fetch_mock:
+            from ai.diffdock.score import score_binding
+
+            score = score_binding(
+                uniprot_id="P04637",
+                smiles="CCO",
+                chembl_id="CHEMBL545",
+                pre_folded_structure="structures/sub123/TP53.pdb",
+            )
+
+            fetch_mock.assert_not_called()
+            assert score is not None
+            assert 0.0 <= score <= 1.0

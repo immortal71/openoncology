@@ -24,15 +24,15 @@ pipeline continues with OpenTargets scores only.
 
 from __future__ import annotations
 
-import csv
 import logging
 import os
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Optional
+import sys
 
-from ai.diffdock.prepare_inputs import fetch_protein_pdb, smiles_to_sdf
+from ai.diffdock.prepare_inputs import fetch_protein_pdb, smiles_to_sdf, cif_to_pdb
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,81 @@ DIFFDOCK_DIR = Path(os.environ.get("DIFFDOCK_DIR", _REPO_ROOT / "ai" / "diffdock
 DIFFDOCK_PYTHON = Path(os.environ.get("DIFFDOCK_PYTHON", "python"))  # override for venv
 
 
+def _get_s3_client():
+    """Return shared MinIO client from API storage service.
+
+    The AI package lives outside api/, so we extend sys.path at runtime.
+    """
+    api_dir = _REPO_ROOT / "api"
+    if str(api_dir) not in sys.path:
+        sys.path.insert(0, str(api_dir))
+    from services.storage import _get_s3  # type: ignore
+
+    return _get_s3()
+
+
+def _materialize_folded_structure(
+    pre_folded_structure: Optional[str | Path],
+    tmp: Path,
+) -> Optional[Path]:
+    """Resolve an optional folded structure to a local .pdb path.
+
+    Supported inputs:
+      - Local .pdb or .cif path
+      - MinIO key (e.g. structures/<sid>/<gene>.pdb or .cif)
+      - S3 URI (s3://<bucket>/<key>)
+    """
+    if not pre_folded_structure:
+        return None
+
+    source = str(pre_folded_structure)
+
+    # Local file path
+    local = Path(source)
+    if local.exists():
+        if local.suffix.lower() == ".pdb":
+            return local
+        if local.suffix.lower() == ".cif":
+            return cif_to_pdb(local, tmp)
+        logger.warning("Unsupported folded structure file extension: %s", local.suffix)
+        return None
+
+    # MinIO/S3 object key path
+    bucket = os.environ.get("ALPHAFOLD_STRUCTURE_BUCKET", "openoncology-vcf")
+    key = source
+    if source.startswith("s3://"):
+        parts = source[5:].split("/", 1)
+        if len(parts) != 2:
+            logger.warning("Invalid s3 URI for folded structure: %s", source)
+            return None
+        bucket, key = parts[0], parts[1]
+
+    try:
+        obj = _get_s3_client().get_object(Bucket=bucket, Key=key)
+        data = obj["Body"].read()
+    except Exception as exc:
+        logger.warning("Could not fetch folded structure from object storage (%s/%s): %s", bucket, key, exc)
+        return None
+
+    ext = Path(key).suffix.lower()
+    if ext not in {".pdb", ".cif"}:
+        # Default to .pdb when no extension is present.
+        ext = ".pdb"
+
+    local_path = tmp / f"mutated_structure{ext}"
+    local_path.write_bytes(data)
+
+    if ext == ".pdb":
+        return local_path
+    return cif_to_pdb(local_path, tmp)
+
+
 def score_binding(
     uniprot_id: str,
     smiles: str,
     chembl_id: str,
     samples: int = 10,
-    pre_folded_cif: Optional[Path] = None,
+    pre_folded_structure: Optional[str | Path] = None,
 ) -> Optional[float]:
     """Run DiffDock and return a normalised binding confidence in [0, 1].
 
@@ -55,10 +124,10 @@ def score_binding(
         smiles: SMILES string of the ligand molecule.
         chembl_id: ChEMBL ID used for naming temp files.
         samples: Number of DiffDock sampling poses (higher = more accurate, slower).
-        pre_folded_cif: Optional .cif file from AlphaFold Server for the *mutated*
-                        protein.  When provided, this structure is used instead of
-                        the generic EBI pre-computed PDB — giving mutation-specific
-                        binding scores.
+        pre_folded_structure: Optional folded mutant structure input.
+                     Can be a local .pdb/.cif path or a MinIO key/S3 URI.
+                     When provided, this structure is used instead of the
+                     generic EBI pre-computed PDB.
 
     Returns:
         Normalised confidence score (0–1), or None if DiffDock unavailable.
@@ -75,13 +144,8 @@ def score_binding(
         tmp = Path(tmpdir)
 
         # Prepare inputs — prefer mutated structure from AlphaFold Server
-        if pre_folded_cif is not None and pre_folded_cif.exists():
-            from ai.diffdock.prepare_inputs import cif_to_pdb
-            pdb_path = cif_to_pdb(pre_folded_cif, tmp)
-            if pdb_path is None:
-                logger.warning("CIF→PDB failed, falling back to EBI structure for %s", uniprot_id)
-                pdb_path = fetch_protein_pdb(uniprot_id, tmp)
-        else:
+        pdb_path = _materialize_folded_structure(pre_folded_structure, tmp)
+        if pdb_path is None:
             pdb_path = fetch_protein_pdb(uniprot_id, tmp)
 
         sdf_path = smiles_to_sdf(smiles, chembl_id, tmp)

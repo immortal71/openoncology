@@ -13,7 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from auth import get_current_user
+from routes.auth import get_current_patient
 from models.patient import Patient
 from models.deletion_request import DeletionRequest
 from workers.gdpr_worker import erase_patient_data
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/me", tags=["gdpr"])
 
 @router.get("/export", summary="Export all personal data (GDPR Art. 20)")
 async def export_my_data(
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
 ):
     """Return a machine-readable JSON export of all data held for this user."""
@@ -55,13 +55,14 @@ async def export_my_data(
         select(Mutation).where(Mutation.submission_id.in_(submission_ids))
     )).all() if submission_ids else []
 
-    candidates = (await db.scalars(
-        select(RepurposingCandidate).where(RepurposingCandidate.submission_id.in_(submission_ids))
-    )).all() if submission_ids else []
-
     results = (await db.scalars(
         select(Result).where(Result.submission_id.in_(submission_ids))
     )).all() if submission_ids else []
+    result_ids = [r.id for r in results]
+
+    candidates = (await db.scalars(
+        select(RepurposingCandidate).where(RepurposingCandidate.result_id.in_(result_ids))
+    )).all() if result_ids else []
 
     orders = (await db.scalars(
         select(Order).where(Order.patient_id == patient.id)
@@ -94,7 +95,7 @@ async def export_my_data(
     summary="Request account deletion (GDPR Art. 17)",
 )
 async def request_deletion(
-    current_user: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
 ):
     """

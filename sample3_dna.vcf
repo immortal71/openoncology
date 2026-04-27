@@ -1,0 +1,12 @@
+##fileformat=VCFv4.2
+##source=OpenOncology-Demo-Generator
+##reference=GRCh38
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene symbol">
+##INFO=<ID=HGVS_C,Number=1,Type=String,Description="Coding HGVS notation">
+##INFO=<ID=SO,Number=1,Type=String,Description="Sequence ontology term">
+##INFO=<ID=CLINVAR_ID,Number=1,Type=String,Description="ClinVar identifier">
+##INFO=<ID=COSMIC_ID,Number=1,Type=String,Description="COSMIC identifier">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+12	25398284	.	C	A	99	PASS	GENE=KRAS;HGVS_C=c.35G>T;SO=missense_variant;CLINVAR_ID=VCV000012345;COSMIC_ID=COSM521
+17	7673803	.	G	A	92	PASS	GENE=TP53;HGVS_C=c.524G>A;SO=missense_variant;CLINVAR_ID=VCV000009999;COSMIC_ID=COSM10660
+7	55249071	.	C	T	88	PASS	GENE=EGFR;HGVS_C=c.2573T>G;SO=missense_variant;CLINVAR_ID=VCV000001111;COSMIC_ID=COSM6240

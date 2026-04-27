@@ -21,6 +21,18 @@ export type AuthState = {
 };
 
 const TOKEN_KEY = "kc_token";
+const DEMO_TOKEN = "demo-local-token";
+const DEMO_USER: KeycloakUser = {
+  sub: "demo-user",
+  email: "demo@openoncology.local",
+  name: "Local Demo User",
+  roles: ["patient"],
+};
+
+function isDemoMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "1";
+}
 
 // ─── Lazy-loaded Keycloak instance ────────────────────────────────────────────
 
@@ -45,13 +57,29 @@ export async function initAuth(): Promise<AuthState> {
     return { authenticated: false, token: null, user: null };
   }
 
+  if (isDemoMode()) {
+    sessionStorage.setItem(TOKEN_KEY, DEMO_TOKEN);
+    return { authenticated: true, token: DEMO_TOKEN, user: DEMO_USER };
+  }
+
+  const keycloakUrl = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
+  if (!keycloakUrl) {
+    return { authenticated: false, token: null, user: null };
+  }
+
   const kc = await getKeycloak();
 
-  const authenticated = await kc.init({
-    onLoad: "check-sso",
-    silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-    pkceMethod: "S256",
-  });
+  let authenticated = false;
+  try {
+    authenticated = await kc.init({
+      onLoad: "check-sso",
+      silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+      pkceMethod: "S256",
+    });
+  } catch {
+    sessionStorage.removeItem(TOKEN_KEY);
+    return { authenticated: false, token: null, user: null };
+  }
 
   if (authenticated && kc.token) {
     sessionStorage.setItem(TOKEN_KEY, kc.token);
@@ -74,6 +102,16 @@ export async function initAuth(): Promise<AuthState> {
 
 /** Redirect browser to Keycloak login page. */
 export async function login() {
+  if (typeof window === "undefined") return;
+  if (isDemoMode()) {
+    sessionStorage.setItem(TOKEN_KEY, DEMO_TOKEN);
+    return;
+  }
+
+  if (!process.env.NEXT_PUBLIC_KEYCLOAK_URL) {
+    throw new Error("Keycloak is not configured in this environment.");
+  }
+
   const kc = await getKeycloak();
   await kc.login({ redirectUri: window.location.href });
 }

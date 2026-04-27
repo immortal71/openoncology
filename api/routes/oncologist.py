@@ -5,14 +5,14 @@ POST /api/oncologist/review   — approve or flag a result
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.database import get_session
-from api.models.result import Result
-from api.models.submission import Submission
-from api.models.mutation import Mutation
-from api.routes.auth import get_current_patient
+from database import get_db
+from models.result import Result
+from models.submission import Submission
+from models.mutation import Mutation
+from routes.auth import get_current_patient
 
 router = APIRouter(prefix="/api/oncologist", tags=["oncologist"])
 
@@ -39,7 +39,7 @@ class ReviewRequest(BaseModel):
 @router.get("/pending")
 async def list_pending(
     _: dict = Depends(_require_oncologist),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Return submissions whose result has not yet been oncologist-reviewed."""
     stmt = (
@@ -54,19 +54,19 @@ async def list_pending(
         # Count mutations
         mut_count = (
             await db.scalar(
-                select(Mutation)
+                select(func.count())
+                .select_from(Mutation)
                 .where(Mutation.submission_id == submission.id)
-                .with_only_columns(Mutation.id)
             )
         )
         targetable_count = (
             await db.scalar(
-                select(Mutation)
+                select(func.count())
+                .select_from(Mutation)
                 .where(
                     Mutation.submission_id == submission.id,
                     Mutation.is_targetable == True,  # noqa: E712
                 )
-                .with_only_columns(Mutation.id)
             )
         )
 
@@ -76,7 +76,7 @@ async def list_pending(
                 "patient_email_hash": None,  # deliberately hidden
                 "mutation_count": mut_count or 0,
                 "targetable_count": targetable_count or 0,
-                "created_at": submission.created_at.isoformat(),
+                "created_at": submission.submitted_at.isoformat() if submission.submitted_at else None,
             }
         )
 
@@ -87,10 +87,12 @@ async def list_pending(
 async def submit_review(
     body: ReviewRequest,
     _: dict = Depends(_require_oncologist),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Mark a result as reviewed and save oncologist notes."""
-    result = await db.get(Result, body.submission_id)
+    result = (await db.execute(
+        select(Result).where(Result.submission_id == body.submission_id)
+    )).scalar_one_or_none()
     if not result:
         raise HTTPException(status_code=404, detail="Result not found")
 

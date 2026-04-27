@@ -4,12 +4,13 @@ Auth route — JWT token introspection via Keycloak.
 Patients authenticate directly through Keycloak (OIDC).
 The API validates the Bearer token on every protected request.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 import httpx
 
 from config import settings
+from middleware.rate_limit import limiter, AUTH_LIMIT
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 _bearer = HTTPBearer()
@@ -35,6 +36,14 @@ async def get_current_patient(
     Raises 401 if the token is invalid or expired.
     """
     token = credentials.credentials
+    if settings.environment == "development" and token == "demo-local-token":
+        return {
+            "sub": "demo-user",
+            "email": "demo@openoncology.local",
+            "name": "Local Demo User",
+            "realm_access": {"roles": ["patient"]},
+        }
+
     try:
         public_key = await _get_keycloak_public_key()
         payload = jwt.decode(
@@ -45,6 +54,11 @@ async def get_current_patient(
             options={"verify_aud": False},
         )
         return payload
+    except httpx.HTTPError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service unavailable",
+        ) from exc
     except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -54,7 +68,8 @@ async def get_current_patient(
 
 
 @router.get("/me")
-async def get_me(patient: dict = Depends(get_current_patient)):
+@limiter.limit(AUTH_LIMIT)
+async def get_me(request: Request, patient: dict = Depends(get_current_patient)):
     """Return the authenticated patient's token claims."""
     return {
         "id": patient.get("sub"),

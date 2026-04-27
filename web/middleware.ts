@@ -18,7 +18,7 @@ import type { NextRequest } from "next/server";
  * backend JWT check — this middleware is only for UX redirection.
  */
 
-const PROTECTED = ["/dashboard", "/submit", "/oncologist"];
+const PROTECTED = ["/dashboard", "/oncologist"];
 const ONCOLOGIST_ONLY = ["/oncologist"];
 
 export function middleware(request: NextRequest) {
@@ -50,5 +50,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/submit/:path*", "/oncologist/:path*"],
+  matcher: ["/dashboard/:path*", "/oncologist/:path*"],
 };

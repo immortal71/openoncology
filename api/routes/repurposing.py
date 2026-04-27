@@ -65,6 +65,8 @@ async def get_repurposing_candidates(
                 "binding_score": c.binding_score,
                 "opentargets_score": c.opentargets_score,
                 "rank_score": c.rank_score,
+                "evidence_sources": c.evidence_sources or [],
+                "matched_terms": c.matched_terms or [],
             }
             for c in candidates
         ],

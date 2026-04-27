@@ -22,15 +22,15 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel as _BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.config import settings
-from api.database import get_session
-from api.models.pharma import PharmaCompany
-from api.routes.auth import get_current_patient
+from config import settings
+from database import get_db
+from models.pharma import PharmaCompany
+from routes.auth import get_current_patient
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/stripe/connect", tags=["stripe-connect"])
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = settings.stripe_secret_key
 
 
 def _require_admin(claims: dict = Depends(get_current_patient)) -> dict:
@@ -47,7 +47,7 @@ async def start_onboarding(
     pharma_id: str,
     request: Request,
     _: dict = Depends(_require_admin),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Create or resume Stripe Connect Express onboarding for a pharma company."""
     company = await db.get(PharmaCompany, pharma_id)
@@ -82,7 +82,7 @@ async def start_onboarding(
 @router.get("/return/{pharma_id}")
 async def onboarding_return(
     pharma_id: str,
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Stripe redirects the pharma here after completing (or leaving) onboarding."""
     company = await db.get(PharmaCompany, pharma_id)
@@ -107,7 +107,7 @@ async def onboarding_return(
 async def account_status(
     pharma_id: str,
     _: dict = Depends(_require_admin),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Admin: retrieve live Stripe account status for a pharma company."""
     company = await db.get(PharmaCompany, pharma_id)
@@ -129,12 +129,6 @@ async def account_status(
 
 # ── Escrow payout ─────────────────────────────────────────────────────────────
 
-class PayoutRequest:
-    def __init__(self, amount_usd: float, description: str = "OpenOncology campaign payout"):
-        self.amount_usd = amount_usd
-        self.description = description
-
-
 class PayoutBody(_BaseModel):
     amount_usd: float
     description: str = "OpenOncology campaign payout"
@@ -146,7 +140,7 @@ async def trigger_payout(
     pharma_id: str,
     body: PayoutBody,
     _: dict = Depends(_require_admin),
-    db: AsyncSession = Depends(get_session),
+    db: AsyncSession = Depends(get_db),
 ):
     """Admin: transfer funds from the platform to a pharma's Connect account.
 

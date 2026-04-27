@@ -3,10 +3,16 @@ from sqlalchemy.orm import DeclarativeBase
 
 from config import settings
 
+_engine_kwargs = {
+    "echo": settings.environment == "development",
+    "pool_pre_ping": True,
+}
+if settings.database_url.startswith("sqlite+"):
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
+
 engine = create_async_engine(
     settings.database_url,
-    echo=settings.environment == "development",
-    pool_pre_ping=True,
+    **_engine_kwargs,
 )
 
 AsyncSessionLocal = async_sessionmaker(

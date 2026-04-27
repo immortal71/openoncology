@@ -14,23 +14,24 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.config import settings
-from api.database import get_session
-from api.models.order import Order
-from api.models.campaign import Campaign
+from config import settings
+from database import get_db
+from models.order import Order, OrderStatus
+from models.campaign import Campaign
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/webhook", tags=["webhook"])
+stripe.api_key = settings.stripe_secret_key
 
 
 @router.post("/stripe", status_code=status.HTTP_200_OK)
-async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_session)):
+async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature", "")
 
     try:
         event = stripe.Webhook.construct_event(
-            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+            payload, sig_header, settings.stripe_webhook_secret
         )
     except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid Stripe signature")
@@ -61,28 +62,24 @@ async def _handle_succeeded(pi: dict, db: AsyncSession) -> None:
             campaign = await db.get(Campaign, campaign_id)
             if campaign:
                 campaign.raised_usd = (campaign.raised_usd or 0) + amount_usd
-                if campaign.goal_usd and campaign.goal_usd > 0:
-                    campaign.percent_complete = round(
-                        (campaign.raised_usd / campaign.goal_usd) * 100, 2
-                    )
                 await db.commit()
                 logger.info("Campaign %s: +$%.2f → $%.2f raised", campaign_id, amount_usd, campaign.raised_usd)
         return
 
     # Regular marketplace order
-    stmt = select(Order).where(Order.stripe_pi_id == pi_id)
+    stmt = select(Order).where(Order.stripe_payment_intent_id == pi_id)
     order = (await db.execute(stmt)).scalar_one_or_none()
     if order:
-        order.status = "confirmed"
+        order.status = OrderStatus.confirmed
         await db.commit()
         logger.info("Order %s confirmed via Stripe PI %s", order.id, pi_id)
 
 
 async def _handle_failed(pi: dict, db: AsyncSession) -> None:
     pi_id: str = pi["id"]
-    stmt = select(Order).where(Order.stripe_pi_id == pi_id)
+    stmt = select(Order).where(Order.stripe_payment_intent_id == pi_id)
     order = (await db.execute(stmt)).scalar_one_or_none()
     if order:
-        order.status = "failed"
+        order.status = OrderStatus.failed
         await db.commit()
         logger.warning("Order %s payment failed (PI %s)", order.id, pi_id)

@@ -1,0 +1,22 @@
+OpenOncology Demo Biopsy Report - Sample 4
+Patient Alias: DEMO-S4
+Specimen: Endoscopic ultrasound-guided core biopsy, pancreatic head mass
+Collection Date: 2026-04-26
+Referring Diagnosis: Pancreatic adenocarcinoma
+
+Histopathology Summary:
+- Invasive moderately differentiated ductal adenocarcinoma.
+- Desmoplastic stromal response present.
+- Tumor cellularity estimate: ~48%.
+
+Immunohistochemistry (IHC):
+- CK7: Positive
+- CK20: Focal positive
+- SMAD4: Loss of expression
+- MMR proteins: Intact
+
+Clinical Notes:
+- Material submitted for molecular profiling due to progressive disease.
+- Evaluate for actionable genomic targets and custom molecule design path.
+
+This is a synthetic test biopsy file generated for local platform validation only.
