@@ -39,6 +39,35 @@
 
 ---
 
+## Patient journey
+
+<div align="center">
+<img src="https://placehold.co/900x60/0f172a/94a3b8?text=VCF+in.+Treatment+plan+out.&font=montserrat" alt="Journey banner" width="100%"/>
+</div>
+
+```mermaid
+flowchart TD
+    A([🧬 Patient submits sample\nBiopsy + germline DNA test]) --> B
+    B[⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT]
+    B --> C{Targeted mutation found?}
+    C -- No --> D([👨‍⚕️ General medicine])
+    C -- Yes --> E[🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL]
+    C -- Yes --> F([💊 General medicine\nin the meantime])
+    E --> G{Existing drug near-match?\nDrug repurposing search}
+    G -- Yes --> H([✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment])
+    H --> M([🏥 Patient receives treatment])
+    G -- No --> I[🧪 Option 2: Custom drug discovery\nPlatform builds target brief from OpenTargets + ChEMBL]
+    I --> I2[🔬 Discovery brief generated\nLead molecules · Ro5 scoring · AlphaFold structure]
+    I2 --> J[🏭 Pharma marketplace\nManufacturers receive brief and bid on synthesis]
+    J --> N{Can patient afford it?}
+    N -- Yes --> K([🔬 Custom medicine manufactured\nPatient-specific mutation])
+    N -- No --> L([❤️ Crowdfund module\nRaise funds for custom drug])
+    L --> K
+    K --> M
+```
+
+---
+
 ## Platform preview
 
 <div align="center">
@@ -266,32 +295,6 @@ See [PROJECT_COMPLETION_STATUS.md](PROJECT_COMPLETION_STATUS.md) for detailed fe
 | **Security CI** | Weekly: pip-audit · npm audit · Bandit · Semgrep OWASP · ZAP baseline · Trivy |
 
 ---
-
-## Patient journey
-
-<div align="center">
-<img src="https://placehold.co/900x60/0f172a/94a3b8?text=VCF+in.+Treatment+plan+out.&font=montserrat" alt="Journey banner" width="100%"/>
-</div>
-
-```mermaid
-flowchart TD
-    A([🧬 Patient submits sample\nBiopsy + germline DNA test]) --> B
-    B[⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT]
-    B --> C{Targeted mutation found?}
-    C -- No --> D([👨‍⚕️ General medicine])
-    C -- Yes --> E[🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL]
-    C -- Yes --> F([💊 General medicine\nin the meantime])
-    E --> G{Existing drug near-match?\nDrug repurposing search}
-    G -- Yes --> H([✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment])
-    H --> M([🏥 Patient receives treatment])
-    G -- No --> I[🏭 Option 2: Custom drug order\nPlatform connects to pharma companies]
-    I --> J[💼 Pharma companies bid\nTransparent cost · patient chooses]
-    J --> N{Can patient afford it?}
-    N -- Yes --> K([🔬 Custom medicine manufactured\nPatient-specific mutation])
-    N -- No --> L([❤️ Crowdfund module\nRaise funds for custom drug])
-    L --> K
-    K --> M
-```
 
 <div align="center">
 
