@@ -57,8 +57,8 @@ def _discovery_brief_to_drug_spec(brief: dict) -> str:
     leads = brief.get("lead_candidates", [])
     comps = brief.get("component_library", {})
     top_leads = [
-        f"- {l.get('drug_name') or 'Unknown'} ({l.get('chembl_id') or 'N/A'}), phase={l.get('max_phase')}, score={l.get('opentargets_score')}"
-        for l in leads[:8]
+        f"- {lead.get('drug_name') or 'Unknown'} ({lead.get('chembl_id') or 'N/A'}), phase={lead.get('max_phase')}, score={lead.get('opentargets_score')}"
+        for lead in leads[:8]
     ]
     scaffolds = comps.get("scaffolds", [])[:12]
     fragments = comps.get("fragments", [])[:16]
@@ -109,16 +109,16 @@ def _discovery_brief_to_report_text(brief: dict) -> str:
 
     lines += ["", "Lead candidates:"]
     if leads:
-        for l in leads[:12]:
+        for lead in leads[:12]:
             lines.append(
-                f"- {l.get('drug_name') or 'Unknown'} ({l.get('chembl_id') or 'N/A'}) | "
-                f"phase={l.get('max_phase')} | approved={l.get('is_approved')} | "
-                f"score={l.get('opentargets_score')}"
+                f"- {lead.get('drug_name') or 'Unknown'} ({lead.get('chembl_id') or 'N/A'}) | "
+                f"phase={lead.get('max_phase')} | approved={lead.get('is_approved')} | "
+                f"score={lead.get('opentargets_score')}"
             )
-            if l.get("mechanism"):
-                lines.append(f"  mechanism: {l.get('mechanism')}")
-            if l.get("smiles"):
-                lines.append(f"  smiles: {l.get('smiles')}")
+            if lead.get("mechanism"):
+                lines.append(f"  mechanism: {lead.get('mechanism')}")
+            if lead.get("smiles"):
+                lines.append(f"  smiles: {lead.get('smiles')}")
     else:
         lines.append("- No direct leads found")
 
@@ -262,8 +262,6 @@ async def create_order(
     )
     db.add(order)
     await db.commit()
-
-    synthesis_plan = _fallback_computational_synthesis_plan(brief)
 
     return {
         "order_id": order.id,

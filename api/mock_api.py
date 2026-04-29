@@ -259,7 +259,6 @@ async def get_drug_request(request_id: str):
 
     created_at = float(req["created_at"])  # type: ignore[arg-type]
     elapsed = monotonic() - created_at
-    scenario = str(req.get("scenario", "no_repurpose"))
     target_gene = str(req.get("target_gene", "KRAS"))
     cancer_type = str(req.get("cancer_type", "Unknown"))
     result_id = str(req.get("result_id", request_id))
@@ -551,29 +550,6 @@ async def list_drug_requests():
             "status": status,
         })
     return {"requests": results}
-    submission = SUBMISSIONS.get(result_id) or {}
-    scenario = str(submission.get("scenario", "repurpose_ok"))
-    target_gene = "KRAS" if scenario == "no_repurpose" else "EGFR"
-
-    report_text = (
-        "OpenOncology Custom Drug Discovery Brief\n"
-        f"Result ID: {result_id}\n"
-        f"Target gene: {target_gene}\n"
-        "Summary: Repurposed drug screening did not yield a suitable candidate above threshold.\n"
-        "Recommended action: proceed with custom medicinal chemistry program and pharma bidding.\n"
-        "Estimated next stage timeline: 2-6 weeks for initial synthesis feasibility package.\n"
-    )
-
-    return {
-        "result_id": result_id,
-        "filename": f"custom_drug_report_{result_id}.txt",
-        "report_text": report_text,
-        "brief": {
-            "target_gene": target_gene,
-            "mode": "custom_design",
-            "reason": "No repurposed candidate above threshold",
-        },
-    }
 
 
 @app.get("/api/marketplace/nearby-pharmacies")
