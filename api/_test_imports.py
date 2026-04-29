@@ -18,17 +18,9 @@ try:
     import routes.stripe_connect as routes_stripe_connect
     import routes.campaign as routes_campaign
     import routes.gdpr as routes_gdpr
-    assert routes_auth is not None
-    assert routes_submit is not None
-    assert routes_results is not None
-    assert routes_repurposing is not None
-    assert routes_marketplace is not None
-    assert routes_oncologist is not None
-    assert routes_webhook is not None
-    assert routes_pharma_admin is not None
-    assert routes_stripe_connect is not None
-    assert routes_campaign is not None
-    assert routes_gdpr is not None
+    _ = (routes_auth, routes_submit, routes_results, routes_repurposing,
+         routes_marketplace, routes_oncologist, routes_webhook, routes_pharma_admin,
+         routes_stripe_connect, routes_campaign, routes_gdpr)
     print("\u2705 All route modules import successfully")
 except Exception as e:
     print(f"\u274c Route import failed: {e}")
@@ -40,10 +32,7 @@ try:
     import workers.genomic_worker as genomic_worker
     import workers.gdpr_worker as gdpr_worker
     import workers.notify_worker as notify_worker
-    assert ai_worker is not None
-    assert genomic_worker is not None
-    assert gdpr_worker is not None
-    assert notify_worker is not None
+    _ = (ai_worker, genomic_worker, gdpr_worker, notify_worker)
     print("\u2705 All worker modules import successfully")
 except Exception as e:
     print(f"\u274c Worker import failed: {e}")
@@ -62,17 +51,9 @@ try:
     import models.bid as models_bid
     import models.deletion_request as models_deletion_request
     import models.oncologist as models_oncologist
-    assert models_patient is not None
-    assert models_submission is not None
-    assert models_mutation is not None
-    assert models_result is not None
-    assert models_repurposing is not None
-    assert models_campaign is not None
-    assert models_order is not None
-    assert models_pharma is not None
-    assert models_bid is not None
-    assert models_deletion_request is not None
-    assert models_oncologist is not None
+    _ = (models_patient, models_submission, models_mutation, models_result,
+         models_repurposing, models_campaign, models_order, models_pharma,
+         models_bid, models_deletion_request, models_oncologist)
     print("\u2705 All model modules import successfully")
 except Exception as e:
     print(f"\u274c Model import failed: {e}")
@@ -90,16 +71,8 @@ try:
     import services.oncokb as svc_oncokb
     import services.opentargets as svc_opentargets
     import services.storage as svc_storage
-    assert svc_cbioportal is not None
-    assert svc_chembl is not None
-    assert svc_civic is not None
-    assert svc_clinvar is not None
-    assert svc_cosmic is not None
-    assert svc_email_templates is not None
-    assert svc_llm_explainer is not None
-    assert svc_oncokb is not None
-    assert svc_opentargets is not None
-    assert svc_storage is not None
+    _ = (svc_cbioportal, svc_chembl, svc_civic, svc_clinvar, svc_cosmic,
+         svc_email_templates, svc_llm_explainer, svc_oncokb, svc_opentargets, svc_storage)
     print("\u2705 All service modules import successfully")
 except Exception as e:
     print(f"\u274c Service import failed: {e}")
@@ -109,8 +82,7 @@ except Exception as e:
 try:
     import middleware.audit as mw_audit
     import middleware.rate_limit as mw_rate_limit
-    assert mw_audit is not None
-    assert mw_rate_limit is not None
+    _ = (mw_audit, mw_rate_limit)
     print("\u2705 All middleware modules import successfully")
 except Exception as e:
     print(f"\u274c Middleware import failed: {e}")
@@ -119,7 +91,7 @@ except Exception as e:
 # Test main app
 try:
     import main as main_module
-    assert main_module.app is not None
+    _ = main_module.app
     print("\u2705 Main app imports successfully")
 except Exception as e:
     print(f"\u274c Main app import failed: {e}")
