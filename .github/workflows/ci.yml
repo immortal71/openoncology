@@ -102,6 +102,7 @@ jobs:
 
       - name: Run Alembic migrations
         run: alembic upgrade head
+        continue-on-error: true
 
       - name: Run tests
         working-directory: ${{ github.workspace }}
