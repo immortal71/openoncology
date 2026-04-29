@@ -3,7 +3,7 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-ingore = ["E501"]
+ignore = ["E501"]
 
 # SQLAlchemy ORM uses string-based forward references in relationship() type
 # annotations (e.g. Mapped["Patient"]).  These are resolved by SQLAlchemy at
