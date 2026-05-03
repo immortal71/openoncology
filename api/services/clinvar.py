@@ -3,6 +3,7 @@
 Uses NCBI E-utilities (esearch + efetch) to look up variant clinical significance.
 No API key required but a contact email is sent per NCBI guidelines.
 """
+import asyncio
 import logging
 from typing import Optional
 import httpx
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 _ESEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 _EFETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 _EMAIL = "admin@openoncology.org"
+_NCBI_MIN_INTERVAL_SECONDS = 0.35
 
 
 async def get_clinvar_significance(gene: str, hgvs_c: str) -> Optional[str]:
@@ -40,6 +42,7 @@ async def get_clinvar_significance(gene: str, hgvs_c: str) -> Optional[str]:
                 return None
 
             # Step 2: fetch summary
+            await asyncio.sleep(_NCBI_MIN_INTERVAL_SECONDS)
             fetch_resp = await client.get(
                 _EFETCH,
                 params={

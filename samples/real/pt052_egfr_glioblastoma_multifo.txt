@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: gbm_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-06-0125-01
+Cancer Type: Glioblastoma Multiforme
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: EGFR
+  Protein Change: G598V
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr7:55233043
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=gbm_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

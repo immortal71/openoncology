@@ -11,6 +11,7 @@ from models.result import Result
 from models.submission import Submission
 from models.patient import Patient
 from routes.auth import get_current_patient
+from services.trial_integration import fetch_trials_by_gene
 
 router = APIRouter(prefix="/api/repurposing", tags=["repurposing"])
 
@@ -70,4 +71,83 @@ async def get_repurposing_candidates(
             }
             for c in candidates
         ],
+    }
+
+
+@router.get("/{result_id}/trials")
+async def get_clinical_trial_matches(
+    result_id: str,
+    db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
+):
+    """Layer 3: live ClinicalTrials.gov matching for the authenticated patient's result."""
+    keycloak_id = token_payload.get("sub")
+
+    result = (await db.execute(
+        select(Result)
+        .join(Submission)
+        .join(Patient)
+        .where(
+            Result.id == result_id,
+            Patient.keycloak_id == keycloak_id,
+        )
+    )).scalar_one_or_none()
+
+    if not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Result not found.")
+
+    submission = (await db.execute(
+        select(Submission)
+        .where(Submission.id == result.submission_id)
+        .options(selectinload(Submission.mutations))
+    )).scalar_one_or_none()
+
+    if not submission:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found.")
+
+    primary_gene = result.target_gene
+    if not primary_gene and submission.mutations:
+        primary_gene = submission.mutations[0].gene
+
+    if not primary_gene:
+        return {
+            "result_id": result_id,
+            "cancer_type": submission.cancer_type,
+            "target_gene": None,
+            "trials": [],
+            "message": "No target gene available for trial matching.",
+        }
+
+    trials = await fetch_trials_by_gene(
+        gene=primary_gene,
+        cancer_type=submission.cancer_type,
+        limit=20,
+    )
+
+    filtered: list[dict] = []
+    for t in trials:
+        title = str(t.get("title") or "")
+        status_text = str(t.get("status") or "")
+        phase = str(t.get("phase") or "")
+        filtered.append(
+            {
+                "trial_id": t.get("trial_id"),
+                "title": title,
+                "phase": phase,
+                "status": status_text,
+                "cancer_type": t.get("cancer_type"),
+                "drugs": t.get("drugs") or [],
+                "basket_trial": any(k in title.lower() for k in ("basket", "agnostic", "histology")),
+                "expanded_access_hint": "expanded access" in title.lower() or "compassionate" in title.lower(),
+                "trial_url": f"https://clinicaltrials.gov/study/{t.get('trial_id')}" if t.get("trial_id") else None,
+                "source": "ClinicalTrials.gov",
+            }
+        )
+
+    return {
+        "result_id": result_id,
+        "cancer_type": submission.cancer_type,
+        "target_gene": primary_gene,
+        "trials": filtered[:10],
+        "message": "Live trial matching from ClinicalTrials.gov.",
     }

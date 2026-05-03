@@ -12,6 +12,7 @@ from services.storage import upload_encrypted_file
 from workers.genomic_worker import run_genomic_pipeline
 from routes.auth import get_current_patient
 from middleware.rate_limit import limiter, READ_LIMIT, UPLOAD_LIMIT
+from schemas import SubmissionResponse, SubmissionStatusOut
 
 router = APIRouter(prefix="/api/submit", tags=["submit"])
 
@@ -26,7 +27,7 @@ ALLOWED_DNA_EXT = {"vcf", "fastq", "fq", "bam", "gz", "txt", "csv", "tsv", "xml"
 MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024  # 500 MB
 
 
-@router.post("/", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/", status_code=status.HTTP_202_ACCEPTED, response_model=SubmissionResponse)
 @limiter.limit(UPLOAD_LIMIT)
 async def submit_sample(
     request: Request,
@@ -106,7 +107,7 @@ async def submit_sample(
     }
 
 
-@router.get("/{submission_id}/status")
+@router.get("/{submission_id}/status", response_model=SubmissionStatusOut)
 @limiter.limit(READ_LIMIT)
 async def get_submission_status(
     request: Request,

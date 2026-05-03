@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: prad_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-ZG-A8QY-01
+Cancer Type: Prostate Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: BRAF
+  Protein Change: F468C
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr7:140481405
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=prad_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

@@ -130,9 +130,9 @@ def run_ai_analysis(
             )
 
             # Score each drug using the composite ranking algorithm
-            from ai.ranking import rank_candidates
+            from api.ai.ranking import rank_candidates
 
-            for drug in drugs[:10]:  # Process top 10 candidates
+            for drug in drugs[:25]:  # Process top 25 candidates (expanded from 10)
                 drug["alphamissense_score"] = (
                     top_mutation.alphamissense_score if hasattr(top_mutation, "alphamissense_score") else None
                 )
@@ -140,7 +140,18 @@ def run_ai_analysis(
                     top_mutation.oncokb_level.value if hasattr(top_mutation, "oncokb_level") else None
                 )
 
-            ranked = rank_candidates(drugs[:10])
+            resistance_context = None
+            top_level = (
+                top_mutation.oncokb_level.value if getattr(top_mutation, "oncokb_level", None) else None
+            )
+            if top_level in ("LEVEL_R1", "LEVEL_R2"):
+                resistance_context = {
+                    "gene": target_gene,
+                    "variant": top_variant,
+                    "level": top_level,
+                }
+
+            ranked = rank_candidates(drugs[:25], resistance_context=resistance_context)
 
             repurposing_candidates = [
                 {
@@ -205,7 +216,7 @@ def run_ai_analysis(
                 if top_mut:
                     top_mut.alphafold_structure_path = alphafold_pdb_path
 
-            for c in repurposing_candidates[:5]:
+            for c in repurposing_candidates[:10]:
                 candidate = RepurposingCandidate(
                     result_id=result.id,
                     **c,
@@ -214,8 +225,8 @@ def run_ai_analysis(
 
             submission = db.get(Submission, submission_id)
             submission.status = SubmissionStatus.complete
-            from datetime import datetime
-            submission.completed_at = datetime.utcnow()
+            from datetime import datetime, UTC
+            submission.completed_at = datetime.now(UTC).replace(tzinfo=None)
             db.commit()
 
         # Step 6: Notify patient
@@ -286,24 +297,117 @@ def _hgvs_to_short(hgvs_p: str) -> str | None:
 
 
 def _gene_to_uniprot(gene: str) -> str | None:
-    """Return UniProt accession for common cancer genes.
+    """Return UniProt accession for cancer-relevant genes.
 
-    This is a curated table for the most frequently targetable oncogenes.
-    A production system would query UniProt REST API or use a full mapping file.
+    Covers the top 150+ oncogenes and tumour suppressors from:
+      - COSMIC Cancer Gene Census v100 (Tier 1 and 2)
+      - OncoKB Level 1/2 actionable genes
+      - TCGA PanCancer Atlas significantly mutated genes
+
+    Genes not in this table fall back to a live UniProt REST lookup.
     """
     _MAP = {
-        "TP53": "P04637", "KRAS": "P01116", "BRAF": "P15056",
-        "EGFR": "P00533", "PIK3CA": "P42336", "PTEN": "P60484",
-        "APC": "P25054",  "BRCA1": "P38398", "BRCA2": "P51587",
-        "CDKN2A": "P42771", "RB1": "P06400", "MYC": "P01106",
-        "ERBB2": "P04626", "VHL": "P40337", "MLH1": "P40692",
-        "MTOR": "P42345", "IDH1": "O75874", "IDH2": "P48735",
-        "FLT3": "P36888", "KIT": "P10721", "ABL1": "P00519",
-        "BCR": "P11274", "ALK": "Q9UM73", "RET": "P07949",
-        "MET": "P08581", "NRAS": "P01111", "HRAS": "P01112",
-        "JAK2": "O60674", "NPM1": "P06748", "DNMT3A": "Q9Y6K1",
+        # Core oncogenes
+        "TP53": "P04637",   "KRAS": "P01116",   "BRAF": "P15056",
+        "EGFR": "P00533",   "PIK3CA": "P42336",  "PTEN": "P60484",
+        "APC": "P25054",    "BRCA1": "P38398",   "BRCA2": "P51587",
+        "CDKN2A": "P42771", "RB1": "P06400",     "MYC": "P01106",
+        "ERBB2": "P04626",  "VHL": "P40337",     "MLH1": "P40692",
+        "MTOR": "P42345",   "IDH1": "O75874",    "IDH2": "P48735",
+        "FLT3": "P36888",   "KIT": "P10721",     "ABL1": "P00519",
+        "BCR": "P11274",    "ALK": "Q9UM73",     "RET": "P07949",
+        "MET": "P08581",    "NRAS": "P01111",    "HRAS": "P01112",
+        "JAK2": "O60674",   "NPM1": "P06748",    "DNMT3A": "Q9Y6K1",
+        # Kinases & receptors
+        "FGFR1": "P11362",  "FGFR2": "P21802",   "FGFR3": "P22607",
+        "FGFR4": "P22455",  "PDGFRA": "P16234",  "PDGFRB": "P09619",
+        "CSF1R": "P07333",  "VEGFR2": "P35968",  "KDR": "P35968",
+        "ERBB3": "P21860",  "ERBB4": "Q15303",   "IGF1R": "P08069",
+        "INSR": "P06213",   "EPHA2": "P29317",   "EPHB4": "P54760",
+        "AXL": "P30530",    "TYRO3": "Q06418",   "MERTK": "Q12866",
+        "ROS1": "P08922",   "NTRK1": "P04629",   "NTRK2": "Q16620",
+        "NTRK3": "Q16288",  "DDR1": "Q08345",    "DDR2": "O15944",
+        "JAK1": "P23458",   "JAK3": "P52333",    "TYK2": "P29597",
+        # RAS pathway
+        "RAF1": "P04049",   "MAP2K1": "Q02750",  "MAP2K2": "P36507",
+        "MAPK1": "P28482",  "MAPK3": "P27361",   "NF1": "P21359",
+        "RASA1": "P20936",  "RALGDS": "Q12967",  "TIAM1": "Q13009",
+        # PI3K / AKT / mTOR
+        "PIK3CB": "P42338", "PIK3CD": "O00329",  "PIK3R1": "P27986",
+        "PIK3R2": "O00459", "AKT1": "P31749",    "AKT2": "P31751",
+        "AKT3": "Q9Y243",   "TSC1": "Q92574",    "TSC2": "P49815",
+        "RHEB": "Q15382",   "STK11": "Q15831",   "PRKAA1": "Q13131",
+        # Transcription factors
+        "MYCN": "P04198",   "MYCL": "P12524",    "MAX": "P61244",
+        "JUN": "P05412",    "FOS": "P01100",     "FOSL1": "P15407",
+        "ATF1": "P18846",   "CREB1": "P16220",   "NFE2L2": "Q16236",
+        "KEAP1": "Q14145",  "YAP1": "P46937",    "WWTR1": "Q9GZV5",
+        # Cell cycle
+        "CCND1": "P24385",  "CCND2": "P30279",   "CCND3": "P30281",
+        "CCNE1": "P24864",  "CDK4": "P11802",    "CDK6": "Q00534",
+        "CDK2": "P24941",   "CDKN1A": "P38936",  "CDKN1B": "P46527",
+        "CDKN2B": "P42772",
+        # Apoptosis
+        "BCL2": "P10415",   "BCL2L1": "Q07817",  "MCL1": "Q07820",
+        "BAX": "Q07812",    "BAD": "Q92934",     "BID": "P55957",
+        "CASP3": "P42574",  "CASP8": "Q14790",   "CASP9": "P55211",
+        "BIRC5": "O15392",  "MDM2": "Q00987",    "MDM4": "O15151",
+        # Chromatin / epigenetic
+        "EZH2": "Q15910",   "EZH1": "Q92800",    "KDM5C": "P41229",
+        "KDM6A": "O15550",  "ARID1A": "O14497",  "ARID2": "Q68CP9",
+        "SMARCA4": "P51532","SMARCB1": "Q12824",  "SMARCC1": "Q92922",
+        "CREBBP": "Q92793", "EP300": "Q09472",   "KMT2A": "Q03164",
+        "KMT2C": "Q8NEZ4",  "KMT2D": "O14686",   "KMT2B": "Q9UMN6",
+        "SETD2": "Q9BYW2",  "ASXL1": "Q8IXJ9",  "ASXL2": "Q76L83",
+        "DNMT1": "P26358",  "TET2": "Q6N021",    "IDH3A": "P50213",
+        # Splicing / RNA biology
+        "SF3B1": "O75533",  "U2AF1": "Q01081",   "SRSF2": "Q01130",
+        "RBM10": "P98175",  "HNRNPK": "P61978",
+        # DDR / DNA repair
+        "ATM": "Q13315",    "ATR": "Q13535",     "CHEK1": "O14757",
+        "CHEK2": "O96017",  "PALB2": "Q86YC2",   "RAD51": "Q06609",
+        "RAD51C": "O43502", "MLH3": "Q9UHC1",    "MSH2": "P43246",
+        "MSH6": "P52701",   "PMS2": "P54278",    "POLE": "Q07864",
+        "BRIP1": "Q9BX63",  "FANCD2": "O15360",
+        # Haematological malignancy
+        "RUNX1": "Q01196",  "CBFB": "Q13951",    "PML": "P29590",
+        "RARA": "P10276",   "NPM1": "P06748",    "CEBPA": "P49715",
+        "TET2": "Q6N021",   "WT1": "P19544",     "GATA1": "P15976",
+        "GATA2": "P23769",  "ETV6": "P41212",    "ERG": "P11308",
+        "EVI1": "Q03112",
+        # Immune / immunotherapy
+        "CD274": "Q9NZQ7",  "PDCD1LG2": "Q9BQ51","PDCD1": "Q15116",
+        "CTLA4": "P16410",  "LAG3": "P18627",    "HAVCR2": "Q8TDQ0",
+        "TMB": None,  # tumour mutational burden — no single gene
+        # Wnt
+        "CTNNB1": "P35222", "AXIN1": "O15169",   "AXIN2": "O15270",
+        "RNF43": "Q68DV7",  "ZNRF3": "Q9ULT6",
     }
-    return _MAP.get(gene.upper())
+    result = _MAP.get(gene.upper())
+    if result is not None:
+        return result
+
+    # Live fallback: query UniProt REST API for genes not in the static map
+    try:
+        import urllib.request
+        import json
+        url = (
+            f"https://rest.uniprot.org/uniprotkb/search"
+            f"?query=gene_exact:{gene}+AND+organism_id:9606+AND+reviewed:true"
+            f"&fields=accession&format=json&size=1"
+        )
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.loads(resp.read())
+            hits = data.get("results") or []
+            if hits:
+                acc = hits[0].get("primaryAccession")
+                if acc:
+                    logger.info("[gene_uniprot] Live lookup %s → %s", gene, acc)
+                    return acc
+    except Exception as exc:
+        logger.debug("[gene_uniprot] Live lookup failed for %s: %s", gene, exc)
+
+    return None
 
 
 def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
@@ -412,7 +516,16 @@ def _query_repurposing_candidates(
     cancer_type: str | None = None,
     submission_id: str = "unknown",
 ) -> tuple[list[dict], str | None]:
-    """Query multiple evidence sources for repurposing candidates.
+    """Query multiple evidence sources for FDA-approved repurposing candidates.
+
+    Sources queried (in priority order):
+      1. OpenTargets — clinical drug candidates with approval status
+      2. DGIdb       — drug-gene interaction database (FDA-approved filter)
+      3. CIViC       — clinical interpretations of variants in cancer
+      4. OncoKB      — oncology knowledge base treatments
+
+    All candidates are filtered to FDA-approved (max_phase == 4 / is_approved).
+    Non-approved drugs are excluded from the final output to ensure clinical safety.
 
     When protein_variant is provided and AlphaFold Server is reachable, the
     mutated protein structure is folded first and passed to DiffDock for
@@ -423,26 +536,43 @@ def _query_repurposing_candidates(
     from services.opentargets import get_target_id, get_drugs_for_target
     from services.chembl import get_molecule, search_molecule_by_name
     from services.civic import get_civic_evidence
+    from services.dgidb import get_interactions as get_dgidb_interactions
     from ai.diffdock.score import score_binding
 
     async def _fetch() -> tuple[list[dict], str | None]:
+        # ── Source 1: OpenTargets (expanded to 50 drugs) ─────────────────────
         ensg_id = await get_target_id(gene)
-        drugs = await get_drugs_for_target(ensg_id, max_drugs=20) if ensg_id else []
+        ot_drugs = await get_drugs_for_target(ensg_id, max_drugs=50) if ensg_id else []
         if not ensg_id:
             logger.warning("[opentargets] No Ensembl ID for gene %s", gene)
         else:
-            logger.info("[opentargets] %d drugs found for %s", len(drugs), gene)
+            logger.info("[opentargets] %d drugs found for %s", len(ot_drugs), gene)
 
+        # ── Source 2: DGIdb (FDA-approved drug-gene interactions) ─────────────
+        dgidb_interactions = await get_dgidb_interactions(gene, approved_only=True)
+        logger.info("[dgidb] %d approved interactions for %s", len(dgidb_interactions), gene)
+
+        # ── Source 3: CIViC / OncoKB supplemental names ──────────────────────
         variant_name = _hgvs_to_short(hgvs) if hgvs else None
         civic_evidence = await get_civic_evidence(gene, variant_name) if variant_name else None
         oncokb_annotation = _query_oncokb(gene, hgvs)
 
         candidate_bank: dict[str, dict] = {}
-        for drug in drugs:
+
+        # Add OpenTargets drugs
+        for drug in ot_drugs:
             enriched = {
                 **drug,
                 "evidence_sources": ["OpenTargets"],
                 "matched_terms": [drug.get("drug_name")] if drug.get("drug_name") else [],
+            }
+            _merge_candidate(candidate_bank, enriched)
+
+        # Add DGIdb interactions (already filtered to approved)
+        for interaction in dgidb_interactions:
+            enriched = {
+                **interaction,
+                "evidence_sources": interaction.get("evidence_sources") or ["DGIdb"],
             }
             _merge_candidate(candidate_bank, enriched)
 
@@ -467,13 +597,18 @@ def _query_repurposing_candidates(
                 gene,
             )
 
-        for name in supplemental_drug_names[:20]:
+        for name in supplemental_drug_names[:25]:
             matches = await search_molecule_by_name(name, limit=3)
             for match in matches:
                 chembl_id = match.get("chembl_id")
                 if not chembl_id:
                     continue
                 molecule = await get_molecule(chembl_id)
+                # Only add if FDA-approved (max_phase == 4)
+                phase = (molecule or {}).get("max_phase", match.get("max_phase", 0))
+                is_approved_flag = (molecule or {}).get("is_approved", False) or (phase == 4)
+                if not is_approved_flag:
+                    continue
                 _merge_candidate(
                     candidate_bank,
                     {
@@ -481,8 +616,8 @@ def _query_repurposing_candidates(
                         "chembl_id": chembl_id,
                         "mechanism": "Evidence-supported repurposing candidate",
                         "action_type": None,
-                        "max_phase": (molecule or {}).get("max_phase", match.get("max_phase")),
-                        "is_approved": (molecule or {}).get("is_approved", False),
+                        "max_phase": phase,
+                        "is_approved": is_approved_flag,
                         "opentargets_score": 0.0,
                         "smiles": (molecule or {}).get("smiles"),
                         "ro5_pass": (molecule or {}).get("ro5_pass"),
@@ -502,11 +637,6 @@ def _query_repurposing_candidates(
                 )
 
         # ── AlphaFold: sequence → mutated structure ──────────────────────────
-        # 1. get canonical protein sequence by gene name (UniProt REST search)
-        # 2. apply this patient's specific mutation
-        # 3. submit to AlphaFold Server, poll, download .cif → MinIO
-        # 4. convert .cif → .pdb for DiffDock
-        # All steps fall back gracefully; DiffDock uses EBI wild-type if any fail.
         pre_folded_pdb_key = None
         uniprot_id = _gene_to_uniprot(gene)
         if protein_variant:
@@ -538,17 +668,29 @@ def _query_repurposing_candidates(
 
         merged_drugs = list(candidate_bank.values())
 
-        # Enrich with ChEMBL SMILES + compute DiffDock binding scores
+        # ── Enrich with ChEMBL SMILES + confirm FDA approval ─────────────────
+        fda_approved_candidates = []
         for drug in merged_drugs:
             chembl_id = drug.get("chembl_id")
-            if not chembl_id:
+            if chembl_id:
+                mol = await get_molecule(chembl_id)
+                if mol:
+                    drug["smiles"] = mol.get("smiles")
+                    drug["max_phase"] = mol.get("max_phase") or drug.get("max_phase", 0)
+                    drug["is_approved"] = mol.get("is_approved", False)
+                    drug["ro5_pass"] = mol.get("ro5_pass", True)
+
+            # ── FDA-APPROVED FILTER: only include max_phase == 4 or is_approved ─
+            is_approved = drug.get("is_approved", False)
+            max_phase = drug.get("max_phase", 0)
+            if not is_approved and max_phase != 4:
+                logger.debug(
+                    "[repurpose] Excluding non-approved candidate: %s (phase=%s)",
+                    drug.get("drug_name"),
+                    max_phase,
+                )
                 continue
-            mol = await get_molecule(chembl_id)
-            if mol:
-                drug["smiles"] = mol.get("smiles")
-                drug["max_phase"] = mol.get("max_phase") or drug.get("max_phase", 0)
-                drug["is_approved"] = mol.get("is_approved", False)
-                drug["ro5_pass"] = mol.get("ro5_pass", True)
+
             if drug.get("smiles") and uniprot_id:
                 drug["binding_score"] = score_binding(
                     uniprot_id, drug["smiles"], chembl_id,
@@ -560,7 +702,15 @@ def _query_repurposing_candidates(
                 if source_note not in mechanism:
                     drug["mechanism"] = f"{mechanism} [{source_note}]".strip()
 
-        return merged_drugs, pre_folded_pdb_key
+            fda_approved_candidates.append(drug)
+
+        logger.info(
+            "[repurpose] %d FDA-approved candidates for %s (from pool of %d)",
+            len(fda_approved_candidates),
+            gene,
+            len(merged_drugs),
+        )
+        return fda_approved_candidates, pre_folded_pdb_key
 
     drugs, pdb_path = asyncio.run(_fetch())
     return drugs, pdb_path

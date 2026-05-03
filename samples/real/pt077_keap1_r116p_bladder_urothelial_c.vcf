@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:blca_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-GC-A3WC
+##sample_id=TCGA-GC-A3WC-01
+##cancer_type=Bladder Urothelial Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=blca_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+19	10610363	.	C	G	99	PASS	GENE=KEAP1;HGVS=R116P;MUTATION_TYPE=Missense_Mutation

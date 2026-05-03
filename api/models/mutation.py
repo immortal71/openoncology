@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, ForeignKey, Float, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -61,6 +61,6 @@ class Mutation(Base):
     # AlphaFold Server — path in MinIO after mutation-specific folding
     alphafold_structure_path: Mapped[str] = mapped_column(String(512), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     submission: Mapped["Submission"] = relationship("Submission", back_populates="mutations")

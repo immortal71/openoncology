@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: luad_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-53-7813-01
+Cancer Type: Lung Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: FGFR3
+  Protein Change: S779R
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr4:1808905
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

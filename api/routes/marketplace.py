@@ -1,7 +1,7 @@
 """
 Marketplace route — pharma company listings, drug ordering, and competitive bidding.
 """
-from datetime import datetime
+from datetime import datetime, UTC
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -781,7 +781,7 @@ async def accept_bid(
 
     drug_request.is_open = False
     drug_request.accepted_bid_id = bid_id
-    drug_request.closed_at = datetime.utcnow()
+    drug_request.closed_at = datetime.now(UTC).replace(tzinfo=None)
     await db.commit()
 
     return {

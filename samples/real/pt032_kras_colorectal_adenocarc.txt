@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: coadread_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-AA-3521-01
+Cancer Type: Colorectal Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: KRAS
+  Protein Change: Q61L
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr12:25380276
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=coadread_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

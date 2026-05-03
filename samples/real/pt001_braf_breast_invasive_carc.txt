@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: brca_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-AN-A0FN-01
+Cancer Type: Breast Invasive Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: BRAF
+  Protein Change: K698R
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr7:140439646
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=brca_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

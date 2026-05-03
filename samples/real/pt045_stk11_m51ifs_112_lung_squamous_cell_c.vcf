@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:lusc_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-21-5787
+##sample_id=TCGA-21-5787-01
+##cancer_type=Lung Squamous Cell Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+19	1207064	.	-	C	99	PASS	GENE=STK11;HGVS=M51Ifs*112;MUTATION_TYPE=Frame_Shift_Ins

@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:ov_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-13-0800
+##sample_id=TCGA-13-0800-01
+##cancer_type=Ovarian Serous Cystadenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=ov_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+3	178936091	.	G	A	99	PASS	GENE=PIK3CA;HGVS=E545K;MUTATION_TYPE=Missense_Mutation

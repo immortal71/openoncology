@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:ov_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-04-1342
+##sample_id=TCGA-04-1342-01
+##cancer_type=Ovarian Serous Cystadenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=ov_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	7577075	.	-	T	99	PASS	GENE=TP53;HGVS=N288Kfs*18;MUTATION_TYPE=Frame_Shift_Ins

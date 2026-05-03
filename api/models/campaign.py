@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, ForeignKey, Float, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,7 +30,7 @@ class Campaign(Base):
     # Stripe Connect account ID for this patient's escrow
     stripe_account_id: Mapped[str] = mapped_column(String(128), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="campaigns")
     result: Mapped["Result"] = relationship("Result", back_populates="campaign")

@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import logging
 from typing import Optional
-import httpx
+
+from utils.http import fetch_with_retry
 
 logger = logging.getLogger(__name__)
 _GQL = "https://api.platform.opentargets.org/api/v4/graphql"
@@ -23,10 +24,13 @@ _TIMEOUT = 20
 
 
 async def _gql(query: str, variables: dict) -> dict:
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        resp = await client.post(_GQL, json={"query": query, "variables": variables})
-        resp.raise_for_status()
-        return resp.json().get("data", {})
+  resp = await fetch_with_retry(
+    _GQL,
+    method="POST",
+    timeout=_TIMEOUT,
+    json={"query": query, "variables": variables},
+  )
+  return resp.json().get("data", {})
 
 
 # ── Gene symbol → Ensembl ID ──────────────────────────────────────────────────

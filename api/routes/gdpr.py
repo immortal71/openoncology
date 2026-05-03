@@ -122,7 +122,7 @@ async def request_deletion(
         return {"deletion_request_id": str(existing.id), "status": "pending", "message": "Deletion already queued"}
 
     req = DeletionRequest(
-        id=uuid.uuid4(),
+        id=str(uuid.uuid4()),
         patient_id=patient.id,
         keycloak_id=keycloak_id,
         requested_at=datetime.now(UTC),

@@ -3,10 +3,17 @@
 ##reference=GRCh38
 ##INFO=<ID=GENE,Number=1,Type=String,Description="Gene symbol">
 ##INFO=<ID=HGVS_C,Number=1,Type=String,Description="Coding HGVS notation">
+##INFO=<ID=HGVS_P,Number=1,Type=String,Description="Protein HGVS notation">
 ##INFO=<ID=SO,Number=1,Type=String,Description="Sequence ontology term">
 ##INFO=<ID=CLINVAR_ID,Number=1,Type=String,Description="ClinVar identifier">
 ##INFO=<ID=COSMIC_ID,Number=1,Type=String,Description="COSMIC identifier">
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-12	25398284	.	C	A	99	PASS	GENE=KRAS;HGVS_C=c.35G>T;SO=missense_variant;CLINVAR_ID=VCV000012345;COSMIC_ID=COSM521
-17	7673803	.	G	A	92	PASS	GENE=TP53;HGVS_C=c.524G>A;SO=missense_variant;CLINVAR_ID=VCV000009999;COSMIC_ID=COSM10660
-7	55249071	.	C	T	88	PASS	GENE=EGFR;HGVS_C=c.2573T>G;SO=missense_variant;CLINVAR_ID=VCV000001111;COSMIC_ID=COSM6240
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths for ref and alt alleles">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Variant allele frequency">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TUMOUR
+12	25398284	.	C	A	99	PASS	GENE=KRAS;HGVS_C=c.35G>T;HGVS_P=p.Gly12Cys;SO=missense_variant;CLINVAR_ID=VCV000012345;COSMIC_ID=COSM521	GT:AD:DP:AF	0/1:142,58:200:0.29
+17	7673803	.	G	A	92	PASS	GENE=TP53;HGVS_C=c.524G>A;HGVS_P=p.Arg175His;SO=missense_variant;CLINVAR_ID=VCV000009999;COSMIC_ID=COSM10660	GT:AD:DP:AF	0/1:108,92:200:0.46
+7	55249071	.	C	T	88	PASS	GENE=EGFR;HGVS_C=c.2573T>G;HGVS_P=p.Leu858Arg;SO=missense_variant;CLINVAR_ID=VCV000001111;COSMIC_ID=COSM6240	GT:AD:DP:AF	0/1:127,73:200:0.365
+7	55242481	.	GAATTAAGAGAAGCAACATCTC	G	85	PASS	GENE=EGFR;HGVS_C=c.2236_2253del;HGVS_P=p.Glu746_Ala750del;SO=inframe_deletion;CLINVAR_ID=VCV000016609;COSMIC_ID=COSM6223	GT:AD:DP:AF	0/1:138,62:200:0.31
+12	25398284	.	C	T	72	FAIL	GENE=KRAS;HGVS_C=c.34G>T;HGVS_P=p.Gly12Cys;SO=missense_variant;CLINVAR_ID=VCV000012345;COSMIC_ID=COSM521	GT:AD:DP:AF	0/1:188,12:200:0.06

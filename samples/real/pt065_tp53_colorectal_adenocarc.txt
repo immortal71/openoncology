@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: coadread_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-A6-3807-01
+Cancer Type: Colorectal Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: Y236*
+  Mutation Type: Nonsense_Mutation
+  Genomic Location: chr17:7577573
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=coadread_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

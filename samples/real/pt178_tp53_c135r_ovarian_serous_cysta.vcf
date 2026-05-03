@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:ov_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-04-1337
+##sample_id=TCGA-04-1337-01
+##cancer_type=Ovarian Serous Cystadenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=ov_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	7578527	.	A	G	99	PASS	GENE=TP53;HGVS=C135R;MUTATION_TYPE=Missense_Mutation

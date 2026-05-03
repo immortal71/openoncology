@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -36,7 +36,7 @@ class Submission(Base):
     pipeline_job_id: Mapped[str] = mapped_column(String(128), nullable=True)
     ai_job_id: Mapped[str] = mapped_column(String(128), nullable=True)
 
-    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="submissions")

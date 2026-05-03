@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: lusc_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-37-3789-01
+Cancer Type: Lung Squamous Cell Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: EGFR
+  Protein Change: G339*
+  Mutation Type: Nonsense_Mutation
+  Genomic Location: chr7:55224234
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

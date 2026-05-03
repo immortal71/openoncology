@@ -1,0 +1,139 @@
+{
+  "run_at": "2026-05-03T06:20:13.401427+00:00",
+  "profile": "industry_strict_v1",
+  "primary_metric": "standard_precision_at_3",
+  "metrics": {
+    "standard_precision_at_3": 0.5366,
+    "standard_precision_at_3_ci95": [
+      0.5074,
+      0.5658
+    ],
+    "structural_ceiling": 0.6543,
+    "multi_drug_fraction": 0.6695,
+    "l3_l4_case_count": 72,
+    "ceiling_normalised_p3": 0.82,
+    "ceiling_normalised_p3_ci95": [
+      0.7754,
+      0.8647
+    ],
+    "hit_at_3": 0.9316,
+    "hit_at_3_ci95": [
+      0.9003,
+      0.9536
+    ],
+    "mrr": 0.9031,
+    "ndcg_at_3": 0.8931,
+    "false_positives": 0,
+    "false_positive_rate": 0.0,
+    "sensitivity_case_count": 351,
+    "specificity_case_count": 37
+  },
+  "leakage_diagnostics": {
+    "dev_cases": 81,
+    "external_pool_cases": 388,
+    "external_selected_cases": 388,
+    "exact_case_overlap_count": 0,
+    "gene_variant_overlap_count": 33,
+    "gene_variant_overlap_rate": 0.1358,
+    "exact_overlap_pass": true
+  },
+  "readiness_gates": {
+    "definitions": {
+      "min_external_sensitivity_cases": 80,
+      "min_structural_ceiling": 0.62,
+      "min_multi_drug_fraction": 0.6,
+      "min_l3_l4_case_count": 20,
+      "min_ceiling_normalised_p3_ci95_lower": 0.8,
+      "max_gene_variant_overlap_rate": 0.25,
+      "max_false_positive_rate": 0.05,
+      "min_ceiling_normalised_p3": 0.85,
+      "min_hit_at_3": 0.8,
+      "min_raw_standard_p3_floor": 0.45
+    },
+    "results": {
+      "external_sample_size_pass": true,
+      "structural_ceiling_pass": true,
+      "multi_drug_fraction_pass": true,
+      "l3_l4_density_pass": true,
+      "ceiling_normalised_p3_ci95_lower_pass": false,
+      "gene_variant_overlap_pass": true,
+      "false_positive_rate_pass": true,
+      "ceiling_normalised_p3_pass": false,
+      "hit_at_3_pass": true,
+      "raw_p3_floor_pass": true,
+      "no_exact_leakage_pass": true
+    },
+    "industry_grade_ready": false
+  },
+  "stratified": {
+    "by_difficulty": {
+      "CONFLICTING_EVIDENCE": {
+        "n": 1,
+        "standard_precision_at_3": 0.3333
+      },
+      "L1_L2": {
+        "n": 262,
+        "standard_precision_at_3": 0.5598
+      },
+      "L3_L4": {
+        "n": 72,
+        "standard_precision_at_3": 0.4769
+      },
+      "RARE_VARIANT": {
+        "n": 1,
+        "standard_precision_at_3": 0.3333
+      },
+      "RESISTANCE_MUTATION": {
+        "n": 15,
+        "standard_precision_at_3": 0.4444
+      }
+    },
+    "by_cancer_type_top10": {
+      "Non-Small Cell Lung Cancer": {
+        "n": 41,
+        "standard_precision_at_3": 0.5528
+      },
+      "Acute Myeloid Leukemia": {
+        "n": 30,
+        "standard_precision_at_3": 0.3778
+      },
+      "Breast Cancer": {
+        "n": 23,
+        "standard_precision_at_3": 0.5072
+      },
+      "Melanoma": {
+        "n": 15,
+        "standard_precision_at_3": 0.4889
+      },
+      "Gastric Cancer": {
+        "n": 13,
+        "standard_precision_at_3": 0.5897
+      },
+      "Colorectal Cancer": {
+        "n": 12,
+        "standard_precision_at_3": 0.4444
+      },
+      "Endometrial Cancer": {
+        "n": 11,
+        "standard_precision_at_3": 0.5152
+      },
+      "Diffuse Large B-Cell Lymphoma": {
+        "n": 9,
+        "standard_precision_at_3": 0.5185
+      },
+      "Follicular Lymphoma": {
+        "n": 9,
+        "standard_precision_at_3": 0.3333
+      },
+      "Gastrointestinal Stromal Tumor": {
+        "n": 9,
+        "standard_precision_at_3": 0.5926
+      }
+    }
+  },
+  "notes": [
+    "No synthetic weighting/composite score is used.",
+    "No random enrichment sampling is used by default.",
+    "Industry-grade claim requires all readiness gates to pass."
+  ]
+}

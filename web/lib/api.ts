@@ -87,6 +87,15 @@ export const api = {
       target_gene: string | null;
       summary: string | null;
       plain_language_summary: string | null;
+      patient_summary: {
+        explanation?: string;
+        top_drugs?: {
+          drug_name?: string;
+          approval_status?: string;
+          patient_note?: string;
+        }[];
+        what_next?: string[];
+      } | null;
       cbioportal_data: { study_id: string; cancer_type: string; mutation_count: number }[] | null;
       cosmic_sample_count: string | null;
       oncologist_reviewed: boolean;
@@ -129,6 +138,27 @@ export const api = {
         matched_terms: string[];
       }[];
     }>(`/api/repurposing/${resultId}`),
+
+  /** Get live ClinicalTrials.gov matches for a result */
+  getClinicalTrials: (resultId: string) =>
+    request<{
+      result_id: string;
+      cancer_type: string;
+      target_gene: string | null;
+      message?: string;
+      trials: {
+        trial_id: string;
+        title: string;
+        phase: string;
+        status: string;
+        cancer_type: string;
+        drugs: string[];
+        basket_trial: boolean;
+        expanded_access_hint: boolean;
+        trial_url: string | null;
+        source: string;
+      }[];
+    }>(`/api/repurposing/${resultId}/trials`),
 
   /** Generate custom discovery brief for a result */
   getDiscoveryBrief: (resultId: string) =>

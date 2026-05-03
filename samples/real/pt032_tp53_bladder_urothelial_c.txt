@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: blca_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-DK-A1A6-01
+Cancer Type: Bladder Urothelial Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: C124Wfs*25
+  Mutation Type: Frame_Shift_Ins
+  Genomic Location: chr17:7579315
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=blca_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

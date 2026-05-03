@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: hnsc_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-BA-5151-01
+Cancer Type: Head and Neck Squamous Cell Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: V143M
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr17:7578503
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=hnsc_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

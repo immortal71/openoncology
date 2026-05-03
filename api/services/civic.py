@@ -5,7 +5,8 @@ Public API — no auth required.
 """
 import logging
 from typing import Optional
-import httpx
+
+from utils.http import fetch_with_retry
 
 logger = logging.getLogger(__name__)
 _GRAPHQL = "https://civicdb.org/api/graphql"
@@ -41,18 +42,18 @@ async def get_civic_evidence(gene: str, variant: str) -> Optional[list[dict]]:
     Returns None on error or if no variant found.
     """
     try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.post(
-                _GRAPHQL,
-                json={"query": _VARIANT_QUERY, "variables": {"gene": gene, "variant": variant}},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            nodes = data.get("data", {}).get("variants", {}).get("nodes", [])
-            if not nodes:
-                return None
-            evidence = nodes[0].get("evidenceItems", {}).get("nodes", [])
-            return evidence if evidence else None
+      resp = await fetch_with_retry(
+        _GRAPHQL,
+        method="POST",
+        timeout=15,
+        json={"query": _VARIANT_QUERY, "variables": {"gene": gene, "variant": variant}},
+      )
+      data = resp.json()
+      nodes = data.get("data", {}).get("variants", {}).get("nodes", [])
+      if not nodes:
+        return None
+      evidence = nodes[0].get("evidenceItems", {}).get("nodes", [])
+      return evidence if evidence else None
     except Exception as exc:
         logger.warning("CIViC lookup failed for %s %s: %s", gene, variant, exc)
         return None

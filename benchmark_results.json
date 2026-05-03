@@ -1,0 +1,51 @@
+{
+  "run_mode": "live API",
+  "cross_validation": {
+    "baseline": {
+      "fold_scores": [
+        1.0,
+        0.8889,
+        0.8472,
+        0.7917,
+        0.7917
+      ],
+      "mean": 0.8639,
+      "std": 0.0773,
+      "n_cases": 60
+    },
+    "tuned": {
+      "fold_scores": [
+        1.0,
+        0.8889,
+        0.8472,
+        0.7917,
+        0.7917
+      ],
+      "mean": 0.8639,
+      "std": 0.0773,
+      "n_cases": 60
+    },
+    "holdout_80_20_tuned": {
+      "train_n": 48,
+      "val_n": 12,
+      "train_p3": 0.8299,
+      "val_p3": 1.0
+    }
+  },
+  "total_cases": 623,
+  "sensitivity_cases": 60,
+  "sensitivity_with_data": 55,
+  "sensitivity_missing_data": 5,
+  "precision_at_3": 0.9424,
+  "precision_at_3_note": "normalised denominator = min(3, |known_drugs|)",
+  "precision_at_3_standard": 0.5758,
+  "precision_at_3_standard_note": "denominator = 3 (comparable to published benchmarks)",
+  "hit_at_3": 0.9818,
+  "mrr": 0.9273,
+  "level_1_precision_at_3": 0.9701,
+  "level_1_hit_at_3": 1.0,
+  "specificity_cases": 0,
+  "false_positive_count": 0,
+  "false_positive_rate": 0.0,
+  "fp_failures": []
+}

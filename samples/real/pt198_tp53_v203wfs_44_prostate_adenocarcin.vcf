@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:prad_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-EJ-5525
+##sample_id=TCGA-EJ-5525-01
+##cancer_type=Prostate Adenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=prad_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	7578242	.	C	-	99	PASS	GENE=TP53;HGVS=V203Wfs*44;MUTATION_TYPE=Frame_Shift_Del

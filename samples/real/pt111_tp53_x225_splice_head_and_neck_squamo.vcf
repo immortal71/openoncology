@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:hnsc_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-BA-4078
+##sample_id=TCGA-BA-4078-01
+##cancer_type=Head and Neck Squamous Cell Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=hnsc_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	7577610	.	T	C	99	PASS	GENE=TP53;HGVS=X225_splice;MUTATION_TYPE=Splice_Site

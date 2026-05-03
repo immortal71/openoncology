@@ -1,19 +1,50 @@
 """LLM-based plain-language result explainer.
 
-Converts technical mutation analysis output into patient-friendly plain English
-using OpenAI GPT-4o (or falls back to a deterministic template when no API key
-is configured, so the pipeline never blocks).
+DEPRECATION NOTICE — Patient Summary Path
+------------------------------------------
+``generate_plain_language_summary()`` is DEPRECATED for patient-facing output.
+
+Use ``generate_patient_summary()`` from ``api.services.patient_summary``
+instead.  That module is:
+  - Template-only (zero hallucination risk)
+  - Written at 6th-to-8th-grade reading level
+  - Structured sections with calm, empathetic language
+  - Explicitly gates de-novo/experimental content away from patients
+  - Consistent disclaimers on every render
+
+The LLM path in this module will be removed in a future version.  It is
+retained ONLY as an internal fallback for the ``plain_language_summary``
+field in the legacy API response envelope, and ONLY when an OpenAI key is
+configured AND the caller explicitly opts in.
+
+For the oncologist / technical report use::
+
+    from api.services.oncologist_report import generate_oncologist_report
+
+----------------------------------------------------------------------
+
+This module provides:
+
+1. ``generate_plain_language_summary()`` — [DEPRECATED] short narrative
+   paragraph using GPT-4o when available, falling back to a template.
+   Kept for backward compatibility with the API response envelope.
+
+2. ``generate_research_report()`` — [DEPRECATED] legacy audit report.
+   Prefer ``generate_oncologist_report()`` from oncologist_report.py
+   which provides a fully structured professional report.
 
 Configuration
 -------------
 Set OPENAI_API_KEY in .env to enable AI-generated summaries.
-Leave it empty to use the built-in template-based fallback (no cost, no AI).
+Leave it empty (default) to use the built-in template-based fallback.
 
-The prompt is specifically designed to:
-  - Use plain language a non-scientist can understand
-  - Avoid instilling panic or false hope
-  - Always recommend consulting a licensed oncologist
-  - Stay compliant with medical device communication guidelines
+Safety notes
+------------
+- ``max_tokens`` is capped at 400 for the patient path.
+- Temperature is set to 0.3 to minimise hallucination.
+- Even so, LLM output for patients carries hallucination risk.
+  Prefer the template path (patient_summary.py) for all patient output.
+- All outputs must be reviewed by a qualified oncologist before acting.
 """
 import logging
 from typing import Optional
@@ -46,27 +77,29 @@ def _build_prompt(
         else "No closely matching existing drug was found in the repurposing analysis."
     )
 
-    return f"""You are an AI assistant helping a cancer patient understand their genomic analysis results.
-Write a clear, compassionate explanation in plain language that a person without a medical background can understand.
-Do NOT use technical jargon without explaining it.
-Always end by strongly recommending the patient discusses these results with a licensed oncologist before making any medical decision.
+    return f"""You are an AI assistant helping a cancer patient understand their genomic test results.
+Write a SHORT, simple explanation (maximum 250 words total).
+Use plain language — no jargon. Write at an 8th-grade reading level.
+Do NOT predict whether a treatment will work. Do NOT say a drug "will" help.
+Do NOT discuss experimental or custom molecules — only approved or late-stage drugs.
+Always end with this exact sentence on its own line:
+"This report is not medical advice. Please discuss these results with your oncologist."
 
-Here are the analysis results:
-
-Cancer type submitted: {cancer_type}
+Analysis data:
+Cancer type: {cancer_type}
 Targetable mutation found: {"Yes" if has_target else "No"}
-Primary gene of interest: {gene or "None identified"}
-Mutations detected:
+Gene: {gene or "None identified"}
+Mutations:
 {mutation_lines}
 {cosmic_note}
 {drug_note}
 
-Write a 3–5 paragraph explanation covering:
-1. What the test found (in plain language)
-2. What "targetable mutation" means and why it matters
-3. The drug repurposing finding (what the drug does, what it might mean)
-4. What the patient should do next
-5. A reassuring closing that emphasises this is a tool to help, not a final diagnosis
+Write THREE short sections only:
+Section 1 (2-3 sentences): What we found — explain the mutation in plain words.
+Section 2 (2-3 sentences): What this might mean — mention the drug only as something the doctor may discuss.
+Section 3 (1-2 sentences): What to do next — see oncologist, do not self-medicate.
+
+End with the required disclaimer sentence.
 """
 
 
@@ -78,11 +111,26 @@ async def generate_plain_language_summary(
     top_drug: Optional[str] = None,
     cosmic_count: int = 0,
 ) -> str:
-    """Generate a patient-friendly plain-language summary of the analysis result.
+    """[DEPRECATED] Generate a plain-language summary via LLM or template fallback.
+
+    .. deprecated::
+        Use ``generate_patient_summary()`` from ``api.services.patient_summary``
+        for all patient-facing output.  That module is template-only (no LLM),
+        uses simpler language, and contains no hallucination risk.
+
+        This function is retained only for the legacy ``plain_language_summary``
+        field in the API response envelope.  It will be removed in a future version.
 
     Tries OpenAI GPT-4o first; falls back to a template string if unavailable.
     Always returns a non-empty string (never raises).
     """
+    import warnings
+    warnings.warn(
+        "generate_plain_language_summary() is deprecated. "
+        "Use generate_patient_summary() from api.services.patient_summary instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     from config import settings
 
     openai_key = getattr(settings, "openai_api_key", "")
@@ -122,8 +170,8 @@ async def _openai_summary(
             json={
                 "model": "gpt-4o",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 600,
-                "temperature": 0.4,
+                "max_tokens": 400,   # keep output short and simple
+                "temperature": 0.3,  # lower temp = less hallucination risk
             },
         )
         resp.raise_for_status()
@@ -154,24 +202,169 @@ def _template_summary(
             else ""
         )
         return (
-            f"Your genomic analysis found a specific change (mutation) in a gene called {gene}. "
-            f"This is known as a 'targetable mutation', which means there may be medicines or "
-            f"treatments designed to specifically address this type of change in cancer cells.\n\n"
+            f"Your DNA test found a change in a gene called {gene}. "
+            f"This is called a 'targetable mutation' — it means there may be medicines "
+            f"that could target cancer cells with this specific change.\n\n"
             f"{cosmic_sentence}\n\n"
             f"{drug_sentence}\n\n"
-            f"While this result is promising, it is very important that you share these findings "
-            f"with a licensed oncologist (cancer specialist doctor) before making any decisions "
-            f"about your treatment. This analysis is a tool to help guide conversations — it is "
-            f"not a medical diagnosis or a prescription."
+            f"This report is not medical advice. "
+            f"Please discuss these results with your oncologist."
         ).strip()
     else:
         return (
-            f"Your genomic analysis for {cancer_type} did not find a mutation that current AI tools "
-            f"can directly match to a targeted therapy. This does not mean treatment options are "
-            f"unavailable — it means standard treatment pathways (general oncology) remain the "
-            f"recommended next step.\n\n"
-            f"Cancer treatment is highly individual. A licensed oncologist will consider your full "
-            f"medical history, imaging, and pathology results alongside this genomic data to "
-            f"provide you with a personalised treatment plan.\n\n"
-            f"Please share these results with your doctor as soon as possible."
+            f"Your DNA test did not find a mutation that matches a targeted therapy "
+            f"in our research database. This does not mean there are no treatment options — "
+            f"your oncologist will consider many factors beyond this one test.\n\n"
+            f"Please share these results with your doctor as soon as possible.\n\n"
+            f"This report is not medical advice. "
+            f"Please discuss these results with your oncologist."
         )
+
+
+def generate_research_report(
+    ranked_candidates: list[dict],
+    mutation_summary: list[dict],
+    cancer_type: str,
+    withdrawn_warnings: Optional[list[dict]] = None,
+) -> dict:
+    """[DEPRECATED] Assemble a structured research transparency report.
+
+    .. deprecated::
+        Use ``generate_oncologist_report()`` from ``api.services.oncologist_report``
+        instead.  That function produces a fully structured, ESMO-inspired report
+        with an executive summary, sample QC section, per-drug rationale bullets,
+        ADME/toxicity notes, experimental candidate section with mandatory caveats,
+        and a complete evidence audit trail.
+
+    This legacy function is retained for backward compatibility only.
+    Includes:
+      - Per-drug evidence audit trail (source, raw_score, effective_weight)
+      - Per-drug plain-language ranking rationale
+      - Evidence completeness and confidence level for each candidate
+      - System limitations and withdrawn-drug warnings
+    """
+    Includes:
+      - Per-drug evidence audit trail (source, raw_score, effective_weight)
+      - Per-drug plain-language explanation of ranking rationale
+      - Evidence completeness and confidence level for each candidate
+      - System limitations from `get_system_limitations()`
+      - Withdrawn-drug warnings flagged by `check_withdrawn_status()`
+      - Missing evidence sources per drug
+      - Interpretation guide for the audit trail columns
+
+    This is SEPARATE from the patient-facing `generate_plain_language_summary()`
+    which is not the right place for technical audit data.  This report is
+    intended for oncologists, clinical data scientists, and regulators.
+
+    Returns a JSON-serialisable dict.
+    """
+    from api.ai.ranking import get_system_limitations
+
+    candidate_reports = []
+    for i, c in enumerate(ranked_candidates[:10]):  # top-10 only for report brevity
+        # Build a human-readable rationale for this drug's rank
+        rationale_parts = []
+        oncokb = c.get("oncokb_level")
+        if oncokb and oncokb.startswith("LEVEL_R"):
+            rationale_parts.append(
+                f"⚠️ RESISTANCE: OncoKB designates this drug as {oncokb} for this variant — "
+                "it should not be used; score is hard-capped."
+            )
+        elif oncokb == "LEVEL_1":
+            rationale_parts.append("OncoKB Level 1 evidence: FDA-approved for this variant/tumour type.")
+        elif oncokb == "LEVEL_2":
+            rationale_parts.append("OncoKB Level 2 evidence: standard-of-care or strong clinical data.")
+        elif oncokb in ("LEVEL_3A", "LEVEL_3B"):
+            rationale_parts.append(f"OncoKB {oncokb} evidence: compelling pre-clinical or early clinical data.")
+        elif oncokb == "LEVEL_4":
+            rationale_parts.append("OncoKB Level 4: biological rationale only; no clinical data for this variant.")
+        else:
+            rationale_parts.append("No OncoKB evidence found for this drug-variant pair.")
+
+        binding = c.get("binding_score")
+        if binding is not None:
+            if binding >= 0.7:
+                rationale_parts.append(f"Strong predicted binding affinity (DiffDock score={binding:.2f}).")
+            elif binding >= 0.4:
+                rationale_parts.append(f"Moderate predicted binding affinity (DiffDock score={binding:.2f}).")
+            else:
+                rationale_parts.append(f"Low predicted binding affinity (DiffDock score={binding:.2f}).")
+        else:
+            rationale_parts.append("Binding score absent (DiffDock not run in default demo).")
+
+        missing = c.get("missing_sources", [])
+        if missing:
+            rationale_parts.append(
+                f"Missing evidence from {len(missing)} source(s): {', '.join(missing)}. "
+                "Confidence interval is wider as a result."
+            )
+
+        ec = c.get("evidence_completeness")
+        if ec is not None:
+            rationale_parts.append(
+                f"Evidence completeness: {ec:.0%} of sources provided data for this drug."
+            )
+
+        candidate_reports.append({
+            "rank": i + 1,
+            "drug_name": c.get("drug_name"),
+            "chembl_id": c.get("chembl_id"),
+            "oncokb_level": oncokb,
+            "rank_score": c.get("rank_score"),
+            "rank_score_ci_low": c.get("rank_score_ci_low"),
+            "rank_score_ci_high": c.get("rank_score_ci_high"),
+            "confidence_level": c.get("confidence_level"),
+            "evidence_completeness": ec,
+            "missing_sources": missing,
+            "evidence_audit_trail": c.get("evidence_audit_trail", []),
+            "immunotherapy_context": c.get("immunotherapy_context"),
+            "ranking_rationale": " ".join(rationale_parts),
+            "_injected": (
+                c.get("_injected_from_oncokb_table")
+                or c.get("_injected_from_oncokb_api")
+                or c.get("_injected_from_ici_context")
+            ),
+        })
+
+    interpretation_guide = {
+        "rank_score": (
+            "Weighted composite score in [0, 1]. Higher = stronger combined evidence. "
+            "NOT a probability of clinical response."
+        ),
+        "rank_score_ci_low / ci_high": (
+            "95% confidence interval half-width based on missing source uncertainty. "
+            "Wide interval = fewer evidence sources available."
+        ),
+        "confidence_level": (
+            "HIGH (≥0.80), MEDIUM (≥0.50), or LOW (<0.50) based on the rank_score value."
+        ),
+        "evidence_completeness": (
+            "Fraction of the 6 evidence sources (DiffDock, OpenTargets, OncoKB, "
+            "AlphaMissense, ClinicalPhase, CIViC) that provided data for this drug."
+        ),
+        "missing_sources": (
+            "Evidence channels with no data for this drug. "
+            "Binding score is missing in the default demo (DiffDock requires GPU pipeline)."
+        ),
+        "oncokb_level": (
+            "OncoKB evidence tier: LEVEL_1=FDA-approved, LEVEL_2=standard-of-care, "
+            "LEVEL_3A/B=investigational, LEVEL_4=biological rationale, "
+            "LEVEL_R1/R2=RESISTANCE (drug should NOT be used)."
+        ),
+        "_injected": (
+            "True if this drug was added by the OncoKB/CIViC evidence layer (not from "
+            "OpenTargets association data). Injected drugs have higher clinical relevance "
+            "but may have lower OpenTargets association scores."
+        ),
+    }
+
+    return {
+        "cancer_type": cancer_type,
+        "mutations_analysed": len(mutation_summary),
+        "candidates_evaluated": len(ranked_candidates),
+        "top_candidates": candidate_reports,
+        "withdrawn_drug_warnings": withdrawn_warnings or [],
+        "system_limitations": get_system_limitations(),
+        "interpretation_guide": interpretation_guide,
+    }
+

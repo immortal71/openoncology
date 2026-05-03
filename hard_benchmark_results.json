@@ -1,0 +1,41 @@
+{
+  "run_at": "2026-05-03T12:16:13.237925+00:00",
+  "metric_lock": "standard_precision_at_3",
+  "targets": {
+    "standard_precision_at_3": 0.65,
+    "hit_at_3": 0.9,
+    "false_positives": 0
+  },
+  "actual": {
+    "standard_precision_at_3": 0.6923,
+    "hit_at_3": 0.9846,
+    "false_positives": 0,
+    "n_cases": 73,
+    "n_sensitivity": 65,
+    "n_negative": 8
+  },
+  "by_difficulty": {
+    "CONFLICTING_EVIDENCE": {
+      "standard_precision_at_3": 0.5926,
+      "standard_precision_at_3_ceiling": 0.8519
+    },
+    "LOW_PURITY": {
+      "standard_precision_at_3": 0.75,
+      "standard_precision_at_3_ceiling": 0.75
+    },
+    "MULTI_DRUG": {
+      "standard_precision_at_3": 0.8974,
+      "standard_precision_at_3_ceiling": 0.9487
+    },
+    "RARE_OR_COMPLEX": {
+      "standard_precision_at_3": 0.746,
+      "standard_precision_at_3_ceiling": 0.7619
+    },
+    "REFRACTORY": {
+      "standard_precision_at_3": 0.4524,
+      "standard_precision_at_3_ceiling": 0.5
+    }
+  },
+  "result": "PASS",
+  "api_mode": "live_oncokb_primary_with_static_fallback+stable_coverage_filter"
+}

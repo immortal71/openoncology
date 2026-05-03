@@ -1,0 +1,254 @@
+﻿Gene        Alteration        Cancer Type        Level        Drug(s)        Drug Abstracts
+ABL1        BCR-ABL1 Fusion        Chronic Myelogenous Leukemia        LEVEL_1        Imatinib        
+ABL1        BCR-ABL1 Fusion        Chronic Myelogenous Leukemia        LEVEL_1        Dasatinib        
+ABL1        BCR-ABL1 Fusion        Chronic Myelogenous Leukemia        LEVEL_1        Nilotinib        
+ABL1        BCR-ABL1 Fusion        Chronic Myelogenous Leukemia        LEVEL_1        Bosutinib        
+ABL1        BCR-ABL1 Fusion        Chronic Myelogenous Leukemia        LEVEL_1        Ponatinib        
+ABL1        BCR-ABL1 Fusion        Acute Lymphoblastic Leukemia        LEVEL_1        Imatinib        
+ABL1        BCR-ABL1 Fusion        Acute Lymphoblastic Leukemia        LEVEL_1        Dasatinib        
+ABL1        BCR-ABL1 Fusion        Acute Lymphoblastic Leukemia        LEVEL_1        Ponatinib        
+ABL1        T315I        Chronic Myelogenous Leukemia        LEVEL_1        Ponatinib        
+ABL1        T315I        Chronic Myelogenous Leukemia        LEVEL_1        Asciminib        
+ABL1        T315I        Acute Lymphoblastic Leukemia        LEVEL_1        Ponatinib        
+AKT1        E17K        Breast Cancer        LEVEL_1        Capivasertib + Fulvestrant        
+AKT1        Oncogenic Mutations        Breast Cancer        LEVEL_1        Capivasertib + Fulvestrant        
+ALK        Fusions        Anaplastic Large Cell Lymphoma        LEVEL_1        Crizotinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Crizotinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Alectinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Brigatinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Ceritinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Lorlatinib        
+ALK        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Entrectinib        
+ALK        G1202R        Non-Small Cell Lung Cancer        LEVEL_1        Lorlatinib        
+ALK        L1196M        Non-Small Cell Lung Cancer        LEVEL_1        Lorlatinib        
+ALK        C1156Y        Non-Small Cell Lung Cancer        LEVEL_1        Lorlatinib        
+BRAF        V600E        Melanoma        LEVEL_1        Vemurafenib        
+BRAF        V600E        Melanoma        LEVEL_1        Dabrafenib        
+BRAF        V600E        Melanoma        LEVEL_1        Dabrafenib + Trametinib        
+BRAF        V600E        Melanoma        LEVEL_1        Encorafenib + Binimetinib        
+BRAF        V600E        Non-Small Cell Lung Cancer        LEVEL_1        Dabrafenib + Trametinib        
+BRAF        V600E        Colorectal Cancer        LEVEL_1        Encorafenib + Cetuximab        
+BRAF        V600E        Thyroid Cancer        LEVEL_1        Dabrafenib + Trametinib        
+BRAF        V600E        Glioma        LEVEL_1        Dabrafenib + Trametinib        
+BRAF        V600E        Hairy Cell Leukemia        LEVEL_1        Vemurafenib        
+BRAF        V600K        Melanoma        LEVEL_1        Dabrafenib + Trametinib        
+BRAF        V600K        Melanoma        LEVEL_1        Encorafenib + Binimetinib        
+BRAF        Class 2 Mutations        Non-Small Cell Lung Cancer        LEVEL_2        Trametinib        
+BRCA1        Oncogenic Mutations        Breast Cancer        LEVEL_1        Olaparib        
+BRCA1        Oncogenic Mutations        Breast Cancer        LEVEL_1        Talazoparib        
+BRCA1        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Olaparib        
+BRCA1        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Niraparib        
+BRCA1        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Rucaparib        
+BRCA1        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Veliparib        
+BRCA1        Oncogenic Mutations        Prostate Cancer        LEVEL_1        Olaparib        
+BRCA1        Oncogenic Mutations        Prostate Cancer        LEVEL_1        Rucaparib        
+BRCA1        Oncogenic Mutations        Pancreatic Cancer        LEVEL_1        Olaparib        
+BRCA2        Oncogenic Mutations        Breast Cancer        LEVEL_1        Olaparib        
+BRCA2        Oncogenic Mutations        Breast Cancer        LEVEL_1        Talazoparib        
+BRCA2        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Olaparib        
+BRCA2        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Niraparib        
+BRCA2        Oncogenic Mutations        Ovarian Cancer        LEVEL_1        Rucaparib        
+BRCA2        Oncogenic Mutations        Prostate Cancer        LEVEL_1        Olaparib        
+BRCA2        Oncogenic Mutations        Prostate Cancer        LEVEL_1        Rucaparib        
+BRCA2        Oncogenic Mutations        Pancreatic Cancer        LEVEL_1        Olaparib        
+CD79B        Oncogenic Mutations        Diffuse Large B-Cell Lymphoma        LEVEL_1        Ibrutinib        
+CD79B        Y196C        Diffuse Large B-Cell Lymphoma        LEVEL_1        Ibrutinib        
+CD79B        Y196C        Diffuse Large B-Cell Lymphoma        LEVEL_1        Zanubrutinib        
+CD79B        Y196C        Diffuse Large B-Cell Lymphoma        LEVEL_1        Acalabrutinib        
+CDK4        Amplification        Liposarcoma        LEVEL_1        Palbociclib        
+CDK6        Amplification        Breast Cancer        LEVEL_1        Palbociclib        
+CDKN2A        Deletion        Melanoma        LEVEL_1        Palbociclib        
+EGFR        Exon 19 deletion        Non-Small Cell Lung Cancer        LEVEL_1        Erlotinib        
+EGFR        Exon 19 deletion        Non-Small Cell Lung Cancer        LEVEL_1        Gefitinib        
+EGFR        Exon 19 deletion        Non-Small Cell Lung Cancer        LEVEL_1        Afatinib        
+EGFR        Exon 19 deletion        Non-Small Cell Lung Cancer        LEVEL_1        Osimertinib        
+EGFR        Exon 19 deletion        Non-Small Cell Lung Cancer        LEVEL_1        Dacomitinib        
+EGFR        L858R        Non-Small Cell Lung Cancer        LEVEL_1        Erlotinib        
+EGFR        L858R        Non-Small Cell Lung Cancer        LEVEL_1        Gefitinib        
+EGFR        L858R        Non-Small Cell Lung Cancer        LEVEL_1        Afatinib        
+EGFR        L858R        Non-Small Cell Lung Cancer        LEVEL_1        Osimertinib        
+EGFR        L858R        Non-Small Cell Lung Cancer        LEVEL_1        Dacomitinib        
+EGFR        T790M        Non-Small Cell Lung Cancer        LEVEL_1        Osimertinib        
+EGFR        Exon 20 insertion        Non-Small Cell Lung Cancer        LEVEL_1        Amivantamab        
+EGFR        Exon 20 insertion        Non-Small Cell Lung Cancer        LEVEL_1        Mobocertinib        
+EGFR        G719X        Non-Small Cell Lung Cancer        LEVEL_2        Afatinib        
+EGFR        L861Q        Non-Small Cell Lung Cancer        LEVEL_2        Afatinib        
+EGFR        S768I        Non-Small Cell Lung Cancer        LEVEL_2        Afatinib        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Trastuzumab        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Pertuzumab + Trastuzumab        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Ado-Trastuzumab Emtansine        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Trastuzumab Deruxtecan        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Lapatinib        
+ERBB2        Amplification        Breast Cancer        LEVEL_1        Neratinib        
+ERBB2        Amplification        Gastric Cancer        LEVEL_1        Trastuzumab        
+ERBB2        Amplification        Colorectal Cancer        LEVEL_2        Trastuzumab + Pertuzumab        
+ERBB2        Oncogenic Mutations        Non-Small Cell Lung Cancer        LEVEL_1        Trastuzumab Deruxtecan        
+ERBB2        Oncogenic Mutations        Breast Cancer        LEVEL_1        Trastuzumab Deruxtecan        
+ERBB2        Oncogenic Mutations        Breast Cancer        LEVEL_1        Neratinib        
+ESR1        Oncogenic Mutations        Breast Cancer        LEVEL_1        Elacestrant        
+FGFR1        Fusions        Myeloid/Lymphoid Neoplasms        LEVEL_1        Pemigatinib        
+FGFR2        Fusions        Cholangiocarcinoma        LEVEL_1        Pemigatinib        
+FGFR2        Fusions        Cholangiocarcinoma        LEVEL_1        Infigratinib        
+FGFR2        Fusions        Cholangiocarcinoma        LEVEL_1        Futibatinib        
+FGFR3        Oncogenic Mutations        Bladder Cancer        LEVEL_1        Erdafitinib        
+FGFR3        S249C        Bladder Cancer        LEVEL_1        Erdafitinib        
+FGFR3        R248C        Bladder Cancer        LEVEL_1        Erdafitinib        
+FGFR3        Fusions        Bladder Cancer        LEVEL_1        Erdafitinib        
+FLT3        Internal tandem duplication        Acute Myeloid Leukemia        LEVEL_1        Midostaurin        
+FLT3        Internal tandem duplication        Acute Myeloid Leukemia        LEVEL_1        Gilteritinib        
+FLT3        Internal tandem duplication        Acute Myeloid Leukemia        LEVEL_1        Quizartinib        
+FLT3        D835        Acute Myeloid Leukemia        LEVEL_1        Gilteritinib        
+IDH1        R132        Acute Myeloid Leukemia        LEVEL_1        Ivosidenib        
+IDH1        R132        Acute Myeloid Leukemia        LEVEL_1        Olutasidenib        
+IDH1        R132        Cholangiocarcinoma        LEVEL_1        Ivosidenib        
+IDH1        Oncogenic Mutations        Acute Myeloid Leukemia        LEVEL_1        Ivosidenib        
+IDH2        R140Q        Acute Myeloid Leukemia        LEVEL_1        Enasidenib        
+IDH2        R172K        Acute Myeloid Leukemia        LEVEL_1        Enasidenib        
+IDH2        Oncogenic Mutations        Acute Myeloid Leukemia        LEVEL_1        Enasidenib        
+KIT        Exon 11 mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Imatinib        
+KIT        Exon 9 mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Imatinib        
+KIT        Exon 9 mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Sunitinib        
+KIT        Oncogenic Mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Avapritinib        
+KIT        Oncogenic Mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Ripretinib        
+KIT        D816V        Systemic Mastocytosis        LEVEL_1        Avapritinib        
+KIT        D816V        Systemic Mastocytosis        LEVEL_1        Midostaurin        
+KIT        Exon 17 mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Avapritinib        
+KIT        Exon 17 mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Ripretinib        
+KRAS        G12C        Non-Small Cell Lung Cancer        LEVEL_1        Sotorasib        
+KRAS        G12C        Non-Small Cell Lung Cancer        LEVEL_1        Adagrasib        
+KRAS        G12C        Colorectal Cancer        LEVEL_1        Adagrasib + Cetuximab        
+KRAS        G12C        Colorectal Cancer        LEVEL_2        Sotorasib + Panitumumab        
+KRAS        G12D        Pancreatic Cancer        LEVEL_2        MRTX1133        
+MET        Exon 14 skipping mutations        Non-Small Cell Lung Cancer        LEVEL_1        Capmatinib        
+MET        Exon 14 skipping mutations        Non-Small Cell Lung Cancer        LEVEL_1        Tepotinib        
+MET        Exon 14 skipping mutations        Non-Small Cell Lung Cancer        LEVEL_1        Crizotinib        
+MET        Amplification        Non-Small Cell Lung Cancer        LEVEL_2        Capmatinib        
+MET        Amplification        Non-Small Cell Lung Cancer        LEVEL_2        Tepotinib        
+MLH1        Oncogenic Mutations        Colorectal Cancer        LEVEL_1        Pembrolizumab        
+MLH1        Loss of expression        Colorectal Cancer        LEVEL_1        Pembrolizumab        
+MLH1        MSI-H        Any Solid Tumor        LEVEL_1        Pembrolizumab        
+MLH1        MSI-H        Any Solid Tumor        LEVEL_1        Nivolumab        
+MLH1        MSI-H        Any Solid Tumor        LEVEL_1        Dostarlimab        
+MLH1        Loss of expression        Gastric Cancer        LEVEL_1        Pembrolizumab        
+MLH1        Loss of expression        Gastric Cancer        LEVEL_1        Nivolumab        
+MLH1        Loss of expression        Gastric Cancer        LEVEL_1        Dostarlimab        
+MSH2        Oncogenic Mutations        Colorectal Cancer        LEVEL_1        Pembrolizumab        
+MSH6        Oncogenic Mutations        Colorectal Cancer        LEVEL_1        Pembrolizumab        
+NF1        Oncogenic Mutations        Melanoma        LEVEL_2        Binimetinib        
+NPM1        W288fs        Acute Myeloid Leukemia        LEVEL_1        Venetoclax        
+NPM1        W288fs        Acute Myeloid Leukemia        LEVEL_1        Azacitidine        
+NPM1        Insertion TypeB        Acute Myeloid Leukemia        LEVEL_1        Midostaurin        
+NPM1        Insertion TypeB        Acute Myeloid Leukemia        LEVEL_1        Venetoclax        
+NPM1        Oncogenic Mutations        Acute Myeloid Leukemia        LEVEL_1        Venetoclax        
+NPM1        Oncogenic Mutations        Acute Myeloid Leukemia        LEVEL_1        Azacitidine        
+NRAS        Q61        Melanoma        LEVEL_1        Binimetinib        
+NTRK1        Fusions        Any Solid Tumor        LEVEL_1        Larotrectinib        
+NTRK1        Fusions        Any Solid Tumor        LEVEL_1        Entrectinib        
+NTRK2        Fusions        Any Solid Tumor        LEVEL_1        Larotrectinib        
+NTRK2        Fusions        Any Solid Tumor        LEVEL_1        Entrectinib        
+NTRK3        Fusions        Any Solid Tumor        LEVEL_1        Larotrectinib        
+NTRK3        Fusions        Any Solid Tumor        LEVEL_1        Entrectinib        
+PALB2        Oncogenic Mutations        Breast Cancer        LEVEL_1        Olaparib        
+PALB2        Oncogenic Mutations        Pancreatic Cancer        LEVEL_2        Olaparib        
+PDGFRA        D842V        Gastrointestinal Stromal Tumor        LEVEL_1        Avapritinib        
+PDGFRA        Oncogenic Mutations        Gastrointestinal Stromal Tumor        LEVEL_1        Avapritinib        
+PIK3CA        E542K        Breast Cancer        LEVEL_1        Alpelisib + Fulvestrant        
+PIK3CA        E545K        Breast Cancer        LEVEL_1        Alpelisib + Fulvestrant        
+PIK3CA        H1047R        Breast Cancer        LEVEL_1        Alpelisib + Fulvestrant        
+PIK3CA        Oncogenic Mutations        Breast Cancer        LEVEL_1        Alpelisib + Fulvestrant        
+PIK3CA        H1047R        Endometrial Cancer        LEVEL_1        Alpelisib        
+PIK3CA        E542K        Endometrial Cancer        LEVEL_1        Alpelisib        
+PIK3CA        Oncogenic Mutations        Endometrial Cancer        LEVEL_2        Everolimus        
+PTEN        Oncogenic Mutations        Endometrial Cancer        LEVEL_2        Everolimus        
+RAD51B        Oncogenic Mutations        Breast Cancer        LEVEL_2        Olaparib        
+RET        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Selpercatinib        
+RET        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Pralsetinib        
+RET        Fusions        Thyroid Cancer        LEVEL_1        Selpercatinib        
+RET        Fusions        Thyroid Cancer        LEVEL_1        Pralsetinib        
+RET        M918T        Thyroid Cancer        LEVEL_1        Selpercatinib        
+RET        M918T        Thyroid Cancer        LEVEL_1        Vandetanib        
+RET        Oncogenic Mutations        Thyroid Cancer        LEVEL_1        Selpercatinib        
+ROS1        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Crizotinib        
+ROS1        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Entrectinib        
+ROS1        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Lorlatinib        
+ROS1        Fusions        Non-Small Cell Lung Cancer        LEVEL_1        Repotrectinib        
+SMARCA4        Loss of function        Any Solid Tumor        LEVEL_2        Tazemetostat        
+SMARCA4        Loss of function        Ovarian Cancer        LEVEL_2        Tazemetostat        
+SMARCA4        Loss of function        Non-Small Cell Lung Cancer        LEVEL_2        Tazemetostat        
+STK11        Oncogenic Mutations        Non-Small Cell Lung Cancer        LEVEL_2        Pembrolizumab        
+TET2        Oncogenic Mutations        Myelodysplastic Syndrome        LEVEL_2        Azacitidine        
+TMB        High        Any Solid Tumor        LEVEL_1        Pembrolizumab        
+TSC1        Oncogenic Mutations        Any Solid Tumor        LEVEL_2        Everolimus        
+TSC2        Oncogenic Mutations        Any Solid Tumor        LEVEL_1        Everolimus        
+TSC2        Oncogenic Mutations        Lymphangioleiomyomatosis        LEVEL_1        Everolimus        
+TSC2        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_2        Everolimus        
+TSC2        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_2        Temsirolimus        
+VHL        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_1        Belzutifan        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Belzutifan        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Sunitinib        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Pazopanib        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Cabozantinib        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Axitinib        
+VHL        Loss        Renal Cell Carcinoma        LEVEL_1        Nivolumab        
+ATM        Oncogenic Mutations        Prostate Cancer        LEVEL_1        Olaparib        
+ATM        Oncogenic Mutations        Breast Cancer        LEVEL_2        Olaparib        
+CHEK2        Oncogenic Mutations        Breast Cancer        LEVEL_2        Olaparib        
+CDK12        Oncogenic Mutations        Prostate Cancer        LEVEL_2        Olaparib        
+POLE        Oncogenic Mutations        Endometrial Cancer        LEVEL_1        Pembrolizumab        
+POLD1        Oncogenic Mutations        Endometrial Cancer        LEVEL_2        Pembrolizumab        
+RAF1        Fusions        Any Solid Tumor        LEVEL_2        Trametinib        
+MAP2K1        Oncogenic Mutations        Any Solid Tumor        LEVEL_2        Trametinib        
+MAP2K2        Oncogenic Mutations        Any Solid Tumor        LEVEL_2        Trametinib        
+HRAS        Oncogenic Mutations        Thyroid Cancer        LEVEL_2        Tipifarnib        
+MTOR        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_1        Everolimus        
+MTOR        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_1        Temsirolimus        
+MTOR        Oncogenic Mutations        Any Solid Tumor        LEVEL_2        Everolimus        
+AR        Amplification        Prostate Cancer        LEVEL_1        Enzalutamide        
+AR        Amplification        Prostate Cancer        LEVEL_1        Apalutamide        
+AR        Amplification        Prostate Cancer        LEVEL_1        Darolutamide        
+BRIP1        Oncogenic Mutations        Ovarian Cancer        LEVEL_2        Niraparib        
+RAD51C        Oncogenic Mutations        Ovarian Cancer        LEVEL_2        Niraparib        
+RAD51D        Oncogenic Mutations        Ovarian Cancer        LEVEL_2        Niraparib        
+NBN        Oncogenic Mutations        Prostate Cancer        LEVEL_2        Olaparib        
+CDK4        Amplification        Breast Cancer        LEVEL_1        Palbociclib        
+CDK4        Amplification        Breast Cancer        LEVEL_1        Ribociclib        
+CDK4        Amplification        Breast Cancer        LEVEL_1        Abemaciclib        
+CCND1        Amplification        Breast Cancer        LEVEL_1        Palbociclib        
+CCND1        Amplification        Breast Cancer        LEVEL_1        Ribociclib        
+CCND1        Amplification        Breast Cancer        LEVEL_1        Abemaciclib        
+ARID1A        Oncogenic Mutations        Any Solid Tumor        LEVEL_2        Pembrolizumab        
+PTCH1        Oncogenic Mutations        Basal Cell Carcinoma        LEVEL_1        Vismodegib        
+PTCH1        Oncogenic Mutations        Basal Cell Carcinoma        LEVEL_1        Sonidegib        
+SMO        Oncogenic Mutations        Basal Cell Carcinoma        LEVEL_1        Vismodegib        
+SMO        Oncogenic Mutations        Basal Cell Carcinoma        LEVEL_1        Sonidegib        
+JAK2        V617F        Myeloproliferative Neoplasm        LEVEL_1        Ruxolitinib        
+JAK2        V617F        Polycythemia Vera        LEVEL_1        Ruxolitinib        
+JAK2        Fusions        Myeloid/Lymphoid Neoplasms        LEVEL_1        Ruxolitinib        
+EZH2        Oncogenic Mutations        Follicular Lymphoma        LEVEL_1        Tazemetostat        
+EZH2        Y646        Follicular Lymphoma        LEVEL_1        Tazemetostat        
+DNMT3A        Oncogenic Mutations        Acute Myeloid Leukemia        LEVEL_2        Azacitidine        
+ASXL1        Oncogenic Mutations        Myelodysplastic Syndrome        LEVEL_2        Azacitidine        
+SF3B1        Oncogenic Mutations        Myelodysplastic Syndrome        LEVEL_2        Luspatercept        
+U2AF1        Oncogenic Mutations        Myelodysplastic Syndrome        LEVEL_2        Azacitidine        
+PDGFRB        Fusions        Myeloid/Lymphoid Neoplasms        LEVEL_1        Imatinib        
+FGFR1        Fusions        Myeloid/Lymphoid Neoplasms        LEVEL_1        Pemigatinib        
+CSF3R        T618I        Chronic Neutrophilic Leukemia        LEVEL_1        Ruxolitinib        
+KDM5C        Oncogenic Mutations        Renal Cell Carcinoma        LEVEL_2        Belzutifan        
+SDHA        Oncogenic Mutations        Gastrointestinal Stromal Tumor        LEVEL_2        Sunitinib        
+SDHB        Oncogenic Mutations        Gastrointestinal Stromal Tumor        LEVEL_2        Sunitinib        
+NF2        Oncogenic Mutations        Mesothelioma        LEVEL_2        Everolimus        
+BAP1        Oncogenic Mutations        Mesothelioma        LEVEL_2        Pembrolizumab        
+CDKN2A        Deletion        Any Solid Tumor        LEVEL_2        Palbociclib        
+MDM2        Amplification        Liposarcoma        LEVEL_2        Milademetan        
+EGFR        Amplification        Non-Small Cell Lung Cancer        LEVEL_2        Osimertinib        
+MYC        Amplification        Diffuse Large B-Cell Lymphoma        LEVEL_2        Venetoclax        
+TP53        R175H        Any Solid Tumor        LEVEL_3A        APR-246        
+TP53        R248W        Any Solid Tumor        LEVEL_3A        APR-246        
+TP53        R273H        Any Solid Tumor        LEVEL_3A        APR-246        
+EGFR        T790M        Non-Small Cell Lung Cancer        LEVEL_R1        Erlotinib        
+EGFR        T790M        Non-Small Cell Lung Cancer        LEVEL_R1        Gefitinib        
+EGFR        T790M        Non-Small Cell Lung Cancer        LEVEL_R1        Afatinib        
+KRAS        Oncogenic Mutations        Non-Small Cell Lung Cancer        LEVEL_R1        Erlotinib        
+KRAS        Oncogenic Mutations        Non-Small Cell Lung Cancer        LEVEL_R1        Gefitinib        
+BRAF        V600E        Colorectal Cancer        LEVEL_R1        Vemurafenib        
+BRAF        V600E        Colorectal Cancer        LEVEL_R1        Dabrafenib

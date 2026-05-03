@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: coadread_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-AA-A01R-01
+Cancer Type: Colorectal Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: EGFR
+  Protein Change: D314N
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr7:55223573
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=coadread_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

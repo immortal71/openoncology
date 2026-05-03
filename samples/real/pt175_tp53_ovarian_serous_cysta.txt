@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: ov_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-04-1331-01
+Cancer Type: Ovarian Serous Cystadenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: R306*
+  Mutation Type: Nonsense_Mutation
+  Genomic Location: chr17:7577022
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=ov_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

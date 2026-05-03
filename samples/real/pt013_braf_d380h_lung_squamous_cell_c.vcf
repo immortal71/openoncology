@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:lusc_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-34-2596
+##sample_id=TCGA-34-2596-01
+##cancer_type=Lung Squamous Cell Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	140494110	.	C	G	99	PASS	GENE=BRAF;HGVS=D380H;MUTATION_TYPE=Missense_Mutation

@@ -1,0 +1,345 @@
+{
+  "run_at": "2026-05-02T03:46:22.407112+00:00",
+  "n_cases": 24,
+  "metrics": {
+    "standard_precision_at_3": 0.5625,
+    "hit_at_3": 1.0,
+    "false_positives": 0
+  },
+  "cases": [
+    {
+      "case_code": "BLIND-001",
+      "case_id": "BRCA1_PATHOGENIC_OVARIAN",
+      "expect_empty": false,
+      "known_drugs": [
+        "Olaparib",
+        "Niraparib",
+        "Rucaparib"
+      ],
+      "top3_drugs": [
+        "Olaparib",
+        "Niraparib",
+        "Rucaparib"
+      ],
+      "standard_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-002",
+      "case_id": "FAT1_TRUNCATION_NSCLC_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-003",
+      "case_id": "HIF2A_V155L_VHL_RCC",
+      "expect_empty": false,
+      "known_drugs": [
+        "Belzutifan"
+      ],
+      "top3_drugs": [
+        "Belzutifan"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-004",
+      "case_id": "ATM_TRUNCATION_PROSTATE_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-005",
+      "case_id": "CDKN2A_DEL_ORALCAVITY_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-006",
+      "case_id": "BCL2_AMP_DLBCL_VENETOCLAX",
+      "expect_empty": false,
+      "known_drugs": [
+        "Venetoclax"
+      ],
+      "top3_drugs": [
+        "Venetoclax"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-007",
+      "case_id": "IDH2_R172K_AML",
+      "expect_empty": false,
+      "known_drugs": [
+        "Enasidenib"
+      ],
+      "top3_drugs": [
+        "Enasidenib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-008",
+      "case_id": "NTRK1_FUSION_PEDIATRIC",
+      "expect_empty": false,
+      "known_drugs": [
+        "Larotrectinib",
+        "Entrectinib"
+      ],
+      "top3_drugs": [
+        "Larotrectinib",
+        "Entrectinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-009",
+      "case_id": "ERBB2_AMP_GASTRIC_INDIA",
+      "expect_empty": false,
+      "known_drugs": [
+        "Trastuzumab",
+        "Trastuzumab deruxtecan"
+      ],
+      "top3_drugs": [
+        "Trastuzumab",
+        "Trastuzumab Deruxtecan",
+        "Pertuzumab"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-010",
+      "case_id": "ARID1A_FRAMESHIFT_GASTRIC_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-011",
+      "case_id": "VUS_LOWVAF_TP53_NSCLC",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-012",
+      "case_id": "KIT_D816V_SYSTEMIC_MASTO",
+      "expect_empty": false,
+      "known_drugs": [
+        "Avapritinib",
+        "Midostaurin"
+      ],
+      "top3_drugs": [
+        "Avapritinib",
+        "Midostaurin",
+        "Imatinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-013",
+      "case_id": "FGFR2_FUSION_GALLBLADDER",
+      "expect_empty": false,
+      "known_drugs": [
+        "Pemigatinib",
+        "Futibatinib"
+      ],
+      "top3_drugs": [
+        "Pemigatinib",
+        "Futibatinib",
+        "Infigratinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-014",
+      "case_id": "EGFR_L858R_ORALCAVITY_INDIA",
+      "expect_empty": false,
+      "known_drugs": [
+        "Cetuximab",
+        "Afatinib"
+      ],
+      "top3_drugs": [
+        "Cetuximab",
+        "Afatinib",
+        "Panitumumab"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-015",
+      "case_id": "ALK_F1174L_NEUROBLASTOMA",
+      "expect_empty": false,
+      "known_drugs": [
+        "Crizotinib",
+        "Lorlatinib"
+      ],
+      "top3_drugs": [
+        "Crizotinib",
+        "Lorlatinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-016",
+      "case_id": "RET_FUSION_PEDS_THYROID",
+      "expect_empty": false,
+      "known_drugs": [
+        "Selpercatinib",
+        "Pralsetinib"
+      ],
+      "top3_drugs": [
+        "Selpercatinib",
+        "Pralsetinib",
+        "Vandetanib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-017",
+      "case_id": "BRAF_V600E_PEDS_GLIOMA",
+      "expect_empty": false,
+      "known_drugs": [
+        "Dabrafenib",
+        "Trametinib"
+      ],
+      "top3_drugs": [
+        "Vemurafenib",
+        "Dabrafenib",
+        "Trametinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-018",
+      "case_id": "PDGFRA_D842V_GIST_AVAPRITINIB",
+      "expect_empty": false,
+      "known_drugs": [
+        "Avapritinib"
+      ],
+      "top3_drugs": [
+        "Avapritinib",
+        "Imatinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-019",
+      "case_id": "VHL_TRUNCATION_RENAL_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-020",
+      "case_id": "FGFR3_FUSION_UROTHELIAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Erdafitinib"
+      ],
+      "top3_drugs": [
+        "Erdafitinib",
+        "Pemigatinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-021",
+      "case_id": "PTEN_LOSS_ENDOMETRIAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Everolimus",
+        "Temsirolimus"
+      ],
+      "top3_drugs": [
+        "Everolimus",
+        "Temsirolimus"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-022",
+      "case_id": "TP53_R248H_OSTEOSARCOMA_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-023",
+      "case_id": "KRAS_G12D_GALLBLADDER",
+      "expect_empty": false,
+      "known_drugs": [
+        "MRTX1133"
+      ],
+      "top3_drugs": [
+        "Mrtx1133"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-024",
+      "case_id": "CDH1_TRUNCATION_GASTRIC_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "auto_pass": true
+    }
+  ]
+}

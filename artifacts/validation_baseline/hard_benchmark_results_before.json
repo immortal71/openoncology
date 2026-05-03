@@ -1,0 +1,16 @@
+{
+  "mode": "hard_clinical_benchmark",
+  "api_source": "static table",
+  "total_hard_cases": 21,
+  "sensitivity_evaluated": 18,
+  "standard_precision_at_3": 0.6667,
+  "hit_at_3": 1.0,
+  "false_positives": 0,
+  "by_category": {
+    "MULTI_DRUG": 0.9048,
+    "CONFLICTING_EVIDENCE": 0.5556,
+    "LOW_PURITY": 0.5,
+    "REFRACTORY": 0.3333,
+    "RARE_OR_COMPLEX": 0.5833
+  }
+}

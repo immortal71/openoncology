@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: ov_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-13-1408-01
+Cancer Type: Ovarian Serous Cystadenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: EGFR
+  Protein Change: S380Pfs*16
+  Mutation Type: Frame_Shift_Del
+  Genomic Location: chr7:55224456
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=ov_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

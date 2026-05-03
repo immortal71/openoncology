@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:hnsc_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-HD-7832
+##sample_id=TCGA-HD-7832-01
+##cancer_type=Head and Neck Squamous Cell Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=hnsc_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55268060	.	A	C	99	PASS	GENE=EGFR;HGVS=E967A;MUTATION_TYPE=Missense_Mutation

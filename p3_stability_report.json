@@ -1,0 +1,43 @@
+{
+  "timestamp": "2026-05-03T03:33:21.050470+00:00",
+  "profile": "p3_stability_v1",
+  "train_set": {
+    "n_cases": 297,
+    "n_sensitivity": 280,
+    "n_specificity": 17,
+    "standard_precision_at_3": 0.5512,
+    "standard_precision_at_3_ci95": [
+      0.517,
+      0.5853
+    ],
+    "hit_at_3": 0.9357,
+    "false_positive_rate": 0.0
+  },
+  "holdout_set": {
+    "n_cases": 139,
+    "n_sensitivity": 130,
+    "n_specificity": 9,
+    "standard_precision_at_3": 0.6,
+    "standard_precision_at_3_ci95": [
+      0.5509,
+      0.6491
+    ],
+    "hit_at_3": 0.9538,
+    "false_positive_rate": 0.0
+  },
+  "stability": {
+    "p3_degradation_percent": -8.86,
+    "hit_at_3_degradation_percent": -1.94,
+    "fpr_increase_pp": 0.0,
+    "is_overfitting": false,
+    "is_stable": true
+  },
+  "interpretation": "\nHoldout Validation Summary: \u2705 STABLE\n\nTrain Set:\n  P@3: 0.551\n  Hit@3: 0.936\n  FP Rate: 0.000\n\nHoldout Set (30% unseen):\n  P@3: 0.600\n  Hit@3: 0.954\n  FP Rate: 0.000\n\nDegradation (Train \u2192 Holdout):\n  P@3 degradation: -8.9% (acceptable: < 5%)\n  Hit@3 degradation: -1.9% (acceptable: < 5%)\n  FP rate increase: 0.0pp (acceptable: < 2pp)\n\nOverfitting Detection:\n  Overfitting detected: No\n  Performance stability: PASS - metrics stable across sets\n",
+  "gates": {
+    "p3_stability_pass": true,
+    "hit_at_3_stability_pass": true,
+    "fpr_stability_pass": true,
+    "no_overfitting": true,
+    "overall_stability": true
+  }
+}
