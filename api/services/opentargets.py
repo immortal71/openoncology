@@ -16,7 +16,10 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from utils.http import fetch_with_retry
+try:
+  from api.utils.http import fetch_with_retry
+except ModuleNotFoundError:
+  from utils.http import fetch_with_retry
 
 logger = logging.getLogger(__name__)
 _GQL = "https://api.platform.opentargets.org/api/v4/graphql"

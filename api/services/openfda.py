@@ -19,7 +19,10 @@ import logging
 from typing import Optional
 import httpx
 
-from utils.http import fetch_with_retry
+try:
+    from api.utils.http import fetch_with_retry
+except ModuleNotFoundError:
+    from utils.http import fetch_with_retry
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,10 @@ Public API — no auth required.
 import logging
 from typing import Optional
 
-from utils.http import fetch_with_retry
+try:
+  from api.utils.http import fetch_with_retry
+except ModuleNotFoundError:
+  from utils.http import fetch_with_retry
 
 logger = logging.getLogger(__name__)
 _GRAPHQL = "https://civicdb.org/api/graphql"
