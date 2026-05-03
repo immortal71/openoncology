@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: luad_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-95-7567-01
+Cancer Type: Lung Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: ERBB2
+  Protein Change: A1232Gfs*45
+  Mutation Type: Frame_Shift_Ins
+  Genomic Location: chr17:37884217
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

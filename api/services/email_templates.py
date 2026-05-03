@@ -6,7 +6,7 @@ Call render_*(data) to get (subject, html_body) tuples for use with Resend.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, UTC
 
 # ── Shared layout ─────────────────────────────────────────────────────────────
 
@@ -18,7 +18,7 @@ _MUTED = "#64748b"
 _border = "#e2e8f0"
 
 def _layout(title: str, body: str) -> str:
-    year = datetime.utcnow().year
+    year = datetime.now(UTC).year
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>

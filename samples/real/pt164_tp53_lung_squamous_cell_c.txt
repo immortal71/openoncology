@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: lusc_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-18-3416-01
+Cancer Type: Lung Squamous Cell Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: G244Afs*3
+  Mutation Type: Frame_Shift_Del
+  Genomic Location: chr17:7577550
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

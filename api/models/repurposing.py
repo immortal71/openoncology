@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 from sqlalchemy import String, DateTime, ForeignKey, Float, JSON
@@ -36,6 +36,6 @@ class RepurposingCandidate(Base):
     evidence_sources: Mapped[Any] = mapped_column(JSON, nullable=True)
     matched_terms: Mapped[Any] = mapped_column(JSON, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     result: Mapped["Result"] = relationship("Result", back_populates="repurposing_candidates")

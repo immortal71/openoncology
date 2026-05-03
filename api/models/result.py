@@ -1,5 +1,6 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
+from typing import Optional
 
 from sqlalchemy import String, DateTime, ForeignKey, Boolean, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -28,8 +29,8 @@ class Result(Base):
     # cBioPortal cohort frequency data (JSON array of {study_id, cancer_type, mutation_count})
     cbioportal_data: Mapped[Any] = mapped_column(JSON, nullable=True)
 
-    # COSMIC sample count for the primary mutated gene
-    cosmic_sample_count: Mapped[int] = mapped_column(String(32), nullable=True)
+    # COSMIC sample count for the primary mutated gene (stored as string from worker)
+    cosmic_sample_count: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
 
     # S3 key for the generated PDF report
     report_pdf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
@@ -39,7 +40,7 @@ class Result(Base):
     oncologist_id: Mapped[str] = mapped_column(ForeignKey("oncologists.id"), nullable=True)
     oncologist_notes: Mapped[str] = mapped_column(Text, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     submission: Mapped["Submission"] = relationship("Submission", back_populates="result")
     repurposing_candidates: Mapped[list["RepurposingCandidate"]] = relationship(

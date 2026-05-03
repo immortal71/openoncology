@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, Boolean, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,7 +22,7 @@ class Patient(Base):
     # GDPR: delete after this many days (0 = keep indefinitely with consent)
     data_retention_days: Mapped[int] = mapped_column(Integer, default=365)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     submissions: Mapped[list["Submission"]] = relationship("Submission", back_populates="patient")
     campaigns: Mapped[list["Campaign"]] = relationship("Campaign", back_populates="patient")

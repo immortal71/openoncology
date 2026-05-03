@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:coadread_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-AG-A002
+##sample_id=TCGA-AG-A002-01
+##cancer_type=Colorectal Adenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=coadread_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55211097	.	G	A	99	PASS	GENE=EGFR;HGVS=E114K;MUTATION_TYPE=Missense_Mutation

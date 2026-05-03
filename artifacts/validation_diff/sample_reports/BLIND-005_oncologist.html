@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Oncologist Report — Diffuse Large B-Cell Lymphoma</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; font-size: 11pt; color: #111;
+            max-width: 900px; margin: 32px auto; padding: 0 24px; line-height: 1.6; }
+    h1 { font-size: 18pt; color: #002060; border-bottom: 3px solid #002060; padding-bottom: 8px; }
+    h2 { font-size: 13pt; color: #002060; background: #eef2ff; padding: 6px 10px;
+          border-left: 4px solid #002060; margin-top: 28px; }
+    h3 { font-size: 11pt; color: #333; margin-top: 18px; }
+    h4 { font-size: 11pt; color: #002060; margin-bottom: 4px; }
+    .meta { color: #555; font-size: 10pt; margin-bottom: 20px; }
+    .conf-badge {
+      display: inline-block; padding: 4px 12px; border-radius: 12px; font-weight: bold;
+      font-size: 10pt; margin-left: 8px;
+    }
+    .conf-HIGH { background: #c8f7c5; color: #145214; }
+    .conf-MEDIUM { background: #fff3cd; color: #7d5f00; }
+    .conf-LOW { background: #fde8e8; color: #7d0000; }
+    .box-info { background: #eef4ff; border-left: 4px solid #2255aa; padding: 12px 16px;
+                 border-radius: 4px; margin: 16px 0; }
+    .box-warn { background: #fff8e1; border-left: 4px solid #f0a500; padding: 12px 16px;
+                 border-radius: 4px; margin: 16px 0; }
+    .box-resist { background: #fde8e8; border-left: 4px solid #cc0000; padding: 12px 16px;
+                   border-radius: 4px; margin: 16px 0; font-weight: bold; }
+    .box-disc { background: #fff0f0; border: 1px solid #cc0000; padding: 14px 18px;
+                 border-radius: 4px; margin: 24px 0; font-size: 10pt; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+    th { background: #002060; color: #fff; padding: 8px 10px; text-align: left; }
+    td { padding: 7px 10px; border-bottom: 1px solid #dde; vertical-align: top; }
+    .drug-name { font-weight: bold; color: #002060; }
+    .resistance-row td { background: #fde8e8; }
+    ul.tight { margin: 4px 0 4px 16px; padding: 0; }
+    ul.tight li { margin-bottom: 2px; }
+    .exp-card { border: 1px solid #c8d8f0; border-radius: 6px; padding: 14px 18px;
+                 margin: 12px 0; background: #f8faff; }
+    .exp-table { width: auto; margin: 6px 0; }
+    .exp-table td { padding: 3px 12px 3px 0; border: none; }
+    .exp-table td:first-child { font-weight: bold; color: #555; width: 200px; }
+    .rationale { font-style: italic; color: #444; margin-top: 8px; }
+    code { font-size: 9pt; background: #f0f0f0; padding: 1px 4px; border-radius: 3px; }
+    .footer { margin-top: 48px; border-top: 1px solid #ccc; padding-top: 14px;
+               font-size: 9pt; color: #777; }
+    @media print {
+      body { margin: 16px; }
+      h2 { break-after: avoid; }
+      .exp-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Oncologist / Molecular Tumour Board Report</h1>
+  <div class="meta">
+    <strong>Date:</strong> 2026-05-01 &nbsp;|&nbsp;
+    <strong>Cancer:</strong> Diffuse Large B-Cell Lymphoma &nbsp;|&nbsp;
+    <strong>Confidence:</strong>
+    <span class="conf-badge conf-LOW">LOW</span>
+    <p><strong>Patient ID:</strong> BLIND-005 (anonymised)</p>
+  </div>
+
+  <!-- ─── SECTION 1: Executive Summary ──────────────────────────────── -->
+  <h2>Section 1 — Executive Summary</h2>
+  <p>Analysis of 1 genomic alteration(s) in Diffuse Large B-Cell Lymphoma did not identify ranked approved or investigational drug candidates with sufficient evidence in the current database snapshot. Standard-of-care therapy and enrolment in clinical trials remain the primary recommendation. Consider molecular tumour board review for this case.
+EXPERIMENTAL CANDIDATES IDENTIFIED: See Section 5 for de-novo compound hypotheses. These are computational research directions ONLY — not clinical recommendations. Do not discuss with the patient until wet-lab data exists.</p>
+  <p><em>Low confidence (score &lt; 0.50). Limited or conflicting evidence.</em></p>
+  <div class="box-info"><strong>Recommended Actions:</strong> No strong actionable drug identified; prioritise tumour board review and clinical-trial pathways.</div>
+  
+  
+  
+        <div class="box-disc">
+          <strong>Safety & Transparency:</strong> This is an experimental open-source tool. Not clinically validated.<br>
+          <strong>All recommendations must be reviewed by a qualified oncologist.</strong><br>
+          Current benchmark context: Standard P@3=0.503, Hit@3=0.984, n=216.
+          <ul><li>STANDARD P@3 = 0.503 (conservative, comparable to published benchmarks). This is the honest number. Commercial tools score 0.65–0.75 with live APIs.</li><li>OFFLINE MODE: 44 of 166 sensitivity cases have no static-table entry. Performance on those 44 cases is UNKNOWN without a live OncoKB API token.</li><li>NORMALISED P@3 (0.955) uses a modified denominator and is NOT comparable to standard P@3 from other tools. Do not quote it without context.</li><li>CANCER-TYPE AGNOSTIC: static table does not distinguish tumour type for most entries (exception: BRAF V600E-CRC). This causes legitimate over-calling.</li></ul>
+        </div>
+
+  <p>No ranked drug candidates identified.</p>
+
+  <!-- ─── SECTION 2: Genomic Alterations ───────────────────────────── -->
+  <h2>Section 2 — Key Genomic Alterations</h2>
+  <table>
+    <thead>
+      <tr><th>Gene</th><th>HGVS</th><th>VAF</th><th>Classification</th><th>OncoKB</th><th>AlphaMissense</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>BCL2</td>
+          <td>Amplification</td>
+          <td>N/A</td>
+          <td>L3_L4</td>
+          <td>—</td>
+          <td>—</td>
+        </tr></tbody>
+  </table>
+
+  <!-- ─── SECTION 3: Drug Recommendations ─────────────────────────── -->
+  <h2>Section 3 — Drug Recommendations (Full Ranked List)</h2>
+  <p>No ranked drug candidates identified.</p>
+
+  <!-- ─── SECTION 4: Experimental Candidates ───────────────────────── -->
+  <h2>Section 4 — Experimental / Custom Drug Candidates</h2>
+  <div class="box-warn">
+    <strong>⚠ HIGHLY EXPERIMENTAL — Research Use Only.</strong> The following candidates
+    are <em>computational hypotheses</em> generated by the de-novo drug discovery module.
+    None have been tested in humans or animals. Computational hypothesis only - no wet-lab data.
+    Independent docking validation, synthesis feasibility review, and medicinal chemistry consultation are required.
+    Wet-lab validation is <strong>mandatory</strong> before any development.
+    Do not discuss these with the patient.
+  </div>
+  
+        <div class="exp-card">
+          <h4>Venetoclax</h4>
+          <p><strong>Computational hypothesis only - no wet-lab data.</strong></p>
+          <table class="exp-table">
+            <tr><td>Ensemble score:</td><td>N/A</td></tr>
+            <tr><td>Toxicity risk:</td><td>N/A</td></tr>
+            <tr><td>Synthesis feasibility:</td><td>N/A</td></tr>
+            <tr><td>SMILES:</td><td><code>N/A</code></td></tr>
+          </table>
+          <p class="rationale"><strong>Biological rationale:</strong> This compound was identified from a computational screening of the OpenTargets/ChEMBL lead molecule library against the patient&#x27;s mutation profile.</p>
+          <p><strong>Concrete next steps:</strong></p><ul class="tight"><li><strong>Docking validation — compute binding affinity with multiple methods.</strong>: DiffDock score is absent (GPU pipeline required). Before synthesis, run at least two independent docking programs (e.g., AutoDock Vina + Glide or GNINA) and compare poses. Only proceed if both give binding energy &lt; −7 kcal/mol and consistent binding pocket.</li><li><strong>In-vitro safety panel (Tier 1).</strong>: Run Ames mutagenicity (OECD TG 471), hERG patch-clamp (IQ-CSRC protocol), and human liver microsome (HLM) metabolic stability assay. These three assays are the minimum acceptable safety evidence before any animal study or IND filing.</li><li><strong>Synthesise and characterise (if Steps 1–2 are positive).</strong>: Synthesis appears feasible. Obtain &gt;95% purity by HPLC. Confirm structure by NMR and LC-MS before any biological testing.</li></ul>
+        </div>
+
+  <h2>Section 5 — How to Use This Report</h2>
+  <ul><li>Use Section 1 first: confirm whether strong actionable options exist before reading lower-ranked entries.</li><li>For each suggested drug, verify tumour context, prior treatment exposure, and contraindications in local guidelines.</li><li>Treat all scores as triage signals only; independently validate citations and molecular findings.</li><li>Discuss uncertain or conflicting cases in a multidisciplinary molecular tumour board.</li><li>Experimental candidates are computational hypotheses only and require independent docking plus wet-lab validation.</li></ul>
+
+  <!-- ─── DISCLAIMER ─────────────────────────────────────────────── -->
+  <div class="box-disc">
+    <strong>MANDATORY DISCLAIMER:</strong> This report was produced by an automated computational research tool and does NOT constitute medical advice, diagnosis, or a treatment recommendation. It has not been cleared as a medical device. All findings require review and confirmation by a licensed oncologist before any clinical action.
+  </div>
+
+  <div class="footer">
+    OpenOncology Research Platform — For Physician Review Only &nbsp;|&nbsp; 2026-05-01
+  </div>
+</body>
+</html>

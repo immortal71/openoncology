@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:luad_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-05-4389
+##sample_id=TCGA-05-4389-01
+##cancer_type=Lung Adenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	140481402	.	C	A	99	PASS	GENE=BRAF;HGVS=G469V;MUTATION_TYPE=Missense_Mutation

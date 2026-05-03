@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:gbm_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-06-0154
+##sample_id=TCGA-06-0154-01
+##cancer_type=Glioblastoma Multiforme
+##data_source=https://www.cbioportal.org/study/summary?id=gbm_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55220274	.	C	T	99	PASS	GENE=EGFR;HGVS=R222C;MUTATION_TYPE=Missense_Mutation

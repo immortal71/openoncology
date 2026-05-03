@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:brca_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-E2-A150
+##sample_id=TCGA-E2-A150-01
+##cancer_type=Breast Invasive Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=brca_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	140476796	.	A	G	99	PASS	GENE=BRAF;HGVS=L537S;MUTATION_TYPE=Missense_Mutation

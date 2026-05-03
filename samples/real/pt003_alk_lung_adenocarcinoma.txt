@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: luad_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-05-4432-01
+Cancer Type: Lung Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: ALK
+  Protein Change: X263_splice
+  Mutation Type: Splice_Site
+  Genomic Location: chr2:29917880
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

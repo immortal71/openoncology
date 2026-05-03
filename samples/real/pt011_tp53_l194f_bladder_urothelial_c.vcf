@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:blca_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-BT-A2LB
+##sample_id=TCGA-BT-A2LB-01
+##cancer_type=Bladder Urothelial Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=blca_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+17	7578269	.	G	A	99	PASS	GENE=TP53;HGVS=L194F;MUTATION_TYPE=Missense_Mutation

@@ -1,0 +1,18 @@
+{
+  "description": "Clinical concordance benchmark between OpenOncology outputs and oncologist-selected therapies.",
+  "predictions_json": "C:\\Users\\HUAWEI\\Downloads\\cancer\\real_patient_benchmark_100.json",
+  "labels_json": null,
+  "include_custom": false,
+  "total_patients_in_predictions": 100,
+  "patients_compared": 0,
+  "skipped_no_oncologist_label": 100,
+  "skipped_no_model_recommendation": 0,
+  "metrics": {
+    "top1_concordance_count": 0,
+    "top1_concordance_pct": 0.0,
+    "top3_concordance_count": 0,
+    "top3_concordance_pct": 0.0,
+    "mean_jaccard_top3": 0.0
+  },
+  "cases": []
+}

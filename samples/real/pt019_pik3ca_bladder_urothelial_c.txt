@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: blca_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-DK-A1A6-01
+Cancer Type: Bladder Urothelial Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: PIK3CA
+  Protein Change: E453Q
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr3:178928079
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=blca_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

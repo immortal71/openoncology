@@ -1,0 +1,9 @@
+##fileformat=VCFv4.2
+##source=PublishedCaseReport
+##reference=GRCh38
+##case_source=PMID:28168265 (Mok et al., NEJM 2017 FLAURA trial patient representative)
+##cancer_type=Non-Small Cell Lung Cancer
+##note=EGFR L858R is one of the most common activating mutations in NSCLC (~40% of EGFR-mutant cases)
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55191822	rs121434568	T	G	99	PASS	GENE=EGFR;HGVS=p.L858R;COSMIC=COSM6224;ONCOKB_LEVEL=1
+17	7675088	rs28934578	G	A	95	PASS	GENE=TP53;HGVS=p.R248W;COSMIC=COSM10648;ONCOKB_LEVEL=NA

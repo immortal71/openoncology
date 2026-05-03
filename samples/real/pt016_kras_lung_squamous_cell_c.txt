@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: lusc_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-21-1078-01
+Cancer Type: Lung Squamous Cell Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: KRAS
+  Protein Change: C118S
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr12:25378645
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

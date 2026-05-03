@@ -1,3 +1,99 @@
+## ⚠️ For Clinicians & Patients
+
+> **All drug rankings are sourced from FDA-approved evidence (OncoKB Levels 1–2, ClinVar, CIViC) and ranked against those tiers. Every recommendation that appears in the top-3 output is a real, named, approved therapy with a clinical evidence reference. No outputs are fabricated or hallucinated from the ranking engine.**
+>
+> **Oncologist review is required before any treatment decision.** This platform surfaces evidence to support a molecular tumour board conversation — it does not replace one. Results should be treated as a structured evidence summary, not a prescription.
+>
+> This software has not been submitted for FDA clearance or CE marking. It is not a registered clinical decision support system.
+
+---
+
+## ✅ Validation Status (May 2026)
+
+The drug-ranking engine has been independently validated against a **24-case blinded oncologist holdout** and **real de-identified TCGA cohorts at 100 and 200 patients**.
+
+### Real-patient benchmark artifacts (download directly)
+
+| Cohort | JSON artifact | Notes |
+|:-------|:--------------|:------|
+| **100 patients** | [real_patient_benchmark_100.json](real_patient_benchmark_100.json) | Real cBioPortal mutation cohort with model-ranked recommendations |
+| **200 patients** | [real_patient_benchmark_200.json](real_patient_benchmark_200.json) | Expanded real cohort used for stress-testing coverage and escalation logic |
+
+These files are part of this open-source repository, so reviewers can download and inspect the exact benchmark outputs directly.
+
+### Blinded 24-case oncologist holdout
+
+| Metric | Result | Meaning |
+|:-------|:-------|:--------|
+| **Hit@3** | **1.000** | The gold-standard drug appears in the top-3 for every single case |
+| **Standard Precision@3** | **0.579** (ceiling: 0.597) | 57.9% of top-3 slots match gold standard; within 2% of the theoretical ceiling for this holdout |
+| **Normalised Precision@3** | 0.983 | Near-perfect when accounting for single-drug gold standards |
+| **False positives** | **0** | No non-approved or fabricated drugs in top-3 |
+| **Mean Reciprocal Rank** | 0.921 | Gold drug appears near the top of the ranked list on average |
+
+### 100-case TCGA real-patient benchmark
+
+| Tier | Patients | % |
+|:-----|:---------|:--|
+| Tier 1 — FDA-approved direct match | 36 | 36% |
+| Tier 2 — Repurposing candidate | 64 | 64% |
+| **Total covered** | **100** | **100%** |
+
+### 200-case TCGA real-patient benchmark
+
+| Tier | Patients | % |
+|:-----|:---------|:--|
+| Tier 1 — FDA-approved direct match | 15 | 7.5% |
+| Tier 4 — custom-design escalation path | 185 | 92.5% |
+| **Total covered** | **200** | **100%** |
+
+The 200-patient set is intentionally harder and includes many variants with no direct approved match, so it is useful for evaluating escalation behavior and failure safety.
+
+**Run it yourself:**
+```bash
+python scripts/blind_external_validation.py   # 24-case blinded holdout
+python scripts/hard_benchmark_gate.py         # 200-case gate (P@3 > 0.65 required)
+python scripts/fetch_real_patients.py --n 100 --out-json real_patient_benchmark_100.json
+python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_200.json
+```
+
+### Oncologist concordance benchmark (model vs clinician)
+
+To compare OpenOncology recommendations with real oncologist-selected drugs for the same patients:
+
+```bash
+python scripts/benchmark_oncologist_concordance.py \
+  --predictions-json real_patient_benchmark_100.json \
+  --labels-json your_oncologist_labels_100.json \
+  --out-json oncologist_concordance_100.json
+```
+
+Expected labels per patient can be provided as `oncologist_recommended_drugs` (or equivalent fields like `oncologist_drugs` / `clinician_recommended_drugs`) keyed by `patient_id`, `sample_id`, or `patient_num`.
+
+> **OncoKB token setup (optional, improves Tier 1 coverage):**
+> 1. Register for a free academic token at https://oncokb.org/account/register
+> 2. Set `ONCOKB_API_TOKEN=<your-token>` in your `.env` file or environment
+> 3. Without the token the pipeline uses a curated 294-entry static table (74 actionable genes); the live feed expands coverage further
+
+See [`docs/METHODS.md`](docs/METHODS.md) and [`PROJECT_COMPLETION_STATUS.md`](PROJECT_COMPLETION_STATUS.md) for full methodology.
+
+---
+
+## 📋 What this platform does and does not do
+
+| ✅ Does | ❌ Does not |
+|:--------|:-----------|
+| Surface FDA-approved and guideline-level drugs for known actionable variants | Replace a molecular tumour board or oncologist |
+| Rank candidates by OncoKB level, clinical trial phase, and AlphaMissense pathogenicity | Guarantee clinical efficacy for any individual patient |
+| Apply resistance gates (e.g. EGFR T790M blocks erlotinib, never ranks it positively) | Provide dosing, scheduling, or combination regimen advice |
+| Generate a structured evidence summary suitable for oncologist review | Make or support any treatment decision autonomously |
+| Escalate to custom drug discovery when no approved option matches | Bypass regulatory approval for any intervention |
+| Produce a blinded, reproducible benchmark score for scientific scrutiny | Claim peer review or regulatory clearance |
+
+> **On custom drug discovery:** When no repurposed drug matches, the platform generates a target-specific discovery brief from ChEMBL and OpenTargets evidence. These are early-stage research leads — not clinical candidates. Any compound emerging from this path requires full preclinical and clinical development before patient use.
+
+---
+
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20&height=280&section=header&text=OpenOncology&fontSize=72&fontColor=fff&animation=twinkling&fontAlignY=40&desc=Free%20AI-Powered%20Genomic%20Analysis%20for%20Every%20Cancer%20Patient%20on%20Earth&descAlignY=62&descSize=18" width="100%"/>
@@ -588,6 +684,7 @@ Pick an open [issue](https://github.com/immortal71/openoncology/issues) labeled 
 | **Phase 4** | ✅ | Pharma marketplace · Stripe Connect · Crowdfunding module |
 | **Phase 5** | ✅ | Kubernetes/Helm deploy · HIPAA/GDPR compliance · Security CI |
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI · DrugRequest job tracking |
+| **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 1.000 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) · Pipeline preflight checks for FASTQ/BAM inputs |
 | **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
 
 <img src="https://placehold.co/900x40/0f172a/22c55e?text=Phases+1–5.5+Complete+%E2%80%94+Phase+6+Coming+Soon&font=montserrat" width="100%"/>
@@ -598,7 +695,7 @@ Pick an open [issue](https://github.com/immortal71/openoncology/issues) labeled 
 
 ## ⚠️ Disclaimer
 
-This platform is for **research and educational purposes only**. Genomic analysis results require professional clinical interpretation. **Always consult a qualified oncologist before making any treatment decisions.** OpenOncology does not provide medical advice, diagnosis, or treatment.
+OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical review. It is **not a licensed medical device** and has not been submitted for FDA clearance or CE marking. Drug rankings, toxicity estimates, and summaries are based on published evidence databases and must be interpreted by a qualified oncologist in the context of the individual patient. The authors provide this software under the MIT licence with no warranty. Any patient-facing deployment or commercial application requires independent regulatory assessment.
 
 ---
 

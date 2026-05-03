@@ -1,0 +1,31 @@
+{
+  "run_at": "2026-05-02T05:33:22.197130+00:00",
+  "total_cases": 35,
+  "included_count": 34,
+  "excluded_count": 1,
+  "excluded": [
+    {
+      "case_id": "HCX_ALK_F1174L_NEUROBLASTOMA",
+      "gene": "ALK",
+      "variant": "F1174L",
+      "cancer_type": "Neuroblastoma",
+      "difficulty": "RARE_OR_COMPLEX",
+      "expect_empty": false,
+      "known_drugs": [
+        "Crizotinib",
+        "Lorlatinib"
+      ],
+      "has_stable_coverage": false,
+      "primary_static_drugs": [],
+      "co_alterations_checked": {},
+      "co_alteration_drugs": {},
+      "covered_known_drugs": [],
+      "missing_known_drugs": [
+        "Crizotinib",
+        "Lorlatinib"
+      ],
+      "remediation": "add_to_static_table: all known drugs absent from oncokb_evidence.py; verify FDA/OncoKB approval status and add the missing entries"
+    }
+  ],
+  "included_with_partial_coverage": []
+}

@@ -110,6 +110,12 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
+      - name: Hard clinical benchmark quality gate
+        working-directory: ${{ github.workspace }}
+        run: python scripts/hard_benchmark_gate.py
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
   # ── Docker build check ────────────────────────────────────────────────────
   docker-build:
     name: Docker build (no push)

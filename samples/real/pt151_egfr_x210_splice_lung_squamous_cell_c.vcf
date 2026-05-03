@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:lusc_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-60-2698
+##sample_id=TCGA-60-2698-01
+##cancer_type=Lung Squamous Cell Carcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55220237	.	A	G	99	PASS	GENE=EGFR;HGVS=X210_splice;MUTATION_TYPE=Splice_Site

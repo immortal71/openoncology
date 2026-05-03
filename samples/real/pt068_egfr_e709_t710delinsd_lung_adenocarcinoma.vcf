@@ -1,0 +1,10 @@
+##fileformat=VCFv4.2
+##source=cBioPortal:luad_tcga_pub
+##reference=GRCh37
+##patient_id=TCGA-69-7760
+##sample_id=TCGA-69-7760-01
+##cancer_type=Lung Adenocarcinoma
+##data_source=https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+##note=Real de-identified patient from published TCGA study. Data is open-access.
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+7	55241679	.	AAC	-	99	PASS	GENE=EGFR;HGVS=E709_T710delinsD;MUTATION_TYPE=In_Frame_Del

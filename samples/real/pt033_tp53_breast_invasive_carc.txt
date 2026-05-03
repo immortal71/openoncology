@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: brca_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-A2-A0D2-01
+Cancer Type: Breast Invasive Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: TP53
+  Protein Change: P318Tfs*15
+  Mutation Type: Frame_Shift_Del
+  Genomic Location: chr17:7576885
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=brca_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

@@ -5,7 +5,7 @@ bids with their price and estimated timeline.  The patient selects a winning
 bid and proceeds to payment.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, ForeignKey, Float, Text, Enum as SAEnum, JSON, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -50,7 +50,7 @@ class PharmaBid(Base):
 
     status: Mapped[BidStatus] = mapped_column(SAEnum(BidStatus), default=BidStatus.open)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     pharma: Mapped["PharmaCompany"] = relationship("PharmaCompany")
     drug_request: Mapped["DrugRequest"] = relationship("DrugRequest", back_populates="bids")
@@ -91,7 +91,7 @@ class DrugRequest(Base):
     # Winning bid (set when patient accepts a bid)
     accepted_bid_id: Mapped[str] = mapped_column(String, nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
     closed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     patient: Mapped["Patient"] = relationship("Patient")

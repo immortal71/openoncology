@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: luad_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-64-5781-01
+Cancer Type: Lung Adenocarcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: ALK
+  Protein Change: H1475Q
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr2:29416528
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=luad_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import String, DateTime, ForeignKey, Float, Text, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -36,7 +36,7 @@ class Order(Base):
     # Stripe payment intent ID
     stripe_payment_intent_id: Mapped[str] = mapped_column(String(128), nullable=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="orders")
     pharma: Mapped["PharmaCompany"] = relationship("PharmaCompany", back_populates="orders")

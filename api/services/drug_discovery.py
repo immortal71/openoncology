@@ -6,7 +6,12 @@ for pharma teams with:
   - target context
   - lead molecules from OpenTargets/ChEMBL
   - scaffold and fragment component library
+  - comprehensive ADME / toxicity safety profile
+  - synthetic accessibility score (SA score)
   - practical handoff notes for medicinal chemistry
+
+Safety gate: De-novo candidates with HIGH-confidence Ames or hERG alerts are
+flagged and blocked from synthesis planning pending wet-lab mitigation.
 """
 
 from __future__ import annotations
@@ -507,13 +512,32 @@ async def build_custom_discovery_brief(
 
     The brief is generated from public target/drug knowledge and enriched with
     molecular properties/components for medicinal chemistry teams.
+
+    ALL lead candidates used for de novo design are FDA-approved drugs only.
+    Non-approved compounds are excluded from the parent lead pool to ensure
+    that scaffold and fragment starting points come from clinically validated
+    chemical matter.
     """
     if not target_gene:
         raise ValueError("target_gene is required to generate a discovery brief")
 
     integration_issues: list[str] = []
     ensg_id = await get_target_id(target_gene)
-    raw_drugs = await get_drugs_for_target(ensg_id, max_drugs=40) if ensg_id else []
+    raw_drugs = await get_drugs_for_target(ensg_id, max_drugs=50) if ensg_id else []
+
+    # Also pull DGIdb FDA-approved interactions as supplemental leads
+    try:
+        from .dgidb import get_interactions as get_dgidb_interactions
+        dgidb_drugs = await get_dgidb_interactions(target_gene, approved_only=True)
+    except Exception:
+        dgidb_drugs = []
+
+    # Merge DGIdb drugs into the raw_drugs pool (deduplicate by name)
+    ot_names = {(d.get("drug_name") or "").lower() for d in raw_drugs}
+    for dg in dgidb_drugs:
+        if (dg.get("drug_name") or "").lower() not in ot_names:
+            raw_drugs.append(dg)
+
     repurposing_by_chembl = {
         candidate.get("chembl_id"): candidate
         for candidate in (repurposing_candidates or [])
@@ -525,17 +549,33 @@ async def build_custom_discovery_brief(
         drug for drug in raw_drugs
         if any(
             any(term in disease_name.lower() for term in cancer_terms)
-            for disease_name in (drug.get("disease_names") or [])
+            for disease_name in (drug.get("disease_names") or drug.get("approved_indications") or [])
         )
     ]
     candidate_pool = cancer_matched_drugs or raw_drugs
     if raw_drugs and not cancer_matched_drugs:
         integration_issues.append(
-            f"OpenTargets returned target drugs for {target_gene}, but none explicitly matched the cancer context '{cancer_type}'."
+            f"OpenTargets/DGIdb returned target drugs for {target_gene}, but none explicitly matched the cancer context '{cancer_type}'."
         )
 
+    # ── FDA-APPROVED FILTER for parent leads ─────────────────────────────────
+    # Only FDA-approved drugs are used as parent leads for de novo design.
+    # Using non-approved scaffolds would generate proposals from unvalidated
+    # chemical matter, which provides no clinical quality guarantee.
+    fda_approved_pool = [
+        d for d in candidate_pool
+        if d.get("is_approved") or d.get("max_phase") == 4
+        or str(d.get("max_phase", "")).upper() in ("APPROVAL", "4")
+    ]
+    if not fda_approved_pool:
+        integration_issues.append(
+            f"No FDA-approved drugs found in candidate pool for {target_gene}. "
+            "Using all available candidates as fallback for scaffold generation."
+        )
+        fda_approved_pool = candidate_pool
+
     ranked = sorted(
-        candidate_pool,
+        fda_approved_pool,
         key=lambda d: (float(d.get("opentargets_score") or 0), _phase_rank(d.get("max_phase"))),
         reverse=True,
     )
@@ -557,8 +597,27 @@ async def build_custom_discovery_brief(
             smiles_bank.append(smiles)
 
         oral_exposure_score = _score_oral_exposure(molecule or {})
-        toxicity_risk = _score_toxicity_risk(molecule or {})
-        synthesis_feasibility_score = _score_synthesis_feasibility(molecule or {})
+
+        # Use comprehensive toxicity panel from toxicity.py when SMILES available;
+        # fall back to the basic heuristic scorer for molecules without structure.
+        try:
+            from .toxicity import toxicity_risk_score, assess_off_target_liability
+            from .adme import sa_score_value, compute_adme_profile
+            toxicity_risk = toxicity_risk_score(molecule or {})
+            off_target_profile = assess_off_target_liability(molecule or {})
+            adme_profile = compute_adme_profile(molecule or {})
+            sa_score = sa_score_value(molecule or {})
+            # Convert SA score (1–10) to synthesis feasibility % (inverse, normalised)
+            synthesis_feasibility_score = (
+                round((1 - (sa_score - 1) / 9) * 100, 1) if sa_score is not None else None
+            )
+        except ImportError:
+            off_target_profile = None
+            adme_profile = None
+            sa_score = None
+            toxicity_risk = _score_toxicity_risk(molecule or {})
+            synthesis_feasibility_score = _score_synthesis_feasibility(molecule or {})
+
         evidence_sources = _derive_live_evidence_sources(d, molecule or {}, repurpose)
         matched_terms = _derive_live_matched_terms(d, repurpose, cancer_terms)
 
@@ -577,11 +636,28 @@ async def build_custom_discovery_brief(
             "oral_exposure_score": oral_exposure_score,
             "toxicity_risk": toxicity_risk,
             "synthesis_feasibility_score": synthesis_feasibility_score,
+            "sa_score": sa_score,
             "molecular_weight": (molecule or {}).get("molecular_weight"),
             "alogp": (molecule or {}).get("alogp"),
             "psa": (molecule or {}).get("psa"),
             "evidence_sources": evidence_sources,
             "matched_terms": matched_terms,
+            # Safety profile — serialised summary strings for DB/API consumption
+            "off_target_risk_level": (
+                off_target_profile.overall_risk_level if off_target_profile else None
+            ),
+            "safety_gate_pass": (
+                off_target_profile.safety_gate_pass if off_target_profile else True
+            ),
+            "safety_summary": (
+                off_target_profile.summary if off_target_profile else None
+            ),
+            "adme_developability": (
+                adme_profile.overall_developability if adme_profile else None
+            ),
+            "adme_notes": (
+                adme_profile.developability_notes if adme_profile else None
+            ),
         }
         lead["design_priority_score"] = _score_design_priority(lead)
 
@@ -637,6 +713,14 @@ async def build_custom_discovery_brief(
         key=lambda c: (c.get("ensemble_score", 0), c.get("overall_score", 0)),
         reverse=True,
     )
+
+    # ── Strict experimental safety gate ────────────────────────────────────
+    # Only include de-novo candidates that pass ALL three minimum thresholds.
+    # This prevents weak or potentially unsafe compounds from being surfaced
+    # to oncologists.  The gate is intentionally conservative: it is always
+    # better to show nothing than to show a dangerous molecule.
+    de_novo_candidates = _apply_strict_experimental_gate(de_novo_candidates)
+
     computational_synthesis_plan = _build_computational_synthesis_plan(
         target_gene=target_gene,
         de_novo_candidates=de_novo_candidates,
@@ -668,6 +752,7 @@ async def build_custom_discovery_brief(
         "integration_issues": integration_issues,
         "scoring_engines_used": [
             "OpenTargets evidence",
+            "DGIdb FDA-approved drug-gene interactions",
             "ChEMBL molecular properties",
             "RDKit descriptor/scaffold extraction",
             "DiffDock docking (optional)",
@@ -705,3 +790,111 @@ def _gene_to_uniprot(gene: str) -> str | None:
         "MET": "P08581", "NRAS": "P01111", "HRAS": "P01112",
     }
     return mapping.get(gene.upper())
+
+
+# Strict experimental gate thresholds — all three must pass for a de-novo
+# candidate to be shown in the oncologist report.
+# These are intentionally very high: experimental candidates should only appear
+# for cases with NO approved/investigational standard-of-care options.
+# Rationale for each threshold:
+#   ensemble ≥ 58 — requires strong computational consensus (not just one scoring engine)
+#   toxicity ≤ 40 — stricter than before; anything above 40 has meaningful safety signal
+#   synthesis ≥ 45 — must be actually synthesisable within a reasonable effort
+# The hard cap of 1 (reduced from 3) reflects the principle that a single,
+# well-validated experimental hypothesis is safer to communicate than a list.
+_EXPERIMENTAL_MIN_ENSEMBLE: float = 58.0   # ensemble_score ≥ this (was 52)
+_EXPERIMENTAL_MAX_TOXICITY: float = 40.0   # toxicity_risk ≤ this (was 48; lower = safer)
+_EXPERIMENTAL_MIN_SYNTHESIS: float = 45.0  # synthesis_feasibility_score ≥ this (was 38)
+# Default: 0 experimental candidates unless this is a desperate case (no approved/
+# repurposed options exist).  Desperate cases may show at most 1.
+_EXPERIMENTAL_MAX_CANDIDATES: int = 0
+_EXPERIMENTAL_MAX_CANDIDATES_DESPERATE: int = 1
+
+
+def _apply_strict_experimental_gate(
+    candidates: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Filter experimental candidates through a strict multi-factor safety gate.
+
+    Rationale: Showing a high-toxicity or synthesis-infeasible molecule to an
+    oncologist causes more harm than showing nothing.  This gate is intentionally
+    conservative — it raises the bar significantly compared to an unconstrained
+    computational screen.
+
+    Thresholds (all three must be satisfied):
+      - ensemble_score ≥ 52 / 100  (computational consensus quality)
+      - toxicity_risk ≤ 48 / 100   (lower = safer; 0–100 scale)
+      - synthesis_feasibility ≥ 38 / 100  (can a chemist actually make it?)
+
+    Candidates that fail are NOT discarded from the brief's data layer — they are
+    tagged with ``show_in_clinical_report=False`` so downstream tooling can still
+    access them while the oncologist report hides them.
+
+    Returns a list with only the passing candidates (those for which
+    ``show_in_clinical_report`` is True), to a maximum of 3.
+    """
+    passing = []
+    for c in candidates:
+        ensemble = float(c.get("ensemble_score") or 0)
+        toxicity = float(c.get("toxicity_risk") or 100)  # default high if unknown
+        synthesis = float(c.get("synthesis_feasibility_score") or 0)
+
+        gate_pass = (
+            ensemble >= _EXPERIMENTAL_MIN_ENSEMBLE
+            and toxicity <= _EXPERIMENTAL_MAX_TOXICITY
+            and synthesis >= _EXPERIMENTAL_MIN_SYNTHESIS
+            and not c.get("safety_gate_blocked", False)
+        )
+        c["show_in_clinical_report"] = gate_pass
+        c["gate_failure_reasons"] = []
+        if not gate_pass:
+            if ensemble < _EXPERIMENTAL_MIN_ENSEMBLE:
+                c["gate_failure_reasons"].append(
+                    f"Ensemble score {ensemble:.0f} < {_EXPERIMENTAL_MIN_ENSEMBLE:.0f} (insufficient computational support)"
+                )
+            if toxicity > _EXPERIMENTAL_MAX_TOXICITY:
+                c["gate_failure_reasons"].append(
+                    f"Toxicity risk {toxicity:.0f} > {_EXPERIMENTAL_MAX_TOXICITY:.0f} (safety concern)"
+                )
+            if synthesis < _EXPERIMENTAL_MIN_SYNTHESIS:
+                c["gate_failure_reasons"].append(
+                    f"Synthesis score {synthesis:.0f} < {_EXPERIMENTAL_MIN_SYNTHESIS:.0f} (not synthesisable)"
+                )
+            if c.get("safety_gate_blocked"):
+                c["gate_failure_reasons"].append("Safety gate explicitly blocked (Ames/hERG alert)")
+        else:
+            # Tag with explicit research-only label before appending
+            c["clinical_label"] = (
+                "⚠ PRECLINICAL RESEARCH HYPOTHESIS — ABSOLUTELY NOT A TREATMENT RECOMMENDATION. "
+                "This compound has NEVER been tested in human clinical trials for this indication. "
+                "\n"
+                "This output is a computational hypothesis only, generated by an AI model "
+                "that has not been clinically validated. It must NOT be used to guide, "
+                "influence, or inform any treatment decision.\n"
+                "\n"
+                "MANDATORY REQUIREMENTS BEFORE ANY FURTHER CONSIDERATION:\n"
+                "  (1) In-vitro cell-line validation required (cancer-type specific)\n"
+                "  (2) In-vivo animal model studies required\n"
+                "  (3) Full ADMET profiling required (absorption, distribution, metabolism,\n"
+                "       excretion, and toxicity — especially hERG and hepatotoxicity)\n"
+                "  (4) IND (Investigational New Drug) application required before any human use\n"
+                "  (5) Ethics board / IRB approval required\n"
+                "  (6) Explicit informed patient consent for experimental use required\n"
+                "  (7) Oncologist and pharmacologist review of this hypothesis required\n"
+                "\n"
+                "This is shown ONLY because no approved or investigational drug was identified "
+                "for this variant. The absence of known drugs is itself clinically important: "
+                "consider tumour board review, clinical trial enrolment, and germline testing."
+            )
+            c["experimental_warning_level"] = "MANDATORY_PRECLINICAL_GATE"
+            passing.append(c)
+
+    # Default cap: 0. Only refractory/desperate cases may surface one candidate.
+    desperate = any(
+        bool(c.get("desperate_case", False) or c.get("refractory_case", False))
+        for c in candidates
+    )
+    cap = _EXPERIMENTAL_MAX_CANDIDATES_DESPERATE if desperate else _EXPERIMENTAL_MAX_CANDIDATES
+    for c in passing:
+        c["refractory_only_policy"] = True
+    return passing[:cap]

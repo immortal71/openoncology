@@ -1,0 +1,16 @@
+Clinical Biopsy Report
+======================
+Study: lusc_tcga_pub (cBioPortal open-access)
+Sample ID: TCGA-70-6722-01
+Cancer Type: Lung Squamous Cell Carcinoma
+Sequencing: Whole Exome Sequencing (WES)
+
+Somatic Mutation Detected:
+  Gene: EGFR
+  Protein Change: V843L
+  Mutation Type: Missense_Mutation
+  Genomic Location: chr7:55259469
+  Genome Build: GRCh37
+
+Data Source: https://www.cbioportal.org/study/summary?id=lusc_tcga_pub
+Note: De-identified open-tier TCGA data. No PHI.

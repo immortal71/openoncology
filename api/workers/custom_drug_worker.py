@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -116,7 +116,7 @@ def build_custom_drug_brief(self, drug_request_id: str):
                 return
 
             req.discovery_status = DiscoveryStatus.running
-            req.discovery_started_at = datetime.utcnow()
+            req.discovery_started_at = datetime.now(UTC).replace(tzinfo=None)
             req.discovery_error = None
             db.flush()
 
@@ -192,7 +192,7 @@ def build_custom_drug_brief(self, drug_request_id: str):
             req.discovery_brief = brief
             req.drug_spec = _brief_to_drug_spec(brief)
             req.discovery_status = DiscoveryStatus.complete
-            req.discovery_completed_at = datetime.utcnow()
+            req.discovery_completed_at = datetime.now(UTC).replace(tzinfo=None)
             db.flush()
 
         logger.info("[custom-drug] completed brief generation for request %s", drug_request_id)
@@ -203,6 +203,6 @@ def build_custom_drug_brief(self, drug_request_id: str):
             if req:
                 req.discovery_status = __import__('models.bid', fromlist=['DiscoveryStatus']).DiscoveryStatus.failed
                 req.discovery_error = str(exc)
-                req.discovery_completed_at = datetime.utcnow()
+                req.discovery_completed_at = datetime.now(UTC).replace(tzinfo=None)
                 db.flush()
         raise self.retry(exc=exc)
