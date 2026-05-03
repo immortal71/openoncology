@@ -70,6 +70,35 @@ python scripts/benchmark_oncologist_concordance.py \
 
 Expected labels per patient can be provided as `oncologist_recommended_drugs` (or equivalent fields like `oncologist_drugs` / `clinician_recommended_drugs`) keyed by `patient_id`, `sample_id`, or `patient_num`.
 
+## Oncologist Concordance Benchmark
+
+We now run concordance directly on all label cases (instead of joining to a small prediction file).
+
+Coverage stats:
+- Total label cases: 1713
+- Cases with pipeline prediction: 36 (2.1%)
+- Cases with no prediction: 1677 (97.9%)
+- Note: high no-prediction rate reflects that most TCGA patients have non-actionable mutations or received chemotherapy rather than targeted therapy.
+
+Exact Match Results (strict):
+- Top-1: 27.78% (10/36)
+- Top-3: 50.0% (18/36)
+- Jaccard: 0.1887
+
+Equivalence-Adjusted Results (clinical class match):
+- Top-1: 100.0% (36/36)
+- Top-3: 100.0% (36/36)
+- Jaccard: 0.5804
+
+Historical small-run snapshot (legacy subset with only 37 scored cases) is retained in the plain-language document for comparison with earlier reporting.
+
+Source: scripts/benchmark_oncologist_concordance.py
+Labels: scripts/concordance_labels.json (multi-cohort TCGA clinical records)
+
+Future milestone: concordance validation against real-world EHR data is planned and requires institutional data access/partnership approvals.
+
+Plain-language explainer: [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md)
+
 > **OncoKB token setup (optional, improves Tier 1 coverage):**
 > 1. Register for a free academic token at https://oncokb.org/account/register
 > 2. Set `ONCOKB_API_TOKEN=<your-token>` in your `.env` file or environment
