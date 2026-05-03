@@ -22,10 +22,8 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
-import pytest_asyncio
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -389,7 +387,6 @@ class TestSubmitBid:
         self, client: AsyncClient, db_session
     ):
         """Even a valid pharma gets 404 for a missing request."""
-        from models.pharma import PharmaCompany
         pharma = await _seed_pharma(
             db_session,
             verified=True,

@@ -15,7 +15,6 @@ data files have not yet been downloaded:
 """
 from __future__ import annotations
 
-import os
 import sys
 import pytest
 from pathlib import Path
@@ -356,7 +355,7 @@ class TestTcgaBrca:
         _require(_VCF_TCGA_BRCA)
         result = _parse_and_annotate_vcf(str(_VCF_TCGA_BRCA))
         chr3 = [m for m in result if m.get("chrom") == "3"]
-        assert len(chr3) >= 6, f"Expected ≥6 chr3 variants (PIK3CA) in BRCA data"
+        assert len(chr3) >= 6, "Expected ≥6 chr3 variants (PIK3CA) in BRCA data"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -412,14 +411,14 @@ class TestTcgaCoadread:
         _require(_VCF_TCGA_COAD)
         result = _parse_and_annotate_vcf(str(_VCF_TCGA_COAD))
         chr5 = [m for m in result if m.get("chrom") == "5"]
-        assert len(chr5) >= 6, f"Expected ≥6 chr5 (APC) variants in COAD data"
+        assert len(chr5) >= 6, "Expected ≥6 chr5 (APC) variants in COAD data"
 
     def test_coad_chromosome_12_variants(self):
         """KRAS sits on chromosome 12."""
         _require(_VCF_TCGA_COAD)
         result = _parse_and_annotate_vcf(str(_VCF_TCGA_COAD))
         chr12 = [m for m in result if m.get("chrom") == "12"]
-        assert len(chr12) >= 6, f"Expected ≥6 chr12 (KRAS) variants in COAD data"
+        assert len(chr12) >= 6, "Expected ≥6 chr12 (KRAS) variants in COAD data"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -78,7 +78,7 @@ def estimate_sa_score(molecule: dict[str, Any]) -> Optional[SyntheticAccessibili
 
     try:
         from rdkit import Chem
-        from rdkit.Chem import Descriptors, rdMolDescriptors
+        from rdkit.Chem import rdMolDescriptors
 
         mol = Chem.MolFromSmiles(smiles or "")
         if mol is not None:

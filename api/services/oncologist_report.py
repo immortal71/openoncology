@@ -1325,9 +1325,9 @@ def _build_tumor_board_questions(
         )
 
     questions.append(
-        f"Is this patient eligible for comprehensive molecular profiling "
-        f"(e.g., FoundationOne CDx, Tempus xT) to confirm these findings and "
-        f"identify additional actionable alterations not covered by this analysis?"
+        "Is this patient eligible for comprehensive molecular profiling "
+        "(e.g., FoundationOne CDx, Tempus xT) to confirm these findings and "
+        "identify additional actionable alterations not covered by this analysis?"
     )
 
     return questions
@@ -1529,12 +1529,16 @@ def _render_plain_text(r: OncologistReport) -> str:
         h3      = bench.get("hit_at_3")
         mrr     = bench.get("mrr")
         fp      = bench.get("false_positive_rate")
-        n       = bench.get("total_gold_standard_cases")
-        if p3_std  is not None: lines.append(f"║  Standard P@3 (honest, comparable):  {p3_std:.3f}         ║")
-        if p3_norm is not None: lines.append(f"║  Normalised P@3 (single-drug credit): {p3_norm:.3f}         ║")
-        if h3      is not None: lines.append(f"║  Hit@3 (≥1 correct drug in top 3):    {h3:.1%}              ║")
-        if mrr     is not None: lines.append(f"║  Mean Reciprocal Rank:                {mrr:.3f}         ║")
-        if fp      is not None: lines.append(f"║  False-positive rate (50 VUS cases):  {fp:.1%}            ║")
+        if p3_std is not None:
+            lines.append(f"║  Standard P@3 (honest, comparable):  {p3_std:.3f}         ║")
+        if p3_norm is not None:
+            lines.append(f"║  Normalised P@3 (single-drug credit): {p3_norm:.3f}         ║")
+        if h3 is not None:
+            lines.append(f"║  Hit@3 (≥1 correct drug in top 3):    {h3:.1%}              ║")
+        if mrr is not None:
+            lines.append(f"║  Mean Reciprocal Rank:                {mrr:.3f}         ║")
+        if fp is not None:
+            lines.append(f"║  False-positive rate (50 VUS cases):  {fp:.1%}            ║")
         lines.append("║                                                                    ║")
         lines.append("║  ⚠ Standard P@3 0.50 means ~1 in 3 top slots is NOT the         ║")
         lines.append("║    best known drug.  This is a RESEARCH tool, not a diagnostic.   ║")

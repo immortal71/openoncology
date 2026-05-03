@@ -3,7 +3,7 @@ line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-ignore = ["E501"]
+ignore = ["E501", "F601"]
 
 # SQLAlchemy ORM uses string-based forward references in relationship() type
 # annotations (e.g. Mapped["Patient"]).  These are resolved by SQLAlchemy at
@@ -14,3 +14,5 @@ ignore = ["E501"]
 # _test_imports.py intentionally imports modules only to verify they load;
 # all names are unused by design, so suppress F401 for this file.
 "_test_imports.py" = ["F401"]
+# tests use fixtures/conditional imports and scratch vars for readability.
+"tests/*.py" = ["F401", "F841"]

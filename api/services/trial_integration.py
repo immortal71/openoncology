@@ -27,7 +27,6 @@ import asyncio
 import json
 import logging
 import re
-from datetime import datetime
 from typing import Any, Optional
 import httpx
 
@@ -100,26 +99,26 @@ TRIAL_PHASE_TO_LEVEL: dict[str, str] = {
 
 async def fetch_trials_by_gene(gene: str, cancer_type: Optional[str] = None, limit: int = 50) -> list[dict[str, Any]]:
     """Fetch ClinicalTrials.gov trials studying a specific gene.
-    
+
     Args:
         gene: Gene symbol (e.g., "EGFR", "ALK")
         cancer_type: Optional cancer type filter (e.g., "NSCLC", "breast cancer")
         limit: Max number of trials to return
-    
+
     Returns:
         List of trial dicts with: trial_id, title, phase, status, drugs, mutations, gene, cancer_type
     """
     search_terms = GENE_TO_TRIAL_NAMES.get(gene, [gene])
-    
+
     # Add precision medicine / targeted therapy qualifier
     query_parts = []
     for term in search_terms:
         query_parts.append(f'("{term}" OR "{term} mutation")')
     query = " OR ".join(query_parts) + ' AND ("precision medicine" OR "targeted therapy" OR "biomarker")'
-    
+
     if cancer_type:
         query += f' AND "{cancer_type}"'
-    
+
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # ClinicalTrials.gov API v2 query
@@ -134,13 +133,13 @@ async def fetch_trials_by_gene(gene: str, cancer_type: Optional[str] = None, lim
             )
             response.raise_for_status()
             data = response.json()
-            
+
             trials = []
             for study in data.get("studies", [])[:limit]:
                 parsed = _parse_trial_json(study, gene)
                 if parsed:
                     trials.append(parsed)
-            
+
             return trials
     except Exception as e:
         logger.error(f"Error fetching trials for {gene}: {e}")
@@ -149,21 +148,21 @@ async def fetch_trials_by_gene(gene: str, cancer_type: Optional[str] = None, lim
 
 async def fetch_trials_by_drug(drug: str, limit: int = 50) -> list[dict[str, Any]]:
     """Fetch ClinicalTrials.gov trials using a specific drug.
-    
+
     Args:
         drug: Drug name (e.g., "Osimertinib")
         limit: Max number of trials
-    
+
     Returns:
         List of trial dicts
     """
     genes = DRUG_TO_GENES.get(drug, [])
-    
+
     trials = []
     for gene in genes:
         gene_trials = await fetch_trials_by_gene(gene, limit=limit // len(genes) if genes else limit)
         trials.extend(gene_trials)
-    
+
     return trials
 
 
@@ -176,16 +175,15 @@ def _parse_trial_json(study: dict[str, Any], gene: str) -> Optional[dict[str, An
         design = protocol.get("designModule", {})
         cond = protocol.get("conditionsModule", {})
         interv = protocol.get("interventionsModule", {})
-        arm = protocol.get("armsInterventionsModule", {})
         outcome = protocol.get("outcomesModule", {})
-        
+
         trial_id = identif.get("nctId", "UNKNOWN")
         title = identif.get("officialTitle", identif.get("briefTitle", ""))
         phase = design.get("phases", ["UNKNOWN"])[0] if design.get("phases") else "UNKNOWN"
         status_val = status.get("overallStatus", "UNKNOWN")
         conditions = cond.get("conditions", [])
         cancer_type = conditions[0] if conditions else "Unknown"
-        
+
         # Extract drugs from interventions
         drugs = []
         if interv and interv.get("interventions"):
@@ -195,13 +193,13 @@ def _parse_trial_json(study: dict[str, Any], gene: str) -> Optional[dict[str, An
                     # Sanitize drug name (remove dosage, frequency, etc.)
                     drug_name = re.split(r'\s+\(', name)[0].strip()
                     drugs.append(drug_name)
-        
+
         # Get primary outcomes
         primary_outcomes = []
         if outcome and outcome.get("primaryOutcomes"):
             for po in outcome["primaryOutcomes"]:
                 primary_outcomes.append(po.get("measure", ""))
-        
+
         return {
             "trial_id": trial_id,
             "title": title,
@@ -227,19 +225,19 @@ def generate_benchmark_case(
     trial_stage: str = "PHASE_3",
 ) -> dict[str, Any]:
     """Convert trial data into benchmark case format.
-    
+
     Args:
         trial: Trial dict from fetch_trials_by_*
         variant: Specific variant (e.g., "L858R", "exon19_del")
         drugs: Known effective drugs for this variant in this trial
         evidence_level: OncoKB level (e.g., "LEVEL_1")
         trial_stage: Clinical phase (e.g., "PHASE_3")
-    
+
     Returns:
         Benchmark case dict
     """
     case_id = f"{trial['gene']}_{variant}_{trial['trial_id']}".replace(" ", "_")
-    
+
     return {
         "case_id": case_id,
         "gene": trial["gene"],
@@ -377,11 +375,6 @@ def get_real_trial_cases() -> list[dict[str, Any]]:
     return REAL_TRIAL_CASES
 
 
-if __name__ == "__main__":
-    # Quick test
-    asyncio.run(test_fetch_trials())
-
-
 async def test_fetch_trials():
     """Test fetching trials from ClinicalTrials.gov API."""
     print("Fetching EGFR trials...")
@@ -389,7 +382,7 @@ async def test_fetch_trials():
     print(f"Found {len(trials)} trials:")
     for trial in trials:
         print(f"  {trial['trial_id']}: {trial['title'][:80]}")
-    
+
     print("\n Generating benchmark case...")
     if trials:
         case = generate_benchmark_case(
@@ -399,3 +392,8 @@ async def test_fetch_trials():
             evidence_level="LEVEL_1",
         )
         print(json.dumps(case, indent=2))
+
+
+if __name__ == "__main__":
+    # Quick test
+    asyncio.run(test_fetch_trials())

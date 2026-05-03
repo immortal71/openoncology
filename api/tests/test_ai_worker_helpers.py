@@ -11,12 +11,10 @@ returns the plain function.
 import sys
 import os
 import types
-import importlib
 from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
 
 
 # ── Lazy-import helpers without bootstrapping Celery ────────────────────────

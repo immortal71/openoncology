@@ -212,12 +212,12 @@ def _template_summary(
         ).strip()
     else:
         return (
-            f"Your DNA test did not find a mutation that matches a targeted therapy "
-            f"in our research database. This does not mean there are no treatment options — "
-            f"your oncologist will consider many factors beyond this one test.\n\n"
-            f"Please share these results with your doctor as soon as possible.\n\n"
-            f"This report is not medical advice. "
-            f"Please discuss these results with your oncologist."
+            "Your DNA test did not find a mutation that matches a targeted therapy "
+            "in our research database. This does not mean there are no treatment options — "
+            "your oncologist will consider many factors beyond this one test.\n\n"
+            "Please share these results with your doctor as soon as possible.\n\n"
+            "This report is not medical advice. "
+            "Please discuss these results with your oncologist."
         )
 
 
@@ -242,22 +242,10 @@ def generate_research_report(
       - Per-drug plain-language ranking rationale
       - Evidence completeness and confidence level for each candidate
       - System limitations and withdrawn-drug warnings
+            - Missing evidence sources per drug
+            - Interpretation guide for audit trail columns
     """
-    Includes:
-      - Per-drug evidence audit trail (source, raw_score, effective_weight)
-      - Per-drug plain-language explanation of ranking rationale
-      - Evidence completeness and confidence level for each candidate
-      - System limitations from `get_system_limitations()`
-      - Withdrawn-drug warnings flagged by `check_withdrawn_status()`
-      - Missing evidence sources per drug
-      - Interpretation guide for the audit trail columns
 
-    This is SEPARATE from the patient-facing `generate_plain_language_summary()`
-    which is not the right place for technical audit data.  This report is
-    intended for oncologists, clinical data scientists, and regulators.
-
-    Returns a JSON-serialisable dict.
-    """
     from api.ai.ranking import get_system_limitations
 
     candidate_reports = []

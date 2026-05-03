@@ -22,7 +22,7 @@ import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
 from main import app
-from middleware.audit import _extract_user_id, _client_ip, _PHI_PREFIXES
+from middleware.audit import _extract_user_id, _PHI_PREFIXES
 
 
 # ─────────────────────────────────────────────────────────────────────────────

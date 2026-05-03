@@ -5737,7 +5737,7 @@ TRIAL_DERIVED_CASES: list[dict[str, Any]] = [
         "difficulty": "CLEAN_L1",
         "note": "BRAF V600E melanoma: OS/RFS improvement with vemurafenib",
     },
-    
+
     # ── Uncommon/rare variants (L2/L3) ─────────────────────────────────────────
     {
         "case_id": "EGFR_G719A_IPASS_001",
@@ -5776,7 +5776,7 @@ TRIAL_DERIVED_CASES: list[dict[str, Any]] = [
         "difficulty": "CONFLICTING_RESISTANCE",
         "note": "ALK solvent-front mutation: selective resistance pattern",
     },
-    
+
     # ── Emerging/novel targets (L3/L4) ────────────────────────────────────────
     {
         "case_id": "SMARCA4_LOSS_TRIAL_001",
@@ -5796,7 +5796,7 @@ TRIAL_DERIVED_CASES: list[dict[str, Any]] = [
         "difficulty": "MECHANISTIC",
         "note": "p16 loss in melanoma; CDK4/6i may restore cell cycle control",
     },
-    
+
     # ── Negative controls (expect_empty) ──────────────────────────────────────
     {
         "case_id": "EGFR_WT_NSCLC_NEG_001",
@@ -6562,10 +6562,10 @@ class BenchmarkReport:
 
     def summary(self) -> str:
         lines = [
-            f"=== OpenOncology Benchmark Report ===",
+            "=== OpenOncology Benchmark Report ===",
             f"Run at: {self.run_at}",
             f"Cases evaluated: {self.n_successful}/{self.n_cases}",
-            f"",
+            "",
             f"Precision@1:  {self.mean_precision_at_1:.3f}",
             f"Precision@3:  {self.mean_precision_at_3:.3f}",
             f"Precision@5:  {self.mean_precision_at_5:.3f}",
@@ -6573,7 +6573,7 @@ class BenchmarkReport:
             f"Hit@3:        {self.hit_rate_at_3:.1%}",
             f"Mean MRR:     {self.mean_mrr:.3f}",
             f"NDCG@5:       {self.mean_ndcg_at_5:.3f}",
-            f"",
+            "",
             self.comparison_note,
         ]
         return "\n".join(lines)
@@ -6761,10 +6761,10 @@ class AblationStudyReport:
             "=== Ablation Study Report ===",
             f"Run at: {self.run_at}",
             f"Cases: {self.n_cases}",
-            f"",
+            "",
             f"Full model  — P@3={self.full_model_precision_at_3:.3f}  "
             f"MRR={self.full_model_mrr:.3f}  Hit@3={self.full_model_hit_at_3:.1%}",
-            f"",
+            "",
             f"{'Source':<20} {'P@3':>6} {'ΔMRR':>8} {'ΔP@3':>8}  Interpretation",
             f"{'─'*20} {'─'*6} {'─'*8} {'─'*8}  {'─'*30}",
         ]
@@ -6846,7 +6846,6 @@ async def run_ablation_study(
 
         # Re-run benchmark with ablated config
         # We patch rank_candidates inline to use the ablation config
-        import functools
 
         async def _ablated_run_case(
             case: dict, rank_fn=_rank, ablation_cfg=cfg

@@ -21,7 +21,7 @@ from __future__ import annotations
 import html
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ def _build_oncologist_html(r) -> str:
         h3 = bench.get("hit_at_3")
         n = bench.get("total_gold_standard_cases")
         lims = bench.get("benchmark_limitations") or []
-        lim_items = "".join(f"<li>{html.escape(str(l))}</li>" for l in lims[:4])
+        lim_items = "".join(f"<li>{html.escape(str(lim))}</li>" for lim in lims[:4])
         bench_note = "This is an experimental open-source tool. Not clinically validated."
         bench_block = f"""
         <div class="box-disc">

@@ -347,11 +347,11 @@ def _build_next_steps(targetable: bool, gene: Optional[str]) -> str:
         )
     else:
         return (
-            f"1. Bring this report to your next cancer doctor visit.\n"
-            f"2. Ask about all treatment options available for your cancer type.\n"
-            f"3. Ask if a team of cancer specialists can review your case together.\n"
-            f"4. Ask your doctor or nurse about clinical trials and support groups.\n"
-            f"5. Do not start or stop any medicine before talking to your doctor."
+            "1. Bring this report to your next cancer doctor visit.\n"
+            "2. Ask about all treatment options available for your cancer type.\n"
+            "3. Ask if a team of cancer specialists can review your case together.\n"
+            "4. Ask your doctor or nurse about clinical trials and support groups.\n"
+            "5. Do not start or stop any medicine before talking to your doctor."
         )
 
 

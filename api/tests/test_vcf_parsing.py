@@ -16,7 +16,6 @@ import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
 from api.workers.genomic_worker import _parse_and_annotate_vcf
 
 
