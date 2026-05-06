@@ -147,7 +147,7 @@ class Query:
         db = info.context["db"]
         from sqlalchemy import select
         from models.cohort import Study
-        stmt = select(Study).where(Study.is_public == True)  # noqa: E712
+        stmt = select(Study).where(Study.is_public.is_(True))  # noqa: E712
         if cancer_type:
             stmt = stmt.where(Study.cancer_type == cancer_type.upper())
         if source:

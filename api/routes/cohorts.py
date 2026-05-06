@@ -43,7 +43,7 @@ async def list_studies(
     db: AsyncSession = Depends(get_db),
 ):
     """List all public genomic studies available for browsing."""
-    stmt = select(Study).where(Study.is_public == True)  # noqa: E712
+    stmt = select(Study).where(Study.is_public.is_(True))  # noqa: E712
     if cancer_type:
         stmt = stmt.where(Study.cancer_type == cancer_type.upper())
     if source:

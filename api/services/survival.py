@@ -111,10 +111,6 @@ def _log_rank_test(
     E_a_total = 0.0
     V_total = 0.0
 
-    n_a_total = len(times_a)
-    n_b_total = len(times_b)
-    _ = n_a_total + n_b_total  # total population size (used for context)
-
     for t in all_times:
         # n at risk in each group at time t
         n_a = sum(1 for ti in times_a if ti >= t)
