@@ -759,6 +759,7 @@ OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical r
 <a href="https://github.com/immortal71/openoncology/issues">
   <img src="https://img.shields.io/badge/💡_Request_Feature-22c55e?style=for-the-badge&logoColor=white" alt="Feature"/>
 </a>
+NOte; We r about to publish paper for this tool soon !!
 
 </div>
 
