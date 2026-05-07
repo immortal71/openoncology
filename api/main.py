@@ -11,6 +11,9 @@ from database import engine, Base, AsyncSessionLocal
 from middleware.audit import AuditMiddleware
 from middleware.rate_limit import limiter
 from routes import auth, submit, results, repurposing, marketplace, oncologist, webhook, pharma_admin, stripe_connect, campaign, gdpr
+from routes.cohorts import router as cohorts_router
+from routes.fhir import router as fhir_router
+from routes.visualizations import router as viz_router
 
 
 async def _seed_local_demo_data() -> None:
@@ -109,7 +112,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="OpenOncology API",
     description="Open-source precision cancer medicine platform",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
     docs_url="/docs" if settings.environment == "development" else None,
     redoc_url="/redoc" if settings.environment == "development" else None,
@@ -142,6 +145,20 @@ app.include_router(webhook.router)
 app.include_router(pharma_admin.router)
 app.include_router(stripe_connect.router)
 app.include_router(gdpr.router)
+# Phase 2: multi-cohort study browser
+app.include_router(cohorts_router)
+# Phase 3: visualisations (lollipop, survival, co-occurrence)
+app.include_router(viz_router)
+# Phase 6: FHIR R4 export
+app.include_router(fhir_router)
+
+# Phase 4: GraphQL API (mounted only when strawberry is installed)
+try:
+    from graphql import create_graphql_router
+    from database import get_db
+    app.include_router(create_graphql_router(get_db), prefix="/graphql")
+except ImportError:
+    pass  # strawberry-graphql not installed — GraphQL endpoint disabled
 
 
 @app.get("/health")

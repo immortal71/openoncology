@@ -36,9 +36,24 @@ class Submission(Base):
     pipeline_job_id: Mapped[str] = mapped_column(String(128), nullable=True)
     ai_job_id: Mapped[str] = mapped_column(String(128), nullable=True)
 
+    # 0–100 progress percentage updated by workers for live progress bar
+    progress_pct: Mapped[int] = mapped_column(default=0)
+
     submitted_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
     patient: Mapped["Patient"] = relationship("Patient", back_populates="submissions")
     mutations: Mapped[list["Mutation"]] = relationship("Mutation", back_populates="submission")
     result: Mapped["Result"] = relationship("Result", back_populates="submission", uselist=False)
+    copy_number_alterations: Mapped[list["CopyNumberAlteration"]] = relationship(
+        "CopyNumberAlteration", back_populates="submission"
+    )
+    structural_variants: Mapped[list["StructuralVariant"]] = relationship(
+        "StructuralVariant", back_populates="submission"
+    )
+    rnaseq_expression: Mapped[list["RnaSeqExpression"]] = relationship(
+        "RnaSeqExpression", back_populates="submission"
+    )
+    mutation_signatures: Mapped[list["MutationSignature"]] = relationship(
+        "MutationSignature", back_populates="submission"
+    )

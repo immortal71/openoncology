@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, UTC
+from typing import Optional
 
-from sqlalchemy import String, DateTime, ForeignKey, Float, Enum as SAEnum
+from sqlalchemy import String, DateTime, ForeignKey, Float, Enum as SAEnum, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
@@ -27,6 +28,17 @@ class OncoKBLevel(str, enum.Enum):
     unknown = "unknown"
 
 
+# MAF variant_classification values (Broad / cBioPortal standard)
+MAF_VARIANT_CLASSIFICATIONS = (
+    "Missense_Mutation", "Nonsense_Mutation", "Frame_Shift_Del",
+    "Frame_Shift_Ins", "Splice_Site", "Splice_Region", "In_Frame_Del",
+    "In_Frame_Ins", "Silent", "3'UTR", "5'UTR", "Intron",
+    "RNA", "Translation_Start_Site", "Nonstop_Mutation",
+    "De_novo_Start_InFrame", "De_novo_Start_OutOfFrame",
+    "Targeted_Region", "IGR",
+)
+
+
 class Mutation(Base):
     __tablename__ = "mutations"
 
@@ -40,6 +52,27 @@ class Mutation(Base):
     position: Mapped[int] = mapped_column(nullable=True)
     ref_allele: Mapped[str] = mapped_column(String(64), nullable=True)
     alt_allele: Mapped[str] = mapped_column(String(64), nullable=True)
+
+    # ── Full MAF-spec fields ────────────────────────────────────────────────────
+    # Variant allele frequency (0–1) computed from AD or AF FORMAT fields
+    vaf: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # Total read depth at the variant position
+    depth: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Reference and alternate allele read depths (from AD FORMAT field)
+    allele_depth_ref: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    allele_depth_alt: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Strand bias — SB or FS PHRED score from GATK INFO field
+    strand_bias: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # MAF variant classification (Missense_Mutation, Frame_Shift_Del, etc.)
+    variant_classification: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    # RefSeq transcript identifier (e.g. NM_004333.6)
+    refseq_transcript_id: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    # Amino-acid position of the change (integer, e.g. 858 for L858R)
+    protein_position: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Codon change string (e.g. c.2573T>G)
+    codon_change: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    # Cancer Hotspots v2 flag — True when this residue is a recurrent hotspot
+    hotspot_flag: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Classification from AlphaMissense
     classification: Mapped[MutationClassification] = mapped_column(

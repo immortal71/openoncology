@@ -54,6 +54,7 @@ export default function RootLayout({
                     <span className="font-[var(--font-manrope)] font-extrabold text-slate-900 dark:text-white tracking-tight">OpenOncology</span>
                   </Link>
                   <div className="flex items-center gap-2 sm:gap-3 text-sm">
+                    <Link href="/explore" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors px-2 py-1">Explore</Link>
                     <Link href="/submit" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors px-2 py-1">Submit</Link>
                     <Link href="/orders" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors px-2 py-1">Orders</Link>
                     <Link href="/marketplace" className="hidden sm:inline text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors px-2 py-1">Marketplace</Link>

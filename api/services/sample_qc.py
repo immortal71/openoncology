@@ -406,6 +406,11 @@ class SampleQCReport:
     verdict: str   # "PASS", "WARN", "FAIL"
     verdict_reasons: list[str]
     actionable_recommendations: list[str]
+    # TMB / MSI are computed lazily from mutations; None until integrated
+    tmb_per_mb: Optional[float] = None
+    tmb_classification: Optional[str] = None
+    msi_classification: Optional[str] = None
+    immunotherapy_relevant: Optional[bool] = None
 
 
 def run_sample_qc(vcf_path: str | Path) -> SampleQCReport:
@@ -468,3 +473,33 @@ def run_sample_qc(vcf_path: str | Path) -> SampleQCReport:
         verdict_reasons=fail_reasons + warn_reasons,
         actionable_recommendations=recommendations,
     )
+
+
+def enrich_qc_with_tmb_msi(report: SampleQCReport, mutations: list[dict]) -> SampleQCReport:
+    """Attach TMB / MSI results to an existing SampleQCReport.
+
+    Separates the QC pipeline (VCF-level) from the TMB/MSI analysis (mutation
+    list-level) so each can be called independently.
+
+    Args:
+        report:    A SampleQCReport previously returned by run_sample_qc().
+        mutations: List of mutation dicts with ``variant_classification`` keys.
+
+    Returns:
+        The same report instance with tmb_*, msi_classification, and
+        immunotherapy_relevant populated.
+    """
+    from services.tmb_msi import run_tmb_msi_analysis
+    tmb_msi = run_tmb_msi_analysis(mutations)
+    report.tmb_per_mb = tmb_msi.tmb.tmb_per_mb
+    report.tmb_classification = tmb_msi.tmb.classification
+    report.msi_classification = tmb_msi.msi.classification
+    report.immunotherapy_relevant = tmb_msi.immunotherapy_relevant
+    logger.info(
+        "[sample_qc] TMB=%.1f (%s) MSI=%s immuno=%s",
+        tmb_msi.tmb.tmb_per_mb,
+        tmb_msi.tmb.classification,
+        tmb_msi.msi.classification,
+        tmb_msi.immunotherapy_relevant,
+    )
+    return report
