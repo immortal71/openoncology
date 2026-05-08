@@ -1,0 +1,81 @@
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allActionableVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allAnnotatedVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] all public dump URLs failed; continuing with cache/static fallback. See https://www.oncokb.org/dataAccess for manual download guidance.
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allActionableVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allAnnotatedVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] all public dump URLs failed; continuing with cache/static fallback. See https://www.oncokb.org/dataAccess for manual download guidance.
+CIViC lookup failed for PIK3CA E542K: [Errno -5] No address associated with hostname
+CIViC lookup failed for CD79B Y196H: [Errno -5] No address associated with hostname
+CIViC lookup failed for ABL1 T315I: [Errno -5] No address associated with hostname
+CIViC lookup failed for ERBB2 AMPLIFICATION: [Errno -5] No address associated with hostname
+CIViC lookup failed for JAK2 V617F: [Errno -5] No address associated with hostname
+CIViC lookup failed for CDK12 BIALLELIC_LOSS: [Errno -5] No address associated with hostname
+CIViC lookup failed for ESR1 Y537N: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR2 AMPLIFICATION: [Errno -5] No address associated with hostname
+CIViC lookup failed for ABL1 BCR-ABL1: [Errno -5] No address associated with hostname
+CIViC lookup failed for BRCA2 Loss_of_Function: [Errno -5] No address associated with hostname
+CIViC lookup failed for ERBB2 Amplification: [Errno -5] No address associated with hostname
+CIViC lookup failed for BRAF V600E: [Errno -5] No address associated with hostname
+CIViC lookup failed for CDKN2A Loss: [Errno -5] No address associated with hostname
+CIViC lookup failed for IDH2 R172W: [Errno -5] No address associated with hostname
+CIViC lookup failed for VHL truncation: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR2 Fusion: [Errno -5] No address associated with hostname
+CIViC lookup failed for FLT3 Y842H: [Errno -5] No address associated with hostname
+CIViC lookup failed for EGFR AMPLIFICATION: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR3 FUSION: [Errno -5] No address associated with hostname
+CIViC lookup failed for KRAS G13D: [Errno -5] No address associated with hostname
+CIViC lookup failed for PIK3CA E542K: [Errno -5] No address associated with hostname
+CIViC lookup failed for SMARCA4 Loss_of_Function: [Errno -5] No address associated with hostname
+CIViC lookup failed for SF3B1 K700E: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR3 K650E: [Errno -5] No address associated with hostname
+CIViC lookup failed for TSC2 truncation: [Errno -5] No address associated with hostname
+CIViC lookup failed for NTRK3 FUSION: [Errno -5] No address associated with hostname
+CIViC lookup failed for NF2 truncation: [Errno -5] No address associated with hostname
+CIViC lookup failed for TP53 R248H: [Errno -5] No address associated with hostname
+CIViC lookup failed for JAK2 V617F: [Errno -5] No address associated with hostname
+CIViC lookup failed for BRCA1 Splice_Site: [Errno -5] No address associated with hostname
+CIViC lookup failed for IDH2 R140Q: [Errno -5] No address associated with hostname
+CIViC lookup failed for PDGFRA D842V: [Errno -5] No address associated with hostname
+CIViC lookup failed for SMAD4 TRUNCATION: [Errno -5] No address associated with hostname
+CIViC lookup failed for MET AMPLIFICATION: [Errno -5] No address associated with hostname
+CIViC lookup failed for HRAS Q61R: [Errno -5] No address associated with hostname
+CIViC lookup failed for TSC1 Loss_of_Function: [Errno -5] No address associated with hostname
+CIViC lookup failed for EGFR G719C: [Errno -5] No address associated with hostname
+CIViC lookup failed for CD274 Amplification: [Errno -5] No address associated with hostname
+CIViC lookup failed for PTEN truncation: [Errno -5] No address associated with hostname
+CIViC lookup failed for MET Exon14_Skipping: [Errno -5] No address associated with hostname
+CIViC lookup failed for RET CCDC6-RET: [Errno -5] No address associated with hostname
+CIViC lookup failed for NRAS Q61L: [Errno -5] No address associated with hostname
+CIViC lookup failed for NTRK1 FUSION: [Errno -5] No address associated with hostname
+CIViC lookup failed for HRAS G12V: [Errno -5] No address associated with hostname
+CIViC lookup failed for IDH1 R132G: [Errno -5] No address associated with hostname
+CIViC lookup failed for NTRK1 G595R: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR4 Amplification: [Errno -5] No address associated with hostname
+CIViC lookup failed for FGFR3 S249C: [Errno -5] No address associated with hostname
+CIViC lookup failed for CDK4 Amplification: [Errno -5] No address associated with hostname
+CIViC lookup failed for FAT1 truncation: [Errno -5] No address associated with hostname
+========================================================================
+BLIND EXTERNAL VALIDATION
+========================================================================
+Cases: 50
+Profile: transparent_v1
+Standard P@3: 0.517
+Normalized P@3: 0.812
+Hit@3:        0.900
+MRR:          0.871
+NDCG@3:       0.845
+False positives: 1
+Single-drug sensitivity fraction: 0.300
+Metric redundancy risk: False
+Std P@3 ceiling (this holdout): 0.650
+Blind packet: /home/runner/work/openoncology/openoncology/blind_review_packet.json
+Scoring key:  /home/runner/work/openoncology/openoncology/blind_review_key_scoring.json
+========================================================================
+ONCOLOGIST REVIEW PACKET DIFF
+========================================================================
+Difficult cases reviewed: 16
+Difficult top-3 changed:  15
+Standard P@3 delta:      -0.0458
+JSON: /home/runner/work/openoncology/openoncology/artifacts/validation_diff/oncologist_review_packet_diff.json
+MD:   /home/runner/work/openoncology/openoncology/artifacts/validation_diff/oncologist_review_packet_diff.md
+Diff artifacts generated under artifacts/validation_diff

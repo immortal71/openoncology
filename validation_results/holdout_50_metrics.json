@@ -1,0 +1,7 @@
+{
+  "hit_at_3": 0.9,
+  "standard_precision_at_3": 0.5167,
+  "normalised_precision_at_3": 0.8125,
+  "mrr": 0.8708,
+  "false_positive_rate": 0.1
+}

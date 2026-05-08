@@ -1,0 +1,37 @@
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allActionableVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] failed URL https://www.oncokb.org/api/v1/utils/allAnnotatedVariants.txt ([Errno -5] No address associated with hostname)
+[OncoKB] all public dump URLs failed; continuing with cache/static fallback. See https://www.oncokb.org/dataAccess for manual download guidance.
+OpenTargets search failed for ERBB2: [Errno -5] No address associated with hostname
+[dgidb] interactions query failed for ERBB2: [Errno -5] No address associated with hostname
+OpenTargets search failed for MTOR: [Errno -5] No address associated with hostname
+[dgidb] interactions query failed for MTOR: [Errno -5] No address associated with hostname
+OpenTargets search failed for EGFR: [Errno -5] No address associated with hostname
+[dgidb] interactions query failed for EGFR: [Errno -5] No address associated with hostname
+OpenTargets search failed for TMB: [Errno -5] No address associated with hostname
+[dgidb] interactions query failed for TMB: [Errno -5] No address associated with hostname
+OpenTargets search failed for BRAF: [Errno -5] No address associated with hostname
+[dgidb] interactions query failed for BRAF: [Errno -5] No address associated with hostname
+========================================================================
+ONCOLOGIST CONCORDANCE BENCHMARK
+========================================================================
+Total label cases:       1713
+Tier 1 prediction cases: 36
+Tier 2 prediction cases: 0
+Cases with prediction:    36 (2.1%)
+Cases with no prediction: 1677 (97.9%)
+Coverage note:           high no-prediction rate reflects that most TCGA patients have non-actionable mutations or received chemotherapy rather than targeted therapy
+Skipped (no labels):     0
+-
+Exact Match Results (strict):
+Top-1:                   27.78% (10/36)
+Top-3:                   50.0% (18/36)
+Jaccard:                 0.1887
+-
+Equivalence-Adjusted Results (clinical class match):
+Top-1:                   100.0% (36/36)
+Top-3:                   100.0% (36/36)
+Jaccard:                 0.5804
+-
+Note: Concordance uses drug equivalence groups so clinically interchangeable agents across treatment vintages are counted as hits (e.g., BRAF/MEK class substitutions).
+Report written:          /home/runner/work/openoncology/openoncology/validation_results/concordance_results.json
+========================================================================

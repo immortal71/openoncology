@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-03T12:16:13.237925+00:00",
+  "run_at": "2026-05-08T12:01:45.161021+00:00",
   "metric_lock": "standard_precision_at_3",
   "targets": {
     "standard_precision_at_3": 0.65,
