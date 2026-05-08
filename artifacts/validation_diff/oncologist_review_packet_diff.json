@@ -1,11 +1,11 @@
 {
   "summary": {
     "before_run_at": "2026-05-02T03:46:22.407112+00:00",
-    "after_run_at": "2026-05-03T13:35:18.424510+00:00",
-    "n_cases_total": 24,
-    "n_difficult_cases_in_diff": 13,
-    "n_difficult_top3_changed": 12,
-    "n_auto_pass_flips": 0,
+    "after_run_at": "2026-05-08T14:02:28.786851+00:00",
+    "n_cases_total": 50,
+    "n_difficult_cases_in_diff": 16,
+    "n_difficult_top3_changed": 16,
+    "n_auto_pass_flips": 2,
     "metrics_before": {
       "standard_precision_at_3": 0.5625,
       "hit_at_3": 1.0,
@@ -13,50 +13,47 @@
     },
     "metrics_after": {
       "locked_primary_metric": "standard_precision_at_3",
-      "standard_precision_at_3": 0.5789,
-      "normalized_precision_at_3": 0.9825,
-      "hit_at_3": 1.0,
-      "mrr": 0.9211,
-      "ndcg_at_3": 0.9355,
+      "standard_precision_at_3": 0.5083,
+      "normalized_precision_at_3": 0.8167,
+      "hit_at_3": 0.9,
+      "mrr": 0.8833,
+      "ndcg_at_3": 0.8827,
       "false_positives": 0,
       "false_positive_rate": 0.0,
-      "sensitivity_case_count": 19,
-      "specificity_case_count": 5,
-      "single_drug_sensitivity_cases": 8,
-      "multi_drug_sensitivity_cases": 11,
-      "single_drug_sensitivity_fraction": 0.4211,
-      "theoretical_standard_precision_at_3_ceiling": 0.5965,
+      "sensitivity_case_count": 40,
+      "specificity_case_count": 10,
+      "single_drug_sensitivity_cases": 16,
+      "multi_drug_sensitivity_cases": 24,
+      "single_drug_sensitivity_fraction": 0.4,
+      "theoretical_standard_precision_at_3_ceiling": 0.625,
       "metric_redundancy_risk": false
     },
     "delta": {
-      "standard_precision_at_3": 0.0164,
-      "normalized_precision_at_3": 0.9825,
-      "hit_at_3": 0.0,
-      "mrr": 0.9211,
-      "ndcg_at_3": 0.9355,
+      "standard_precision_at_3": -0.0542,
+      "normalized_precision_at_3": 0.8167,
+      "hit_at_3": -0.1,
+      "mrr": 0.8833,
+      "ndcg_at_3": 0.8827,
       "false_positives": 0
     }
   },
   "difficult_case_diffs": [
     {
-      "case_code": "BLIND-001",
+      "case_code": "BLIND-002",
       "gene": "KIT",
-      "variant": "EXON17MUT",
-      "cancer_type": "GIST",
+      "variant": "EXON9MUT",
+      "cancer_type": "Gastrointestinal Stromal Tumor",
       "difficulty": "L3_L4",
       "top3_changed": true,
-      "before_top3": [
-        "Olaparib",
-        "Niraparib",
-        "Rucaparib"
-      ],
+      "before_top3": [],
       "after_top3": [
-        "Avapritinib",
-        "Ripretinib"
+        "Imatinib",
+        "Sunitinib",
+        "Regorafenib"
       ],
       "per_drug_delta": [
         {
-          "drug_name": "Avapritinib",
+          "drug_name": "Imatinib",
           "before_rank": null,
           "after_rank": 1,
           "before_score": null,
@@ -69,76 +66,9 @@
           "after_oncokb_level": "LEVEL_1"
         },
         {
-          "drug_name": "Niraparib",
-          "before_rank": 2,
-          "after_rank": null,
-          "before_score": 0.9168,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Olaparib",
-          "before_rank": 1,
-          "after_rank": null,
-          "before_score": 0.9182,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Ripretinib",
+          "drug_name": "Regorafenib",
           "before_rank": null,
-          "after_rank": 2,
-          "before_score": null,
-          "after_score": 1.0,
-          "before_confidence": null,
-          "after_confidence": "MEDIUM",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.5,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_1"
-        },
-        {
-          "drug_name": "Rucaparib",
-          "before_rank": 3,
-          "after_rank": null,
-          "before_score": 0.9155,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        }
-      ]
-    },
-    {
-      "case_code": "BLIND-002",
-      "gene": "IDH2",
-      "variant": "R140Q",
-      "cancer_type": "Relapsed Refractory AML",
-      "difficulty": "L3_L4",
-      "top3_changed": true,
-      "before_top3": [],
-      "after_top3": [
-        "Enasidenib",
-        "Azacitidine"
-      ],
-      "per_drug_delta": [
-        {
-          "drug_name": "Azacitidine",
-          "before_rank": null,
-          "after_rank": 2,
+          "after_rank": 3,
           "before_score": null,
           "after_score": 0.8351,
           "before_confidence": null,
@@ -149,9 +79,9 @@
           "after_oncokb_level": "LEVEL_2"
         },
         {
-          "drug_name": "Enasidenib",
+          "drug_name": "Sunitinib",
           "before_rank": null,
-          "after_rank": 1,
+          "after_rank": 2,
           "before_score": null,
           "after_score": 1.0,
           "before_confidence": null,
@@ -165,18 +95,143 @@
     },
     {
       "case_code": "BLIND-003",
-      "gene": "FAT1",
-      "variant": "truncation",
-      "cancer_type": "Non-Small Cell Lung Cancer",
-      "difficulty": "VUS_NEG",
+      "gene": "TMB",
+      "variant": "TMB_High",
+      "cancer_type": "Glioblastoma Multiforme",
+      "difficulty": "L3_L4",
       "top3_changed": true,
       "before_top3": [
         "Belzutifan"
       ],
-      "after_top3": [],
+      "after_top3": [
+        "Pembrolizumab"
+      ],
       "per_drug_delta": [
         {
           "drug_name": "Belzutifan",
+          "before_rank": 1,
+          "after_rank": null,
+          "before_score": 0.9182,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_1",
+          "after_oncokb_level": null
+        },
+        {
+          "drug_name": "Pembrolizumab",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 1.0,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_1"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-004",
+      "gene": "ARID1A",
+      "variant": "Loss_of_Function",
+      "cancer_type": "Ovarian Clear Cell Carcinoma",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [],
+      "after_top3": [
+        "Olaparib",
+        "Tazemetostat"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Olaparib",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.7538,
+          "before_confidence": null,
+          "after_confidence": "LOW",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.33,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3"
+        },
+        {
+          "drug_name": "Tazemetostat",
+          "before_rank": null,
+          "after_rank": 2,
+          "before_score": null,
+          "after_score": 0.7538,
+          "before_confidence": null,
+          "after_confidence": "LOW",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.33,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-006",
+      "gene": "SMARCA4",
+      "variant": "Loss_of_Function",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [
+        "Venetoclax"
+      ],
+      "after_top3": [
+        "Tazemetostat"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Tazemetostat",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.7538,
+          "before_confidence": null,
+          "after_confidence": "LOW",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.33,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3"
+        },
+        {
+          "drug_name": "Venetoclax",
+          "before_rank": 1,
+          "after_rank": null,
+          "before_score": 0.5,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_3A",
+          "after_oncokb_level": null
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-007",
+      "gene": "KRAS",
+      "variant": "G12V",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [
+        "Enasidenib"
+      ],
+      "after_top3": [],
+      "per_drug_delta": [
+        {
+          "drug_name": "Enasidenib",
           "before_rank": 1,
           "after_rank": null,
           "before_score": 0.9182,
@@ -191,10 +246,80 @@
       ]
     },
     {
-      "case_code": "BLIND-004",
-      "gene": "TSC2",
+      "case_code": "BLIND-008",
+      "gene": "NPM1",
+      "variant": "W288FS",
+      "cancer_type": "Acute Myeloid Leukemia",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [
+        "Larotrectinib",
+        "Entrectinib"
+      ],
+      "after_top3": [
+        "Azacitidine",
+        "Venetoclax"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Azacitidine",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.8351,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_2"
+        },
+        {
+          "drug_name": "Entrectinib",
+          "before_rank": 2,
+          "after_rank": null,
+          "before_score": 0.9168,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_1",
+          "after_oncokb_level": null
+        },
+        {
+          "drug_name": "Larotrectinib",
+          "before_rank": 1,
+          "after_rank": null,
+          "before_score": 0.9182,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_1",
+          "after_oncokb_level": null
+        },
+        {
+          "drug_name": "Venetoclax",
+          "before_rank": null,
+          "after_rank": 2,
+          "before_score": null,
+          "after_score": 0.8351,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_2"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-010",
+      "gene": "TSC1",
       "variant": "MUTATION",
-      "cancer_type": "Lymphangioleiomyomatosis",
+      "cancer_type": "Renal Angiomyolipoma",
       "difficulty": "L3_L4",
       "top3_changed": true,
       "before_top3": [],
@@ -232,147 +357,25 @@
       ]
     },
     {
-      "case_code": "BLIND-006",
-      "gene": "MYC",
-      "variant": "Amplification",
-      "cancer_type": "Diffuse Large B-Cell Lymphoma",
-      "difficulty": "VUS_NEG",
-      "top3_changed": true,
-      "before_top3": [
-        "Venetoclax"
-      ],
-      "after_top3": [],
-      "per_drug_delta": [
-        {
-          "drug_name": "Venetoclax",
-          "before_rank": 1,
-          "after_rank": null,
-          "before_score": 0.5,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_3A",
-          "after_oncokb_level": null
-        }
-      ]
-    },
-    {
-      "case_code": "BLIND-007",
-      "gene": "SMARCA4",
-      "variant": "Loss_of_Function",
-      "cancer_type": "Non-Small Cell Lung Cancer",
+      "case_code": "BLIND-013",
+      "gene": "MET",
+      "variant": "AMPLIFICATION",
+      "cancer_type": "Gastric Cancer",
       "difficulty": "L3_L4",
       "top3_changed": true,
       "before_top3": [
-        "Enasidenib"
+        "Pemigatinib",
+        "Futibatinib",
+        "Infigratinib"
       ],
       "after_top3": [
-        "Tazemetostat"
+        "Capmatinib",
+        "Tepotinib",
+        "Crizotinib"
       ],
       "per_drug_delta": [
         {
-          "drug_name": "Enasidenib",
-          "before_rank": 1,
-          "after_rank": null,
-          "before_score": 0.9182,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Tazemetostat",
-          "before_rank": null,
-          "after_rank": 1,
-          "before_score": null,
-          "after_score": 0.7538,
-          "before_confidence": null,
-          "after_confidence": "LOW",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.33,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_3"
-        }
-      ]
-    },
-    {
-      "case_code": "BLIND-009",
-      "gene": "TSC2",
-      "variant": "truncation",
-      "cancer_type": "Clear Cell Renal Cell Carcinoma",
-      "difficulty": "VUS_NEG",
-      "top3_changed": true,
-      "before_top3": [
-        "Trastuzumab",
-        "Trastuzumab Deruxtecan",
-        "Pertuzumab"
-      ],
-      "after_top3": [],
-      "per_drug_delta": [
-        {
-          "drug_name": "Pertuzumab",
-          "before_rank": 3,
-          "after_rank": null,
-          "before_score": 0.9155,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Trastuzumab",
-          "before_rank": 1,
-          "after_rank": null,
-          "before_score": 0.9182,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Trastuzumab Deruxtecan",
-          "before_rank": 2,
-          "after_rank": null,
-          "before_score": 0.9168,
-          "after_score": null,
-          "before_confidence": "MEDIUM",
-          "after_confidence": null,
-          "before_evidence_completeness": 0.5,
-          "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_1",
-          "after_oncokb_level": null
-        }
-      ]
-    },
-    {
-      "case_code": "BLIND-016",
-      "gene": "PIK3CA",
-      "variant": "E542K",
-      "cancer_type": "Endometrial Cancer",
-      "difficulty": "L3_L4",
-      "top3_changed": true,
-      "before_top3": [
-        "Selpercatinib",
-        "Pralsetinib",
-        "Vandetanib"
-      ],
-      "after_top3": [
-        "Alpelisib"
-      ],
-      "per_drug_delta": [
-        {
-          "drug_name": "Alpelisib",
+          "drug_name": "Capmatinib",
           "before_rank": null,
           "after_rank": 1,
           "before_score": null,
@@ -385,7 +388,20 @@
           "after_oncokb_level": "LEVEL_1"
         },
         {
-          "drug_name": "Pralsetinib",
+          "drug_name": "Crizotinib",
+          "before_rank": null,
+          "after_rank": 3,
+          "before_score": null,
+          "after_score": 0.8351,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_2"
+        },
+        {
+          "drug_name": "Futibatinib",
           "before_rank": 2,
           "after_rank": null,
           "before_score": 0.9168,
@@ -398,7 +414,20 @@
           "after_oncokb_level": null
         },
         {
-          "drug_name": "Selpercatinib",
+          "drug_name": "Infigratinib",
+          "before_rank": 3,
+          "after_rank": null,
+          "before_score": 0.7,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_2",
+          "after_oncokb_level": null
+        },
+        {
+          "drug_name": "Pemigatinib",
           "before_rank": 1,
           "after_rank": null,
           "before_score": 0.9182,
@@ -411,10 +440,51 @@
           "after_oncokb_level": null
         },
         {
-          "drug_name": "Vandetanib",
-          "before_rank": 3,
+          "drug_name": "Tepotinib",
+          "before_rank": null,
+          "after_rank": 2,
+          "before_score": null,
+          "after_score": 1.0,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_1"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-015",
+      "gene": "TP53",
+      "variant": "R248H",
+      "cancer_type": "Osteosarcoma",
+      "difficulty": "VUS_NEG",
+      "top3_changed": true,
+      "before_top3": [
+        "Crizotinib",
+        "Lorlatinib"
+      ],
+      "after_top3": [],
+      "per_drug_delta": [
+        {
+          "drug_name": "Crizotinib",
+          "before_rank": 1,
           "after_rank": null,
           "before_score": 0.7,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_2",
+          "after_oncokb_level": null
+        },
+        {
+          "drug_name": "Lorlatinib",
+          "before_rank": 2,
+          "after_rank": null,
+          "before_score": 0.6986,
           "after_score": null,
           "before_confidence": "MEDIUM",
           "after_confidence": null,
@@ -427,9 +497,9 @@
     },
     {
       "case_code": "BLIND-017",
-      "gene": "SMARCA4",
-      "variant": "Loss_of_Function",
-      "cancer_type": "Ovarian Cancer",
+      "gene": "NRAS",
+      "variant": "Q61L",
+      "cancer_type": "Colorectal Cancer",
       "difficulty": "L3_L4",
       "top3_changed": true,
       "before_top3": [
@@ -438,9 +508,22 @@
         "Trametinib"
       ],
       "after_top3": [
-        "Tazemetostat"
+        "Binimetinib"
       ],
       "per_drug_delta": [
+        {
+          "drug_name": "Binimetinib",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.8351,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_2"
+        },
         {
           "drug_name": "Dabrafenib",
           "before_rank": 2,
@@ -453,19 +536,6 @@
           "after_evidence_completeness": null,
           "before_oncokb_level": "LEVEL_1",
           "after_oncokb_level": null
-        },
-        {
-          "drug_name": "Tazemetostat",
-          "before_rank": null,
-          "after_rank": 1,
-          "before_score": null,
-          "after_score": 0.7538,
-          "before_confidence": null,
-          "after_confidence": "LOW",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.33,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_3"
         },
         {
           "drug_name": "Trametinib",
@@ -496,48 +566,20 @@
       ]
     },
     {
-      "case_code": "BLIND-019",
-      "gene": "TP53",
-      "variant": "R248H",
-      "cancer_type": "Osteosarcoma",
-      "difficulty": "VUS_NEG",
-      "top3_changed": false,
-      "before_top3": [],
-      "after_top3": [],
-      "per_drug_delta": []
-    },
-    {
-      "case_code": "BLIND-020",
-      "gene": "CD79B",
-      "variant": "Y196C",
-      "cancer_type": "Diffuse Large B-Cell Lymphoma",
+      "case_code": "BLIND-018",
+      "gene": "SMARCB1",
+      "variant": "Loss_of_Function",
+      "cancer_type": "Epithelioid Sarcoma",
       "difficulty": "L3_L4",
       "top3_changed": true,
       "before_top3": [
-        "Erdafitinib",
-        "Pemigatinib"
+        "Avapritinib",
+        "Imatinib"
       ],
-      "after_top3": [
-        "Ibrutinib",
-        "Zanubrutinib",
-        "Acalabrutinib"
-      ],
+      "after_top3": [],
       "per_drug_delta": [
         {
-          "drug_name": "Acalabrutinib",
-          "before_rank": null,
-          "after_rank": 3,
-          "before_score": null,
-          "after_score": 0.6653,
-          "before_confidence": null,
-          "after_confidence": "MEDIUM",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.5,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_3A"
-        },
-        {
-          "drug_name": "Erdafitinib",
+          "drug_name": "Avapritinib",
           "before_rank": 1,
           "after_rank": null,
           "before_score": 0.9182,
@@ -550,9 +592,153 @@
           "after_oncokb_level": null
         },
         {
-          "drug_name": "Ibrutinib",
+          "drug_name": "Imatinib",
+          "before_rank": 2,
+          "after_rank": null,
+          "before_score": 0.08,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_R1",
+          "after_oncokb_level": null
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-019",
+      "gene": "PTEN",
+      "variant": "truncation",
+      "cancer_type": "Endometrial Cancer",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [],
+      "after_top3": [
+        "Everolimus",
+        "Temsirolimus"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Everolimus",
           "before_rank": null,
           "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.6653,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3A"
+        },
+        {
+          "drug_name": "Temsirolimus",
+          "before_rank": null,
+          "after_rank": 2,
+          "before_score": null,
+          "after_score": 0.6653,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3A"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-020",
+      "gene": "FGFR2",
+      "variant": "AMPLIFICATION",
+      "cancer_type": "Gastric Cancer",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [
+        "Erdafitinib",
+        "Pemigatinib"
+      ],
+      "after_top3": [
+        "Futibatinib",
+        "Pemigatinib",
+        "Erdafitinib"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Erdafitinib",
+          "before_rank": 1,
+          "after_rank": 3,
+          "before_score": 0.9182,
+          "after_score": 0.5298,
+          "before_confidence": "MEDIUM",
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": "LEVEL_1",
+          "after_oncokb_level": "LEVEL_3B"
+        },
+        {
+          "drug_name": "Futibatinib",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 0.6653,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_3A"
+        },
+        {
+          "drug_name": "Pemigatinib",
+          "before_rank": 2,
+          "after_rank": 2,
+          "before_score": 0.7,
+          "after_score": 0.6653,
+          "before_confidence": "MEDIUM",
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": "LEVEL_2",
+          "after_oncokb_level": "LEVEL_3A"
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-021",
+      "gene": "EGFR",
+      "variant": "AMPLIFICATION",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [
+        "Everolimus",
+        "Temsirolimus"
+      ],
+      "after_top3": [
+        "Cetuximab",
+        "Panitumumab",
+        "Erlotinib"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Cetuximab",
+          "before_rank": null,
+          "after_rank": 1,
+          "before_score": null,
+          "after_score": 1.0,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_1"
+        },
+        {
+          "drug_name": "Erlotinib",
+          "before_rank": null,
+          "after_rank": 3,
           "before_score": null,
           "after_score": 0.8351,
           "before_confidence": null,
@@ -563,22 +749,62 @@
           "after_oncokb_level": "LEVEL_2"
         },
         {
-          "drug_name": "Pemigatinib",
-          "before_rank": 2,
+          "drug_name": "Everolimus",
+          "before_rank": 1,
           "after_rank": null,
-          "before_score": 0.7,
+          "before_score": 0.5,
           "after_score": null,
           "before_confidence": "MEDIUM",
           "after_confidence": null,
           "before_evidence_completeness": 0.5,
           "after_evidence_completeness": null,
-          "before_oncokb_level": "LEVEL_2",
+          "before_oncokb_level": "LEVEL_3A",
           "after_oncokb_level": null
         },
         {
-          "drug_name": "Zanubrutinib",
+          "drug_name": "Panitumumab",
           "before_rank": null,
           "after_rank": 2,
+          "before_score": null,
+          "after_score": 1.0,
+          "before_confidence": null,
+          "after_confidence": "MEDIUM",
+          "before_evidence_completeness": null,
+          "after_evidence_completeness": 0.5,
+          "before_oncokb_level": null,
+          "after_oncokb_level": "LEVEL_1"
+        },
+        {
+          "drug_name": "Temsirolimus",
+          "before_rank": 2,
+          "after_rank": null,
+          "before_score": 0.4986,
+          "after_score": null,
+          "before_confidence": "MEDIUM",
+          "after_confidence": null,
+          "before_evidence_completeness": 0.5,
+          "after_evidence_completeness": null,
+          "before_oncokb_level": "LEVEL_3A",
+          "after_oncokb_level": null
+        }
+      ]
+    },
+    {
+      "case_code": "BLIND-022",
+      "gene": "MTOR",
+      "variant": "E1799K",
+      "cancer_type": "Renal Cell Carcinoma",
+      "difficulty": "L3_L4",
+      "top3_changed": true,
+      "before_top3": [],
+      "after_top3": [
+        "Everolimus"
+      ],
+      "per_drug_delta": [
+        {
+          "drug_name": "Everolimus",
+          "before_rank": null,
+          "after_rank": 1,
           "before_score": null,
           "after_score": 0.8351,
           "before_confidence": null,
@@ -592,9 +818,9 @@
     },
     {
       "case_code": "BLIND-023",
-      "gene": "TET2",
-      "variant": "frameshift",
-      "cancer_type": "Acute Myeloid Leukemia",
+      "gene": "TSC2",
+      "variant": "truncation",
+      "cancer_type": "Clear Cell Renal Cell Carcinoma",
       "difficulty": "VUS_NEG",
       "top3_changed": true,
       "before_top3": [
@@ -616,48 +842,28 @@
           "after_oncokb_level": null
         }
       ]
-    },
-    {
-      "case_code": "BLIND-024",
-      "gene": "NPM1",
-      "variant": "W288FS",
-      "cancer_type": "Acute Myeloid Leukemia",
-      "difficulty": "L3_L4",
-      "top3_changed": true,
-      "before_top3": [],
-      "after_top3": [
-        "Azacitidine",
-        "Venetoclax"
-      ],
-      "per_drug_delta": [
-        {
-          "drug_name": "Azacitidine",
-          "before_rank": null,
-          "after_rank": 1,
-          "before_score": null,
-          "after_score": 0.8351,
-          "before_confidence": null,
-          "after_confidence": "MEDIUM",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.5,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_2"
-        },
-        {
-          "drug_name": "Venetoclax",
-          "before_rank": null,
-          "after_rank": 2,
-          "before_score": null,
-          "after_score": 0.8351,
-          "before_confidence": null,
-          "after_confidence": "MEDIUM",
-          "before_evidence_completeness": null,
-          "after_evidence_completeness": 0.5,
-          "before_oncokb_level": null,
-          "after_oncokb_level": "LEVEL_2"
-        }
-      ]
     }
   ],
-  "auto_pass_flips": []
+  "auto_pass_flips": [
+    {
+      "case_code": "BLIND-007",
+      "case_id": "KRAS_G12V_NSCLC_EMERGING_01",
+      "before_auto_pass": true,
+      "after_auto_pass": false,
+      "before_standard_precision_at_3": 0.3333333333333333,
+      "after_standard_precision_at_3": 0.0,
+      "before_hit_at_3": true,
+      "after_hit_at_3": false
+    },
+    {
+      "case_code": "BLIND-018",
+      "case_id": "LIT_SMARCB1_LOF_EPS_01",
+      "before_auto_pass": true,
+      "after_auto_pass": false,
+      "before_standard_precision_at_3": 0.3333333333333333,
+      "after_standard_precision_at_3": 0.0,
+      "before_hit_at_3": true,
+      "after_hit_at_3": false
+    }
+  ]
 }

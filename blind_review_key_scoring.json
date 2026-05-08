@@ -1,38 +1,37 @@
 {
-  "run_at": "2026-05-08T11:53:15.606785+00:00",
+  "run_at": "2026-05-08T14:02:28.786851+00:00",
   "n_cases": 50,
   "metrics": {
     "locked_primary_metric": "standard_precision_at_3",
-    "standard_precision_at_3": 0.5167,
-    "normalized_precision_at_3": 0.8125,
+    "standard_precision_at_3": 0.5083,
+    "normalized_precision_at_3": 0.8167,
     "hit_at_3": 0.9,
-    "mrr": 0.8708,
-    "ndcg_at_3": 0.8449,
-    "false_positives": 1,
-    "false_positive_rate": 0.1,
+    "mrr": 0.8833,
+    "ndcg_at_3": 0.8827,
+    "false_positives": 0,
+    "false_positive_rate": 0.0,
     "sensitivity_case_count": 40,
     "specificity_case_count": 10,
-    "single_drug_sensitivity_cases": 12,
-    "multi_drug_sensitivity_cases": 28,
-    "single_drug_sensitivity_fraction": 0.3,
-    "theoretical_standard_precision_at_3_ceiling": 0.65,
+    "single_drug_sensitivity_cases": 16,
+    "multi_drug_sensitivity_cases": 24,
+    "single_drug_sensitivity_fraction": 0.4,
+    "theoretical_standard_precision_at_3_ceiling": 0.625,
     "metric_redundancy_risk": false
   },
   "cases": [
     {
       "case_code": "BLIND-001",
-      "case_id": "PIK3CA_E542K_CERVICAL_MULTI_01",
+      "case_id": "IDH1_R132H_CC_01",
       "expect_empty": false,
       "known_drugs": [
-        "Alpelisib",
-        "Everolimus",
-        "Temsirolimus"
+        "Ivosidenib"
       ],
       "top3_drugs": [
-        "Alpelisib"
+        "Ivosidenib",
+        "Olutasidenib"
       ],
       "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
       "hit_at_3": true,
       "mrr": 1.0,
       "ndcg_at_3": 1.0,
@@ -41,79 +40,17 @@
     },
     {
       "case_code": "BLIND-002",
-      "case_id": "CD79B_Y196H_DLBCL_MULTI",
+      "case_id": "KIT_EXON9MUT_GIST_DUAL",
       "expect_empty": false,
       "known_drugs": [
-        "Ibrutinib",
-        "Zanubrutinib",
-        "Acalabrutinib"
+        "Sunitinib",
+        "Imatinib",
+        "Regorafenib"
       ],
       "top3_drugs": [
-        "Ibrutinib",
-        "Zanubrutinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 0.6666666666666666,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-003",
-      "case_id": "ABL1_T315I_ALL",
-      "expect_empty": false,
-      "known_drugs": [
-        "Ponatinib",
-        "Asciminib"
-      ],
-      "top3_drugs": [
-        "Asciminib",
-        "Ponatinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-004",
-      "case_id": "ERBB2_AMP_ENDOMETRIAL",
-      "expect_empty": false,
-      "known_drugs": [
-        "Trastuzumab deruxtecan",
-        "Trastuzumab"
-      ],
-      "top3_drugs": [
-        "Ado-Trastuzumab Emtansine",
-        "Lapatinib",
-        "Neratinib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 0.5,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 0.46927872602275644,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-005",
-      "case_id": "JAK2_V617F_MPN_VALIDATED",
-      "expect_empty": false,
-      "known_drugs": [
-        "Ruxolitinib",
-        "Fedratinib",
-        "Pacritinib"
-      ],
-      "top3_drugs": [
-        "Fedratinib",
-        "Pacritinib",
-        "Ruxolitinib"
+        "Imatinib",
+        "Sunitinib",
+        "Regorafenib"
       ],
       "standard_precision_at_3": 1.0,
       "normalized_precision_at_3": 1.0,
@@ -124,289 +61,86 @@
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-006",
-      "case_id": "CDK12_BIALLELIC_PROSTATE",
+      "case_code": "BLIND-003",
+      "case_id": "TMB_HIGH_NEURO_01",
       "expect_empty": false,
       "known_drugs": [
-        "Olaparib"
+        "Pembrolizumab"
       ],
       "top3_drugs": [
-        "Nivolumab",
-        "Olaparib"
+        "Pembrolizumab"
       ],
       "standard_precision_at_3": 0.3333333333333333,
       "normalized_precision_at_3": 1.0,
       "hit_at_3": true,
-      "mrr": 0.5,
-      "ndcg_at_3": 0.6309297535714575,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-004",
+      "case_id": "ARID1A_LOF_OVARIAN_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Olaparib",
+        "Tazemetostat"
+      ],
+      "top3_drugs": [
+        "Olaparib",
+        "Tazemetostat"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-005",
+      "case_id": "RET_NCOA4_THYROID",
+      "expect_empty": false,
+      "known_drugs": [
+        "Selpercatinib",
+        "Pralsetinib"
+      ],
+      "top3_drugs": [
+        "Pralsetinib",
+        "Selpercatinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-006",
+      "case_id": "SMARCA4_LOF_NSCLC_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Tazemetostat"
+      ],
+      "top3_drugs": [
+        "Tazemetostat"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
       "top3_hit_count": 1,
       "auto_pass": true
     },
     {
       "case_code": "BLIND-007",
-      "case_id": "ESR1_Y537N_BREAST",
+      "case_id": "KRAS_G12V_NSCLC_EMERGING_01",
       "expect_empty": false,
       "known_drugs": [
-        "Elacestrant",
-        "Fulvestrant"
-      ],
-      "top3_drugs": [
-        "Elacestrant",
-        "Lasofoxifene"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 0.5,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-008",
-      "case_id": "FGFR2_AMP_GASTRIC_L3",
-      "expect_empty": false,
-      "known_drugs": [
-        "Pemigatinib",
-        "Futibatinib"
-      ],
-      "top3_drugs": [
-        "Futibatinib",
-        "Pemigatinib",
-        "Erdafitinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-009",
-      "case_id": "ABL1_BCRABL1_PH_ALL",
-      "expect_empty": false,
-      "known_drugs": [
-        "Ponatinib",
-        "Dasatinib",
-        "Bosutinib",
-        "Imatinib",
-        "Nilotinib"
-      ],
-      "top3_drugs": [
-        "Bosutinib",
-        "Dasatinib",
-        "Imatinib"
-      ],
-      "standard_precision_at_3": 1.0,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 3,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-010",
-      "case_id": "LIT_BRCA2_SOM_PDAC_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Olaparib",
-        "Rucaparib"
-      ],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": false
-    },
-    {
-      "case_code": "BLIND-011",
-      "case_id": "HER2_AMP_NSCLC_MULTI_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Trastuzumab deruxtecan",
-        "Trastuzumab",
-        "Pertuzumab"
-      ],
-      "top3_drugs": [
-        "Ado-Trastuzumab Emtansine",
-        "Lapatinib",
-        "Neratinib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 0.3333333333333333,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 0.46927872602275644,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-012",
-      "case_id": "LIT_BRAF_V600E_THYROID_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Dabrafenib",
-        "Trametinib"
-      ],
-      "top3_drugs": [
-        "Dabrafenib",
-        "Trametinib",
-        "Vemurafenib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-013",
-      "case_id": "CDKN2A_LOSS_MELANOMA_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Palbociclib",
-        "Abemaciclib"
-      ],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": false
-    },
-    {
-      "case_code": "BLIND-014",
-      "case_id": "IDH2_R172W_AML",
-      "expect_empty": false,
-      "known_drugs": [
-        "Enasidenib"
-      ],
-      "top3_drugs": [
-        "Enasidenib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-015",
-      "case_id": "VHL_TRUNCATION_RENAL_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [
-        "Belzutifan",
-        "Axitinib",
-        "Cabozantinib"
-      ],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": false
-    },
-    {
-      "case_code": "BLIND-016",
-      "case_id": "FGFR2_BICC1_CHOLANGIO_MULTI_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Pemigatinib",
-        "Infigratinib",
-        "Futibatinib"
-      ],
-      "top3_drugs": [
-        "Futibatinib",
-        "Pemigatinib",
-        "Infigratinib"
-      ],
-      "standard_precision_at_3": 1.0,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 3,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-017",
-      "case_id": "FLT3_Y842H_AML",
-      "expect_empty": false,
-      "known_drugs": [
-        "Gilteritinib"
-      ],
-      "top3_drugs": [
-        "Gilteritinib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-018",
-      "case_id": "EGFR_AMP_NSCLC_L2",
-      "expect_empty": false,
-      "known_drugs": [
-        "Erlotinib",
-        "Gefitinib"
-      ],
-      "top3_drugs": [
-        "Cetuximab",
-        "Panitumumab",
-        "Erlotinib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 0.5,
-      "hit_at_3": true,
-      "mrr": 0.3333333333333333,
-      "ndcg_at_3": 0.3065735963827292,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-019",
-      "case_id": "FGFR3_FUSION_UROTHELIAL_DUAL",
-      "expect_empty": false,
-      "known_drugs": [
-        "Erdafitinib",
-        "Pemigatinib"
-      ],
-      "top3_drugs": [
-        "Erdafitinib",
-        "Pemigatinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-020",
-      "case_id": "KRAS_G13D_CRC_SOTO_NOTE",
-      "expect_empty": false,
-      "known_drugs": [
-        "Sotorasib",
         "Adagrasib"
       ],
       "top3_drugs": [],
@@ -419,205 +153,55 @@
       "auto_pass": false
     },
     {
-      "case_code": "BLIND-021",
-      "case_id": "PIK3CA_E542K_ENDOMETRIAL",
+      "case_code": "BLIND-008",
+      "case_id": "NPM1_W288FS_AML_COMBO",
       "expect_empty": false,
       "known_drugs": [
-        "Alpelisib"
-      ],
-      "top3_drugs": [
-        "Alpelisib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-022",
-      "case_id": "SMARCA4_LOF_OVARIAN_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Tazemetostat"
-      ],
-      "top3_drugs": [
-        "Tazemetostat"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-023",
-      "case_id": "SF3B1_K700E_MDS_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-024",
-      "case_id": "FGFR3_K650E_BLADDER",
-      "expect_empty": false,
-      "known_drugs": [
-        "Erdafitinib"
-      ],
-      "top3_drugs": [
-        "Erdafitinib"
-      ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-025",
-      "case_id": "TSC2_TRUNCATION_RCC_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-026",
-      "case_id": "NTRK3_FUSION_COLORECTAL",
-      "expect_empty": false,
-      "known_drugs": [
-        "Larotrectinib",
-        "Entrectinib"
-      ],
-      "top3_drugs": [
-        "Entrectinib",
-        "Larotrectinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-027",
-      "case_id": "NF2_LOSS_MESOTHELIOMA_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-028",
-      "case_id": "TP53_R248H_OSTEOSARCOMA_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-029",
-      "case_id": "JAK2_V617F_PV_MULTI_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Ruxolitinib",
-        "Fedratinib",
-        "Ropeginterferon"
-      ],
-      "top3_drugs": [
-        "Fedratinib",
-        "Pacritinib",
-        "Ruxolitinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 0.6666666666666666,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 0.9197207891481876,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-030",
-      "case_id": "BRCA1_SPLICE_SITE_BREAST_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Olaparib",
-        "Niraparib"
-      ],
-      "top3_drugs": [
-        "Olaparib",
-        "Niraparib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-031",
-      "case_id": "IDH2_R140Q_AML",
-      "expect_empty": false,
-      "known_drugs": [
-        "Enasidenib"
-      ],
-      "top3_drugs": [
-        "Enasidenib",
+        "Venetoclax",
         "Azacitidine"
       ],
-      "standard_precision_at_3": 0.3333333333333333,
+      "top3_drugs": [
+        "Azacitidine",
+        "Venetoclax"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
       "normalized_precision_at_3": 1.0,
       "hit_at_3": true,
       "mrr": 1.0,
       "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
+      "top3_hit_count": 2,
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-032",
-      "case_id": "PDGFRA_D842V_MET_GIST",
+      "case_code": "BLIND-009",
+      "case_id": "EZH2_Y646N_FL_MULTI_01",
       "expect_empty": false,
       "known_drugs": [
-        "Avapritinib"
+        "Tazemetostat",
+        "Rituximab",
+        "Bendamustine"
       ],
       "top3_drugs": [
-        "Avapritinib"
+        "Tazemetostat"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-010",
+      "case_id": "TSC1_MUTATION_ANGIO",
+      "expect_empty": false,
+      "known_drugs": [
+        "Everolimus"
+      ],
+      "top3_drugs": [
+        "Everolimus",
+        "Temsirolimus"
       ],
       "standard_precision_at_3": 0.3333333333333333,
       "normalized_precision_at_3": 1.0,
@@ -628,21 +212,47 @@
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-033",
-      "case_id": "SMAD4_TRUNCATION_CRC_VUS",
-      "expect_empty": true,
-      "known_drugs": [],
-      "top3_drugs": [],
-      "standard_precision_at_3": 0.0,
-      "normalized_precision_at_3": 0.0,
-      "hit_at_3": false,
-      "mrr": 0.0,
-      "ndcg_at_3": 0.0,
-      "top3_hit_count": 0,
+      "case_code": "BLIND-011",
+      "case_id": "MAP2K2_Q60P_MELANOMA_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Trametinib",
+        "Cobimetinib"
+      ],
+      "top3_drugs": [
+        "Cobimetinib",
+        "Trametinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-034",
+      "case_code": "BLIND-012",
+      "case_id": "IDH2_R172K_AML_MULTI_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Enasidenib",
+        "Venetoclax",
+        "Azacitidine"
+      ],
+      "top3_drugs": [
+        "Enasidenib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 0.3333333333333333,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-013",
       "case_id": "MET_AMP_GASTRIC_L3",
       "expect_empty": false,
       "known_drugs": [
@@ -663,11 +273,83 @@
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-035",
-      "case_id": "LIT_HRAS_Q61R_HNSCC_01",
+      "case_code": "BLIND-014",
+      "case_id": "ERBB2_AMP_GASTRIC_MULTI",
       "expect_empty": false,
       "known_drugs": [
-        "Tipifarnib"
+        "Trastuzumab",
+        "Trastuzumab deruxtecan"
+      ],
+      "top3_drugs": [
+        "Trastuzumab",
+        "Trastuzumab Deruxtecan"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-015",
+      "case_id": "TP53_R248H_OSTEOSARCOMA_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-016",
+      "case_id": "ERBB2_V777L_BREAST_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Neratinib",
+        "Afatinib"
+      ],
+      "top3_drugs": [
+        "Afatinib",
+        "Neratinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-017",
+      "case_id": "NRAS_Q61L_COLORECTAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Binimetinib"
+      ],
+      "top3_drugs": [
+        "Binimetinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-018",
+      "case_id": "LIT_SMARCB1_LOF_EPS_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Tazemetostat"
       ],
       "top3_drugs": [],
       "standard_precision_at_3": 0.0,
@@ -679,69 +361,7 @@
       "auto_pass": false
     },
     {
-      "case_code": "BLIND-036",
-      "case_id": "TSC1_LOF_ENDO_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Everolimus",
-        "Temsirolimus"
-      ],
-      "top3_drugs": [
-        "Everolimus",
-        "Temsirolimus"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-037",
-      "case_id": "EGFR_G719C_NSCLC",
-      "expect_empty": false,
-      "known_drugs": [
-        "Afatinib",
-        "Osimertinib"
-      ],
-      "top3_drugs": [
-        "Osimertinib",
-        "Afatinib"
-      ],
-      "standard_precision_at_3": 0.6666666666666666,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-038",
-      "case_id": "CD274_AMP_HNSCC_MULTI_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Pembrolizumab",
-        "Nivolumab",
-        "Atezolizumab"
-      ],
-      "top3_drugs": [
-        "Atezolizumab",
-        "Nivolumab",
-        "Pembrolizumab"
-      ],
-      "standard_precision_at_3": 1.0,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 3,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-039",
+      "case_code": "BLIND-019",
       "case_id": "PTEN_LOSS_ENDOMETRIAL",
       "expect_empty": false,
       "known_drugs": [
@@ -761,38 +381,17 @@
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-040",
-      "case_id": "MET_EX14_SKIP_NSCLC_MULTI_02",
+      "case_code": "BLIND-020",
+      "case_id": "FGFR2_AMP_GASTRIC_L3",
       "expect_empty": false,
       "known_drugs": [
-        "Capmatinib",
-        "Tepotinib",
-        "Crizotinib"
+        "Pemigatinib",
+        "Futibatinib"
       ],
       "top3_drugs": [
-        "Capmatinib",
-        "Tepotinib",
-        "Crizotinib"
-      ],
-      "standard_precision_at_3": 1.0,
-      "normalized_precision_at_3": 1.0,
-      "hit_at_3": true,
-      "mrr": 1.0,
-      "ndcg_at_3": 1.0,
-      "top3_hit_count": 3,
-      "auto_pass": true
-    },
-    {
-      "case_code": "BLIND-041",
-      "case_id": "RET_CCDC6_RET_NSCLC_01",
-      "expect_empty": false,
-      "known_drugs": [
-        "Selpercatinib",
-        "Pralsetinib"
-      ],
-      "top3_drugs": [
-        "Pralsetinib",
-        "Selpercatinib"
+        "Futibatinib",
+        "Pemigatinib",
+        "Erdafitinib"
       ],
       "standard_precision_at_3": 0.6666666666666666,
       "normalized_precision_at_3": 1.0,
@@ -803,14 +402,391 @@
       "auto_pass": true
     },
     {
-      "case_code": "BLIND-042",
-      "case_id": "NRAS_Q61L_COLORECTAL",
+      "case_code": "BLIND-021",
+      "case_id": "EGFR_AMP_NSCLC_L2",
       "expect_empty": false,
       "known_drugs": [
-        "Binimetinib"
+        "Erlotinib",
+        "Gefitinib"
       ],
       "top3_drugs": [
-        "Binimetinib"
+        "Cetuximab",
+        "Panitumumab",
+        "Erlotinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 0.5,
+      "hit_at_3": true,
+      "mrr": 0.3333333333333333,
+      "ndcg_at_3": 0.3065735963827292,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-022",
+      "case_id": "MTOR_E1799K_RCC",
+      "expect_empty": false,
+      "known_drugs": [
+        "Everolimus",
+        "Temsirolimus"
+      ],
+      "top3_drugs": [
+        "Everolimus"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 0.5,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-023",
+      "case_id": "TSC2_TRUNCATION_RCC_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-024",
+      "case_id": "TMB_HIGH_COLORECTAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Pembrolizumab"
+      ],
+      "top3_drugs": [
+        "Pembrolizumab"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-025",
+      "case_id": "ARID1A_FRAMESHIFT_OVARIAN_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-026",
+      "case_id": "FLT3_ITD_AML_MULTI",
+      "expect_empty": false,
+      "known_drugs": [
+        "Midostaurin",
+        "Gilteritinib",
+        "Quizartinib"
+      ],
+      "top3_drugs": [
+        "Gilteritinib",
+        "Midostaurin",
+        "Quizartinib"
+      ],
+      "standard_precision_at_3": 1.0,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 3,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-027",
+      "case_id": "CTNNB1_S45F_HCC",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-028",
+      "case_id": "NF2_LOSS_MESOTHELIOMA_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-029",
+      "case_id": "ROS1_EZR_NSCLC_MULTI_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Crizotinib",
+        "Entrectinib",
+        "Lorlatinib"
+      ],
+      "top3_drugs": [
+        "Crizotinib",
+        "Entrectinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-030",
+      "case_id": "FGFR3_FUSION_UROTHELIAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Erdafitinib"
+      ],
+      "top3_drugs": [
+        "Erdafitinib",
+        "Pemigatinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-031",
+      "case_id": "FGFR3_G370C_BLADDER",
+      "expect_empty": false,
+      "known_drugs": [
+        "Erdafitinib"
+      ],
+      "top3_drugs": [
+        "Erdafitinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-032",
+      "case_id": "BRAF_L597V_MELANOMA_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Trametinib"
+      ],
+      "top3_drugs": [
+        "Trametinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-033",
+      "case_id": "SETD2_FRAMESHIFT_RCC_VUS",
+      "expect_empty": true,
+      "known_drugs": [],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-034",
+      "case_id": "FGFR3_FUSION_UROTHELIAL_DUAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Erdafitinib",
+        "Pemigatinib"
+      ],
+      "top3_drugs": [
+        "Erdafitinib",
+        "Pemigatinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-035",
+      "case_id": "FLT3_Y842H_AML",
+      "expect_empty": false,
+      "known_drugs": [
+        "Gilteritinib"
+      ],
+      "top3_drugs": [
+        "Gilteritinib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-036",
+      "case_id": "PMS2_PATHOGENIC_OVARIAN_01",
+      "expect_empty": false,
+      "known_drugs": [
+        "Pembrolizumab"
+      ],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": false
+    },
+    {
+      "case_code": "BLIND-037",
+      "case_id": "TMB_HIGH_ENDOMETRIAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Pembrolizumab"
+      ],
+      "top3_drugs": [
+        "Pembrolizumab"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-038",
+      "case_id": "MYD88_L265P_WM_VALIDATED",
+      "expect_empty": false,
+      "known_drugs": [
+        "Ibrutinib",
+        "Zanubrutinib"
+      ],
+      "top3_drugs": [],
+      "standard_precision_at_3": 0.0,
+      "normalized_precision_at_3": 0.0,
+      "hit_at_3": false,
+      "mrr": 0.0,
+      "ndcg_at_3": 0.0,
+      "top3_hit_count": 0,
+      "auto_pass": false
+    },
+    {
+      "case_code": "BLIND-039",
+      "case_id": "CD79B_Y196H_DLBCL_MULTI",
+      "expect_empty": false,
+      "known_drugs": [
+        "Ibrutinib",
+        "Zanubrutinib",
+        "Acalabrutinib"
+      ],
+      "top3_drugs": [
+        "Ibrutinib",
+        "Zanubrutinib"
+      ],
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 0.6666666666666666,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 2,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-040",
+      "case_id": "IDH2_R172S_AML",
+      "expect_empty": false,
+      "known_drugs": [
+        "Enasidenib"
+      ],
+      "top3_drugs": [
+        "Enasidenib"
+      ],
+      "standard_precision_at_3": 0.3333333333333333,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 1,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-041",
+      "case_id": "JAK2_V617F_MF_MULTI",
+      "expect_empty": false,
+      "known_drugs": [
+        "Ruxolitinib",
+        "Fedratinib",
+        "Pacritinib",
+        "Momelotinib"
+      ],
+      "top3_drugs": [
+        "Fedratinib",
+        "Pacritinib",
+        "Ruxolitinib"
+      ],
+      "standard_precision_at_3": 1.0,
+      "normalized_precision_at_3": 1.0,
+      "hit_at_3": true,
+      "mrr": 1.0,
+      "ndcg_at_3": 1.0,
+      "top3_hit_count": 3,
+      "auto_pass": true
+    },
+    {
+      "case_code": "BLIND-042",
+      "case_id": "PIK3CA_E542K_ENDOMETRIAL",
+      "expect_empty": false,
+      "known_drugs": [
+        "Alpelisib"
+      ],
+      "top3_drugs": [
+        "Alpelisib"
       ],
       "standard_precision_at_3": 0.3333333333333333,
       "normalized_precision_at_3": 1.0,
@@ -822,27 +798,29 @@
     },
     {
       "case_code": "BLIND-043",
-      "case_id": "NTRK1_FUSION_THYROID",
+      "case_id": "CDK4_AMP_BREAST_01",
       "expect_empty": false,
       "known_drugs": [
-        "Larotrectinib",
-        "Entrectinib"
+        "Palbociclib",
+        "Ribociclib",
+        "Abemaciclib"
       ],
       "top3_drugs": [
-        "Entrectinib",
-        "Larotrectinib"
+        "Abemaciclib",
+        "Palbociclib",
+        "Ribociclib"
       ],
-      "standard_precision_at_3": 0.6666666666666666,
+      "standard_precision_at_3": 1.0,
       "normalized_precision_at_3": 1.0,
       "hit_at_3": true,
       "mrr": 1.0,
       "ndcg_at_3": 1.0,
-      "top3_hit_count": 2,
+      "top3_hit_count": 3,
       "auto_pass": true
     },
     {
       "case_code": "BLIND-044",
-      "case_id": "HRAS_G12V_HNSCC",
+      "case_id": "TP53_R273H_CRC_NEG",
       "expect_empty": true,
       "known_drugs": [],
       "top3_drugs": [],
@@ -856,25 +834,28 @@
     },
     {
       "case_code": "BLIND-045",
-      "case_id": "IDH1_R132G_AML",
+      "case_id": "RET_NCOA4_TC_MULTI_01",
       "expect_empty": false,
       "known_drugs": [
-        "Ivosidenib"
+        "Selpercatinib",
+        "Pralsetinib",
+        "Cabozantinib"
       ],
       "top3_drugs": [
-        "Ivosidenib"
+        "Pralsetinib",
+        "Selpercatinib"
       ],
-      "standard_precision_at_3": 0.3333333333333333,
-      "normalized_precision_at_3": 1.0,
+      "standard_precision_at_3": 0.6666666666666666,
+      "normalized_precision_at_3": 0.6666666666666666,
       "hit_at_3": true,
       "mrr": 1.0,
       "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
+      "top3_hit_count": 2,
       "auto_pass": true
     },
     {
       "case_code": "BLIND-046",
-      "case_id": "NTRK1_G595R_RESISTANCE_01",
+      "case_id": "HRAS_Q61R_HNSCC_01",
       "expect_empty": true,
       "known_drugs": [],
       "top3_drugs": [],
@@ -888,7 +869,7 @@
     },
     {
       "case_code": "BLIND-047",
-      "case_id": "FGFR4_AMP_HCC_01",
+      "case_id": "NTRK1_G595R_RESISTANCE_01",
       "expect_empty": true,
       "known_drugs": [],
       "top3_drugs": [],
@@ -902,35 +883,39 @@
     },
     {
       "case_code": "BLIND-048",
-      "case_id": "FGFR3_S249C_BLADDER_EXTENDED",
+      "case_id": "BRCA1_PATHOGENIC_HGSOC",
       "expect_empty": false,
       "known_drugs": [
-        "Erdafitinib"
+        "Olaparib",
+        "Niraparib",
+        "Rucaparib"
       ],
       "top3_drugs": [
-        "Erdafitinib"
+        "Niraparib",
+        "Olaparib",
+        "Rucaparib"
       ],
-      "standard_precision_at_3": 0.3333333333333333,
+      "standard_precision_at_3": 1.0,
       "normalized_precision_at_3": 1.0,
       "hit_at_3": true,
       "mrr": 1.0,
       "ndcg_at_3": 1.0,
-      "top3_hit_count": 1,
+      "top3_hit_count": 3,
       "auto_pass": true
     },
     {
       "case_code": "BLIND-049",
-      "case_id": "CDK4_AMP_LIPOSARCOMA_01",
+      "case_id": "FGFR2_BICC1_CHOLANGIO_MULTI_01",
       "expect_empty": false,
       "known_drugs": [
-        "Palbociclib",
-        "Ribociclib",
-        "Abemaciclib"
+        "Pemigatinib",
+        "Infigratinib",
+        "Futibatinib"
       ],
       "top3_drugs": [
-        "Abemaciclib",
-        "Palbociclib",
-        "Ribociclib"
+        "Futibatinib",
+        "Pemigatinib",
+        "Infigratinib"
       ],
       "standard_precision_at_3": 1.0,
       "normalized_precision_at_3": 1.0,

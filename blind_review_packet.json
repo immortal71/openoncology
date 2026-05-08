@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-08T11:53:15.606785+00:00",
+  "run_at": "2026-05-08T14:02:28.786851+00:00",
   "n_cases": 50,
   "seed": 11,
   "selection_policy": "Holdout from ADDITIONAL_VALIDATION_CASES excluding HARD_CLINICAL_CASES overlaps",
@@ -19,9 +19,9 @@
   "cases": [
     {
       "case_code": "BLIND-001",
-      "cancer_type": "Cervical Cancer",
-      "gene": "PIK3CA",
-      "variant": "E542K",
+      "cancer_type": "Cholangiocarcinoma",
+      "gene": "IDH1",
+      "variant": "R132H",
       "difficulty": "L1_L2",
       "context": {
         "comutations": [],
@@ -30,7 +30,15 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Alpelisib",
+          "drug_name": "Ivosidenib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Olutasidenib",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -42,9 +50,9 @@
     },
     {
       "case_code": "BLIND-002",
-      "cancer_type": "Diffuse Large B-Cell Lymphoma",
-      "gene": "CD79B",
-      "variant": "Y196H",
+      "cancer_type": "Gastrointestinal Stromal Tumor",
+      "gene": "KIT",
+      "variant": "EXON9MUT",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -53,15 +61,23 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Ibrutinib",
-          "oncokb_level": "LEVEL_2",
+          "drug_name": "Imatinib",
+          "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
+          "rank_score": 1.0,
           "confidence_level": "MEDIUM",
           "evidence_completeness": 0.5
         },
         {
-          "drug_name": "Zanubrutinib",
+          "drug_name": "Sunitinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Regorafenib",
           "oncokb_level": "LEVEL_2",
           "oncokb_gene_fallback": false,
           "rank_score": 0.8351,
@@ -73,9 +89,9 @@
     },
     {
       "case_code": "BLIND-003",
-      "cancer_type": "B-Cell Acute Lymphoblastic Leukemia",
-      "gene": "ABL1",
-      "variant": "T315I",
+      "cancer_type": "Glioblastoma Multiforme",
+      "gene": "TMB",
+      "variant": "TMB_High",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -84,15 +100,7 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Asciminib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Ponatinib",
+          "drug_name": "Pembrolizumab",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -104,9 +112,9 @@
     },
     {
       "case_code": "BLIND-004",
-      "cancer_type": "Endometrial Cancer",
-      "gene": "ERBB2",
-      "variant": "AMPLIFICATION",
+      "cancer_type": "Ovarian Clear Cell Carcinoma",
+      "gene": "ARID1A",
+      "variant": "Loss_of_Function",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -115,37 +123,29 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Ado-Trastuzumab Emtansine",
-          "oncokb_level": "LEVEL_1",
+          "drug_name": "Olaparib",
+          "oncokb_level": "LEVEL_3",
           "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
+          "rank_score": 0.7538,
+          "confidence_level": "LOW",
+          "evidence_completeness": 0.33
         },
         {
-          "drug_name": "Lapatinib",
-          "oncokb_level": "LEVEL_1",
+          "drug_name": "Tazemetostat",
+          "oncokb_level": "LEVEL_3",
           "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Neratinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
+          "rank_score": 0.7538,
+          "confidence_level": "LOW",
+          "evidence_completeness": 0.33
         }
       ],
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
       "case_code": "BLIND-005",
-      "cancer_type": "Myeloproliferative Neoplasm",
-      "gene": "JAK2",
-      "variant": "V617F",
+      "cancer_type": "Papillary Thyroid Cancer",
+      "gene": "RET",
+      "variant": "NCOA4-RET",
       "difficulty": "L1_L2",
       "context": {
         "comutations": [],
@@ -154,7 +154,7 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Fedratinib",
+          "drug_name": "Pralsetinib",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -162,15 +162,7 @@
           "evidence_completeness": 0.5
         },
         {
-          "drug_name": "Pacritinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Ruxolitinib",
+          "drug_name": "Selpercatinib",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -182,9 +174,9 @@
     },
     {
       "case_code": "BLIND-006",
-      "cancer_type": "Prostate Cancer",
-      "gene": "CDK12",
-      "variant": "BIALLELIC_LOSS",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "gene": "SMARCA4",
+      "variant": "Loss_of_Function",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -193,46 +185,7 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Nivolumab",
-          "oncokb_level": "LEVEL_3A",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.6653,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Olaparib",
-          "oncokb_level": "LEVEL_3A",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.6653,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-007",
-      "cancer_type": "Breast Cancer",
-      "gene": "ESR1",
-      "variant": "Y537N",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Elacestrant",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Lasofoxifene",
+          "drug_name": "Tazemetostat",
           "oncokb_level": "LEVEL_3",
           "oncokb_gene_fallback": false,
           "rank_score": 0.7538,
@@ -243,7 +196,343 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
+      "case_code": "BLIND-007",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "gene": "KRAS",
+      "variant": "G12V",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
       "case_code": "BLIND-008",
+      "cancer_type": "Acute Myeloid Leukemia",
+      "gene": "NPM1",
+      "variant": "W288FS",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Azacitidine",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Venetoclax",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-009",
+      "cancer_type": "Follicular Lymphoma",
+      "gene": "EZH2",
+      "variant": "Y646N",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Tazemetostat",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-010",
+      "cancer_type": "Renal Angiomyolipoma",
+      "gene": "TSC1",
+      "variant": "MUTATION",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Everolimus",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Temsirolimus",
+          "oncokb_level": "LEVEL_3A",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.6653,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-011",
+      "cancer_type": "Melanoma",
+      "gene": "MAP2K2",
+      "variant": "Q60P",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Cobimetinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Trametinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-012",
+      "cancer_type": "Acute Myeloid Leukemia",
+      "gene": "IDH2",
+      "variant": "R172K",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Enasidenib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-013",
+      "cancer_type": "Gastric Cancer",
+      "gene": "MET",
+      "variant": "AMPLIFICATION",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Capmatinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Tepotinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Crizotinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-014",
+      "cancer_type": "HER2-Positive Gastric Cancer",
+      "gene": "ERBB2",
+      "variant": "AMPLIFICATION",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Trastuzumab",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Trastuzumab Deruxtecan",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-015",
+      "cancer_type": "Osteosarcoma",
+      "gene": "TP53",
+      "variant": "R248H",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-016",
+      "cancer_type": "Breast Cancer",
+      "gene": "ERBB2",
+      "variant": "V777L",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Afatinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Neratinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-017",
+      "cancer_type": "Colorectal Cancer",
+      "gene": "NRAS",
+      "variant": "Q61L",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Binimetinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-018",
+      "cancer_type": "Epithelioid Sarcoma",
+      "gene": "SMARCB1",
+      "variant": "Loss_of_Function",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-019",
+      "cancer_type": "Endometrial Cancer",
+      "gene": "PTEN",
+      "variant": "truncation",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Everolimus",
+          "oncokb_level": "LEVEL_3A",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.6653,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Temsirolimus",
+          "oncokb_level": "LEVEL_3A",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.6653,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-020",
       "cancer_type": "Gastric Cancer",
       "gene": "FGFR2",
       "variant": "AMPLIFICATION",
@@ -282,276 +571,7 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-009",
-      "cancer_type": "B-Cell Acute Lymphoblastic Leukemia",
-      "gene": "ABL1",
-      "variant": "BCR-ABL1",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Bosutinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Dasatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Imatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-010",
-      "cancer_type": "Pancreatic Adenocarcinoma",
-      "gene": "BRCA2",
-      "variant": "Loss_of_Function",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-011",
-      "cancer_type": "Non-Small Cell Lung Cancer",
-      "gene": "ERBB2",
-      "variant": "Amplification",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Ado-Trastuzumab Emtansine",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Lapatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Neratinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-012",
-      "cancer_type": "Papillary Thyroid Cancer",
-      "gene": "BRAF",
-      "variant": "V600E",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Dabrafenib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Trametinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Vemurafenib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-013",
-      "cancer_type": "Melanoma",
-      "gene": "CDKN2A",
-      "variant": "Loss",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-014",
-      "cancer_type": "Acute Myeloid Leukemia",
-      "gene": "IDH2",
-      "variant": "R172W",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Enasidenib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-015",
-      "cancer_type": "Clear Cell Renal Cell Carcinoma",
-      "gene": "VHL",
-      "variant": "truncation",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Belzutifan",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        },
-        {
-          "drug_name": "Axitinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.7898,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        },
-        {
-          "drug_name": "Cabozantinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.7898,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-016",
-      "cancer_type": "Intrahepatic Cholangiocarcinoma",
-      "gene": "FGFR2",
-      "variant": "Fusion",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Futibatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Pemigatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Infigratinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-017",
-      "cancer_type": "Acute Myeloid Leukemia",
-      "gene": "FLT3",
-      "variant": "Y842H",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Gilteritinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-018",
+      "case_code": "BLIND-021",
       "cancer_type": "Non-Small Cell Lung Cancer",
       "gene": "EGFR",
       "variant": "AMPLIFICATION",
@@ -590,7 +610,270 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-019",
+      "case_code": "BLIND-022",
+      "cancer_type": "Renal Cell Carcinoma",
+      "gene": "MTOR",
+      "variant": "E1799K",
+      "difficulty": "L3_L4",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Everolimus",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-023",
+      "cancer_type": "Clear Cell Renal Cell Carcinoma",
+      "gene": "TSC2",
+      "variant": "truncation",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-024",
+      "cancer_type": "Colorectal Cancer",
+      "gene": "TMB",
+      "variant": "TMB-HIGH",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Pembrolizumab",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-025",
+      "cancer_type": "Ovarian Clear Cell Carcinoma",
+      "gene": "ARID1A",
+      "variant": "FRAMESHIFT",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-026",
+      "cancer_type": "AML",
+      "gene": "FLT3",
+      "variant": "ITD",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Gilteritinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Midostaurin",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Quizartinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-027",
+      "cancer_type": "Hepatocellular Carcinoma",
+      "gene": "CTNNB1",
+      "variant": "S45F",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-028",
+      "cancer_type": "Mesothelioma",
+      "gene": "NF2",
+      "variant": "truncation",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-029",
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "gene": "ROS1",
+      "variant": "EZR-ROS1",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Crizotinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Entrectinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-030",
+      "cancer_type": "Urothelial Cancer",
+      "gene": "FGFR3",
+      "variant": "FUSION",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Erdafitinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Pemigatinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-031",
+      "cancer_type": "Bladder Urothelial Carcinoma",
+      "gene": "FGFR3",
+      "variant": "G370C",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Erdafitinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-032",
+      "cancer_type": "Melanoma",
+      "gene": "BRAF",
+      "variant": "L597V",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Trametinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-033",
+      "cancer_type": "Clear Cell Renal Cell Carcinoma",
+      "gene": "SETD2",
+      "variant": "FRAMESHIFT",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-034",
       "cancer_type": "Urothelial Carcinoma",
       "gene": "FGFR3",
       "variant": "FUSION",
@@ -621,24 +904,10 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-020",
-      "cancer_type": "Colorectal Cancer",
-      "gene": "KRAS",
-      "variant": "G13D",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-021",
-      "cancer_type": "Endometrial Cancer",
-      "gene": "PIK3CA",
-      "variant": "E542K",
+      "case_code": "BLIND-035",
+      "cancer_type": "Acute Myeloid Leukemia",
+      "gene": "FLT3",
+      "variant": "Y842H",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -647,7 +916,7 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Alpelisib",
+          "drug_name": "Gilteritinib",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -658,34 +927,11 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-022",
+      "case_code": "BLIND-036",
       "cancer_type": "Ovarian Cancer",
-      "gene": "SMARCA4",
-      "variant": "Loss_of_Function",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Tazemetostat",
-          "oncokb_level": "LEVEL_3",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.7538,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-023",
-      "cancer_type": "Myelodysplastic Syndrome",
-      "gene": "SF3B1",
-      "variant": "K700E",
-      "difficulty": "VUS_NEG",
+      "gene": "PMS2",
+      "variant": "Pathogenic",
+      "difficulty": "L1_L2",
       "context": {
         "comutations": [],
         "vaf": null,
@@ -695,10 +941,10 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-024",
-      "cancer_type": "Bladder Cancer",
-      "gene": "FGFR3",
-      "variant": "K650E",
+      "case_code": "BLIND-037",
+      "cancer_type": "Endometrial Cancer",
+      "gene": "TMB",
+      "variant": "TMB-HIGH",
       "difficulty": "L1_L2",
       "context": {
         "comutations": [],
@@ -707,7 +953,7 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Erdafitinib",
+          "drug_name": "Pembrolizumab",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -718,11 +964,11 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-025",
-      "cancer_type": "Clear Cell Renal Cell Carcinoma",
-      "gene": "TSC2",
-      "variant": "truncation",
-      "difficulty": "VUS_NEG",
+      "case_code": "BLIND-038",
+      "cancer_type": "Waldenstrom Macroglobulinemia",
+      "gene": "MYD88",
+      "variant": "L265P",
+      "difficulty": "L1_L2",
       "context": {
         "comutations": [],
         "vaf": null,
@@ -732,11 +978,11 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-026",
-      "cancer_type": "Colorectal Cancer",
-      "gene": "NTRK3",
-      "variant": "FUSION",
-      "difficulty": "L1_L2",
+      "case_code": "BLIND-039",
+      "cancer_type": "Diffuse Large B-Cell Lymphoma",
+      "gene": "CD79B",
+      "variant": "Y196H",
+      "difficulty": "L3_L4",
       "context": {
         "comutations": [],
         "vaf": null,
@@ -744,15 +990,38 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Entrectinib",
-          "oncokb_level": "LEVEL_1",
+          "drug_name": "Ibrutinib",
+          "oncokb_level": "LEVEL_2",
           "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
+          "rank_score": 0.8351,
           "confidence_level": "MEDIUM",
           "evidence_completeness": 0.5
         },
         {
-          "drug_name": "Larotrectinib",
+          "drug_name": "Zanubrutinib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-040",
+      "cancer_type": "Acute Myeloid Leukemia",
+      "gene": "IDH2",
+      "variant": "R172S",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Enasidenib",
           "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
           "rank_score": 1.0,
@@ -763,36 +1032,8 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-027",
-      "cancer_type": "Mesothelioma",
-      "gene": "NF2",
-      "variant": "truncation",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-028",
-      "cancer_type": "Osteosarcoma",
-      "gene": "TP53",
-      "variant": "R248H",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-029",
-      "cancer_type": "Polycythemia Vera",
+      "case_code": "BLIND-041",
+      "cancer_type": "Myelofibrosis",
       "gene": "JAK2",
       "variant": "V617F",
       "difficulty": "L1_L2",
@@ -830,364 +1071,10 @@
       "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
     },
     {
-      "case_code": "BLIND-030",
-      "cancer_type": "Breast Cancer",
-      "gene": "BRCA1",
-      "variant": "Splice_Site",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Olaparib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Niraparib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-031",
-      "cancer_type": "Acute Myeloid Leukemia",
-      "gene": "IDH2",
-      "variant": "R140Q",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Enasidenib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Azacitidine",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-032",
-      "cancer_type": "Metastatic GIST",
-      "gene": "PDGFRA",
-      "variant": "D842V",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Avapritinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-033",
-      "cancer_type": "Colorectal Cancer",
-      "gene": "SMAD4",
-      "variant": "TRUNCATION",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-034",
-      "cancer_type": "Gastric Cancer",
-      "gene": "MET",
-      "variant": "AMPLIFICATION",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Capmatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Tepotinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Crizotinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-035",
-      "cancer_type": "Head and Neck Squamous Cell Carcinoma",
-      "gene": "HRAS",
-      "variant": "Q61R",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-036",
-      "cancer_type": "Endometrial Carcinoma",
-      "gene": "TSC1",
-      "variant": "Loss_of_Function",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Everolimus",
-          "oncokb_level": "LEVEL_2B",
-          "oncokb_gene_fallback": true,
-          "rank_score": 0.7538,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        },
-        {
-          "drug_name": "Temsirolimus",
-          "oncokb_level": "LEVEL_2B",
-          "oncokb_gene_fallback": true,
-          "rank_score": 0.7538,
-          "confidence_level": "LOW",
-          "evidence_completeness": 0.33
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-037",
-      "cancer_type": "Non-Small Cell Lung Cancer",
-      "gene": "EGFR",
-      "variant": "G719C",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Osimertinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Afatinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-038",
-      "cancer_type": "Head and Neck Squamous Cell Carcinoma",
-      "gene": "CD274",
-      "variant": "Amplification",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Atezolizumab",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Nivolumab",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Pembrolizumab",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-039",
-      "cancer_type": "Endometrial Cancer",
-      "gene": "PTEN",
-      "variant": "truncation",
-      "difficulty": "L3_L4",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Everolimus",
-          "oncokb_level": "LEVEL_3A",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.6653,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Temsirolimus",
-          "oncokb_level": "LEVEL_3A",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.6653,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-040",
-      "cancer_type": "Pulmonary Sarcomatoid Carcinoma",
-      "gene": "MET",
-      "variant": "Exon14_Skipping",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Capmatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Tepotinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Crizotinib",
-          "oncokb_level": "LEVEL_2",
-          "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-041",
-      "cancer_type": "Non-Small Cell Lung Cancer",
-      "gene": "RET",
-      "variant": "CCDC6-RET",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Pralsetinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Selpercatinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
       "case_code": "BLIND-042",
-      "cancer_type": "Colorectal Cancer",
-      "gene": "NRAS",
-      "variant": "Q61L",
+      "cancer_type": "Endometrial Cancer",
+      "gene": "PIK3CA",
+      "variant": "E542K",
       "difficulty": "L3_L4",
       "context": {
         "comutations": [],
@@ -1196,10 +1083,10 @@
       },
       "top3_candidates": [
         {
-          "drug_name": "Binimetinib",
-          "oncokb_level": "LEVEL_2",
+          "drug_name": "Alpelisib",
+          "oncokb_level": "LEVEL_1",
           "oncokb_gene_fallback": false,
-          "rank_score": 0.8351,
+          "rank_score": 1.0,
           "confidence_level": "MEDIUM",
           "evidence_completeness": 0.5
         }
@@ -1208,126 +1095,7 @@
     },
     {
       "case_code": "BLIND-043",
-      "cancer_type": "Thyroid Cancer",
-      "gene": "NTRK1",
-      "variant": "FUSION",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Entrectinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        },
-        {
-          "drug_name": "Larotrectinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-044",
-      "cancer_type": "Head and Neck Squamous Cell Carcinoma",
-      "gene": "HRAS",
-      "variant": "G12V",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-045",
-      "cancer_type": "Acute Myeloid Leukemia",
-      "gene": "IDH1",
-      "variant": "R132G",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Ivosidenib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-046",
-      "cancer_type": "Papillary Thyroid Cancer",
-      "gene": "NTRK1",
-      "variant": "G595R",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-047",
-      "cancer_type": "Hepatocellular Carcinoma",
-      "gene": "FGFR4",
-      "variant": "Amplification",
-      "difficulty": "VUS_NEG",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-048",
-      "cancer_type": "Bladder Urothelial Carcinoma",
-      "gene": "FGFR3",
-      "variant": "S249C",
-      "difficulty": "L1_L2",
-      "context": {
-        "comutations": [],
-        "vaf": null,
-        "tumour_purity": null
-      },
-      "top3_candidates": [
-        {
-          "drug_name": "Erdafitinib",
-          "oncokb_level": "LEVEL_1",
-          "oncokb_gene_fallback": false,
-          "rank_score": 1.0,
-          "confidence_level": "MEDIUM",
-          "evidence_completeness": 0.5
-        }
-      ],
-      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
-    },
-    {
-      "case_code": "BLIND-049",
-      "cancer_type": "Well-Differentiated Liposarcoma",
+      "cancer_type": "Breast Cancer",
       "gene": "CDK4",
       "variant": "Amplification",
       "difficulty": "L1_L2",
@@ -1355,6 +1123,157 @@
         },
         {
           "drug_name": "Ribociclib",
+          "oncokb_level": "LEVEL_2",
+          "oncokb_gene_fallback": false,
+          "rank_score": 0.8351,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-044",
+      "cancer_type": "Colorectal Cancer",
+      "gene": "TP53",
+      "variant": "R273H",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-045",
+      "cancer_type": "Papillary Thyroid Cancer",
+      "gene": "RET",
+      "variant": "NCOA4-RET",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Pralsetinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Selpercatinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-046",
+      "cancer_type": "Head and Neck Squamous Cell Carcinoma",
+      "gene": "HRAS",
+      "variant": "Q61R",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-047",
+      "cancer_type": "Papillary Thyroid Cancer",
+      "gene": "NTRK1",
+      "variant": "G595R",
+      "difficulty": "VUS_NEG",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-048",
+      "cancer_type": "High-Grade Serous Ovarian Cancer",
+      "gene": "BRCA1",
+      "variant": "PATHOGENIC",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Niraparib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Olaparib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Rucaparib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        }
+      ],
+      "review_prompt": "Do the top-3 choices look clinically reasonable for this context?"
+    },
+    {
+      "case_code": "BLIND-049",
+      "cancer_type": "Intrahepatic Cholangiocarcinoma",
+      "gene": "FGFR2",
+      "variant": "Fusion",
+      "difficulty": "L1_L2",
+      "context": {
+        "comutations": [],
+        "vaf": null,
+        "tumour_purity": null
+      },
+      "top3_candidates": [
+        {
+          "drug_name": "Futibatinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Pemigatinib",
+          "oncokb_level": "LEVEL_1",
+          "oncokb_gene_fallback": false,
+          "rank_score": 1.0,
+          "confidence_level": "MEDIUM",
+          "evidence_completeness": 0.5
+        },
+        {
+          "drug_name": "Infigratinib",
           "oncokb_level": "LEVEL_2",
           "oncokb_gene_fallback": false,
           "rank_score": 0.8351,
