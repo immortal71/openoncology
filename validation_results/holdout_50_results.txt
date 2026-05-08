@@ -70,3 +70,12 @@ Metric redundancy risk: False
 Std P@3 ceiling (this holdout): 0.650
 Blind packet: /home/runner/work/openoncology/openoncology/blind_review_packet.json
 Scoring key:  /home/runner/work/openoncology/openoncology/blind_review_key_scoring.json
+========================================================================
+ONCOLOGIST REVIEW PACKET DIFF
+========================================================================
+Difficult cases reviewed: 16
+Difficult top-3 changed:  15
+Standard P@3 delta:      -0.0458
+JSON: /home/runner/work/openoncology/openoncology/artifacts/validation_diff/oncologist_review_packet_diff.json
+MD:   /home/runner/work/openoncology/openoncology/artifacts/validation_diff/oncologist_review_packet_diff.md
+Diff artifacts generated under artifacts/validation_diff
