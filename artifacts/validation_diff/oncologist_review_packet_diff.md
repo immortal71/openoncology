@@ -1,60 +1,73 @@
 # Oncologist Review Packet Diff (Before vs After)
 
 - Before run: 2026-05-02T03:46:22.407112+00:00
-- After run: 2026-05-03T13:35:18.424510+00:00
-- Cases total: 24
-- Difficult cases reviewed: 13
-- Difficult cases with top-3 changes: 12
-- Auto-pass flips: 0
+- After run: 2026-05-08T14:02:28.786851+00:00
+- Cases total: 50
+- Difficult cases reviewed: 16
+- Difficult cases with top-3 changes: 16
+- Auto-pass flips: 2
 
 ## Metrics Delta
 
-- Standard P@3: 0.5625 -> 0.5789 (delta +0.0164)
-- Normalized P@3: None -> 0.9825 (delta +0.9825)
-- Hit@3: 1.0 -> 1.0 (delta +0.0000)
-- MRR: None -> 0.9211 (delta +0.9211)
-- NDCG@3: None -> 0.9355 (delta +0.9355)
+- Standard P@3: 0.5625 -> 0.5083 (delta -0.0542)
+- Normalized P@3: None -> 0.8167 (delta +0.8167)
+- Hit@3: 1.0 -> 0.9 (delta -0.1000)
+- MRR: None -> 0.8833 (delta +0.8833)
+- NDCG@3: None -> 0.8827 (delta +0.8827)
 - False positives: 0 -> 0 (delta +0)
 
 ## Difficult Case Top-3 Changes
 
-- BLIND-001 | KIT EXON17MUT | GIST | L3_L4
-  - Before: Olaparib, Niraparib, Rucaparib
-  - After: Avapritinib, Ripretinib
-- BLIND-002 | IDH2 R140Q | Relapsed Refractory AML | L3_L4
+- BLIND-002 | KIT EXON9MUT | Gastrointestinal Stromal Tumor | L3_L4
   - Before: (none)
-  - After: Enasidenib, Azacitidine
-- BLIND-003 | FAT1 truncation | Non-Small Cell Lung Cancer | VUS_NEG
+  - After: Imatinib, Sunitinib, Regorafenib
+- BLIND-003 | TMB TMB_High | Glioblastoma Multiforme | L3_L4
   - Before: Belzutifan
+  - After: Pembrolizumab
+- BLIND-004 | ARID1A Loss_of_Function | Ovarian Clear Cell Carcinoma | L3_L4
+  - Before: (none)
+  - After: Olaparib, Tazemetostat
+- BLIND-006 | SMARCA4 Loss_of_Function | Non-Small Cell Lung Cancer | L3_L4
+  - Before: Venetoclax
+  - After: Tazemetostat
+- BLIND-007 | KRAS G12V | Non-Small Cell Lung Cancer | L3_L4
+  - Before: Enasidenib
   - After: (none)
-- BLIND-004 | TSC2 MUTATION | Lymphangioleiomyomatosis | L3_L4
+- BLIND-008 | NPM1 W288FS | Acute Myeloid Leukemia | L3_L4
+  - Before: Larotrectinib, Entrectinib
+  - After: Azacitidine, Venetoclax
+- BLIND-010 | TSC1 MUTATION | Renal Angiomyolipoma | L3_L4
   - Before: (none)
   - After: Everolimus, Temsirolimus
-- BLIND-006 | MYC Amplification | Diffuse Large B-Cell Lymphoma | VUS_NEG
-  - Before: Venetoclax
+- BLIND-013 | MET AMPLIFICATION | Gastric Cancer | L3_L4
+  - Before: Pemigatinib, Futibatinib, Infigratinib
+  - After: Capmatinib, Tepotinib, Crizotinib
+- BLIND-015 | TP53 R248H | Osteosarcoma | VUS_NEG
+  - Before: Crizotinib, Lorlatinib
   - After: (none)
-- BLIND-007 | SMARCA4 Loss_of_Function | Non-Small Cell Lung Cancer | L3_L4
-  - Before: Enasidenib
-  - After: Tazemetostat
-- BLIND-009 | TSC2 truncation | Clear Cell Renal Cell Carcinoma | VUS_NEG
-  - Before: Trastuzumab, Trastuzumab Deruxtecan, Pertuzumab
-  - After: (none)
-- BLIND-016 | PIK3CA E542K | Endometrial Cancer | L3_L4
-  - Before: Selpercatinib, Pralsetinib, Vandetanib
-  - After: Alpelisib
-- BLIND-017 | SMARCA4 Loss_of_Function | Ovarian Cancer | L3_L4
+- BLIND-017 | NRAS Q61L | Colorectal Cancer | L3_L4
   - Before: Vemurafenib, Dabrafenib, Trametinib
-  - After: Tazemetostat
-- BLIND-020 | CD79B Y196C | Diffuse Large B-Cell Lymphoma | L3_L4
+  - After: Binimetinib
+- BLIND-018 | SMARCB1 Loss_of_Function | Epithelioid Sarcoma | L3_L4
+  - Before: Avapritinib, Imatinib
+  - After: (none)
+- BLIND-019 | PTEN truncation | Endometrial Cancer | L3_L4
+  - Before: (none)
+  - After: Everolimus, Temsirolimus
+- BLIND-020 | FGFR2 AMPLIFICATION | Gastric Cancer | L3_L4
   - Before: Erdafitinib, Pemigatinib
-  - After: Ibrutinib, Zanubrutinib, Acalabrutinib
-- BLIND-023 | TET2 frameshift | Acute Myeloid Leukemia | VUS_NEG
+  - After: Futibatinib, Pemigatinib, Erdafitinib
+- BLIND-021 | EGFR AMPLIFICATION | Non-Small Cell Lung Cancer | L3_L4
+  - Before: Everolimus, Temsirolimus
+  - After: Cetuximab, Panitumumab, Erlotinib
+- BLIND-022 | MTOR E1799K | Renal Cell Carcinoma | L3_L4
+  - Before: (none)
+  - After: Everolimus
+- BLIND-023 | TSC2 truncation | Clear Cell Renal Cell Carcinoma | VUS_NEG
   - Before: Mrtx1133
   - After: (none)
-- BLIND-024 | NPM1 W288FS | Acute Myeloid Leukemia | L3_L4
-  - Before: (none)
-  - After: Azacitidine, Venetoclax
 
 ## Auto-Pass Outcome Flips
 
-- No auto-pass outcome flips.
+- BLIND-007 | KRAS_G12V_NSCLC_EMERGING_01 | auto_pass True -> False
+- BLIND-018 | LIT_SMARCB1_LOF_EPS_01 | auto_pass True -> False
