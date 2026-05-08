@@ -1,17 +1,7 @@
 {
-  "locked_primary_metric": "standard_precision_at_3",
-  "standard_precision_at_3": 0.5167,
-  "normalized_precision_at_3": 0.8125,
   "hit_at_3": 0.9,
+  "standard_precision_at_3": 0.5167,
+  "normalised_precision_at_3": 0.8125,
   "mrr": 0.8708,
-  "ndcg_at_3": 0.8449,
-  "false_positives": 1,
-  "false_positive_rate": 0.1,
-  "sensitivity_case_count": 40,
-  "specificity_case_count": 10,
-  "single_drug_sensitivity_cases": 12,
-  "multi_drug_sensitivity_cases": 28,
-  "single_drug_sensitivity_fraction": 0.3,
-  "theoretical_standard_precision_at_3_ceiling": 0.65,
-  "metric_redundancy_risk": false
+  "false_positive_rate": 0.1
 }
