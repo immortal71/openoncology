@@ -1,0 +1,18 @@
+{
+  "n_cases": 50,
+  "seed": 11,
+  "profile": "transparent_v1",
+  "hit_at_3": 0.9,
+  "standard_precision_at_3": 0.5167,
+  "normalised_precision_at_3": 0.8125,
+  "mrr": 0.8708,
+  "ndcg_at_3": 0.8449,
+  "false_positives": 1,
+  "false_positive_rate": 0.1,
+  "sensitivity_case_count": 40,
+  "specificity_case_count": 10,
+  "std_p3_ceiling": 0.65,
+  "single_drug_sensitivity_fraction": 0.3,
+  "metric_redundancy_risk": false,
+  "note": "CIViC lookups failed (network unavailable); OncoKB static fallback used. Metrics are offline-mode results."
+}

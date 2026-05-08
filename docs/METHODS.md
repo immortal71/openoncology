@@ -147,7 +147,7 @@ All numeric thresholds are configurable via `api/ai/ranking_config.py`.
 
 ### DiffDock
 
-- **Source**: MIT CSAIL (Stärk et al., ICLR 2023)
+- **Source**: MIT CSAIL (Stärk et al., ICLR 2023, arXiv:2210.01776)
 - **Coverage**: Requires AlphaFold structure + SMILES of candidate drug
 - **Limitations**: NOT run in the default demo. Requires GPU resources and takes ~30 minutes per target. Docking scores are not equivalent to experimental binding affinities; they are semi-quantitative poses from a generative model.
 
@@ -411,11 +411,11 @@ This separation is intentional to reduce patient confusion and prevent technical
 
 ## References
 
-- **OncoKB**: Chakravarty et al., JCO PO 2017. https://oncokb.org
+- **OncoKB**: Chakravarty et al., JCO Precision Oncology 2017, PO.17.00011. https://oncokb.org
 - **CIViC**: Griffith et al., Nature Genetics 2017. https://civicdb.org
 - **OpenTargets**: Ochoa et al., Nucleic Acids Research 2023. https://www.opentargets.org
 - **AlphaMissense**: Cheng et al., Science 2023. https://deepmind.google/technologies/alphamissense/
-- **DiffDock**: Stärk et al., ICLR 2023. https://arxiv.org/abs/2210.01776
+- **DiffDock**: Stärk et al., ICLR 2023, arXiv:2210.01776. https://arxiv.org/abs/2210.01776
 - **AlphaFold**: Jumper et al., Nature 2021. https://alphafold.ebi.ac.uk
 - **RDKit SA Score**: Ertl & Schuffenhauer, J. Cheminformatics 2009.
 - **Ames SMARTS**: Kazius et al., J. Med. Chem. 2005.
@@ -425,6 +425,7 @@ This separation is intentional to reduce patient confusion and prevent technical
 - **Oral bioavailability**: Lipinski et al., Adv. Drug Deliv. Rev. 1997; Veber et al., J. Med. Chem. 2002.
 - **Delaney solubility**: Delaney, J. Chem. Inf. Comput. Sci. 2004.
 - **ChEMBL**: Mendez et al., Nucleic Acids Research 2019. https://www.ebi.ac.uk/chembl/
+- **Chapman et al. (vemurafenib/BRAF)**: Chapman et al., NEJM 2011 — not directly cited in this document; listed here for completeness of BRAF V600E treatment history. This reference is unused in the current methods text.
 
 ### Tumor board case report sources (holdout literature cases)
 
