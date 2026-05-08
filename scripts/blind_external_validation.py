@@ -530,7 +530,7 @@ def run_blind_external_validation(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run blind holdout external validation")
-    parser.add_argument("--n-cases", type=int, default=24, help="Number of holdout cases (default: 24)")
+    parser.add_argument("--n-cases", type=int, default=50, help="Number of holdout cases (default: 50)")
     parser.add_argument("--seed", type=int, default=11, help="Selection/randomization seed")
     parser.add_argument(
         "--profile",
