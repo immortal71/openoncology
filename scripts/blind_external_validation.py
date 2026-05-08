@@ -287,6 +287,12 @@ def _known_drug_count(case: dict[str, Any]) -> int:
     return len(case.get("known_drugs") or [])
 
 
+def _is_offline_mode() -> bool:
+    return not bool(
+        os.getenv("ONCOKB_API_TOKEN", "").strip() or os.getenv("ONCOKB_PUBLIC_DUMP_TOKEN", "").strip()
+    )
+
+
 def _select_holdout_cases(
     n_cases: int,
     seed: int,
@@ -312,6 +318,7 @@ def _select_holdout_cases(
             bool(c.get("expect_empty", False)),
         )
         not in hard_keys
+        and not (_is_offline_mode() and bool(c.get("network_dependent", False)))
     ]
 
     by_diff: dict[str, list[dict[str, Any]]] = {}

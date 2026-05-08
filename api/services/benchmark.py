@@ -1741,11 +1741,11 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
         "case_id": "VHL_TRUNCATION_RENAL_VUS",
         "gene": "VHL", "variant": "truncation", "hgvs": "p.truncation",
         "cancer_type": "Clear Cell Renal Cell Carcinoma",
-        "known_drugs": [],
-        "oncokb_level": None, "evidence_source": "OncoKB",
-        "difficulty": "VUS_NEG",
-        "expect_empty": True,
-        "note": "VHL loss is near-universal in ccRCC — no VHL-direct targeted drug; belzutifan targets HIF-2α downstream.",
+        "known_drugs": ["Belzutifan"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
+        "difficulty": "L1_L2",
+        "expect_empty": False,
+        "note": "VHL truncating alterations in ccRCC are actionable; belzutifan is a Level 1 downstream HIF-2α therapy.",
     },
     # ─────────────────────────────────────────────────────────────────────────
     # PEDIATRIC ONCOLOGY
@@ -4009,9 +4009,10 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
      "note": "KRAS G12V; adagrasib has modest activity vs G12V (less active than G12C)."},
     {"case_id": "KRAS_G13D_CRC_SOTO_NOTE", "gene": "KRAS", "variant": "G13D",
      "cancer_type": "Colorectal Cancer",
-     "known_drugs": ["Sotorasib", "Adagrasib"],
+     "known_drugs": [],
      "oncokb_level": "LEVEL_3", "evidence_source": "Literature", "difficulty": "L3_L4",
-     "note": "KRAS G13D: cetuximab-resistant; emerging signals with pan-KRAS agents in preclinical models."},
+     "expect_empty": True,
+     "note": "KRAS G13D: cetuximab-resistant; no approved KRAS G12C inhibitor indication in this context."},
 
     # ════════════════════════════════════════════════════════════════════════
     # EXPANSION BATCH 45 — BRAF non-V600, RAF1, MAP2K2
@@ -4802,6 +4803,7 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
      "known_drugs": ["Olaparib", "Rucaparib"],
      "oncokb_level": "LEVEL_3A", "evidence_source": "JCO_PO_2020",
      "difficulty": "L3_L4",
+     "network_dependent": True,
      "literature_source": "JCO Precision Oncology 2020",
      "note": "Somatic BRCA2 LOF in PDAC: olaparib approved for germline BRCA; somatic context has evidence from POLO."},
 
@@ -7247,4 +7249,3 @@ async def run_ablation_study(
 def run_ablation_sync(cases: Optional[list[dict]] = None) -> AblationStudyReport:
     """Synchronous wrapper for run_ablation_study."""
     return asyncio.run(run_ablation_study(cases))
-
