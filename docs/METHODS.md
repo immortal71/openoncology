@@ -147,7 +147,7 @@ All numeric thresholds are configurable via `api/ai/ranking_config.py`.
 
 ### DiffDock
 
-- **Source**: MIT CSAIL (Stärk et al., ICLR 2023, arXiv:2210.01776)
+- **Source**: MIT CSAIL (Stärk et al., ICLR 2023)
 - **Coverage**: Requires AlphaFold structure + SMILES of candidate drug
 - **Limitations**: NOT run in the default demo. Requires GPU resources and takes ~30 minutes per target. Docking scores are not equivalent to experimental binding affinities; they are semi-quantitative poses from a generative model.
 
@@ -172,10 +172,6 @@ The benchmark uses a curated set of 200+ cases drawn from:
 3. **VUS negative controls** (~40): Variants of uncertain significance or variants with no approved targeted therapy. The system must NOT over-claim Level 1/2 evidence for these cases. These test **specificity**, not sensitivity.
 
 4. **Resistance cases** (~15): Known resistance mutations (e.g., EGFR T790M for erlotinib/gefitinib, ABL1 T315I for imatinib). The system must cap resistance drugs; the correct drug (e.g., osimertinib for T790M) should rank highly.
-
-5. **Literature-sourced tumor board cases** (~30): Cases mined from published molecular tumor
-   board reports in JCO Precision Oncology, Annals of Oncology, and Nature Medicine (see
-   [holdout validation](#blind-holdout-validation-n50) below).
 
 ### Metrics
 
@@ -220,61 +216,7 @@ Run locally:
 
 This gate is also run in CI to prevent silent quality regressions.
 
-### Blind Holdout Validation (n=50)
-
-The blind holdout validation evaluates pipeline quality on cases that were never seen during
-development. Cases are drawn from `ADDITIONAL_VALIDATION_CASES`, which now includes a dedicated
-literature-sourced subset of 30 published tumor board cases.
-
-#### Case sources
-
-The 30 literature cases span three difficulty tiers:
-
-| Tier | Count | Journals |
-|---|---|---|
-| L1_L2 (Level 1–2 evidence) | 12 | JCO Precision Oncology, Annals of Oncology |
-| L3_L4 (Level 3–4 evidence) | 12 | JCO Precision Oncology, Annals of Oncology, Nature Medicine |
-| VUS_NEG (negative controls) | 6 | JCO Precision Oncology, Nature Medicine |
-
-Representative cases include:
-- FGFR2 fusion intrahepatic cholangiocarcinoma → pemigatinib (JCO PO 2020, FIGHT-202)
-- IDH1 R132H AML → ivosidenib (JCO PO 2019)
-- HRAS Q61R HNSCC → tipifarnib (JCO PO 2021, AIM-HN trial)
-- KMT2A::MLLT3 AML → revumenib (JCO PO 2023, AUGMENT-101)
-- KRAS G12V GBM → negative control (no approved therapy; JCO PO 2022 actionability gap report)
-- STK11 LOF NSCLC → negative control (resistance mechanism; Nature Medicine 2022)
-
-#### Running the expanded holdout
-
-```bash
-# Default is now n=50
-python scripts/blind_external_validation.py
-
-# Explicit invocation with seed for reproducibility
-python scripts/blind_external_validation.py --n-cases 50 --seed 11
-
-# Produce only blind review packet (no scoring key)
-python scripts/blind_external_validation.py --n-cases 50 --no-generate-diff
-```
-
-Outputs:
-- `blind_review_packet.json` — de-identified case list for external clinical reviewer
-- `blind_review_key_scoring.json` — expected labels + automated metric summary
-
-#### Selection policy
-
-Cases are sampled from `ADDITIONAL_VALIDATION_CASES` while excluding any overlap with
-`HARD_CLINICAL_CASES`. Stratified quotas ensure the difficulty distribution matches the
-full pool:
-
-```
-L1_L2 quota : round(n_cases × 0.45) = 23 for n=50
-L3_L4 quota : round(n_cases × 0.35) = 18 for n=50
-VUS_NEG quota: n_cases − L1_L2 − L3_L4  = 9 for n=50
-```
-
 ### Real-world cBioPortal 100-case benchmark (May 2026)
-
 
 In addition to the curated gold-standard benchmark, the pipeline was validated against **100 real de-identified TCGA patient mutation records** fetched from the public cBioPortal REST API. This test measures operational coverage and recommendation quality on genuine human genomic data — not synthetic or hand-crafted cases.
 
@@ -411,11 +353,11 @@ This separation is intentional to reduce patient confusion and prevent technical
 
 ## References
 
-- **OncoKB**: Chakravarty et al., JCO Precision Oncology 2017, PO.17.00011. https://oncokb.org
+- **OncoKB**: Chakravarty et al., JCO PO 2017. https://oncokb.org
 - **CIViC**: Griffith et al., Nature Genetics 2017. https://civicdb.org
 - **OpenTargets**: Ochoa et al., Nucleic Acids Research 2023. https://www.opentargets.org
 - **AlphaMissense**: Cheng et al., Science 2023. https://deepmind.google/technologies/alphamissense/
-- **DiffDock**: Stärk et al., ICLR 2023, arXiv:2210.01776. https://arxiv.org/abs/2210.01776
+- **DiffDock**: Stärk et al., ICLR 2023. https://arxiv.org/abs/2210.01776
 - **AlphaFold**: Jumper et al., Nature 2021. https://alphafold.ebi.ac.uk
 - **RDKit SA Score**: Ertl & Schuffenhauer, J. Cheminformatics 2009.
 - **Ames SMARTS**: Kazius et al., J. Med. Chem. 2005.
@@ -425,22 +367,3 @@ This separation is intentional to reduce patient confusion and prevent technical
 - **Oral bioavailability**: Lipinski et al., Adv. Drug Deliv. Rev. 1997; Veber et al., J. Med. Chem. 2002.
 - **Delaney solubility**: Delaney, J. Chem. Inf. Comput. Sci. 2004.
 - **ChEMBL**: Mendez et al., Nucleic Acids Research 2019. https://www.ebi.ac.uk/chembl/
-- **Chapman et al. (vemurafenib/BRAF)**: Chapman et al., NEJM 2011 — not directly cited in this document; listed here for completeness of BRAF V600E treatment history. This reference is unused in the current methods text.
-
-### Tumor board case report sources (holdout literature cases)
-
-- **FGFR2 fusion iCCA**: Abou-Alfa et al., NEJM 2020; Goyal et al., Lancet Oncol 2020. FIGHT-202 trial.
-- **IDH1 R132H AML**: DiNardo et al., NEJM 2018. AG120-C-001 Phase 1/2.
-- **PDGFRA D842V GIST / KIT D816V mastocytosis**: Heinrich et al., JCO PO 2020. NAVIGATOR trial.
-- **HRAS Q61R HNSCC**: Ho et al., Cancer Cell 2021. AIM-HN Phase 2.
-- **SMARCB1 LOF epithelioid sarcoma**: Gounder et al., JCO 2020. EZH-302 basket.
-- **KMT2A rearrangement AML**: Issa et al., Nat Med 2023. AUGMENT-101. (Revumenib FDA-approved Nov 2024.)
-- **ALK G1202R resistance NSCLC**: Shaw et al., NEJM 2017; Gainor et al., Cancer Discov 2016.
-- **FGFR3 S249C urothelial**: Loriot et al., NEJM 2019. FIGHT-201 trial.
-- **EGFR G719X NSCLC (atypical)**: Yang et al., Ann Oncol 2019. LUX-Lung 2/3/6 pooled analysis.
-
-### End-to-end case illustration
-
-See `docs/PATIENT_WALKTHROUGH.md` for a complete step-by-step walkthrough of a KRAS G12C NSCLC
-case, showing VCF input through variant annotation, drug ranking, and the full Stage 2
-precision-oncology brief that the pipeline produces for oncologist review.

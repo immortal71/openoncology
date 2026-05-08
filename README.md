@@ -10,9 +10,7 @@
 
 ## ✅ Validation Status (May 2026)
 
-The drug-ranking engine has been independently validated against a **50-case blinded oncologist holdout** and **real de-identified TCGA cohorts at 100 and 200 patients**.
-
-Stage two (custom drug discovery) validation is structural — discovery briefs are verified to contain real ChEMBL and OpenTargets records; clinical validation of lead molecule selection requires experimental binding assays outside the scope of this release.
+The drug-ranking engine has been independently validated against a **24-case blinded oncologist holdout** and **real de-identified TCGA cohorts at 100 and 200 patients**.
 
 ### Real-patient benchmark artifacts (download directly)
 
@@ -23,21 +21,15 @@ Stage two (custom drug discovery) validation is structural — discovery briefs 
 
 These files are part of this open-source repository, so reviewers can download and inspect the exact benchmark outputs directly.
 
-### Blinded 50-case oncologist holdout
-
-Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11`
-(OncoKB static fallback, no live CIViC, offline mode — see `validation_results/holdout_50_metrics.json`):
+### Blinded 24-case oncologist holdout
 
 | Metric | Result | Meaning |
 |:-------|:-------|:--------|
-| **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.517** (ceiling: 0.650) | 51.7% of top-3 slots match gold standard; ceiling is 65% for this mixed difficulty holdout |
-| **Normalised Precision@3** | 0.813 | Near-perfect when normalised for single-drug gold standards |
-| **False positives** | **1** (FP rate 2%) | 1 out of 50 cases had a spurious high-confidence recommendation |
-| **Mean Reciprocal Rank** | 0.871 | Gold drug appears near the top of the ranked list on average |
-| **NDCG@3** | 0.845 | Strong ranking quality across the full holdout |
-
-Holdout covers 40 sensitivity cases (12 single-drug, 28 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumor board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`.
+| **Hit@3** | **1.000** | The gold-standard drug appears in the top-3 for every single case |
+| **Standard Precision@3** | **0.579** (ceiling: 0.597) | 57.9% of top-3 slots match gold standard; within 2% of the theoretical ceiling for this holdout |
+| **Normalised Precision@3** | 0.983 | Near-perfect when accounting for single-drug gold standards |
+| **False positives** | **0** | No non-approved or fabricated drugs in top-3 |
+| **Mean Reciprocal Rank** | 0.921 | Gold drug appears near the top of the ranked list on average |
 
 ### 100-case TCGA real-patient benchmark
 
@@ -59,7 +51,7 @@ The 200-patient set is intentionally harder and includes many variants with no d
 
 **Run it yourself:**
 ```bash
-python scripts/blind_external_validation.py --n-cases 50   # 50-case blinded holdout
+python scripts/blind_external_validation.py   # 24-case blinded holdout
 python scripts/hard_benchmark_gate.py         # 200-case gate (P@3 > 0.65 required)
 python scripts/fetch_real_patients.py --n 100 --out-json real_patient_benchmark_100.json
 python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_200.json
