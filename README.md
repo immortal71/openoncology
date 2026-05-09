@@ -31,10 +31,10 @@ Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11
 | Metric | Result | Meaning |
 |:-------|:-------|:--------|
 | **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.517** (ceiling: 0.650) | 51.7% of top-3 slots match gold standard; ceiling is 65% for this mixed difficulty holdout |
-| **Normalised Precision@3** | 0.813 | Near-perfect when normalised for single-drug gold standards |
-| **False positives** | **1** (FP rate 2%) | 1 out of 50 cases had a spurious high-confidence recommendation |
-| **Mean Reciprocal Rank** | 0.871 | Gold drug appears near the top of the ranked list on average |
+| **Standard Precision@3** | **0.508** (ceiling: 0.650) | 50.8% of top-3 slots match gold standard; ceiling is 65% for this mixed difficulty holdout |
+| **Normalised Precision@3** | 0.817 | Near-perfect when normalised for single-drug gold standards |
+| **False positives** | **0** (FP rate 0%) | No cases had a spurious high-confidence recommendation |
+| **Mean Reciprocal Rank** | 0.883 | Gold drug appears near the top of the ranked list on average |
 | **NDCG@3** | 0.845 | Strong ranking quality across the full holdout |
 
 Holdout covers 40 sensitivity cases (12 single-drug, 28 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumor board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`.
