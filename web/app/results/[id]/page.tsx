@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { saveOrderToLocalStorage } from "@/lib/orders";
+import ResultsSkeleton from "@/components/ResultsSkeleton";
 
 type MutationRow = {
 	gene?: string;
@@ -83,14 +84,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	};
 
 	if (isLoading) {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-4xl mx-auto clinical-surface p-6">
-					<h1 className="text-xl font-[var(--font-manrope)] font-bold text-slate-900">Loading analysis...</h1>
-					<p className="text-sm text-slate-500 mt-2">Fetching your latest result.</p>
-				</div>
-			</main>
-		);
+		return <ResultsSkeleton />;
 	}
 
 	if (isError || !data) {
