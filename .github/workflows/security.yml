@@ -156,15 +156,24 @@ jobs:
             -e REDIS_URL="redis://localhost:6379/0" \
             -e SECRET_KEY="zap-test-secret" \
             -e ENVIRONMENT="development" \
+            -e PGUSER="openoncology" \
+            -e PGPASSWORD="zaptestpassword" \
             -p 8000:8000 \
             openoncology-api:zap \
             uvicorn main:app --host 0.0.0.0 --port 8000
 
       - name: Wait for API to be ready
         run: |
+          echo "Waiting for API to be ready..."
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8000/health && break || sleep 2
+            curl -sf http://localhost:8000/health && echo "API is ready!" && exit 0 || sleep 2
           done
+          echo "API failed to start. Container logs:"
+          docker logs api
+          exit 1
+
+      - name: Fix ZAP workspace permissions
+        run: chmod 777 ${{ github.workspace }}
 
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.12.0
