@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { saveOrderToLocalStorage } from "@/lib/orders";
+import ResultsSkeleton from "@/components/ResultsSkeleton";
 
 type MutationRow = {
 	gene?: string;
@@ -83,14 +84,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	};
 
 	if (isLoading) {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-4xl mx-auto clinical-surface p-6">
-					<h1 className="text-xl font-[var(--font-manrope)] font-bold text-slate-900">Loading analysis...</h1>
-					<p className="text-sm text-slate-500 mt-2">Fetching your latest result.</p>
-				</div>
-			</main>
-		);
+		return <ResultsSkeleton />;
 	}
 
 	if (isError || !data) {
@@ -114,29 +108,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	];
 
 	if (!isComplete) {
-		return (
-			<main className="min-h-screen p-6">
-				<div className="max-w-4xl mx-auto clinical-surface border-cyan-200 p-6 space-y-4">
-					<h1 className="text-xl font-semibold text-gray-900">Analysis in progress</h1>
-					<p className="text-sm text-slate-600">Tracking ID: {params.id}</p>
-					<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-						{stages.map((s) => (
-							<div key={s.label} className={`rounded-xl border p-3 ${s.active ? "border-cyan-300 bg-cyan-50" : "border-slate-200 bg-slate-50"}`}>
-								<div className="flex items-center gap-2">
-									<span className={`h-3 w-3 rounded-full ${s.active ? "bg-cyan-700" : "bg-slate-300"}`} />
-									<p className="text-sm font-medium text-slate-800">{s.label}</p>
-								</div>
-							</div>
-						))}
-					</div>
-					<p className="text-sm text-slate-600">
-						Current status: <span className="font-medium">{data.status || "queued"}</span>
-					</p>
-					{data.message && <p className="mt-2 text-sm text-slate-600">{data.message}</p>}
-					<p className="text-xs text-slate-500">This page auto-refreshes every few seconds until repurposing is ready.</p>
-				</div>
-			</main>
-		);
+		return <ResultsSkeleton />;
 	}
 
 	const mutations = (data.mutations || []) as MutationRow[];
