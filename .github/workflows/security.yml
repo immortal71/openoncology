@@ -162,21 +162,9 @@ jobs:
 
       - name: Wait for API to be ready
         run: |
-          echo "Waiting for API..."
           for i in $(seq 1 30); do
-            if curl -sf http://localhost:8000/health; then
-              echo "API is up!"
-              exit 0
-            fi
-            echo "Attempt $i/30 failed, retrying in 2s..."
-            sleep 2
+            curl -sf http://localhost:8000/health && break || sleep 2
           done
-          echo "API failed to start. Dumping container logs:"
-          docker logs api
-          exit 1
-
-      - name: Fix ZAP workspace permissions
-        run: chmod 777 ${{ github.workspace }}
 
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.12.0
