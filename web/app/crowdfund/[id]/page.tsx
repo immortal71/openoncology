@@ -7,6 +7,7 @@ import { Heart, Users, Target, Share2, CheckCircle } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
 
@@ -46,7 +47,7 @@ function DonateForm({
     if (!usd || usd < 1) { setError("Enter a valid amount (min $1)"); return; }
 
     try {
-      const token = sessionStorage.getItem("kc_token");
+      const token = getToken();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/crowdfund/${slug}/donate`,
         {
