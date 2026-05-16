@@ -18,6 +18,7 @@ import {
   Send,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { getToken } from "@/lib/auth";
 
 const orderSchema = z.object({
   drug_spec: z.string().min(20, "Please provide a detailed drug specification").max(2000),
@@ -203,7 +204,7 @@ function OrderModal({
   const onSubmit = async (data: OrderForm) => {
     setStatus("submitting");
     try {
-      const token = sessionStorage.getItem("kc_token");
+      const token = getToken();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/marketplace/order`, {
         method: "POST",
         headers: {

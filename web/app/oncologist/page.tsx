@@ -1,5 +1,6 @@
 "use client";
 
+import { getToken } from "@/lib/auth";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -22,7 +23,7 @@ interface ReviewPayload {
 const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 function authHeaders(): Record<string, string> {
-  const token = typeof window !== "undefined" ? sessionStorage.getItem("kc_token") : null;
+  const token = getToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
