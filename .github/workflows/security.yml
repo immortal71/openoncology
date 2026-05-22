@@ -208,7 +208,7 @@ jobs:
         run: chmod 777 ${{ github.workspace }}
 
       - name: Run ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:8000"
           rules_file_name: infra/zap/rules.tsv
