@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { saveOrderToLocalStorage } from "@/lib/orders";
 import ResultsSkeleton from "@/components/ResultsSkeleton";
+import { DEMO_RESULTS, DEMO_REPURPOSING, DEMO_ID } from "@/lib/demo-data";
 
 type MutationRow = {
 	gene?: string;
@@ -29,14 +30,17 @@ type TrialRow = {
 
 export default function ResultsPage({ params }: { params: { id: string } }) {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
 	const [customBusy, setCustomBusy] = useState(false);
 	const [customError, setCustomError] = useState<string | null>(null);
 	const [nearbyOpen, setNearbyOpen] = useState(false);
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["results", params.id],
-		queryFn: () => api.getResults(params.id),
+		queryFn: () => isDemo ? Promise.resolve(DEMO_RESULTS as typeof DEMO_RESULTS & Record<string, unknown>) : api.getResults(params.id),
 		refetchInterval: (query) => {
+			if (isDemo) return false;
 			const status = (query.state.data as { status?: string } | undefined)?.status;
 			const done = ["complete", "completed", "failed"].includes((status || "").toLowerCase());
 			return done ? false : 3000;
@@ -49,7 +53,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
 	const repurposingQuery = useQuery({
 		queryKey: ["repurposing", resultId],
-		queryFn: () => api.getRepurposing(resultId),
+		queryFn: () => isDemo ? Promise.resolve(DEMO_REPURPOSING) : api.getRepurposing(resultId),
 		enabled: Boolean(isComplete && resultId),
 	});
 
@@ -67,6 +71,10 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
 	const generateCustomDrug = async () => {
 		if (!resultId) return;
+		if (isDemo) {
+			router.push(`/custom-drug/${DEMO_ID}?demo=true`);
+			return;
+		}
 		setCustomBusy(true);
 		setCustomError(null);
 		try {

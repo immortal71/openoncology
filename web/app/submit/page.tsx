@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useSearchParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { motion } from "framer-motion";
-import { Upload, FileText, Dna, CheckCircle, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Upload, FileText, Dna, CheckCircle, AlertCircle, FlaskConical } from "lucide-react";
 import { api } from "@/lib/api";
+import { DEMO_ID } from "@/lib/demo-data";
 
 const schema = z.object({
   cancer_type: z.string().min(2, "Please specify the cancer type").max(128),
@@ -31,6 +33,9 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function SubmitPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const isDemo = searchParams.get("demo") === "true";
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
@@ -99,11 +104,35 @@ export default function SubmitPage() {
       <div className="max-w-2xl mx-auto clinical-surface p-7 md:p-9">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl font-[var(--font-manrope)] font-extrabold text-slate-900 mb-2">Submit Your Sample</h1>
-          <p className="text-slate-600 mb-8">
+          <p className="text-slate-600 mb-5">
             Upload your case files to start the mutation pathway: actionable check,
             repurposed-drug search, custom-drug brief generation, and funding support when needed.
           </p>
         </motion.div>
+
+        {/* Demo banner */}
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 rounded-xl border border-cyan-200 bg-cyan-50/60 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+          >
+            <FlaskConical className="shrink-0 text-cyan-600" size={20} />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-cyan-900">Try a live demo</p>
+              <p className="text-xs text-cyan-700 mt-0.5">
+                See a full KRAS G12C · Non-Small Cell Lung Cancer case — Sotorasib ranked #1 (OncoKB Level 1).
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push(`/results/${DEMO_ID}?demo=true`)}
+              className="shrink-0 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 active:bg-cyan-700 transition-colors"
+            >
+              View demo results →
+            </button>
+          </motion.div>
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Cancer Type */}

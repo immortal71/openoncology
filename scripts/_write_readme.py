@@ -1,4 +1,10 @@
-<div align="center">
+"""One-shot script: rewrite README.md with the new 15-section structure."""
+import pathlib, sys
+
+ROOT = pathlib.Path(__file__).parent.parent
+README = ROOT / "README.md"
+
+CONTENT = r"""<div align="center">
 
 # OpenOncology
 
@@ -376,3 +382,7 @@ OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical r
 [![Star History Chart](https://api.star-history.com/svg?repos=immortal71/openoncology&type=Date)](https://star-history.com/#immortal71/openoncology&Date)
 
 </div>
+"""
+
+README.write_text(CONTENT, encoding="utf-8")
+print(f"README written: {len(CONTENT.splitlines())} lines")

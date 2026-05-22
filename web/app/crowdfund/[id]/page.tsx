@@ -2,20 +2,22 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Heart, Users, Target, Share2, CheckCircle } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { DEMO_CROWDFUND, DEMO_ID } from "@/lib/demo-data";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
 
 function ProgressBar({ percent }: { percent: number }) {
   return (
-    <div className="w-full bg-gray-100 rounded-full h-3">
+    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
       <motion.div
-        className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full"
+        className="bg-gradient-to-r from-cyan-500 to-cyan-600 h-3 rounded-full"
         initial={{ width: 0 }}
         animate={{ width: `${Math.min(percent, 100)}%` }}
         transition={{ duration: 1, ease: "easeOut" }}
@@ -153,12 +155,14 @@ function DonateForm({
 }
 
 export default function CrowdfundPage({ params }: { params: { id: string } }) {
+  const searchParams = useSearchParams();
+  const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
   const [donated, setDonated] = useState(false);
   const [showDonate, setShowDonate] = useState(false);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["campaign", params.id],
-    queryFn: () => api.getCampaign(params.id),
+    queryFn: () => isDemo ? Promise.resolve(DEMO_CROWDFUND) : api.getCampaign(params.id),
   });
 
   const handleShare = () => {
@@ -167,40 +171,40 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600" />
       </main>
     );
   }
 
   if (!data) {
     return (
-      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Campaign not found.</p>
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <p className="text-slate-500">Campaign not found.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 px-6">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 px-6">
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
           {/* Title */}
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">{data.title}</h1>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{data.title}</h1>
           </div>
 
           {/* Progress */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
             <div className="flex justify-between text-sm mb-3">
-              <span className="text-gray-500">Raised</span>
-              <span className="font-bold text-gray-900">
+              <span className="text-slate-500">Raised</span>
+              <span className="font-bold text-slate-900 dark:text-slate-100">
                 ${data.raised_usd.toLocaleString()} of ${data.goal_usd.toLocaleString()}
               </span>
             </div>
             <ProgressBar percent={data.percent_complete} />
-            <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-              <span className="font-semibold text-blue-600">{data.percent_complete}% funded</span>
+            <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
+              <span className="font-semibold text-cyan-600">{data.percent_complete}% funded</span>
             </div>
           </div>
 
@@ -208,13 +212,13 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
           <div className="flex gap-3">
             <button
               onClick={() => setShowDonate(true)}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 bg-cyan-700 text-white py-3 rounded-xl font-semibold hover:bg-cyan-600 active:bg-cyan-800 transition-colors shadow-sm"
             >
               <Heart size={18} /> Donate
             </button>
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 border border-gray-200 px-5 py-3 rounded-xl font-semibold text-gray-700 hover:border-gray-400 transition-colors"
+              className="flex items-center gap-2 border border-slate-200 dark:border-slate-700 px-5 py-3 rounded-xl font-semibold text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500 transition-colors"
             >
               <Share2 size={16} /> Share
             </button>
@@ -225,9 +229,9 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl border border-blue-200 p-6"
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-cyan-200 dark:border-cyan-800 p-6"
             >
-              <h3 className="font-bold text-gray-900 mb-4">Make a donation</h3>
+              <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Make a donation</h3>
               <DonateForm
                 slug={params.id}
                 campaignTitle={data.title}
@@ -240,23 +244,23 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-green-50 border border-green-200 rounded-2xl p-4 text-green-800 text-sm text-center"
+              className="bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 rounded-2xl p-4 text-green-800 dark:text-green-300 text-sm text-center"
             >
               Your donation has been received. Thank you for your support!
             </motion.div>
           )}
 
           {/* Story */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <Users size={18} className="text-blue-500" /> Their Story
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+              <Users size={18} className="text-cyan-500" /> Their Story
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-line">
               {data.patient_story}
             </p>
           </div>
 
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-slate-400 text-center">
             Funds are held in escrow by Stripe and released directly to the verified
             pharmaceutical manufacturer when the goal is reached.
           </p>

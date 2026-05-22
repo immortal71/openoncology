@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { DEMO_DRUG_REQUESTS } from "@/lib/demo-data";
 
 const orderSchema = z.object({
   drug_spec: z.string().min(20, "Please provide a detailed drug specification").max(2000),
@@ -306,6 +308,8 @@ function OrderModal({
 }
 
 export default function MarketplacePage() {
+  const searchParams = useSearchParams();
+  const isDemo = searchParams.get("demo") === "true";
   const [selectedPharma, setSelectedPharma] = useState<{
     id: string;
     name: string;
@@ -320,15 +324,15 @@ export default function MarketplacePage() {
 
   const { data: openRequests, isLoading: requestsLoading } = useQuery({
     queryKey: ["open-drug-requests"],
-    queryFn: () => api.getDrugRequests(),
+    queryFn: () => isDemo ? Promise.resolve(DEMO_DRUG_REQUESTS as DrugRequest[]) : api.getDrugRequests(),
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16 px-6">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 px-6">
       <div className="max-w-5xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Pharma Marketplace</h1>
-          <p className="text-gray-500">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Pharma Marketplace</h1>
+          <p className="text-slate-500">
             Verified pharmaceutical manufacturers who can produce repurposed or custom drugs
             based on your mutation profile. All companies are manually verified by our team.
           </p>
@@ -348,34 +352,34 @@ export default function MarketplacePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.06 }}
-                className="bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-md transition-all flex flex-col"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 hover:border-cyan-200 dark:hover:border-cyan-700 hover:shadow-md transition-all flex flex-col"
               >
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="bg-blue-50 rounded-xl p-2">
-                    <Building2 className="text-blue-600" size={20} />
+                  <div className="bg-cyan-50 dark:bg-cyan-950/50 rounded-xl p-2">
+                    <Building2 className="text-cyan-600" size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">{c.name}</h3>
-                    <div className="flex items-center gap-1 text-gray-400 text-xs mt-0.5">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100">{c.name}</h3>
+                    <div className="flex items-center gap-1 text-slate-400 text-xs mt-0.5">
                       <Globe size={11} />
                       <span>{c.country}</span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-gray-500 text-sm flex-1 leading-relaxed">
+                <p className="text-slate-500 text-sm flex-1 leading-relaxed">
                   {c.description ?? "Custom pharmaceutical manufacturing for oncology applications."}
                 </p>
 
                 {c.min_order_usd && (
-                  <p className="text-xs text-gray-400 mt-3">
-                    Min. order: <span className="font-semibold text-gray-600">${c.min_order_usd.toLocaleString()}</span>
+                  <p className="text-xs text-slate-400 mt-3">
+                    Min. order: <span className="font-semibold text-slate-600 dark:text-slate-300">${c.min_order_usd.toLocaleString()}</span>
                   </p>
                 )}
 
                 <button
                   onClick={() => setSelectedPharma(c)}
-                  className="mt-4 w-full bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                  className="mt-4 w-full bg-cyan-700 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-cyan-600 active:bg-cyan-800 transition-colors"
                 >
                   Request Quote
                 </button>
@@ -383,7 +387,7 @@ export default function MarketplacePage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-slate-400">
             <Building2 className="mx-auto mb-4" size={48} />
             <p>No verified pharma companies yet. Check back soon.</p>
           </div>
@@ -399,12 +403,12 @@ export default function MarketplacePage() {
           className="mb-6"
         >
           <div className="flex items-center gap-3 mb-1">
-            <FlaskConical size={22} className="text-blue-500" />
-            <h2 className="text-2xl font-bold text-gray-900">
+            <FlaskConical size={22} className="text-cyan-500" />
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Drug Synthesis Requests
             </h2>
           </div>
-          <p className="text-gray-500 text-sm">
+          <p className="text-slate-500 text-sm">
             Patients have posted these custom drug synthesis requests. Submit a
             competitive bid — patients will be notified and can accept the best offer.
           </p>
@@ -413,13 +417,13 @@ export default function MarketplacePage() {
         {requestsLoading && (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl h-20 animate-pulse border border-gray-100" />
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl h-20 animate-pulse border border-slate-100 dark:border-slate-800" />
             ))}
           </div>
         )}
 
         {openRequests && openRequests.length === 0 && (
-          <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center text-gray-400">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-10 text-center text-slate-400">
             <FlaskConical size={36} className="mx-auto mb-3 opacity-40" />
             <p className="font-medium">No open requests at the moment</p>
             <p className="text-sm mt-1">Check back soon — new patient requests appear here.</p>
@@ -434,36 +438,36 @@ export default function MarketplacePage() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="bg-white rounded-2xl border border-gray-100 px-5 py-4 flex items-center gap-4 hover:border-blue-200 hover:shadow-sm transition-all"
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 px-5 py-4 flex items-center gap-4 hover:border-cyan-200 dark:hover:border-cyan-700 hover:shadow-sm transition-all"
               >
-                <FlaskConical size={18} className="text-blue-400 shrink-0" />
+                <FlaskConical size={18} className="text-cyan-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     {req.target_gene && (
-                      <span className="font-mono font-bold text-blue-700 text-sm">
+                      <span className="font-mono font-bold text-cyan-700 dark:text-cyan-400 text-sm">
                         {req.target_gene}
                       </span>
                     )}
                     {req.max_budget_usd && (
-                      <span className="text-xs bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-300 border border-green-100 dark:border-green-800 px-2 py-0.5 rounded-full">
                         Max ${req.max_budget_usd.toLocaleString()}
                       </span>
                     )}
-                    <span className="text-gray-400 text-xs">
+                    <span className="text-slate-400 text-xs">
                       {new Date(req.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-gray-500 text-sm mt-0.5 line-clamp-1">
+                  <p className="text-slate-500 text-sm mt-0.5 line-clamp-1">
                     {req.drug_spec}
                   </p>
                 </div>
                 <div className="shrink-0 flex items-center gap-3">
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-slate-400">
                     {req.bid_count} bid{req.bid_count !== 1 ? "s" : ""}
                   </span>
                   <button
                     onClick={() => setSelectedRequest(req)}
-                    className="flex items-center gap-1.5 bg-blue-600 text-white text-sm px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                    className="flex items-center gap-1.5 bg-cyan-700 text-white text-sm px-4 py-2 rounded-xl font-semibold hover:bg-cyan-600 active:bg-cyan-800 transition-colors"
                   >
                     Bid <ChevronRight size={14} />
                   </button>

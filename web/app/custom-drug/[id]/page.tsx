@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import { DEMO_CUSTOM_DRUG, DEMO_ID } from "@/lib/demo-data";
 
 const STAGES = [
   { key: "queued", label: "Fetching protein structure", description: "Loading AlphaFold predicted structure for target gene." },
@@ -237,14 +238,17 @@ function downloadBrief(data: DrugRequestData) {
 
 export default function CustomDrugPage() {
   const routeParams = useParams<{ id?: string | string[] }>();
+  const searchParams = useSearchParams();
   const requestId = Array.isArray(routeParams?.id) ? routeParams.id[0] : routeParams?.id;
+  const isDemo = searchParams.get("demo") === "true" || requestId === DEMO_ID;
 
   const { data, isLoading, isFetching, isError, error } = useQuery<DrugRequestData>({
     queryKey: ["drug-request", requestId],
     enabled: Boolean(requestId),
-    queryFn: () => api.getDrugRequest(requestId as string),
+    queryFn: () => isDemo ? Promise.resolve(DEMO_CUSTOM_DRUG as DrugRequestData) : api.getDrugRequest(requestId as string),
     retry: false,
     refetchInterval: (query) => {
+      if (isDemo) return false;
       const status = (query.state.data as { status?: string } | undefined)?.status;
       if (!status) return false;
       return status === "complete" ? false : 3000;
