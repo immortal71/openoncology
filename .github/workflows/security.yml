@@ -125,6 +125,10 @@ jobs:
     name: OWASP ZAP API baseline scan
     runs-on: ubuntu-latest
     needs: []   # Run independently — API starts in Docker
+    permissions:
+      contents: read
+      issues: write          # ZAP action creates/updates a GitHub Issue with scan results
+      security-events: write # Upload SARIF to GitHub Security tab
 
     services:
       postgres:
