@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
+import CustomDrugSkeleton from "@/components/CustomDrugSkeleton";
 
 const STAGES = [
   { key: "queued", label: "Fetching protein structure", description: "Loading AlphaFold predicted structure for target gene." },
@@ -251,14 +252,8 @@ export default function CustomDrugPage() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-gray-500 text-sm">Loading drug brief...</p>
-        </div>
-      </main>
-    );
+  if (isLoading || isFetching) {
+    return <CustomDrugSkeleton />;
   }
 
   if (!requestId) {
