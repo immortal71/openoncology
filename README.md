@@ -730,6 +730,35 @@ Pick an open [issue](https://github.com/immortal71/openoncology/issues) labeled 
 
 ---
 
+## 📄 Cite This Work
+
+If you use OpenOncology in research, a clinical workflow, or a derivative project, please cite the preprint:
+
+[![DOI](https://img.shields.io/badge/DOI-10.21203%2Frs.3.rs--9707913%2Fv1-blue?style=flat-square)](https://doi.org/10.21203/rs.3.rs-9707913/v1)
+[![Research Square](https://img.shields.io/badge/Preprint-Research%20Square-orange?style=flat-square)](https://www.researchsquare.com/article/rs-9707913/v1)
+
+> **Kharel, A.** (2026). *OpenOncology: An Open-Source Framework for Evidence-Based Drug Matching and De Novo Custom Drug Discovery in Precision Oncology.* Research Square. https://doi.org/10.21203/rs.3.rs-9707913/v1
+
+```bibtex
+@misc{kharel2026openoncology,
+  title     = {OpenOncology: An Open-Source Framework for Evidence-Based
+               Drug Matching and De Novo Custom Drug Discovery in Precision Oncology},
+  author    = {Kharel, Aashish},
+  year      = {2026},
+  month     = {05},
+  publisher = {Research Square},
+  doi       = {10.21203/rs.3.rs-9707913/v1},
+  url       = {https://www.researchsquare.com/article/rs-9707913/v1},
+  note      = {Preprint — under review}
+}
+```
+
+> **Note:** This preprint describes the current codebase (**OpenOncology v2**), including the two-stage escalation pipeline, crowdfunding marketplace, and the blinded 50-case oncologist holdout validation. It does not describe an older or superseded version.
+
+For full paper details, abstract, and a codebase-to-paper mapping see [PAPER.md](PAPER.md).
+
+---
+
 ## ⚠️ Disclaimer
 
 OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical review. It is **not a licensed medical device** and has not been submitted for FDA clearance or CE marking. Drug rankings, toxicity estimates, and summaries are based on published evidence databases and must be interpreted by a qualified oncologist in the context of the individual patient. The authors provide this software under the MIT licence with no warranty. Any patient-facing deployment or commercial application requires independent regulatory assessment.
