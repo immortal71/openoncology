@@ -125,6 +125,10 @@ jobs:
     name: OWASP ZAP API baseline scan
     runs-on: ubuntu-latest
     needs: []   # Run independently — API starts in Docker
+    permissions:
+      contents: read
+      issues: write          # ZAP action creates/updates a GitHub Issue with scan results
+      security-events: write # Upload SARIF to GitHub Security tab
 
     services:
       postgres:
@@ -133,6 +137,8 @@ jobs:
           POSTGRES_USER: openoncology
           POSTGRES_PASSWORD: zaptestpassword
           POSTGRES_DB: openoncology
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -140,6 +146,8 @@ jobs:
           --health-retries 5
       redis:
         image: redis:7
+        ports:
+          - 6379:6379
 
     steps:
       - uses: actions/checkout@v4
@@ -147,28 +155,52 @@ jobs:
       - name: Build API image
         run: docker build -t openoncology-api:zap ./api
 
+      - name: Wait for Postgres to accept connections
+        run: |
+          echo "Waiting for Postgres to be ready..."
+          for i in $(seq 1 30); do
+            pg_isready -h localhost -p 5432 -U openoncology && echo "Postgres is ready!" && break
+            echo "Attempt $i: Postgres not ready yet..."
+            sleep 2
+          done
+          # Verify with an actual connection, not just a TCP check
+          PGPASSWORD=zaptestpassword psql -h localhost -U openoncology -d openoncology -c "SELECT 1;" \
+            && echo "Postgres accepting queries!" \
+            || (echo "Postgres connection failed" && exit 1)
+
       - name: Start API
         run: |
           docker run -d \
             --name api \
             --network host \
+            --restart on-failure:3 \
             -e DATABASE_URL="postgresql+asyncpg://openoncology:zaptestpassword@localhost:5432/openoncology" \
             -e REDIS_URL="redis://localhost:6379/0" \
             -e SECRET_KEY="zap-test-secret" \
             -e ENVIRONMENT="development" \
             -e PGUSER="openoncology" \
             -e PGPASSWORD="zaptestpassword" \
-            -p 8000:8000 \
-            openoncology-api:zap \
-            uvicorn main:app --host 0.0.0.0 --port 8000
+            openoncology-api:zap
 
       - name: Wait for API to be ready
         run: |
           echo "Waiting for API to be ready..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:8000/health && echo "API is ready!" && exit 0 || sleep 2
+          for i in $(seq 1 40); do
+            if curl -sf http://localhost:8000/health; then
+              echo "API is ready!"
+              exit 0
+            fi
+            # Check if container exited unexpectedly
+            STATUS=$(docker inspect --format='{{.State.Status}}' api 2>/dev/null || echo "missing")
+            if [ "$STATUS" = "exited" ]; then
+              echo "API container exited unexpectedly. Logs:"
+              docker logs api
+              exit 1
+            fi
+            echo "Attempt $i: API not ready yet (container status: $STATUS)..."
+            sleep 3
           done
-          echo "API failed to start. Container logs:"
+          echo "API failed to become ready in time. Container logs:"
           docker logs api
           exit 1
 
@@ -176,7 +208,7 @@ jobs:
         run: chmod 777 ${{ github.workspace }}
 
       - name: Run ZAP baseline scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.15.0
         with:
           target: "http://localhost:8000"
           rules_file_name: infra/zap/rules.tsv
