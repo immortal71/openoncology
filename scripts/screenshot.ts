@@ -37,9 +37,9 @@ async function run() {
   for (const page of PAGES) {
     const p = await context.newPage();
     console.log(`Capturing ${page.name} …`);
-    await p.goto(page.url, { waitUntil: "networkidle", timeout: 30_000 });
-    // Wait a beat for animations to settle
-    await p.waitForTimeout(800);
+    await p.goto(page.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
+    // Give React time to hydrate and render
+    await p.waitForTimeout(3_000);
     const dest = path.join(OUT_DIR, `${page.name}.png`);
     await p.screenshot({ path: dest, fullPage: false });
     console.log(`  → ${dest}`);
