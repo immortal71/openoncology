@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
+import CustomDrugSkeleton from "@/components/CustomDrugSkeleton";
 import { DEMO_CUSTOM_DRUG, DEMO_ID } from "@/lib/demo-data";
 
 const STAGES = [
@@ -255,14 +256,8 @@ export default function CustomDrugPage() {
     },
   });
 
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-gray-500 text-sm">Loading drug brief...</p>
-        </div>
-      </main>
-    );
+  if (isLoading || isFetching) {
+    return <CustomDrugSkeleton />;
   }
 
   if (!requestId) {
