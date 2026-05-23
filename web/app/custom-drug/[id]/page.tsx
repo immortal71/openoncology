@@ -22,13 +22,13 @@ function StatusTracker({ stage }: { stage: number }) {
         return (
           <div
             key={s.key}
-            className={`rounded-xl border p-4 ${done ? "border-green-300 bg-green-50" : active ? "border-blue-300 bg-blue-50" : "border-gray-200 bg-gray-50"}`}
+            className={`rounded-xl border p-4 ${done ? "border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-950/30" : active ? "border-cyan-400 dark:border-cyan-600 bg-cyan-50 dark:bg-cyan-950/40" : "border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"}`}
           >
             <div className="flex items-center gap-2 mb-1">
-              <span className={`h-3 w-3 rounded-full ${done ? "bg-green-500" : active ? "bg-blue-500 animate-pulse" : "bg-gray-300"}`} />
-              <p className="text-sm font-semibold text-gray-800">{s.label}</p>
+              <span className={`h-3 w-3 rounded-full ${done ? "bg-green-500" : active ? "bg-cyan-500 animate-pulse" : "bg-gray-300 dark:bg-slate-600"}`} />
+              <p className="text-sm font-semibold text-gray-800 dark:text-slate-200">{s.label}</p>
             </div>
-            <p className="text-xs text-gray-500">{s.description}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{s.description}</p>
           </div>
         );
       })}
@@ -290,22 +290,22 @@ export default function CustomDrugPage() {
   const stageIndex = data.stage ?? (data.status === "running" ? 1 : data.status === "complete" ? 2 : 0);
 
   return (
-    <main className="min-h-screen bg-gray-50 py-10 px-4">
+    <main className="min-h-screen bg-slate-950 py-10 px-4">
       <div className="max-w-5xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
-            <Link href="/orders" className="text-xs text-blue-600 hover:underline">← My Orders</Link>
-            <h1 className="text-3xl font-bold text-gray-900 mt-1">Custom Drug Discovery Brief</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Request <code className="bg-gray-100 px-1 rounded">{requestId}</code> · Target: <span className="font-semibold">{data.target_gene}</span> · {data.cancer_type}
+            <Link href="/orders" className="text-xs text-cyan-500 hover:underline">← My Orders</Link>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-slate-100 mt-1">Custom Drug Discovery Brief</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
+              Request <code className="bg-gray-100 dark:bg-slate-800 px-1 rounded">{requestId}</code> · Target: <span className="font-semibold text-slate-900 dark:text-slate-100">{data.target_gene}</span> · {data.cancer_type}
             </p>
           </div>
           {isComplete && (
             <button
               onClick={() => downloadBrief(data)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow transition-colors"
+              className="bg-cyan-700 hover:bg-cyan-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow transition-colors"
             >
               ↓ Download Full Brief
             </button>
@@ -313,9 +313,9 @@ export default function CustomDrugPage() {
         </div>
 
         {/* Stage tracker — always shown */}
-        <section className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-base font-semibold text-gray-700 mb-1">Generation Progress</h2>
-          <p className="text-sm text-gray-500">{data.message}</p>
+        <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+          <h2 className="text-base font-semibold text-gray-700 dark:text-slate-300 mb-1">Generation Progress</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400">{data.message}</p>
           <StatusTracker stage={isComplete ? 3 : stageIndex} />
           {isFailed && (
             <p className="text-xs text-red-600 mt-4">Generation failed. Review the error above or restart the request from the result page.</p>
@@ -347,15 +347,18 @@ export default function CustomDrugPage() {
             )}
 
             {/* Rationale */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-2">Why a Custom Drug?</h2>
-              <p className="text-sm text-gray-700 leading-relaxed">{data.rationale}</p>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-cyan-200 dark:border-cyan-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-2 flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-700 text-white text-base">&#x1F9EA;</span>
+                Why a Custom Drug?
+              </h2>
+              <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed">{data.rationale}</p>
               <div className="mt-4">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Mutation Profile</p>
+                <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2">Mutation Profile</p>
                 <ul className="space-y-1">
                   {(data.mutation_profile ?? []).map((m) => (
-                    <li key={m} className="text-sm text-gray-700 flex items-start gap-2">
-                      <span className="text-indigo-500 font-bold">•</span> {m}
+                    <li key={m} className="text-sm text-gray-700 dark:text-slate-300 flex items-start gap-2">
+                      <span className="text-cyan-500 font-bold">•</span> {m}
                     </li>
                   ))}
                 </ul>
@@ -363,9 +366,9 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Computational Synthesis Plan */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">Computational Synthesis Plan</h2>
-              <p className="text-sm text-gray-700">
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Computational Synthesis Plan</h2>
+              <p className="text-sm text-gray-700 dark:text-slate-300">
                 {data.computational_synthesis_plan?.summary ?? "Route planning data is not available for this request."}
               </p>
               <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -436,20 +439,20 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Lead Compounds */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Lead Compounds</h2>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">Lead Compounds</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {(data.lead_compounds ?? []).map((c) => (
-                  <div key={c.name} className="border border-gray-200 rounded-xl p-4 space-y-2 hover:border-indigo-300 transition-colors">
+                  <div key={c.name} className="border border-gray-200 dark:border-slate-700 rounded-xl p-4 space-y-2 hover:border-cyan-500/50 dark:hover:border-cyan-500/50 transition-all">
                     <div className="flex items-center justify-between">
-                      <p className="font-bold text-gray-900">{c.name}</p>
+                      <p className="font-bold text-gray-900 dark:text-slate-100">{c.name}</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${c.toxicity_flag ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
                         {c.toxicity_flag ? "Tox flag" : "No tox flag"}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 italic">{c.phase}</p>
-                    <p className="text-xs text-gray-700">{c.mechanism}</p>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600 mt-2">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 italic">{c.phase}</p>
+                    <p className="text-xs text-gray-700 dark:text-slate-300">{c.mechanism}</p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600 dark:text-slate-400 mt-2">
                       <span>Binding score</span><span className="text-right font-medium text-indigo-700">{c.binding_score ?? "n/a"}</span>
                       <span>Ensemble score</span><span className="text-right font-medium text-cyan-700">{c.ensemble_score ?? "n/a"}</span>
                       <span>Priority score</span><span className="text-right font-medium">{c.design_priority_score ?? "n/a"}</span>
@@ -474,15 +477,15 @@ export default function CustomDrugPage() {
                         </p>
                       )}
                     </div>
-                    <p className="font-mono text-xs text-gray-400 break-all mt-2 bg-gray-50 rounded p-1">{c.smiles}</p>
+                    <p className="font-mono text-xs text-cyan-300 dark:text-cyan-400 break-all mt-2 bg-slate-800 dark:bg-slate-800 rounded px-2 py-1 border border-slate-700">{c.smiles}</p>
                   </div>
                 ))}
               </div>
             </section>
 
             {/* De Novo Candidates */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">De Novo Candidate Proposals</h2>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">De Novo Candidate Proposals</h2>
               {data.docking_summary && (
                 <div className="mb-4 rounded-xl border border-cyan-100 bg-cyan-50 p-3">
                   <p className="text-xs font-semibold text-cyan-800 uppercase tracking-wide">Docking Compute Summary</p>
@@ -532,7 +535,7 @@ export default function CustomDrugPage() {
                           Ensemble inputs: {Object.entries(cand.ensemble_breakdown).map(([k, v]) => `${k}=${v ?? "n/a"}`).join("; ")}
                         </p>
                       )}
-                      <p className="font-mono text-xs text-gray-400 break-all mt-1 bg-gray-50 rounded p-1">{cand.proposed_smiles || "n/a"}</p>
+                      <p className="font-mono text-xs text-cyan-300 dark:text-cyan-400 break-all mt-1 bg-slate-800 rounded px-2 py-1 border border-slate-700">{cand.proposed_smiles || "n/a"}</p>
                       <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded p-2">{cand.disclaimer}</p>
                     </div>
                   ))}
@@ -541,8 +544,8 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Scaffold & ADMET */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">Scaffold & ADMET Summary</h2>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Scaffold &amp; ADMET Summary</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Core Scaffolds</p>
@@ -568,8 +571,8 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Timeline */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Computation Timeline</h2>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">Computation Timeline</h2>
               <div className="relative">
                 <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-indigo-200" />
                 <ol className="space-y-4 ml-8">
@@ -585,8 +588,8 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Next Steps */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-3">Recommended Next Steps</h2>
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Recommended Next Steps</h2>
               <ol className="space-y-3">
                 {(data.next_steps ?? []).map((step, i) => (
                   <li key={i} className="flex gap-3 text-sm text-gray-700">
@@ -600,7 +603,7 @@ export default function CustomDrugPage() {
             </section>
 
             {/* Attributions */}
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
+            <section className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 p-6">
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Scientific Attributions</h2>
               <ul className="space-y-1">
                 {(data.attributions ?? []).map((a) => (

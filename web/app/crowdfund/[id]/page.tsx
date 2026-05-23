@@ -15,13 +15,33 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
 
 function ProgressBar({ percent }: { percent: number }) {
   return (
-    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3">
-      <motion.div
-        className="bg-gradient-to-r from-cyan-500 to-cyan-600 h-3 rounded-full"
-        initial={{ width: 0 }}
-        animate={{ width: `${Math.min(percent, 100)}%` }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      />
+    <div>
+      <div className="relative w-full bg-slate-100 dark:bg-slate-800 rounded-full h-4 overflow-hidden">
+        <motion.div
+          className="bg-gradient-to-r from-cyan-600 to-cyan-400 h-4 rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.min(percent, 100)}%` }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        />
+        {[25, 50, 75].map((m) => (
+          <div
+            key={m}
+            className="absolute top-0 bottom-0 w-px bg-slate-900/20 dark:bg-white/10"
+            style={{ left: `${m}%` }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-1 h-4">
+        {[25, 50, 75, 100].map((m) => (
+          <span
+            key={m}
+            className="absolute text-[10px] text-slate-400 -translate-x-1/2"
+            style={{ left: `${m}%` }}
+          >
+            {m}%
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -171,8 +191,22 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-600" />
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 px-6">
+        <div className="max-w-2xl mx-auto space-y-6 animate-pulse">
+          <div className="h-9 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+          <div className="h-5 w-1/3 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 space-y-4">
+            <div className="flex justify-between">
+              <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+              <div className="h-4 w-36 bg-slate-200 dark:bg-slate-700 rounded" />
+            </div>
+            <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-full" />
+          </div>
+          <div className="flex gap-3">
+            <div className="flex-1 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+            <div className="w-28 h-12 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+          </div>
+        </div>
       </main>
     );
   }
@@ -185,26 +219,57 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const percentComplete = data?.raised_usd && data?.goal_usd
+    ? Math.round((data.raised_usd / data.goal_usd) * 100)
+    : 0;
+
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 px-6">
       <div className="max-w-2xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-          {/* Title */}
+          {/* Title + meta */}
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{data.title}</h1>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 leading-snug">{data.title}</h1>
+            {(data.cancer_type || data.target_gene) && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {data.cancer_type && (
+                  <span className="text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-full">{data.cancer_type}</span>
+                )}
+                {data.target_gene && (
+                  <span className="text-xs font-mono font-bold bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-800 px-2.5 py-1 rounded-full">{data.target_gene}</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Progress */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-            <div className="flex justify-between text-sm mb-3">
-              <span className="text-slate-500">Raised</span>
-              <span className="font-bold text-slate-900 dark:text-slate-100">
-                ${data.raised_usd.toLocaleString()} of ${data.goal_usd.toLocaleString()}
-              </span>
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+                  ${data.raised_usd.toLocaleString()}
+                </p>
+                <p className="text-sm text-slate-500 mt-0.5">raised of <span className="font-semibold text-slate-700 dark:text-slate-300">${data.goal_usd.toLocaleString()}</span> goal</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-extrabold text-cyan-600">{percentComplete}%</p>
+                <p className="text-xs text-slate-400">funded</p>
+              </div>
             </div>
-            <ProgressBar percent={data.percent_complete} />
-            <div className="flex items-center gap-4 mt-3 text-sm text-slate-500">
-              <span className="font-semibold text-cyan-600">{data.percent_complete}% funded</span>
+            <ProgressBar percent={percentComplete} />
+            <div className="flex items-center gap-6 mt-4 text-sm text-slate-500">
+              {data.backer_count != null && (
+                <span className="flex items-center gap-1.5">
+                  <Users size={14} className="text-slate-400" />
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">{data.backer_count.toLocaleString()}</span> backers
+                </span>
+              )}
+              {data.end_date && (
+                <span className="flex items-center gap-1.5">
+                  <Target size={14} className="text-slate-400" />
+                  Ends {new Date(data.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </span>
+              )}
             </div>
           </div>
 
@@ -256,7 +321,7 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
               <Users size={18} className="text-cyan-500" /> Their Story
             </h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-line">
-              {data.patient_story}
+              {(data as Record<string, unknown>).patient_story as string ?? data.description}
             </p>
           </div>
 

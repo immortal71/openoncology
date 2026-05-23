@@ -13,9 +13,9 @@ function ScoreBar({ value }: { value: number | null }) {
   const pct = Math.round(value * 100);
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
+      <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-2.5">
         <div
-          className="bg-cyan-500 h-1.5 rounded-full"
+          className="bg-cyan-500 h-2.5 rounded-full"
           style={{ width: `${Math.min(pct, 100)}%` }}
         />
       </div>
@@ -86,18 +86,20 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 px-6">
-      <div className="max-w-3xl mx-auto space-y-8">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-2">
-            <FlaskConical className="text-cyan-600" size={28} />
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Drug Repurposing Candidates</h1>
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-16">
+      <div className="sticky top-0 z-10 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+        <div className="max-w-3xl mx-auto flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-3">
+            <FlaskConical className="text-cyan-600 shrink-0" size={24} />
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Drug Repurposing Candidates</h1>
           </div>
-          <p className="text-slate-500 text-sm">
-            Target gene: <span className="font-mono font-semibold text-cyan-700 dark:text-cyan-400">{data.target_gene}</span>
-            &nbsp;·&nbsp; {data.candidates.length} candidate{data.candidates.length !== 1 ? "s" : ""} found
+          <p className="text-sm text-slate-500">
+            Target: <span className="font-mono font-semibold text-cyan-700 dark:text-cyan-400">{data.target_gene}</span>
+            &nbsp;·&nbsp;{data.candidates.length} candidate{data.candidates.length !== 1 ? "s" : ""}
           </p>
-        </motion.div>
+        </div>
+      </div>
+      <div className="max-w-3xl mx-auto space-y-8 px-6 pt-8">
 
         {/* Explanation */}
         <div className="bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-100 dark:border-cyan-800 rounded-2xl p-5 text-sm text-cyan-800 dark:text-cyan-300 leading-relaxed">
@@ -120,7 +122,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-2xl font-bold text-slate-200 dark:text-slate-600 w-7">#{i + 1}</span>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-700 text-white text-sm font-bold shrink-0">{i + 1}</span>
                     <h3 className="font-bold text-slate-900 dark:text-slate-100 text-lg">{c.drug_name}</h3>
                     {c.approval_status && (
                       <span className="bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-300 text-xs px-2 py-0.5 rounded-full font-medium">
@@ -128,7 +130,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-500 text-sm ml-9">{c.mechanism ?? "Mechanism not available"}</p>
+                  <p className="text-slate-500 text-sm ml-10">{c.mechanism ?? "Mechanism not available"}</p>
                 </div>
                 {c.chembl_id && (
                   <a
@@ -142,7 +144,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
                 )}
               </div>
 
-              <div className="mt-4 ml-9 grid grid-cols-2 gap-4">
+              <div className="mt-4 ml-10 grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-slate-400 mb-1">OpenTargets association</p>
                   <ScoreBar value={c.opentargets_score} />
@@ -153,7 +155,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
                 </div>
               </div>
 
-              <div className="mt-4 ml-9 space-y-2">
+              <div className="mt-4 ml-10 space-y-2">
                 <div>
                   <p className="text-xs text-slate-400 mb-2">Evidence sources</p>
                   <div className="flex flex-wrap gap-2">

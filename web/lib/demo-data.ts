@@ -186,6 +186,33 @@ export const DEMO_DRUG_REQUESTS = [
   },
 ];
 
+export const DEMO_PHARMA_COMPANIES = [
+  {
+    id: "pharma-001",
+    name: "OncoBridge Therapeutics",
+    country: "United States",
+    description:
+      "GMP-certified specialist in covalent KRAS inhibitor synthesis. IND-enabling studies, API scale-up, and formulation development for oncology small molecules.",
+    min_order_usd: 85000,
+  },
+  {
+    id: "pharma-002",
+    name: "Nexagen BioSynth",
+    country: "Germany",
+    description:
+      "EU-GMP manufacturer of oncology APIs. Rapid prototyping from lead candidate to clinical-grade compound. Strong track record with KRAS, EGFR, and ALK inhibitors.",
+    min_order_usd: 50000,
+  },
+  {
+    id: "pharma-003",
+    name: "Precision Pharma Labs",
+    country: "Singapore",
+    description:
+      "Asia-Pacific GMP synthesis hub. Oncology API manufacturing, ICH stability studies, and formulation development. ISO 9001:2015 certified.",
+    min_order_usd: 40000,
+  },
+];
+
 export const DEMO_CROWDFUND = {
   id: DEMO_ID,
   slug: DEMO_ID,

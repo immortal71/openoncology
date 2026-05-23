@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
-import { DEMO_DRUG_REQUESTS } from "@/lib/demo-data";
+import { DEMO_DRUG_REQUESTS, DEMO_PHARMA_COMPANIES } from "@/lib/demo-data";
 
 const orderSchema = z.object({
   drug_spec: z.string().min(20, "Please provide a detailed drug specification").max(2000),
@@ -318,8 +318,8 @@ export default function MarketplacePage() {
   const [selectedRequest, setSelectedRequest] = useState<DrugRequest | null>(null);
 
   const { data: companies, isLoading } = useQuery({
-    queryKey: ["pharma-companies"],
-    queryFn: api.getPharmaCompanies,
+    queryKey: ["pharma-companies", isDemo],
+    queryFn: isDemo ? () => Promise.resolve(DEMO_PHARMA_COMPANIES) : api.getPharmaCompanies,
   });
 
   const { data: openRequests, isLoading: requestsLoading } = useQuery({

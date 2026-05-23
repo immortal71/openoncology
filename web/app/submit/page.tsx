@@ -100,15 +100,37 @@ export default function SubmitPage() {
   }
 
   return (
-    <main className="min-h-screen py-16 px-6">
-      <div className="max-w-2xl mx-auto clinical-surface p-7 md:p-9">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-3xl font-[var(--font-manrope)] font-extrabold text-slate-900 mb-2">Submit Your Sample</h1>
-          <p className="text-slate-600 mb-5">
-            Upload your case files to start the mutation pathway: actionable check,
-            repurposed-drug search, custom-drug brief generation, and funding support when needed.
-          </p>
-        </motion.div>
+    <main className="min-h-screen py-10 px-6">
+      <div className="max-w-2xl mx-auto">
+        {/* 3-step progress indicator */}
+        <div className="flex items-center gap-0 mb-8">
+          {["Upload", "Analysis", "Results"].map((step, i) => (
+            <div key={step} className="flex items-center flex-1">
+              <div className="flex flex-col items-center">
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
+                  i === 0 ? "border-cyan-600 bg-cyan-600 text-white" : "border-slate-300 dark:border-slate-600 text-slate-400"
+                }`}>
+                  {i + 1}
+                </div>
+                <span className={`text-xs mt-1 font-medium ${
+                  i === 0 ? "text-cyan-600" : "text-slate-400"
+                }`}>{step}</span>
+              </div>
+              {i < 2 && (
+                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700 mx-2 mb-4" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="clinical-surface p-7 md:p-9">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-3xl font-[var(--font-manrope)] font-extrabold text-slate-900 dark:text-slate-100 mb-2">Submit Your Sample</h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-5">
+              Upload your case files to start the mutation pathway: actionable check,
+              repurposed-drug search, custom-drug brief generation, and funding support when needed.
+            </p>
+          </motion.div>
 
         {/* Demo banner */}
         <AnimatePresence>
@@ -134,7 +156,7 @@ export default function SubmitPage() {
           </motion.div>
         </AnimatePresence>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
           {/* Cancer Type */}
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -150,48 +172,67 @@ export default function SubmitPage() {
             )}
           </div>
 
-          {/* Biopsy File */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Biopsy report <span className="text-slate-400">(PDF/JPG/PNG/TXT/DOC/DOCX/RTF/XML/JSON - max 50MB)</span>
-            </label>
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-cyan-400 transition-colors bg-cyan-50/20">
-              <FileText className="text-slate-400 mb-2" size={24} />
-              <span className="text-sm text-slate-500">
-                {biopsyFile ? biopsyFile.name : "Click to upload biopsy file"}
-              </span>
-              <input
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && setValue("biopsy_file", e.target.files[0])}
-              />
-            </label>
-            {errors.biopsy_file && (
-              <p className="text-red-500 text-xs mt-1">{errors.biopsy_file.message as string}</p>
-            )}
-          </div>
+{/* File uploads — side-by-side on desktop */}
+          <div className="grid md:grid-cols-2 gap-5">
+            {/* Biopsy File */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Biopsy report
+                <span className="ml-1.5 text-xs font-normal text-slate-400">max 50 MB</span>
+              </label>
+              <label className="group flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-cyan-500 dark:hover:border-cyan-500 hover:bg-cyan-50/30 dark:hover:bg-cyan-950/20 transition-all bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="mb-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 p-2.5 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 transition-colors">
+                  <FileText className="text-cyan-600 dark:text-cyan-400" size={26} />
+                </div>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 text-center px-3">
+                  {biopsyFile ? biopsyFile.name : "Click or drag to upload"}
+                </span>
+                {!biopsyFile && (
+                  <span className="text-xs text-slate-400 mt-1">PDF · JPG · TXT · DOC</span>
+                )}
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && setValue("biopsy_file", e.target.files[0])}
+                />
+              </label>
+              {errors.biopsy_file && (
+                <p className="text-red-500 text-xs mt-1">{errors.biopsy_file.message as string}</p>
+              )}
+            </div>
 
-          {/* DNA File */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              DNA file <span className="text-slate-400">(VCF/FASTQ/BAM/GZ/TXT/CSV/TSV/XML/JSON - max 500MB)</span>
-            </label>
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-xl cursor-pointer hover:border-cyan-400 transition-colors bg-cyan-50/20">
-              <Dna className="text-slate-400 mb-2" size={24} />
-              <span className="text-sm text-slate-500">
-                {dnaFile ? dnaFile.name : "Click to upload DNA file"}
-              </span>
-              <input
-                type="file"
-                accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && setValue("dna_file", e.target.files[0])}
-              />
-            </label>
-            {errors.dna_file && (
-              <p className="text-red-500 text-xs mt-1">{errors.dna_file.message as string}</p>
-            )}
+            {/* DNA File */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                DNA / genomic file
+                <span className="ml-1.5 text-xs font-normal text-slate-400">max 500 MB</span>
+              </label>
+              <label className="group flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-cyan-500 dark:hover:border-cyan-500 hover:bg-cyan-50/30 dark:hover:bg-cyan-950/20 transition-all bg-slate-50/50 dark:bg-slate-800/30">
+                <div className="mb-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 p-2.5 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 transition-colors">
+                  <Dna className="text-cyan-600 dark:text-cyan-400" size={26} />
+                </div>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 text-center px-3">
+                  {dnaFile ? dnaFile.name : "Click or drag to upload"}
+                </span>
+                {!dnaFile && (
+                  <div className="flex gap-1.5 mt-2 flex-wrap justify-center">
+                    {["VCF", "FASTQ", "BAM", "GZ"].map((ext) => (
+                      <span key={ext} className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-1.5 py-0.5 rounded">{ext}</span>
+                    ))}
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && setValue("dna_file", e.target.files[0])}
+                />
+              </label>
+              {errors.dna_file && (
+                <p className="text-red-500 text-xs mt-1">{errors.dna_file.message as string}</p>
+              )}
+            </div>
           </div>
 
           {/* Consent notice */}
@@ -215,12 +256,13 @@ export default function SubmitPage() {
           <button
             type="submit"
             disabled={status === "uploading"}
-            className="w-full bg-cyan-700 text-white py-3 rounded-xl font-semibold hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-cyan-700 text-white py-3.5 rounded-xl text-base font-bold hover:bg-cyan-600 active:bg-cyan-800 hover:shadow-lg hover:shadow-cyan-900/30 shadow-md shadow-cyan-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
           >
             <Upload size={18} />
             {status === "uploading" ? "Uploading & encrypting..." : "Submit Sample"}
           </button>
         </form>
+        </div>
       </div>
     </main>
   );

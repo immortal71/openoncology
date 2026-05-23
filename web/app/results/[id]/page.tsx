@@ -147,7 +147,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 				<section className="clinical-surface p-6 border-t-4 border-cyan-600">
 					<div className="flex items-start justify-between gap-4 flex-wrap">
 						<div>
-							<h1 className="text-2xl font-bold text-gray-900">Your Results Summary</h1>
+							<h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Your Results Summary</h1>
 							<p className="text-sm text-gray-500 mt-1">
 								{data.cancer_type} · Submission {params.id.slice(0, 8)}
 							</p>
@@ -230,7 +230,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 								</thead>
 								<tbody>
 									{mutations.map((m, i) => (
-										<tr key={`${m.gene || "gene"}-${i}`} className="border-b last:border-0">
+									<tr key={`${m.gene || "gene"}-${i}`} className={`border-b last:border-0 ${i % 2 === 0 ? "bg-white dark:bg-slate-900/50" : "bg-slate-50 dark:bg-slate-800/30"}`}>
 											<td className="py-2 pr-3 font-medium text-gray-900">{m.gene || "-"}</td>
 											<td className="py-2 pr-3 text-gray-700">{m.hgvs || "-"}</td>
 											<td className="py-2 pr-3 text-gray-700">{m.classification || "-"}</td>
@@ -252,20 +252,23 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 						<p className="text-sm text-gray-600">No FDA-aligned options found in Layer 1 or Layer 2.</p>
 					) : (
 						<ul className="space-y-2">
-							{candidates.slice(0, 5).map((c) => (
-								<li key={`${c.chembl_id || c.drug_name}-${c.rank_score || 0}`} className="border rounded-lg p-3">
-									<p className="font-medium text-gray-900">{c.drug_name}</p>
-									<p className="text-xs text-gray-600">{c.chembl_id || "Unknown ID"} | {c.approval_status || "Unknown approval"} | Rank {(c.rank_score ?? 0).toFixed(2)}</p>
-									<p className="text-xs text-gray-600 mt-1">{c.mechanism || "Mechanism not provided"}</p>
+						{candidates.slice(0, 5).map((c, i) => (
+							<li key={`${c.chembl_id || c.drug_name}-${c.rank_score || 0}`} className="border rounded-xl p-3 flex gap-3 items-start hover:border-cyan-500/50 transition-all duration-200">
+								<span className="flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-cyan-700 text-white text-xs font-bold mt-0.5">{i + 1}</span>
+								<div className="flex-1">
+									<p className="font-medium text-gray-900 dark:text-slate-100">{c.drug_name}</p>
+									<p className="text-xs text-gray-600 dark:text-slate-400">{c.chembl_id || "Unknown ID"} | {c.approval_status || "Unknown approval"} | Rank {(c.rank_score ?? 0).toFixed(2)}</p>
+									<p className="text-xs text-gray-600 dark:text-slate-400 mt-1">{c.mechanism || "Mechanism not provided"}</p>
 									<div className="mt-2 flex flex-wrap gap-2">
 										{(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source) => (
 											<span
 												key={`${c.chembl_id || c.drug_name}-${source}`}
-												className="rounded-full border border-blue-100 bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700"
+												className="rounded-full border border-cyan-100 bg-cyan-50 dark:bg-cyan-950/40 dark:border-cyan-800 px-2 py-0.5 text-[11px] font-medium text-cyan-700 dark:text-cyan-300"
 											>
 												{source}
 											</span>
 										))}
+									</div>
 									</div>
 								</li>
 							))}
