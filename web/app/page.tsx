@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import GenomicStream from "@/components/ui/genomic-stream";
 
 const DEMO_ID = "demo-nsclc-kras-g12c";
 
@@ -117,10 +118,10 @@ export default function LandingPage() {
       <section className="relative overflow-hidden border-b border-slate-800/60">
         <div className="hero-dots absolute inset-0 pointer-events-none z-0" />
         <div className="clinical-shell py-16 md:py-20 relative z-10">
-          <div className="flex flex-col gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
             {/* Headline + CTA */}
-            <div className="max-w-2xl">
+            <div>
               <p className="font-mono text-xs text-cyan-400/60 mb-5 tracking-wider">
                 KRAS · G12C · chr12:25398284 · COSV57014428
               </p>
@@ -147,11 +148,18 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Terminal log panel — full width */}
-            <div
-              className="w-full rounded-sm border border-slate-700/50 bg-[#0d1117] overflow-hidden"
-              style={{ boxShadow: "0 0 40px rgba(6,182,212,0.08)" }}
-            >
+            {/* Right: genomic data stream (desktop only) */}
+            <div className="hidden lg:block">
+              <GenomicStream />
+            </div>
+
+          </div>
+
+          {/* Terminal log panel — full width */}
+          <div
+            className="mt-8 w-full rounded-sm border border-slate-700/50 bg-[#0d1117] overflow-hidden"
+            style={{ boxShadow: "0 0 40px rgba(6,182,212,0.08)" }}
+          >
               {/* macOS-style titlebar */}
               <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-slate-700/50 bg-slate-900/60">
                 <div className="h-[10px] w-[10px] rounded-full bg-red-500/70" />
@@ -178,8 +186,6 @@ export default function LandingPage() {
                   <p className="text-slate-400 mt-1">$ <span className="cursor-blink" /></p>
                 )}
               </div>
-            </div>
-
           </div>
         </div>
       </section>
