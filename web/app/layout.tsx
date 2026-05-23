@@ -4,6 +4,7 @@ import { Manrope, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import { LogoAnimated } from "@/components/ui/logo-animated";
 import { Toaster } from "@/components/ui/toaster";
 
 const manrope = Manrope({
@@ -47,10 +48,7 @@ export default function RootLayout({
           <AuthProvider>
             <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1e]/90 backdrop-blur-md">
               <div className="clinical-shell h-16 flex items-center justify-between gap-4">
-                <Link href="/" className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
-                  <span className="font-[var(--font-manrope)] font-extrabold text-white tracking-tight text-sm">OpenOncology</span>
-                </Link>
+                <LogoAnimated />
                 <div className="flex items-center gap-1 sm:gap-2 text-xs">
                   <Link href="/explore" className="uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Explore</Link>
                   <Link href="/submit" className="uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Submit</Link>

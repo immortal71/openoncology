@@ -58,28 +58,69 @@ const timelineItems = [
   },
 ];
 
+const LOG_LINES: { text: string; color: string }[] = [
+  { text: "$ openoncology analyze --sample KRAS_G12C_NSCLC", color: "text-slate-500 text-xs" },
+  { text: "[✓] Variant called: KRAS p.Gly12Cys", color: "text-green-400" },
+  { text: "[✓] OncoKB Level 1 — actionable", color: "text-green-400" },
+  { text: "[✓] Sotorasib ranked #1 (DiffDock 0.847)", color: "text-green-400" },
+  { text: "[→] Custom brief: not required", color: "text-cyan-400" },
+  { text: "[✓] Report ready — 3 candidates found", color: "text-green-400" },
+];
+
 export default function LandingPage() {
-  const [showFinal, setShowFinal] = useState(false);
+  const [completedLines, setCompletedLines] = useState<{ text: string; color: string }[]>([]);
+  const [partialLine, setPartialLine] = useState("");
+  const [partialColor, setPartialColor] = useState("");
+  const [fading, setFading] = useState(false);
+  const [loopKey, setLoopKey] = useState(0);
+
   useEffect(() => {
-    const t = setTimeout(() => setShowFinal(true), 3500);
-    return () => clearTimeout(t);
-  }, []);
+    let tid: ReturnType<typeof setTimeout>;
+
+    function tick(li: number, ci: number, done: { text: string; color: string }[]) {
+      if (li >= LOG_LINES.length) {
+        tid = setTimeout(() => {
+          setFading(true);
+          tid = setTimeout(() => {
+            setFading(false);
+            setCompletedLines([]);
+            setPartialLine("");
+            setLoopKey((k) => k + 1);
+          }, 500);
+        }, 2000);
+        return;
+      }
+      const line = LOG_LINES[li];
+      const partial = line.text.slice(0, ci);
+      setPartialLine(partial);
+      setPartialColor(line.color);
+      if (ci < line.text.length) {
+        tid = setTimeout(() => tick(li, ci + 1, done), 30);
+      } else {
+        const next = [...done, line];
+        tid = setTimeout(() => {
+          setCompletedLines(next);
+          setPartialLine("");
+          tick(li + 1, 0, next);
+        }, 60);
+      }
+    }
+
+    tick(0, 0, []);
+    return () => clearTimeout(tid);
+  }, [loopKey]);
+
   return (
     <main className="min-h-screen bg-[#0a0f1e] text-slate-100">
 
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <section
-        className="relative overflow-hidden border-b border-slate-800/60"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(6,182,212,0.07) 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      >
-        <div className="clinical-shell py-16 md:py-20">
-          <div className="grid lg:grid-cols-[1fr_360px] gap-10 items-start">
+      <section className="relative overflow-hidden border-b border-slate-800/60">
+        <div className="hero-dots absolute inset-0 pointer-events-none z-0" />
+        <div className="clinical-shell py-16 md:py-20 relative z-10">
+          <div className="flex flex-col gap-8">
 
-            {/* Left: headline + CTA */}
-            <div>
+            {/* Headline + CTA */}
+            <div className="max-w-2xl">
               <p className="font-mono text-xs text-cyan-400/60 mb-5 tracking-wider">
                 KRAS · G12C · chr12:25398284 · COSV57014428
               </p>
@@ -106,7 +147,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right: terminal log panel */}
+            {/* Terminal log panel — full width */}
             <div
               className="w-full rounded-sm border border-slate-700/50 bg-[#0d1117] overflow-hidden"
               style={{ boxShadow: "0 0 40px rgba(6,182,212,0.08)" }}
@@ -119,21 +160,23 @@ export default function LandingPage() {
                 <span className="ml-2 font-mono text-xs text-gray-500">analysis.log</span>
               </div>
               <div
-                className="p-5 font-mono text-sm space-y-2.5"
+                className={`p-5 font-mono text-sm space-y-2.5 min-h-[160px] transition-opacity duration-500 ${fading ? "opacity-0" : "opacity-100"}`}
                 style={{
                   backgroundImage:
                     "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)",
                 }}
               >
-                <p className="text-slate-600 text-xs">$ openoncology analyze --sample KRAS_G12C_NSCLC</p>
-                <p className="text-green-400">[✓] Variant called: KRAS p.Gly12Cys</p>
-                <p className="text-green-400">[✓] OncoKB Level 1 — actionable</p>
-                <p className="text-green-400">[✓] Sotorasib ranked #1 (DiffDock 0.847)</p>
-                <p className="text-cyan-400">[→] Custom brief: not required</p>
-                {showFinal && (
-                  <p className="text-green-400">[✓] Report ready — 3 candidates found</p>
+                {completedLines.map((line, i) => (
+                  <p key={i} className={line.color}>{line.text}</p>
+                ))}
+                {partialLine !== "" && (
+                  <p className={partialColor}>
+                    {partialLine}<span className="cursor-blink text-slate-400 ml-[1px]" />
+                  </p>
                 )}
-                <p className="mt-2"><span className="cursor-blink text-slate-400" /></p>
+                {completedLines.length === LOG_LINES.length && partialLine === "" && (
+                  <p className="text-slate-400 mt-1">$ <span className="cursor-blink" /></p>
+                )}
               </div>
             </div>
 
