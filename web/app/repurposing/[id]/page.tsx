@@ -28,7 +28,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<any>({
     queryKey: ["repurposing", params.id],
     queryFn: () => isDemo ? Promise.resolve(DEMO_REPURPOSING) : api.getRepurposing(params.id),
   });
@@ -111,7 +111,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
 
         {/* Candidates */}
         <div className="space-y-4">
-          {data.candidates.map((c, i) => (
+          {data.candidates.map((c: any, i: number) => (
             <motion.div
               key={c.chembl_id ?? i}
               initial={{ opacity: 0, y: 12 }}
@@ -159,7 +159,7 @@ export default function RepurposingPage({ params }: { params: { id: string } }) 
                 <div>
                   <p className="text-xs text-slate-400 mb-2">Evidence sources</p>
                   <div className="flex flex-wrap gap-2">
-                    {(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source) => (
+                    {(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source: string) => (
                       <span
                         key={`${c.chembl_id ?? c.drug_name}-${source}`}
                         className="rounded-full border border-cyan-100 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-950/50 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:text-cyan-300"

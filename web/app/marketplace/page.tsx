@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from "react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -307,7 +307,7 @@ function OrderModal({
   );
 }
 
-export default function MarketplacePage() {
+function MarketplacePageInner() {
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true";
   const [selectedPharma, setSelectedPharma] = useState<{
@@ -317,12 +317,12 @@ export default function MarketplacePage() {
   } | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<DrugRequest | null>(null);
 
-  const { data: companies, isLoading } = useQuery({
+  const { data: companies, isLoading } = useQuery<any>({
     queryKey: ["pharma-companies", isDemo],
     queryFn: isDemo ? () => Promise.resolve(DEMO_PHARMA_COMPANIES) : api.getPharmaCompanies,
   });
 
-  const { data: openRequests, isLoading: requestsLoading } = useQuery({
+  const { data: openRequests, isLoading: requestsLoading } = useQuery<any>({
     queryKey: ["open-drug-requests"],
     queryFn: () => isDemo ? Promise.resolve(DEMO_DRUG_REQUESTS as DrugRequest[]) : api.getDrugRequests(),
   });
@@ -346,7 +346,7 @@ export default function MarketplacePage() {
           </div>
         ) : companies && companies.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {companies.map((c, i) => (
+            {companies.map((c: any, i: number) => (
               <motion.div
                 key={c.id}
                 initial={{ opacity: 0, y: 12 }}
@@ -432,7 +432,7 @@ export default function MarketplacePage() {
 
         {openRequests && openRequests.length > 0 && (
           <div className="space-y-3">
-            {openRequests.map((req, i) => (
+            {openRequests.map((req: any, i: number) => (
               <motion.div
                 key={req.id}
                 initial={{ opacity: 0, y: 8 }}
@@ -486,4 +486,8 @@ export default function MarketplacePage() {
       )}
     </main>
   );
+}
+
+export default function MarketplacePage() {
+  return <Suspense fallback={null}><MarketplacePageInner /></Suspense>;
 }

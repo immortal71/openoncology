@@ -180,7 +180,7 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
   const [donated, setDonated] = useState(false);
   const [showDonate, setShowDonate] = useState(false);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, refetch } = useQuery<any>({
     queryKey: ["campaign", params.id],
     queryFn: () => isDemo ? Promise.resolve(DEMO_CROWDFUND) : api.getCampaign(params.id),
   });

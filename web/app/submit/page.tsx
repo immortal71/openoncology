@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -32,7 +32,7 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-export default function SubmitPage() {
+function SubmitPageInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const isDemo = searchParams.get("demo") === "true";
@@ -137,19 +137,20 @@ export default function SubmitPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-xl border border-cyan-200 bg-cyan-50/60 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+            className="mb-6 rounded-r-xl border border-slate-700/60 bg-slate-800/50 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+            style={{ borderLeft: '4px solid rgb(6 182 212)' }}
           >
-            <FlaskConical className="shrink-0 text-cyan-600" size={20} />
+            <FlaskConical className="shrink-0 text-cyan-400" size={20} />
             <div className="flex-1">
-              <p className="text-sm font-semibold text-cyan-900">Try a live demo</p>
-              <p className="text-xs text-cyan-700 mt-0.5">
+              <p className="text-sm font-semibold text-white">Try a live demo</p>
+              <p className="text-xs text-slate-400 mt-0.5">
                 See a full KRAS G12C · Non-Small Cell Lung Cancer case — Sotorasib ranked #1 (OncoKB Level 1).
               </p>
             </div>
             <button
               type="button"
               onClick={() => router.push(`/results/${DEMO_ID}?demo=true`)}
-              className="shrink-0 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-500 active:bg-cyan-700 transition-colors"
+              className="shrink-0 rounded-md bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 active:bg-cyan-800 transition-colors font-mono"
             >
               View demo results →
             </button>
@@ -165,7 +166,7 @@ export default function SubmitPage() {
             <input
               {...register("cancer_type")}
               placeholder="e.g. Lung adenocarcinoma, Breast cancer, Glioblastoma"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              className="w-full border border-slate-700 bg-slate-800/50 text-slate-100 rounded-xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:shadow-[0_0_0_3px_rgba(6,182,212,0.15)] transition-all"
             />
             {errors.cancer_type && (
               <p className="text-red-500 text-xs mt-1">{errors.cancer_type.message}</p>
@@ -218,7 +219,7 @@ export default function SubmitPage() {
                 {!dnaFile && (
                   <div className="flex gap-1.5 mt-2 flex-wrap justify-center">
                     {["VCF", "FASTQ", "BAM", "GZ"].map((ext) => (
-                      <span key={ext} className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-1.5 py-0.5 rounded">{ext}</span>
+                      <span key={ext} className="font-mono text-[10px] font-bold bg-slate-700 text-cyan-300 px-1.5 py-0.5 rounded border border-slate-600">{ext}</span>
                     ))}
                   </div>
                 )}
@@ -266,4 +267,8 @@ export default function SubmitPage() {
       </div>
     </main>
   );
+}
+
+export default function SubmitPage() {
+  return <Suspense fallback={null}><SubmitPageInner /></Suspense>;
 }

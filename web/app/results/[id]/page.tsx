@@ -36,7 +36,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	const [customError, setCustomError] = useState<string | null>(null);
 	const [nearbyOpen, setNearbyOpen] = useState(false);
 
-	const { data, isLoading, isError, error } = useQuery({
+	const { data, isLoading, isError, error } = useQuery<any>({
 		queryKey: ["results", params.id],
 		queryFn: () => isDemo ? Promise.resolve(DEMO_RESULTS as typeof DEMO_RESULTS & Record<string, unknown>) : api.getResults(params.id),
 		refetchInterval: (query) => {
@@ -51,7 +51,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	const isComplete = ["complete", "completed", "done"].includes(normalizedStatus) || !data?.status;
 	const resultId = data?.result_id || data?.submission_id || params.id;
 
-	const repurposingQuery = useQuery({
+	const repurposingQuery = useQuery<any>({
 		queryKey: ["repurposing", resultId],
 		queryFn: () => isDemo ? Promise.resolve(DEMO_REPURPOSING) : api.getRepurposing(resultId),
 		enabled: Boolean(isComplete && resultId),
@@ -120,7 +120,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	}
 
 	const mutations = (data.mutations || []) as MutationRow[];
-	const candidates = repurposingQuery.data?.candidates || [];
+	const candidates = (repurposingQuery.data?.candidates || []) as any[];
 	const trialMatches = (trialQuery.data?.trials || []) as TrialRow[];
 	const repurposingFailed = !repurposingQuery.isLoading && candidates.length === 0;
 	const hasActionable = Boolean(data.has_targetable_mutation || mutations.some((m) => m.is_targetable));
@@ -260,7 +260,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 									<p className="text-xs text-gray-600 dark:text-slate-400">{c.chembl_id || "Unknown ID"} | {c.approval_status || "Unknown approval"} | Rank {(c.rank_score ?? 0).toFixed(2)}</p>
 									<p className="text-xs text-gray-600 dark:text-slate-400 mt-1">{c.mechanism || "Mechanism not provided"}</p>
 									<div className="mt-2 flex flex-wrap gap-2">
-										{(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source) => (
+										{(c.evidence_sources?.length ? c.evidence_sources : ["Unspecified"]).map((source: string) => (
 											<span
 												key={`${c.chembl_id || c.drug_name}-${source}`}
 												className="rounded-full border border-cyan-100 bg-cyan-50 dark:bg-cyan-950/40 dark:border-cyan-800 px-2 py-0.5 text-[11px] font-medium text-cyan-700 dark:text-cyan-300"
