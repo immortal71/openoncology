@@ -66,6 +66,11 @@
   }
 }
 
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 @layer components {
   .clinical-shell {
     @apply max-w-6xl mx-auto px-4 sm:px-6;
@@ -73,6 +78,16 @@
 
   .clinical-surface {
     @apply bg-slate-900/80 backdrop-blur border border-slate-800 rounded-2xl shadow-sm;
+  }
+
+  /* Blinking 2px terminal cursor */
+  .cursor-blink {
+    display: inline-block;
+    width: 2px;
+    height: 0.875rem;
+    background: currentColor;
+    vertical-align: middle;
+    animation: cursor-blink 1s step-end infinite;
   }
 
   /* Monospace data elements — gene names, scores, IDs, coordinates */
