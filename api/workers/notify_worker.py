@@ -66,6 +66,8 @@ def _get_patient_email_from_keycloak(keycloak_id: str) -> str | None:
     bind=True,
     max_retries=3,
     default_retry_delay=30,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def notify_results_ready(self, submission_id: str, patient_id: str):
     from workers._db_sync import get_sync_session
@@ -121,6 +123,8 @@ def notify_results_ready(self, submission_id: str, patient_id: str):
     bind=True,
     max_retries=3,
     default_retry_delay=30,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def notify_campaign_milestone(self, campaign_id: str, percent: int):
     from workers._db_sync import get_sync_session
@@ -162,6 +166,8 @@ def notify_campaign_milestone(self, campaign_id: str, percent: int):
     bind=True,
     max_retries=3,
     default_retry_delay=30,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def notify_order_confirmed(self, order_id: str):
     from workers._db_sync import get_sync_session
@@ -205,6 +211,8 @@ def notify_order_confirmed(self, order_id: str):
     bind=True,
     max_retries=3,
     default_retry_delay=30,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def notify_pharma_approved(self, pharma_id: str):
     from workers._db_sync import get_sync_session
@@ -238,6 +246,8 @@ def notify_pharma_approved(self, pharma_id: str):
     bind=True,
     max_retries=3,
     default_retry_delay=30,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def notify_review_complete(self, submission_id: str):
     from workers._db_sync import get_sync_session

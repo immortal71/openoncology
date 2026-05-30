@@ -160,6 +160,71 @@ export const api = {
       }[];
     }>(`/api/repurposing/${resultId}/trials`),
 
+  /** Get immunotherapy biomarker profile (TMB, MSI-H, HRD, POLE) for a result */
+  getImmunotherapyProfile: (resultId: string) =>
+    request<{
+      result_id: string;
+      available: boolean;
+      message?: string;
+      profile: {
+        tmb_per_mb: number;
+        tmb_high: boolean;
+        msi_high: boolean;
+        hrd: boolean;
+        pole_mutation: boolean;
+        mmr_gene_hits: string[];
+        hrd_gene_hits: string[];
+        candidates: {
+          drug_name: string;
+          drug_class: string;
+          oncokb_level: string;
+          indication?: string;
+          evidence_note?: string;
+          rank_score_estimate: number;
+        }[];
+      } | null;
+    }>(`/api/repurposing/${resultId}/immunotherapy`),
+
+  /** Get dominant SBS mutational signature + treatment implication for a result */
+  getMutationalSignature: (resultId: string) =>
+    request<{
+      result_id: string;
+      available: boolean;
+      message?: string;
+      signature: {
+        dominant_signature: string | null;
+        signature_fraction: number;
+        confidence: string;
+        mutation_count: number;
+        all_fractions: Record<string, number>;
+        implication: {
+          signature_name: string;
+          drug_class: string;
+          drug_recommendations: string[];
+          oncokb_level: string;
+          evidence_note?: string;
+        } | null;
+      } | null;
+    }>(`/api/repurposing/${resultId}/signatures`),
+
+  /** Get combination therapy suggestions for a result */
+  getCombinationTherapy: (resultId: string) =>
+    request<{
+      result_id: string;
+      count: number;
+      message: string;
+      combinations: {
+        drugs: string[];
+        synergy_type: string;
+        rationale: string;
+        combination_score: number;
+        evidence_level: string;
+        evidence_note: string;
+        cancer_type_context?: string | null;
+        trial_ids: string[];
+      }[];
+    }>(`/api/repurposing/${resultId}/combinations`),
+
   /** Generate custom discovery brief for a result */
   getDiscoveryBrief: (resultId: string) =>
     request<{
@@ -443,4 +508,137 @@ export const api = {
     }>(`/api/marketplace/drug-requests/${requestId}/bids/${bidId}/accept`, {
       method: "POST",
     }),
+
+  // ── COHORT / STUDY EXPLORER ──────────────────────────────────────────────
+
+  /** List all public genomic studies, with optional cancer_type / source filters */
+  getStudies: (filters?: { cancer_type?: string; source?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.cancer_type) params.set("cancer_type", filters.cancer_type);
+    if (filters?.source) params.set("source", filters.source);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return request<{
+      total: number;
+      studies: {
+        id: string;
+        study_id: string;
+        name: string;
+        description: string | null;
+        cancer_type: string | null;
+        cancer_type_label: string | null;
+        sample_count: number;
+        data_types: string[] | null;
+        reference_genome: string | null;
+        pmid: string | null;
+        source: string | null;
+      }[];
+    }>(`/api/cohorts/studies${qs}`);
+  },
+
+  /** Get details for a single study including live sample + gene counts */
+  getStudyDetail: (studyId: string) =>
+    request<{
+      id: string;
+      study_id: string;
+      name: string;
+      description: string | null;
+      cancer_type: string | null;
+      cancer_type_label: string | null;
+      sample_count: number;
+      data_types: string[] | null;
+      reference_genome: string | null;
+      pmid: string | null;
+      source: string | null;
+      sample_count_live: number;
+      distinct_genes_mutated: number;
+    }>(`/api/cohorts/studies/${studyId}`),
+
+  /** Paginated mutation list for a study, with optional gene/classification filters */
+  getCohortMutations: (
+    studyId: string,
+    params?: { gene?: string; classification?: string; page?: number; per_page?: number }
+  ) => {
+    const qs = new URLSearchParams();
+    if (params?.gene) qs.set("gene", params.gene);
+    if (params?.classification) qs.set("classification", params.classification);
+    if (params?.page) qs.set("page", String(params.page));
+    if (params?.per_page) qs.set("per_page", String(params.per_page));
+    const q = qs.toString() ? `?${qs.toString()}` : "";
+    return request<{
+      study_id: string;
+      gene_filter: string | null;
+      total: number;
+      page: number;
+      per_page: number;
+      mutations: {
+        id: string;
+        gene: string;
+        sample_id: string;
+        variant_classification: string | null;
+        variant_type: string | null;
+        protein_change: string | null;
+        hgvsc: string | null;
+        chromosome: string | null;
+        start_position: number | null;
+        end_position: number | null;
+      }[];
+    }>(`/api/cohorts/${studyId}/mutations${q}`);
+  },
+
+  /** Alteration frequency for a gene (and optional specific variant) across all studies */
+  getCrossStudyFrequency: (gene: string, alteration?: string) => {
+    const qs = new URLSearchParams({ gene });
+    if (alteration) qs.set("alteration", alteration);
+    return request<{
+      gene: string;
+      alteration: string | null;
+      total_studies_with_alteration: number;
+      frequency_by_study: {
+        study_id: string;
+        study_name: string;
+        cancer_type: string | null;
+        cancer_type_label: string | null;
+        mutation_count: number;
+        sample_count: number;
+        frequency: number | null;
+        frequency_pct: number | null;
+      }[];
+    }>(`/api/cohorts/cross-study?${qs.toString()}`);
+  },
+
+  /** OncoPrint alteration matrix for a gene panel in a study */
+  getOncoprint: (studyId: string, genes: string[], maxSamples?: number) => {
+    const qs = new URLSearchParams({ study_id: studyId, genes: genes.join(",") });
+    if (maxSamples) qs.set("max_samples", String(maxSamples));
+    return request<{
+      study_id: string;
+      genes: string[];
+      samples: string[];
+      sample_count: number;
+      gene_frequencies: Record<string, number>;
+      alterations: Record<string, Record<string, string[]>>;
+    }>(`/api/cohorts/oncoprint?${qs.toString()}`);
+  },
+
+  /** Per-gene summary (top protein changes, variant classes, study list) */
+  getGeneSummary: (gene: string) =>
+    request<{
+      gene: string;
+      total_mutations: number;
+      top_protein_changes: {
+        protein_change: string;
+        count: number;
+        is_hotspot: boolean;
+      }[];
+      variant_classification_breakdown: {
+        classification: string;
+        count: number;
+      }[];
+      studies: {
+        study_id: string;
+        name: string;
+        cancer_type: string | null;
+        source: string | null;
+      }[];
+    }>(`/api/cohorts/gene-summary?gene=${encodeURIComponent(gene)}`),
 };

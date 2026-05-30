@@ -7,6 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { saveOrderToLocalStorage } from "@/lib/orders";
 import ResultsSkeleton from "@/components/ResultsSkeleton";
+import ImmunoPanel from "@/components/ImmunoPanel";
+import SignatureCard from "@/components/SignatureCard";
+import CombinationTable from "@/components/CombinationTable";
 import { DEMO_RESULTS, DEMO_REPURPOSING, DEMO_ID } from "@/lib/demo-data";
 
 type MutationRow = {
@@ -66,6 +69,24 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	const trialQuery = useQuery({
 		queryKey: ["clinical-trials", resultId],
 		queryFn: () => api.getClinicalTrials(resultId),
+		enabled: Boolean(isComplete && resultId),
+	});
+
+	const immunoQuery = useQuery({
+		queryKey: ["immunotherapy", resultId],
+		queryFn: () => api.getImmunotherapyProfile(resultId),
+		enabled: Boolean(isComplete && resultId),
+	});
+
+	const signatureQuery = useQuery({
+		queryKey: ["signatures", resultId],
+		queryFn: () => api.getMutationalSignature(resultId),
+		enabled: Boolean(isComplete && resultId),
+	});
+
+	const combinationQuery = useQuery({
+		queryKey: ["combinations", resultId],
+		queryFn: () => api.getCombinationTherapy(resultId),
 		enabled: Boolean(isComplete && resultId),
 	});
 
@@ -351,6 +372,22 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 						)}
 					</div>
 				</section>
+
+				{/* ── Immunotherapy Biomarkers ─────────────────────────── */}
+				{immunoQuery.data?.available && immunoQuery.data?.profile && (
+					<ImmunoPanel profile={immunoQuery.data.profile} />
+				)}
+
+				{/* ── Mutational Signature ─────────────────────────────── */}
+				{signatureQuery.data?.available && signatureQuery.data?.signature && (
+					<SignatureCard signature={signatureQuery.data.signature} />
+				)}
+
+				{/* ── Combination Therapy ──────────────────────────────── */}
+				{(combinationQuery.data?.combinations?.length ?? 0) > 0 && (
+					<CombinationTable combinations={combinationQuery.data.combinations} />
+				)}
+
 			</div>
 		</main>
 	);

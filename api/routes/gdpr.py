@@ -8,7 +8,7 @@ import logging
 import uuid
 from datetime import datetime, UTC
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,8 @@ from routes.auth import get_current_patient
 from models.patient import Patient
 from models.deletion_request import DeletionRequest
 from workers.gdpr_worker import erase_patient_data
+from utils.http import not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,9 @@ router = APIRouter(prefix="/api/me", tags=["gdpr"])
 # ── GET /api/me/export ────────────────────────────────────────────────────────
 
 @router.get("/export", summary="Export all personal data (GDPR Art. 20)")
+@limiter.limit(READ_LIMIT)
 async def export_my_data(
+    request: Request,
     current_user: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
 ):
@@ -37,7 +41,7 @@ async def export_my_data(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient record not found")
+        raise not_found_error(request, "Patient record not found")
 
     from models.submission import Submission
     from models.mutation import Mutation
@@ -94,7 +98,9 @@ async def export_my_data(
     status_code=status.HTTP_202_ACCEPTED,
     summary="Request account deletion (GDPR Art. 17)",
 )
+@limiter.limit(WRITE_LIMIT)
 async def request_deletion(
+    request: Request,
     current_user: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
 ):
@@ -109,7 +115,7 @@ async def request_deletion(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient record not found")
+        raise not_found_error(request, "Patient record not found")
 
     # Idempotency — don't allow duplicate pending requests
     existing = await db.scalar(

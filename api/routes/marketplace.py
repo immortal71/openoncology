@@ -3,7 +3,7 @@ Marketplace route — pharma company listings, drug ordering, and competitive bi
 """
 from datetime import datetime, UTC
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -21,6 +21,8 @@ from models.submission import Submission
 from services.drug_discovery import build_custom_discovery_brief
 from routes.auth import get_current_patient
 from workers.custom_drug_worker import build_custom_drug_brief
+from utils.http import api_error, bad_request_error, forbidden_error, not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])
 
@@ -193,7 +195,9 @@ def _fallback_computational_synthesis_plan(brief: dict) -> dict:
 
 
 @router.get("/pharma")
+@limiter.limit(READ_LIMIT)
 async def list_pharma_companies(
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Public list of verified pharma manufacturers."""
@@ -220,8 +224,10 @@ class OrderRequest(BaseModel):
 
 
 @router.post("/order", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def create_order(
     req: OrderRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -231,7 +237,7 @@ async def create_order(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+        raise not_found_error(request, "Patient not found.")
 
     pharma = (await db.execute(
         select(PharmaCompany).where(
@@ -240,7 +246,7 @@ async def create_order(
         )
     )).scalar_one_or_none()
     if not pharma:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pharma company not found.")
+        raise not_found_error(request, "Pharma company not found.")
 
     # Create Stripe payment intent
     intent = stripe.PaymentIntent.create(
@@ -284,8 +290,10 @@ class DrugRequestCreate(BaseModel):
 
 
 @router.get("/discovery-brief/{result_id}")
+@limiter.limit(READ_LIMIT)
 async def get_custom_discovery_brief(
     result_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -308,7 +316,7 @@ async def get_custom_discovery_brief(
 
     target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
     if not target_gene:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+        raise bad_request_error(request, "No target gene found for custom discovery.")
 
     brief = await build_custom_discovery_brief(
         target_gene=target_gene,
@@ -320,8 +328,10 @@ async def get_custom_discovery_brief(
 
 
 @router.get("/custom-drug-report/{result_id}")
+@limiter.limit(READ_LIMIT)
 async def get_custom_drug_report(
     result_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -337,7 +347,7 @@ async def get_custom_drug_report(
 
     target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
     if not target_gene:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+        raise bad_request_error(request, "No target gene found for custom discovery.")
 
     brief = await build_custom_discovery_brief(
         target_gene=target_gene,
@@ -355,7 +365,8 @@ async def get_custom_drug_report(
 
 
 @router.get("/nearby-pharmacies")
-async def get_nearby_pharmacies():
+@limiter.limit(READ_LIMIT)
+async def get_nearby_pharmacies(request: Request):
     """Temporary nearby pharmacy placeholder list (phase-in feature)."""
     return {
         "pharmacies": [
@@ -376,8 +387,10 @@ async def get_nearby_pharmacies():
 
 
 @router.post("/drug-requests/from-result/{result_id}", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def create_drug_request_from_result(
     result_id: str,
+    request: Request,
     max_budget_usd: float | None = None,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
@@ -388,7 +401,7 @@ async def create_drug_request_from_result(
 
     target_gene = result.target_gene or (submission.mutations[0].gene if submission.mutations else None)
     if not target_gene:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No target gene found for custom discovery.")
+        raise bad_request_error(request, "No target gene found for custom discovery.")
 
     req = DrugRequest(
         patient_id=patient.id,
@@ -421,8 +434,10 @@ async def create_drug_request_from_result(
 
 
 @router.post("/drug-requests", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def create_drug_request(
     req: DrugRequestCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -432,7 +447,7 @@ async def create_drug_request(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+        raise not_found_error(request, "Patient not found.")
 
     drug_request = DrugRequest(
         patient_id=patient.id,
@@ -449,7 +464,9 @@ async def create_drug_request(
 
 
 @router.get("/drug-requests")
+@limiter.limit(READ_LIMIT)
 async def list_drug_requests(
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Public listing of open drug synthesis requests for pharma companies to bid on."""
@@ -476,8 +493,10 @@ async def list_drug_requests(
 
 
 @router.get("/drug-requests/{request_id}")
+@limiter.limit(READ_LIMIT)
 async def get_drug_request_detail(
     request_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Get a single drug request detail payload used by the custom-drug page."""
@@ -487,7 +506,7 @@ async def get_drug_request_detail(
     )).scalar_one_or_none()
 
     if not req:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Drug request not found.")
+        raise not_found_error(request, "Drug request not found.")
 
     result = None
     submission = None
@@ -619,9 +638,11 @@ class BidCreate(BaseModel):
 
 
 @router.post("/drug-requests/{request_id}/bids", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def submit_bid(
     request_id: str,
     bid: BidCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -637,10 +658,7 @@ async def submit_bid(
         )
     )).scalar_one_or_none()
     if not pharma:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only verified pharma companies can submit bids.",
-        )
+        raise forbidden_error(request, "Only verified pharma companies can submit bids.")
 
     drug_request = (await db.execute(
         select(DrugRequest).where(
@@ -649,13 +667,13 @@ async def submit_bid(
         )
     )).scalar_one_or_none()
     if not drug_request:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Drug request not found or closed.")
+        raise not_found_error(request, "Drug request not found or closed.")
 
     # Validate budget ceiling
     if drug_request.max_budget_usd and bid.price_usd > drug_request.max_budget_usd:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Bid exceeds patient's budget ceiling of ${drug_request.max_budget_usd:,.2f}.",
+        raise bad_request_error(
+            request,
+            f"Bid exceeds patient's budget ceiling of ${drug_request.max_budget_usd:,.2f}.",
         )
 
     new_bid = PharmaBid(
@@ -673,8 +691,10 @@ async def submit_bid(
 
 
 @router.get("/drug-requests/{request_id}/bids")
+@limiter.limit(READ_LIMIT)
 async def list_bids(
     request_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -684,7 +704,7 @@ async def list_bids(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=407, detail="Patient not found.")
+        raise not_found_error(request, "Patient not found.")
 
     drug_request = (await db.execute(
         select(DrugRequest).where(
@@ -693,7 +713,7 @@ async def list_bids(
         )
     )).scalar_one_or_none()
     if not drug_request:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Drug request not found.")
+        raise not_found_error(request, "Drug request not found.")
 
     bids = (await db.execute(
         select(PharmaBid).where(PharmaBid.drug_request_id == request_id)
@@ -714,9 +734,11 @@ async def list_bids(
 
 
 @router.post("/drug-requests/{request_id}/bids/{bid_id}/accept")
+@limiter.limit(WRITE_LIMIT)
 async def accept_bid(
     request_id: str,
     bid_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -729,7 +751,7 @@ async def accept_bid(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+        raise not_found_error(request, "Patient not found.")
 
     drug_request = (await db.execute(
         select(DrugRequest).where(
@@ -739,7 +761,7 @@ async def accept_bid(
         )
     )).scalar_one_or_none()
     if not drug_request:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Drug request not found or already closed.")
+        raise not_found_error(request, "Drug request not found or already closed.")
 
     winning_bid = (await db.execute(
         select(PharmaBid).where(
@@ -749,7 +771,7 @@ async def accept_bid(
         )
     )).scalar_one_or_none()
     if not winning_bid:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bid not found.")
+        raise not_found_error(request, "Bid not found.")
 
     pharma = (await db.execute(
         select(PharmaCompany).where(PharmaCompany.id == winning_bid.pharma_id)

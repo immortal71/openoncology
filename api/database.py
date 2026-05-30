@@ -3,12 +3,20 @@ from sqlalchemy.orm import DeclarativeBase
 
 from config import settings
 
-_engine_kwargs = {
+_engine_kwargs: dict = {
     "echo": settings.environment == "development",
     "pool_pre_ping": True,
 }
 if settings.database_url.startswith("sqlite+"):
     _engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    # PostgreSQL production pool — tuned for 2–4 API replicas on a typical RDS/Cloud SQL instance
+    _engine_kwargs.update({
+        "pool_size": 20,
+        "max_overflow": 10,
+        "pool_timeout": 30,
+        "pool_recycle": 1800,   # recycle connections after 30 min to avoid stale TCP
+    })
 
 engine = create_async_engine(
     settings.database_url,

@@ -182,9 +182,9 @@ def _resistance_next_line_boost(
         return 0.0, ""
 
     if any(tok in drug_name for tok in match_variant):
-        return 0.10, f"resistance_next_line_variant:{gene} {variant}"
+        return 0.15, f"resistance_next_line_variant:{gene} {variant}"
     if any(tok in drug_name for tok in match_gene):
-        return 0.06, f"resistance_next_line_gene:{gene}"
+        return 0.10, f"resistance_next_line_gene:{gene}"
     return 0.0, ""
 
 
@@ -264,8 +264,14 @@ def compute_rank_score(
         rank = max(rank - cfg.low_vaf.very_low_vaf_score_discount, 0.0)
 
     # ⑥ Robustness scoring: reward convergent evidence, penalize conflict.
+    # L1/L2 drugs are exempt from the variance penalty: their clinical evidence
+    # is authoritative. Disagreement from structural scores (DiffDock) or
+    # broad-association scores (OpenTargets) is expected for drugs whose
+    # mechanism doesn't rely on direct kinase binding (immunotherapy, PARPi,
+    # CDK4/6i). Penalising them here causes CONFLICTING_EVIDENCE misranking.
     rb = cfg.robustness
-    if len(source_scores) >= 2:
+    _high_evidence = _level_str in {"LEVEL_1", "LEVEL_2"}
+    if len(source_scores) >= 2 and not _high_evidence:
         mean_s = sum(source_scores) / len(source_scores)
         variance = sum((s - mean_s) ** 2 for s in source_scores) / len(source_scores)
         conflict_penalty = min(variance * rb.variance_penalty_factor, rb.max_variance_penalty)

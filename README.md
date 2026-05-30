@@ -129,7 +129,22 @@ flowchart TD
 
 ## Validation Results
 
-The drug-ranking engine has been independently validated against a **50-case blinded oncologist holdout** and **real de-identified TCGA cohorts at 100 and 200 patients**.
+OpenOncology is built as a pan-cancer precision oncology platform, and its evaluation framework is designed accordingly. Rather than relying on a single benchmark, the system is validated across five levels: canonical evidence cases, a blinded oncologist-reviewed holdout, retrospective real-patient cohorts, hard negative and abstention cases, and stability and drift checks.
+
+> **Post-publication status (May 2026 onwards):** The paper ([doi:10.21203/rs.3.rs-9707913/v1](https://doi.org/10.21203/rs.3.rs-9707913/v1)) has been published. All work in the `main` branch from this point forward is **post-publication development** and is not part of the published paper's claims. Paper-reported metrics (Hit@3 = 0.900, Standard P@3 = 0.508, FP = 0 on the 50-case blinded holdout) remain the authoritative published baseline. Any benchmark improvements, new cancer-context overrides, algorithm changes, or roadmap items described below reflect ongoing work **after** publication.
+
+## Output Surfaces
+
+OpenOncology exposes four output surfaces, each with a different scientific contract and validation standard.
+
+- **Evidence:** approved or guideline-linked therapies for actionable variants.
+- **Repurposing:** investigational or off-label leads with explicit uncertainty.
+- **Discovery:** early-stage research brief when no safe direct option exists.
+- **Benchmark:** reproducible metrics, failure modes, and dataset versions.
+
+## Benchmark Principles
+
+Benchmarking is designed to reward correctness, specificity, and honest abstention rather than forced coverage. Every benchmark case follows one contract with expected positive labels, explicitly disallowed labels, tumor context, and surface type. This makes it possible to measure both retrieval quality and whether unsafe or unsupported options were correctly excluded.
 
 ### Blinded 50-case oncologist holdout
 
@@ -203,7 +218,17 @@ flowchart LR
     GPT["GPT-4o\nplain-English summary"]
 ```
 
-Leads are scored by a composite: DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Clinical Phase 10%. Scores are clamped to [0, 1] and surfaced directly in the brief.
+The vNext ranking architecture is a multi-stage, multi-head system:
+
+> **Post-publication scope note:** This multi-head ranking architecture is active post-publication roadmap work. It is not the system described in the published paper. The paper describes the composite-score legacy ranker.
+
+1. Input interpretation
+2. Candidate generation
+3. Per-surface scoring (evidence, repurposing, discovery)
+4. Confidence and abstention head
+5. Explanation builder
+
+Legacy composite scoring remains the current baseline (DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Clinical Phase 10%, clamped to [0, 1]), but each surface is moving to dedicated scoring heads so approved therapies, repurposing leads, and discovery briefs are not forced into one opaque score.
 
 ---
 

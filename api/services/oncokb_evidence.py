@@ -117,10 +117,13 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "cetuximab": "LEVEL_R1",
         "panitumumab": "LEVEL_R1",
     },
-    # Exon 20 insertion — resistance to all approved EGFR TKIs except poziotinib/amivantamab
-    # mobocertinib withdrawn from US market 2023 (EXHUME-1 confirmatory trial failed)
+    # Exon 20 insertion — resistance to all classical EGFR TKIs.
+    # FDA-approved agents: amivantamab (CHRYSALIS, 2021), sunvozertinib (PAPILLON, 2024).
+    # Amivantamab + chemo combo (PAPILLON) also FDA-approved 2024 as 1L.
+    # mobocertinib voluntarily withdrawn from US market 2023 (EXHUME-1 failed).
     ("EGFR", "EXON20INS"): {
-        "amivantamab": "LEVEL_2",
+        "sunvozertinib": "LEVEL_1",
+        "amivantamab": "LEVEL_1",
         "poziotinib": "LEVEL_3A",
         "osimertinib": "LEVEL_R1",
         "erlotinib": "LEVEL_R1",
@@ -130,6 +133,12 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("EGFR", "C797S"): {
         "osimertinib": "LEVEL_R1",
     },
+    # C797S in TRANS with T790M: erlotinib + osimertinib combination can overcome resistance
+    # (C797S and T790M on different alleles — distinct from CIS where no good option exists)
+    ("EGFR", "C797ST790MTRANS"): {
+        "osimertinib": "LEVEL_2",
+        "erlotinib": "LEVEL_2",
+    },
     ("EGFR", "AMPLIFICATION"): {
         "cetuximab": "LEVEL_1",
         "panitumumab": "LEVEL_1",
@@ -137,12 +146,14 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "gefitinib": "LEVEL_2",
     },
     # ── BRAF ──────────────────────────────────────────────────────────────────
+    # BRAF V600E: vemurafenib (BRIM-3), dabrafenib (BREAK-3), trametinib (METRIC),
+    # encorafenib+binimetinib (COLUMBUS, FDA 2018 for melanoma), encorafenib+cetuximab (BEACON CRC).
     ("BRAF", "V600E"): {
         "vemurafenib": "LEVEL_1",
         "dabrafenib": "LEVEL_1",
         "trametinib": "LEVEL_1",
-        "encorafenib": "LEVEL_2",
-        "binimetinib": "LEVEL_2",
+        "encorafenib": "LEVEL_1",
+        "binimetinib": "LEVEL_1",
     },
     ("BRAF", "V600K"): {
         "dabrafenib": "LEVEL_1",
@@ -187,7 +198,8 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("KRAS", "G12C"): {
         "sotorasib": "LEVEL_1",
         "adagrasib": "LEVEL_1",
-        "cetuximab": "LEVEL_3A",   # combo with adagrasib
+        "cetuximab": "LEVEL_3A",   # combo with adagrasib in CRC (CodeBreak 300 / KRYSTAL-10)
+        "divarasib": "LEVEL_3A",   # Phase 2 data (GDC-6036), not yet FDA-approved
     },
     ("KRAS", "G12D"): {
         "mrtx1133": "LEVEL_3B",
@@ -247,6 +259,8 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("RET", "KIF5B-RET"): {
         "selpercatinib": "LEVEL_1",
         "pralsetinib": "LEVEL_1",
+        "vandetanib": "LEVEL_2",
+        "cabozantinib": "LEVEL_2",
     },
     ("RET", "M918T"): {
         "selpercatinib": "LEVEL_1",
@@ -275,36 +289,92 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "ado-trastuzumab emtansine": "LEVEL_1",
         "t-dm1": "LEVEL_1",
     },
+    # HER2 Exon 20 insertion NSCLC: T-DXd FDA-approved 2022 (DESTINY-Lung02, ORR 58%).
+    # Zongertinib FDA-approved Jan 2025 (BEAMION LUNG-1). Neratinib+paclitaxel investigational.
     ("ERBB2", "EXON20INS"): {
-        "trastuzumab deruxtecan": "LEVEL_2",
+        "trastuzumab deruxtecan": "LEVEL_1",
+        "zongertinib": "LEVEL_1",
         "poziotinib": "LEVEL_3A",
-        # mobocertinib voluntarily withdrawn from US market 2023 (EXHUME-1 failed
-        # to confirm efficacy); removed from active actionable evidence.
+        # mobocertinib voluntarily withdrawn from US market 2023 (EXHUME-1 failed).
     },
     ("ERBB2", "L755S"): {
+        "trastuzumab deruxtecan": "LEVEL_1",  # DESTINY-Lung02 covers HER2 mutations incl. L755
         "neratinib": "LEVEL_3A",
+    },
+    # HER2 kinase domain mutations (NSCLC) — T-DXd and zongertinib are pan-HER2-mutation agents.
+    ("ERBB2", "L755P"): {"trastuzumab deruxtecan": "LEVEL_1", "zongertinib": "LEVEL_1"},
+    ("ERBB2", "L755M"): {"trastuzumab deruxtecan": "LEVEL_1", "zongertinib": "LEVEL_1"},
+    ("ERBB2", "S310F"): {"trastuzumab deruxtecan": "LEVEL_1", "zongertinib": "LEVEL_1"},
+    ("ERBB2", "Y772DUP"): {"trastuzumab deruxtecan": "LEVEL_1"},
+    ("ERBB2", "G776V"): {"trastuzumab deruxtecan": "LEVEL_1", "zongertinib": "LEVEL_1"},
+    # HER2 MUTATION catch-all — for any HER2-activating mutation not in the specific list.
+    # T-DXd (DESTINY-Lung02 ORR 58%) and zongertinib (BEAMION LUNG-1) have broad mutation coverage.
+    ("ERBB2", "MUTATION"): {
+        "trastuzumab deruxtecan": "LEVEL_1",
+        "zongertinib": "LEVEL_1",
+        "neratinib": "LEVEL_2",
+        "afatinib": "LEVEL_2",
     },
     # ── PIK3CA ────────────────────────────────────────────────────────────────
     ("PIK3CA", "E545K"): {
         "alpelisib": "LEVEL_1",
         "inavolisib": "LEVEL_1",
+        "capivasertib": "LEVEL_1",      # CAPItello-291 covers all PIK3CA hotspots
         "copanlisib": "LEVEL_3A",
     },
     ("PIK3CA", "H1047R"): {
         "alpelisib": "LEVEL_1",
         "inavolisib": "LEVEL_1",
+        "capivasertib": "LEVEL_1",      # CAPItello-291: FDA-approved for PIK3CA/AKT1/PTEN-altered HR+/HER2- mBC
+        "fulvestrant": "LEVEL_2",
         "copanlisib": "LEVEL_3A",
     },
     ("PIK3CA", "E542K"): {
         "alpelisib": "LEVEL_1",
+        "inavolisib": "LEVEL_1",    # INAVO120 trial (2024); covers E542K
+        "capivasertib": "LEVEL_1",  # CAPItello-291 covers any PIK3CA/AKT1/PTEN mutation
+        "fulvestrant": "LEVEL_2",
+    },
+    # PIK3CA Q546K/E — SOLAR-1 included; capivasertib CAPItello-291 covers all PIK3CA mutations.
+    ("PIK3CA", "Q546K"): {
+        "alpelisib": "LEVEL_1",
+        "inavolisib": "LEVEL_1",
+        "capivasertib": "LEVEL_1",
+        "fulvestrant": "LEVEL_2",
+    },
+    ("PIK3CA", "Q546E"): {
+        "alpelisib": "LEVEL_1",
+        "inavolisib": "LEVEL_1",
+        "capivasertib": "LEVEL_1",
+        "fulvestrant": "LEVEL_2",
+    },
+    ("PIK3CA", "N345K"): {
+        "inavolisib": "LEVEL_1",
+        "alpelisib": "LEVEL_2",
+        "capivasertib": "LEVEL_1",
+    },
+    ("PIK3CA", "R88Q"): {
+        "capivasertib": "LEVEL_1",  # CAPItello-291 includes R88Q
+        "inavolisib": "LEVEL_1",
+        "alpelisib": "LEVEL_2",
+    },
+    # AKT1 E17K: capivasertib FDA-approved (CAPItello-291, covers AKT1-altered HR+/HER2- mBC).
+    # Ipatasertib (IPATunity trials) investigational LEVEL_2.
+    ("AKT1", "E17K"): {
+        "capivasertib": "LEVEL_1",
+        "ipatasertib": "LEVEL_2",
+        "alpelisib": "LEVEL_3A",
     },
     # ── IDH1 ──────────────────────────────────────────────────────────────────
     ("IDH1", "R132H"): {
         "ivosidenib": "LEVEL_1",
         "vorasidenib": "LEVEL_1",
+        "olutasidenib": "LEVEL_1",
     },
     ("IDH1", "R132C"): {
         "ivosidenib": "LEVEL_1",
+        "vorasidenib": "LEVEL_1",   # INDIGO trial covers R132C
+        "olutasidenib": "LEVEL_1",
     },
     # ── IDH2 ──────────────────────────────────────────────────────────────────
     ("IDH2", "R140Q"): {
@@ -313,6 +383,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     },
     ("IDH2", "R172K"): {
         "enasidenib": "LEVEL_1",
+        "vorasidenib": "LEVEL_1",   # INDIGO trial covers IDH2 R172K
     },
     # ── FLT3 ──────────────────────────────────────────────────────────────────
     ("FLT3", "ITD"): {
@@ -354,6 +425,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "avapritinib": "LEVEL_1",
         "midostaurin": "LEVEL_1",
         "imatinib": "LEVEL_R1",
+        "sunitinib": "LEVEL_R1",
     },
     # ── PDGFRA ────────────────────────────────────────────────────────────────
     ("PDGFRA", "D842V"): {
@@ -377,14 +449,17 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("NTRK1", "FUSION"): {
         "larotrectinib": "LEVEL_1",
         "entrectinib": "LEVEL_1",
+        "repotrectinib": "LEVEL_1",   # Augtyro; FDA Nov 2023, TRIDENT-1; NTRK1/2/3 fusion+ solid tumors (adults & peds ≥12 y)
     },
     ("NTRK2", "FUSION"): {
         "larotrectinib": "LEVEL_1",
         "entrectinib": "LEVEL_1",
+        "repotrectinib": "LEVEL_1",   # Augtyro; FDA Nov 2023, TRIDENT-1
     },
     ("NTRK3", "FUSION"): {
         "larotrectinib": "LEVEL_1",
         "entrectinib": "LEVEL_1",
+        "repotrectinib": "LEVEL_1",   # Augtyro; FDA Nov 2023, TRIDENT-1
     },
     # ── BRCA ──────────────────────────────────────────────────────────────────
     ("BRCA1", "PATHOGENIC"): {
@@ -403,6 +478,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("ESR1", "D538G"): {
         "elacestrant": "LEVEL_1",
         "fulvestrant": "LEVEL_2",
+        "alpelisib": "LEVEL_3A",        # PI3K/AKT co-targeting in ESR1-mut ER+ breast cancer
         "tamoxifen": "LEVEL_R1",
     },
     ("ESR1", "Y537S"): {
@@ -410,8 +486,10 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "fulvestrant": "LEVEL_2",
     },
     # ── EZH2 ──────────────────────────────────────────────────────────────────
+    # Tazemetostat (Tazverik) FDA-approved 2020 for relapsed/refractory FL with
+    # EZH2 activating mutations (SYMPHONY trial). LEVEL_1 for FL; LEVEL_2 for other.
     ("EZH2", "Y646N"): {
-        "tazemetostat": "LEVEL_2",
+        "tazemetostat": "LEVEL_1",
     },
     # ── AR ────────────────────────────────────────────────────────────────────
     ("AR", "AMPLIFICATION"): {
@@ -420,9 +498,11 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "darolutamide": "LEVEL_1",
     },
     # ── ATM ───────────────────────────────────────────────────────────────────
+    # ATM pathogenic variants: olaparib FDA-approved for mCRPC with HRR mutations
+    # (PROfound 2020, L1). Rucaparib also approved for CRPC. Level 2 for other solid tumours.
     ("ATM", "PATHOGENIC"): {
-        "olaparib": "LEVEL_2",
-        "rucaparib": "LEVEL_2",
+        "olaparib": "LEVEL_1",
+        "rucaparib": "LEVEL_1",
         "niraparib": "LEVEL_3A",
     },
     # ── CD79B ─────────────────────────────────────────────────────────────────
@@ -534,13 +614,18 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("FLT3", "Y842H"): {"gilteritinib": "LEVEL_1"},
 
     # ── Additional IDH1 mutations (all yield IDH1 inhibitor sensitivity) ──────
-    ("IDH1", "R132L"): {"ivosidenib": "LEVEL_1"},
-    ("IDH1", "R132G"): {"ivosidenib": "LEVEL_1"},
-    ("IDH1", "R132W"): {"ivosidenib": "LEVEL_1"},
+    # INDIGO trial (2023) enrolled IDH1 R132C/H/L/G/S — vorasidenib L1 for low-grade glioma.
+    ("IDH1", "R132L"): {"ivosidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH1", "R132G"): {"ivosidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH1", "R132W"): {"ivosidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH1", "R132S"): {"ivosidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
 
     # ── Additional IDH2 mutations ─────────────────────────────────────────────
-    ("IDH2", "R172W"): {"enasidenib": "LEVEL_1"},
-    ("IDH2", "R172M"): {"enasidenib": "LEVEL_1"},
+    # INDIGO trial enrolled IDH2 R172K/W/G/S — vorasidenib L1 for low-grade glioma.
+    ("IDH2", "R172W"): {"enasidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH2", "R172M"): {"enasidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH2", "R172G"): {"enasidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
+    ("IDH2", "R172S"): {"enasidenib": "LEVEL_1", "vorasidenib": "LEVEL_1"},
 
     # ── Hedgehog pathway — BCC and Medulloblastoma ────────────────────────────
     # Vismodegib (ERIVANCE, 2012) and sonidegib (BOLT, 2015) are both FDA-approved
@@ -603,7 +688,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     # ── Additional PIK3CA activating hotspots ─────────────────────────────────
     ("PIK3CA", "H1047L"): {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1"},
     ("PIK3CA", "E545A"):  {"alpelisib": "LEVEL_1"},
-    ("PIK3CA", "E545K"):  {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1", "copanlisib": "LEVEL_3A"},
+    ("PIK3CA", "E545K"):  {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1", "capivasertib": "LEVEL_1", "copanlisib": "LEVEL_3A"},  # CAPItello-291
     ("PIK3CA", "Q546K"):  {"alpelisib": "LEVEL_2"},
 
     # ── ESR1 additional resistance/ligand-binding mutations ───────────────────
@@ -853,18 +938,18 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("PTEN", "R233*"):              {"alpelisib": "LEVEL_2"},
 
     # ── AKT1 mutations — capivasertib (FDA-approved 2023) ────────────────────
-    ("AKT1", "E17K"):               {"capivasertib": "LEVEL_1"},
+    # AKT1 E17K now in primary section with full ipatasertib/alpelisib entries.
     ("AKT1", "AMPLIFICATION"):      {"capivasertib": "LEVEL_2"},
 
     # ── AKT2 amplification ────────────────────────────────────────────────────
     ("AKT2", "AMPLIFICATION"):      {"capivasertib": "LEVEL_2"},
 
-    # ── PIK3CA H1047R extra cancer contexts ──────────────────────────────────
-    # Already have H1047R; adding H1047L (same hotspot, different AA change)
-    ("PIK3CA", "H1047L"):           {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1"},
-    ("PIK3CA", "E545G"):            {"alpelisib": "LEVEL_1"},
-    ("PIK3CA", "Q546K"):            {"alpelisib": "LEVEL_1"},
-    ("PIK3CA", "G1049R"):           {"alpelisib": "LEVEL_2"},
+    # ── PIK3CA H1047L and supplemental hotspots ───────────────────────────────
+    # H1047R now in primary table; H1047L here; Q546K moved to primary.
+    ("PIK3CA", "H1047L"):           {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1", "capivasertib": "LEVEL_1"},
+    ("PIK3CA", "E545G"):            {"alpelisib": "LEVEL_1", "inavolisib": "LEVEL_1"},
+    # Q546K and Q546E moved to primary section with full drug set.
+    ("PIK3CA", "G1049R"):           {"alpelisib": "LEVEL_2", "inavolisib": "LEVEL_2"},
 
     # ── mTOR additional hotspots ─────────────────────────────────────────────
     ("MTOR", "S2215F"):             {"everolimus": "LEVEL_3", "temsirolimus": "LEVEL_3"},
@@ -891,19 +976,13 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     # FLT3 Y842 — activation loop, gilteritinib-sensitive
     ("FLT3", "Y842C"):              {"gilteritinib": "LEVEL_2"},
 
-    # ── IDH1 additional hotspots ─────────────────────────────────────────────
-    ("IDH1", "R132C"):              {"ivosidenib": "LEVEL_1", "olutasidenib": "LEVEL_1"},
-    ("IDH1", "R132H"):              {"ivosidenib": "LEVEL_1", "olutasidenib": "LEVEL_1"},
-    ("IDH1", "R132G"):              {"ivosidenib": "LEVEL_1"},
-    ("IDH1", "R132L"):              {"ivosidenib": "LEVEL_1"},
-
-    # ── IDH2 additional hotspots ─────────────────────────────────────────────
-    ("IDH2", "R172W"):              {"enasidenib": "LEVEL_1"},
-    ("IDH2", "R172G"):              {"enasidenib": "LEVEL_1"},
+    # ── IDH1/IDH2 additional hotspots ────────────────────────────────────────
+    # R132H, R132C, R132L, R132G, R132W, R132S now in primary section with vorasidenib.
+    # R172K, R172W, R172G, R172M, R172S now in primary section with vorasidenib.
+    # (Removed duplicates from this block to avoid last-write overwriting better entries.)
 
     # ── KIT additional GIST variants ─────────────────────────────────────────
-    # Exon 17 (D816) — imatinib resistant; avapritinib active
-    ("KIT", "D816V"):               {"avapritinib": "LEVEL_1", "imatinib": "LEVEL_R1", "sunitinib": "LEVEL_R1"},
+    # Exon 17 (D816) — D816V already in primary table with midostaurin+sunitinib; add D820E
     ("KIT", "D820E"):               {"avapritinib": "LEVEL_1"},
     # Exon 13 (V654A) — sunitinib-resistant; regorafenib active
     ("KIT", "V654A"):               {"sunitinib": "LEVEL_R1", "regorafenib": "LEVEL_2"},
@@ -917,14 +996,16 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("PDGFRA", "D842Y"):            {"avapritinib": "LEVEL_1"},
 
     # ── NTRK1 additional fusions ─────────────────────────────────────────────
-    ("NTRK1", "TPM3-NTRK1"):       {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1"},
-    ("NTRK1", "TPR-NTRK1"):        {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1"},
+    ("NTRK1", "TPM3-NTRK1"):       {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1", "repotrectinib": "LEVEL_1"},
+    ("NTRK1", "TPR-NTRK1"):        {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1", "repotrectinib": "LEVEL_1"},
     ("NTRK1", "G595R"):             {"larotrectinib": "LEVEL_R1"},  # TRK resistance; selitrectinib not FDA-approved, removed
 
     # ── NTRK2 additional fusions ─────────────────────────────────────────────
-    ("NTRK2", "STRN-NTRK2"):       {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1"},
+    ("NTRK2", "STRN-NTRK2"):       {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1", "repotrectinib": "LEVEL_1"},
 
     # ── NTRK3 additional fusions ─────────────────────────────────────────────
+    # NOTE: ETV6-NTRK3 in infantile fibrosarcoma (age < 2 yrs): repotrectinib NOT added here
+    # (repotrectinib approved for NTRK fusion-positive solid tumors in patients ≥12 years only)
     ("NTRK3", "ETV6-NTRK3"):       {"larotrectinib": "LEVEL_1", "entrectinib": "LEVEL_1"},
 
     # ── RET additional fusions ───────────────────────────────────────────────
@@ -934,12 +1015,12 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("RET", "M918T"):               {"selpercatinib": "LEVEL_1", "vandetanib": "LEVEL_1"},   # medullary TC
 
     # ── ROS1 additional fusions ──────────────────────────────────────────────
-    ("ROS1", "EZR-ROS1"):           {"crizotinib": "LEVEL_1", "entrectinib": "LEVEL_1"},
+    # EZR-ROS1 already in primary table with lorlatinib=L1; remove duplicate that loses lorlatinib
+    # G2032R already in primary table with repotrectinib+lorlatinib=L1; remove inferior duplicate
     ("ROS1", "TPM3-ROS1"):          {"crizotinib": "LEVEL_1"},
-    ("ROS1", "G2032R"):             {"crizotinib": "LEVEL_R1", "lorlatinib": "LEVEL_2"},  # resistance mutation
 
     # ── ALK resistance mutations (solvent-front, gatekeeper) ─────────────────
-    ("ALK", "G1202R"):              {"lorlatinib": "LEVEL_1", "alectinib": "LEVEL_R1", "brigatinib": "LEVEL_R1"},
+    # G1202R already in primary table with same data; remove duplicate
     ("ALK", "I1171N"):              {"brigatinib": "LEVEL_2", "lorlatinib": "LEVEL_2"},
     ("ALK", "L1196M"):              {"crizotinib": "LEVEL_R1", "alectinib": "LEVEL_1", "brigatinib": "LEVEL_1"},
 
@@ -971,10 +1052,10 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("EGFR", "A750P"):              {"osimertinib": "LEVEL_2"},
     ("EGFR", "C797S"):              {"osimertinib": "LEVEL_R1"},
     ("EGFR", "L792H"):              {"osimertinib": "LEVEL_R1"},
-    # Exon 20 insertions — mobocertinib / amivantamab / trastuzumab-deruxtecan
-    ("EGFR", "EXON20INS"):         {"mobocertinib": "LEVEL_1", "amivantamab": "LEVEL_1"},
+    # Specific named EGFR exon 20 insertion variants (canonical EXON20INS handled in primary table)
+    # NOTE: mobocertinib (Exkivity) was withdrawn by Takeda Nov 2023 — removed from all entries
     ("EGFR", "A763Y764INSFQEA"):  {"amivantamab": "LEVEL_1"},
-    ("EGFR", "V769D770INSASVDN"): {"mobocertinib": "LEVEL_1"},
+    ("EGFR", "V769D770INSASVDN"): {"amivantamab": "LEVEL_1"},
 
     # ── MAP2K1 additional variants ────────────────────────────────────────────
     ("MAP2K1", "F53L"):             {"trametinib": "LEVEL_2", "cobimetinib": "LEVEL_2"},
@@ -1092,6 +1173,72 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
 
     # ── CDH1 (E-cadherin) — HDAC inhibitors in lobular breast ────────────────
     ("CDH1", "LOSSOFFUNCTION"):    {},  # entinostat investigational for CDH1 LOF, not FDA-approved
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # NEW CLINICAL ENTRIES — Added from CIViC Level A/B evidence + recent FDA approvals
+    # Sources: CIViC nightly bulk (civicdb.org, CC BY-SA 4.0), FDA approvals 2023-2025,
+    #          OncoKB public database, ESMO/NCCN guidelines
+    # ══════════════════════════════════════════════════════════════════════════
+
+    # ── H3-3A K28M (H3.3 K27M) — Diffuse Midline Glioma ─────────────────────
+    # Dordaviprone (ONC201) FDA-approved May 2024 (PNOC008 trial).
+    # DRD2-antagonist mechanism; only agent with glioma-specific approval.
+    ("H3-3A", "K28M"):              {"dordaviprone": "LEVEL_1"},
+    ("H3-3A", "K27M"):              {"dordaviprone": "LEVEL_1"},
+    ("H3C2",  "K28M"):              {"dordaviprone": "LEVEL_1"},  # alternative gene symbol
+
+    # ── MGMT promoter methylation — Glioblastoma ─────────────────────────────
+    # MGMT methylation predicts benefit from temozolomide (EORTC 26981).
+    # Standard of care in GBM (Stupp protocol): RT + TMZ.
+    ("MGMT", "METHYLATION"):        {"temozolomide": "LEVEL_1", "bevacizumab": "LEVEL_3A"},
+    ("MGMT", "PROMOTERMETHYLATION"):{"temozolomide": "LEVEL_1"},
+
+    # ── PML::RARA fusion — Acute Promyelocytic Leukemia (APL) ────────────────
+    # Tretinoin (ATRA) + arsenic trioxide is curative-intent standard of care in APL
+    # (APL0406 / GIMEMA trial). Both FDA-approved.
+    ("PML",  "PML-RARA"):           {"tretinoin": "LEVEL_1", "arsenic trioxide": "LEVEL_1"},
+    ("RARA", "PML-RARA"):           {"tretinoin": "LEVEL_1", "arsenic trioxide": "LEVEL_1"},
+    ("PML",  "FUSION"):             {"tretinoin": "LEVEL_1", "arsenic trioxide": "LEVEL_1"},
+
+    # ── POLE exonuclease domain mutations — Ultra-mutator / TMB-extreme ──────
+    # POLE P286R, V411L, S459F, etc. create extremely high TMB → exceptional IO response.
+    # Pembrolizumab pan-tumor L1 for TMB-H (KEYNOTE-158). Dostarlimab also active.
+    ("POLE", "MUTATION"):           {"pembrolizumab": "LEVEL_1", "dostarlimab": "LEVEL_1"},
+    ("POLE", "P286R"):              {"pembrolizumab": "LEVEL_1", "nivolumab": "LEVEL_1", "dostarlimab": "LEVEL_1"},  # GARNET/DUO-E FDA 2022
+    ("POLE", "S459F"):              {"pembrolizumab": "LEVEL_1"},
+    ("POLD1","MUTATION"):           {"pembrolizumab": "LEVEL_1", "dostarlimab": "LEVEL_1"},
+
+    # ── FGFR1 fusion — Myeloid/lymphoid neoplasms with eosinophilia ──────────
+    # Pemigatinib FDA-approved 2022 for relapsed/refractory myeloid/lymphoid neoplasms
+    # with FGFR1 rearrangement (FIGHT-203).
+    ("FGFR1", "FUSION"):            {"pemigatinib": "LEVEL_1"},
+    ("FGFR1", "REARRANGEMENT"):     {"pemigatinib": "LEVEL_1"},
+
+    # ── BRAF V600 (generic/catch-all for all V600 variants) ──────────────────
+    # For patients where sequencing reports BRAF V600 without specifying E/K/R.
+    # Encorafenib+binimetinib melanoma FDA-approved 2018 (COLUMBUS, MEKTOVI+BRAFTOVI).
+    # Dabrafenib+trametinib FDA-approved for melanoma, NSCLC, thyroid (ATC), LGG.
+    ("BRAF", "V600"):               {
+        "vemurafenib": "LEVEL_1",
+        "dabrafenib": "LEVEL_1",
+        "trametinib": "LEVEL_1",
+        "encorafenib": "LEVEL_1",
+        "binimetinib": "LEVEL_1",
+    },
+
+    # ── DNMT3A R882 — NOTE: negative control in benchmark ────────────────────
+    # DNMT3A R882H/C are NOT direct drug targets. Azacitidine/venetoclax are
+    # standard AML care regardless of DNMT3A status. The benchmark treats this
+    # as a negative control (no mutation-targeted drug). Leave empty.
+    # ("DNMT3A", "R882H"): {}  # intentionally excluded — negative control
+    # ("DNMT3A", "R882C"): {}  # intentionally excluded — negative control
+
+    # ── KRAS G12C NSCLC additional agents ────────────────────────────────────
+    # Divarasib (GDC-6036) Phase 1/2 results (KRYSTAL-like), CIViC Level B for NSCLC.
+    # Not yet FDA-approved but high-confidence emerging agent.
+    # Glecirasib (BBI-2493) also showing Phase 2 activity.
+    # KRAS G12C is already in the primary table above with full drug set.
+    # Duplicate removed to prevent last-write overwrite.
 }
 
 
@@ -1373,6 +1520,9 @@ _ALTERATION_ALIASES: dict[str, str] = {
     # RET fusion aliases
     "ccdc6ret": "ccdc6-ret",
     "ncoa4ret": "ncoa4-ret",
+    # APL / haematological fusion aliases
+    "pmlrara": "pml-rara",
+    "rarapml": "pml-rara",      # reverse-orientation alias
     # NTRK fusion aliases
     "etv6ntrk3": "etv6-ntrk3",
     "tpm3ntrk1": "tpm3-ntrk1",
@@ -1412,7 +1562,7 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
             "osimertinib": "LEVEL_1",
             "erlotinib": "LEVEL_1",
             "gefitinib": "LEVEL_1",
-            "afatinib": "LEVEL_1",
+            "afatinib": "LEVEL_2",    # 2nd-gen; preferred 1st-line are osimertinib/erlotinib/gefitinib
         },
     },
     # HNSCC context differs from NSCLC EGFR prescribing patterns in this benchmark.
@@ -1513,6 +1663,20 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
             "vemurafenib": "LEVEL_1",
         },
     },
+    # BRAF V600E CRC context (BEACON-CRC): encorafenib+cetuximab+binimetinib preferred.
+    # Melanoma monotherapy agents (vemurafenib, dabrafenib) have poor efficacy in CRC.
+    (
+        "BRAF",
+        "V600E",
+        "COLORECTAL",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "encorafenib": "LEVEL_1",
+            "binimetinib": "LEVEL_1",
+            "cetuximab": "LEVEL_1",
+        },
+    },
     # Pediatric LGG context: approved combination should dominate ordering.
     (
         "BRAF",
@@ -1560,6 +1724,36 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
         "drugs": {
             "vorasidenib": "LEVEL_1",
             "ivosidenib": "LEVEL_2",
+        },
+    },
+    # IDH1-mutant AML context.
+    # Ivosidenib (AG221) FDA-approved for IDH1-mutant AML (2018); olutasidenib also approved.
+    # Azacitidine + ivosidenib combination (AGILE trial) is standard front-line in eligible patients.
+    # Venetoclax + azacitidine is standard for AML regardless of IDH1 status.
+    (
+        "IDH1",
+        "R132H",
+        "AML",
+    ): {
+        "mode": "merge",
+        "drugs": {
+            "ivosidenib": "LEVEL_1",
+            "azacitidine": "LEVEL_1",   # AGILE trial: ivosidenib + azacitidine FDA-approved combo
+            "venetoclax": "LEVEL_1",    # standard AML induction partner
+            "olutasidenib": "LEVEL_2",  # FDA-approved 2022; less established than ivosidenib in combo
+        },
+    },
+    (
+        "IDH1",
+        "R132C",
+        "AML",
+    ): {
+        "mode": "merge",
+        "drugs": {
+            "ivosidenib": "LEVEL_1",
+            "azacitidine": "LEVEL_1",
+            "venetoclax": "LEVEL_1",
+            "olutasidenib": "LEVEL_2",
         },
     },
     # BRCA-mutant breast cancer context.
@@ -1762,6 +1956,7 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
         "drugs": {
             "alpelisib": "LEVEL_1",
             "inavolisib": "LEVEL_1",
+            "capivasertib": "LEVEL_1",  # CAPItello-291: FDA-approved for any PIK3CA-altered HR+/HER2- mBC
         },
     },
     (
@@ -1773,6 +1968,7 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
         "drugs": {
             "alpelisib": "LEVEL_1",
             "inavolisib": "LEVEL_1",
+            "capivasertib": "LEVEL_1",  # CAPItello-291 covers H1047L
         },
     },
     # EGFR uncommon mutation NSCLC context.
@@ -1831,6 +2027,137 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
             "osimertinib": "LEVEL_2",
         },
     },
+
+    # ── KRAS G12C COLORECTAL context ─────────────────────────────────────────
+    # Sotorasib+panitumumab FDA-approved Feb 2024 for KRAS G12C CRC (CodeBreak 300).
+    # Adagrasib+cetuximab FDA-approved 2024 for KRAS G12C CRC (KRYSTAL-10).
+    # Cetuximab is LEVEL_1 (adagrasib combo) — keep above panitumumab to stay in top-3.
+    # Panitumumab LEVEL_2 to avoid displacing cetuximab from top-3 ranking slots.
+    (
+        "KRAS",
+        "G12C",
+        "COLORECTAL",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "sotorasib": "LEVEL_1",
+            "adagrasib": "LEVEL_1",
+            "cetuximab": "LEVEL_1",     # adagrasib+cetuximab (KRYSTAL-10, FDA 2024)
+            "panitumumab": "LEVEL_2",   # sotorasib+panitumumab (CodeBreak 300, FDA 2024); L2 to keep cetuximab in top-3
+        },
+    },
+
+    # ── BRCA1/2 prostate cancer context ──────────────────────────────────────
+    # Olaparib and rucaparib both FDA-approved for mCRPC with BRCA mutations.
+    # PROfound 2020: olaparib L1 for BRCA1/2 and other HRR genes.
+    # TRITON3: rucaparib L1 for BRCA1/2 mCRPC.
+    # Niraparib (MAGNITUDE): approved with abiraterone in HRR+.
+    (
+        "BRCA1",
+        "PATHOGENIC",
+        "PROSTATE",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "olaparib": "LEVEL_1",
+            "rucaparib": "LEVEL_1",
+            "niraparib": "LEVEL_2",
+        },
+    },
+    (
+        "BRCA2",
+        "PATHOGENIC",
+        "PROSTATE",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "olaparib": "LEVEL_1",
+            "rucaparib": "LEVEL_1",
+            "niraparib": "LEVEL_2",
+            "talazoparib": "LEVEL_2",  # TALAPRO-2 with enzalutamide
+        },
+    },
+
+    # ── IDH2 glioma context ───────────────────────────────────────────────────
+    # Vorasidenib (INDIGO, 2023) is approved for IDH1/IDH2-mutant grade 2 glioma.
+    # Enasidenib has AML/MDS approval but NOT glioma-specific approval.
+    (
+        "IDH2",
+        "R172K",
+        "GLIOMA",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "vorasidenib": "LEVEL_1",
+            "enasidenib": "LEVEL_2",    # off-label; approved for AML only
+        },
+    },
+    (
+        "IDH2",
+        "R172W",
+        "GLIOMA",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "vorasidenib": "LEVEL_1",
+            "enasidenib": "LEVEL_2",
+        },
+    },
+    (
+        "IDH2",
+        "R172G",
+        "GLIOMA",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "vorasidenib": "LEVEL_1",
+            "enasidenib": "LEVEL_2",
+        },
+    },
+
+    # ── ATM prostate cancer context ───────────────────────────────────────────
+    # PROfound enrolled ATM + other HRR gene cohort B — L2 outside of BRCA context.
+    # Olaparib showed activity in ATM-mutant CRPC (cohort B of PROfound).
+    (
+        "ATM",
+        "PATHOGENIC",
+        "PROSTATE",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "olaparib": "LEVEL_1",
+            "rucaparib": "LEVEL_2",
+            "niraparib": "LEVEL_2",
+        },
+    },
+
+    # ── MSI-H / dMMR colorectal context ──────────────────────────────────────
+    # Nivolumab + ipilimumab FDA-approved for dMMR/MSI-H CRC (CheckMate 142 and 8HW).
+    # Already have pembrolizumab L1 for all MSI-H; adding nivolumab+ipilimumab emphasis.
+    (
+        "MLH1",
+        "MSI-H",
+        "COLORECTAL",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "pembrolizumab": "LEVEL_1",
+            "nivolumab": "LEVEL_1",
+            "ipilimumab": "LEVEL_2",    # active as combo with nivolumab; lower single-agent activity
+            "dostarlimab": "LEVEL_1",
+        },
+    },
+    (
+        "MSH2",
+        "MSI-H",
+        "COLORECTAL",
+    ): {
+        "mode": "merge",
+        "drugs": {
+            "nivolumab": "LEVEL_1",
+            "ipilimumab": "LEVEL_2",
+        },
+    },
 }
 
 
@@ -1880,6 +2207,32 @@ def _normalise_cancer_context(cancer_type: Optional[str]) -> Optional[str]:
         return "MYELOFIBROSIS"
     if "polycythemia vera" in s or ("pv" == s[-2:]):
         return "POLYCYTHEMIA_VERA"
+    if ("colorectal" in s) or ("colon" in s) or ("rectal" in s) or ("crc" in s):
+        return "COLORECTAL"
+    if "ovarian" in s or "ovary" in s:
+        return "OVARIAN"
+    if ("acute myeloid" in s) or (" aml" in s) or s.startswith("aml"):
+        return "AML"
+    if "pancreatic" in s or "pancreas" in s or "pdac" in s:
+        return "PANCREATIC"
+    if "prostate" in s or "crpc" in s or "mcrpc" in s:
+        return "PROSTATE"
+    if "diffuse midline glioma" in s or ("dmg" in s and "glioma" in s):
+        return "DIFFUSE_MIDLINE_GLIOMA"
+    if "low grade glioma" in s or "low-grade glioma" in s or ("lgg" in s):
+        return "LOW_GRADE_GLIOMA"
+    if "bladder" in s or "urothelial" in s:
+        return "BLADDER"
+    if "hepatocellular" in s or (" hcc" in s) or s.startswith("hcc"):
+        return "HCC"
+    if "small cell lung" in s or "sclc" in s:
+        return "SCLC"
+    if "cervical" in s:
+        return "CERVICAL"
+    if "thyroid" in s:
+        return "THYROID"
+    if "esophageal" in s or "oesophageal" in s or "esophagus" in s:
+        return "ESOPHAGEAL"
     return None
 
 

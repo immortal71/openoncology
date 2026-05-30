@@ -13,7 +13,7 @@ Both endpoints are authenticated (patient token required) to ensure only
 authorised patients and clinicians can export PHI as FHIR resources.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +25,8 @@ from models.patient import Patient
 from models.submission import Submission
 from routes.auth import get_current_patient
 from services.fhir_export import build_diagnostic_report, build_observation
+from utils.http import not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT
 
 router = APIRouter(prefix="/api/fhir", tags=["fhir"])
 
@@ -33,8 +35,10 @@ _FHIR_CONTENT_TYPE = "application/fhir+json; fhirVersion=4.0"
 
 
 @router.get("/DiagnosticReport/{submission_id}", response_class=JSONResponse)
+@limiter.limit(READ_LIMIT)
 async def get_diagnostic_report(
     submission_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -56,10 +60,7 @@ async def get_diagnostic_report(
     )).scalar_one_or_none()
 
     if not submission:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Submission not found or access denied.",
-        )
+        raise not_found_error(request, "Submission not found or access denied.")
 
     patient = (await db.execute(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
@@ -81,8 +82,10 @@ async def get_diagnostic_report(
 
 
 @router.get("/Observation/{mutation_id}", response_class=JSONResponse)
+@limiter.limit(READ_LIMIT)
 async def get_observation(
     mutation_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -103,10 +106,7 @@ async def get_observation(
     )).scalar_one_or_none()
 
     if not mutation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Mutation not found or access denied.",
-        )
+        raise not_found_error(request, "Mutation not found or access denied.")
 
     observation = build_observation(mutation)
 

@@ -2,7 +2,7 @@
 Results route — return mutation analysis report for a submission.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -13,12 +13,16 @@ from models.submission import Submission
 from models.patient import Patient
 from routes.auth import get_current_patient
 from schemas import ResultsResponse, SubmissionStatusOut
+from utils.http import conflict_error, not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT
 
 router = APIRouter(prefix="/api/results", tags=["results"])
 
 
 @router.get("/{submission_id}", response_model=ResultsResponse)
+@limiter.limit(READ_LIMIT)
 async def get_results(
+    request: Request,
     submission_id: str,
     include_oncologist_report: bool = Query(
         default=False,
@@ -47,7 +51,7 @@ async def get_results(
     )).scalar_one_or_none()
 
     if not submission:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found.")
+        raise not_found_error(request, "Submission not found.")
 
     if submission.status.value not in ("complete",):
         return {
@@ -149,11 +153,16 @@ async def get_results(
             for m in mutations
         ],
         "result_id": result.id if result else None,
+        "immunotherapy_profile": result.immunotherapy_profile if result else None,
+        "mutational_signature": result.mutational_signature if result else None,
+        "combination_therapy": result.combination_therapy or [] if result else [],
     }
 
 
 @router.get("/dashboard/all", response_model=list[SubmissionStatusOut])
+@limiter.limit(READ_LIMIT)
 async def get_all_submissions(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
@@ -183,6 +192,7 @@ async def get_all_submissions(
 # ---------------------------------------------------------------------------
 
 async def _get_verified_submission(
+    request: Request,
     submission_id: str,
     db: AsyncSession,
     token_payload: dict,
@@ -202,9 +212,9 @@ async def _get_verified_submission(
         )
     )).scalar_one_or_none()
     if not submission:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found.")
+        raise not_found_error(request, "Submission not found.")
     if submission.status.value != "complete":
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Analysis not yet complete.")
+        raise conflict_error(request, "Analysis not yet complete.")
     return submission
 
 
@@ -217,7 +227,9 @@ async def _get_verified_submission(
     ),
     response_class=Response,
 )
+@limiter.limit(READ_LIMIT)
 async def download_patient_letter_pdf(
+    request: Request,
     submission_id: str,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
@@ -225,7 +237,7 @@ async def download_patient_letter_pdf(
     from services.patient_summary import generate_patient_summary
     from services.pdf_export import generate_patient_letter_document
 
-    submission = await _get_verified_submission(submission_id, db, token_payload)
+    submission = await _get_verified_submission(request, submission_id, db, token_payload)
     result = submission.result
     mutations = submission.mutations
     mutation_list = [
@@ -265,7 +277,9 @@ async def download_patient_letter_pdf(
     ),
     response_class=Response,
 )
+@limiter.limit(READ_LIMIT)
 async def download_oncologist_report_pdf(
+    request: Request,
     submission_id: str,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
@@ -273,7 +287,7 @@ async def download_oncologist_report_pdf(
     from services.oncologist_report import generate_oncologist_report
     from services.pdf_export import generate_oncologist_report_document
 
-    submission = await _get_verified_submission(submission_id, db, token_payload)
+    submission = await _get_verified_submission(request, submission_id, db, token_payload)
     result = submission.result
     mutations = submission.mutations
     mutation_list = [

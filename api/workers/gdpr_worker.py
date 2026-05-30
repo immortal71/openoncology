@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
     bind=True,
     max_retries=3,
     default_retry_delay=60,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def erase_patient_data(self, deletion_request_id: str):
     from datetime import datetime, UTC
@@ -216,3 +218,34 @@ def _send_erasure_confirmation(to_email: str) -> None:
         })
     except Exception as exc:
         logger.warning("[gdpr] Could not send erasure confirmation email: %s", exc)
+
+
+# ── Periodic maintenance tasks (invoked by Celery Beat) ───────────────────────
+
+@celery_app.task(
+    name="workers.gdpr_worker.enforce_retention_policy",
+    bind=True,
+    max_retries=1,
+    acks_late=True,
+)
+def enforce_retention_policy(self):
+    """Auto-delete patient data past their consent retention_days. Runs daily via Beat."""
+    from datetime import datetime, timedelta, UTC
+    from sqlalchemy import select
+    from workers._db_sync import get_sync_session
+    from models.patient import Patient
+
+    with get_sync_session() as db:
+        patients = db.execute(select(Patient)).scalars().all()
+        queued = 0
+        for p in patients:
+            retention_days = getattr(p, "retention_days", None) or 3650  # default 10 years
+            if p.created_at and (datetime.now(UTC) - p.created_at).days >= retention_days:
+                # Trigger full Art. 17 erasure workflow
+                erase_patient_data.apply_async(
+                    args=[str(p.id)],
+                    queue="gdpr",
+                )
+                queued += 1
+                logger.info("[gdpr] Queued auto-erasure for patient %s (retention exceeded)", p.id)
+    logger.info("[gdpr] Retention sweep complete: %d patients queued for erasure", queued)

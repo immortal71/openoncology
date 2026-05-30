@@ -25,13 +25,15 @@ from typing import Optional
 
 import logging
 import math
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models.cohort import CohortMutation, Sample, Study
 from services.hotspot import get_hotspot_info
+from utils.http import not_found_error, validation_error
+from middleware.rate_limit import limiter, READ_LIMIT
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,9 @@ router = APIRouter(prefix="/api/viz", tags=["visualizations"])
 # ── Lollipop plot ──────────────────────────────────────────────────────────────
 
 @router.get("/lollipop/{gene}")
+@limiter.limit(READ_LIMIT)
 async def lollipop_data(
+    request: Request,
     gene: str,
     study_id: Optional[str] = Query(None, description="Limit to one study; omit for all public studies"),
     min_count: int = Query(2, ge=1, description="Minimum sample count to include a residue"),
@@ -185,7 +189,9 @@ def _get_protein_domains(gene: str) -> list[dict]:
 # ── Survival curves ────────────────────────────────────────────────────────────
 
 @router.get("/survival")
+@limiter.limit(READ_LIMIT)
 async def survival_curves(
+    request: Request,
     study_id: str = Query(..., description="Study ID (e.g. tcga_luad_2016)"),
     gene: str = Query(..., description="Hugo gene symbol"),
     alteration: Optional[str] = Query(None, description="Protein change (e.g. L858R); omit for any mutation"),
@@ -197,8 +203,7 @@ async def survival_curves(
         select(Study).where(Study.study_id == study_id)
     )).scalar_one_or_none()
     if not study:
-        from fastapi import HTTPException, status
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study not found")
+        raise not_found_error(request, "Study not found")
 
     from services.survival import compute_survival_curves
     return await compute_survival_curves(
@@ -213,7 +218,9 @@ async def survival_curves(
 # ── Co-occurrence / mutual exclusivity ────────────────────────────────────────
 
 @router.get("/cooccurrence")
+@limiter.limit(READ_LIMIT)
 async def cooccurrence_matrix(
+    request: Request,
     study_id: str = Query(..., description="Study ID"),
     genes: str = Query(..., description="Comma-separated gene list (2–20 genes)"),
     db: AsyncSession = Depends(get_db),
@@ -232,13 +239,11 @@ async def cooccurrence_matrix(
         select(Study).where(Study.study_id == study_id)
     )).scalar_one_or_none()
     if not study:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=404, detail="Study not found")
+        raise not_found_error(request, "Study not found")
 
     gene_list = [g.strip().upper() for g in genes.split(",") if g.strip()]
     if len(gene_list) < 2:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=422, detail="At least two genes required")
+        raise validation_error(request, "At least two genes required")
     gene_list = gene_list[:20]
 
     # Total samples in study

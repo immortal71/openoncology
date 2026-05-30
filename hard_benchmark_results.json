@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-08T12:01:45.161021+00:00",
+  "run_at": "2026-05-29T15:41:22.227172+00:00",
   "metric_lock": "standard_precision_at_3",
   "targets": {
     "standard_precision_at_3": 0.65,
@@ -7,33 +7,33 @@
     "false_positives": 0
   },
   "actual": {
-    "standard_precision_at_3": 0.6923,
-    "hit_at_3": 0.9846,
+    "standard_precision_at_3": 0.8174,
+    "hit_at_3": 1.0,
     "false_positives": 0,
-    "n_cases": 73,
-    "n_sensitivity": 65,
+    "n_cases": 81,
+    "n_sensitivity": 73,
     "n_negative": 8
   },
   "by_difficulty": {
     "CONFLICTING_EVIDENCE": {
-      "standard_precision_at_3": 0.5926,
-      "standard_precision_at_3_ceiling": 0.8519
+      "standard_precision_at_3": 0.963,
+      "standard_precision_at_3_ceiling": 0.963
     },
     "LOW_PURITY": {
-      "standard_precision_at_3": 0.75,
-      "standard_precision_at_3_ceiling": 0.75
+      "standard_precision_at_3": 0.8333,
+      "standard_precision_at_3_ceiling": 0.8333
     },
     "MULTI_DRUG": {
-      "standard_precision_at_3": 0.8974,
-      "standard_precision_at_3_ceiling": 0.9487
+      "standard_precision_at_3": 0.9778,
+      "standard_precision_at_3_ceiling": 0.9778
     },
     "RARE_OR_COMPLEX": {
-      "standard_precision_at_3": 0.746,
-      "standard_precision_at_3_ceiling": 0.7619
+      "standard_precision_at_3": 0.8148,
+      "standard_precision_at_3_ceiling": 0.8148
     },
     "REFRACTORY": {
-      "standard_precision_at_3": 0.4524,
-      "standard_precision_at_3_ceiling": 0.5
+      "standard_precision_at_3": 0.5476,
+      "standard_precision_at_3_ceiling": 0.5476
     }
   },
   "result": "PASS",

@@ -3,7 +3,7 @@ Crowdfund route — create and manage patient fundraising campaigns.
 """
 import re
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, Field
@@ -14,6 +14,8 @@ from database import get_db
 from models.campaign import Campaign
 from models.patient import Patient
 from routes.auth import get_current_patient
+from utils.http import conflict_error, not_found_error, validation_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 router = APIRouter(prefix="/api/crowdfund", tags=["crowdfund"])
 
@@ -33,32 +35,28 @@ class CampaignCreate(BaseModel):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def create_campaign(
     req: CampaignCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token_payload: dict = Depends(get_current_patient),
 ):
     if not _SLUG_RE.match(req.slug):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Slug must be 3-64 lowercase letters, numbers, or hyphens.",
-        )
+        raise validation_error(request, "Slug must be 3-64 lowercase letters, numbers, or hyphens.")
 
     keycloak_id = token_payload.get("sub")
     patient = (await db.execute(
         select(Patient).where(Patient.keycloak_id == keycloak_id)
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+        raise not_found_error(request, "Patient not found.")
 
     existing = (await db.execute(
         select(Campaign).where(Campaign.slug == req.slug)
     )).scalar_one_or_none()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This campaign URL is already taken. Please choose another.",
-        )
+        raise conflict_error(request, "This campaign URL is already taken. Please choose another.")
 
     campaign = Campaign(
         patient_id=patient.id,
@@ -83,14 +81,15 @@ async def create_campaign(
 
 
 @router.get("/{slug}")
-async def get_campaign(slug: str, db: AsyncSession = Depends(get_db)):
+@limiter.limit(READ_LIMIT)
+async def get_campaign(request: Request, slug: str, db: AsyncSession = Depends(get_db)):
     """Public campaign page — no auth required for public campaigns."""
     campaign = (await db.execute(
         select(Campaign).where(Campaign.slug == slug, Campaign.is_public, Campaign.is_active)
     )).scalar_one_or_none()
 
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found.")
+        raise not_found_error(request, "Campaign not found.")
 
     return {
         "campaign_id": campaign.id,
@@ -108,9 +107,11 @@ class DonationRequest(BaseModel):
 
 
 @router.post("/{slug}/donate")
+@limiter.limit(WRITE_LIMIT)
 async def donate_to_campaign(
     slug: str,
     req: DonationRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     campaign = (await db.execute(
@@ -118,7 +119,7 @@ async def donate_to_campaign(
     )).scalar_one_or_none()
 
     if not campaign:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found.")
+        raise not_found_error(request, "Campaign not found.")
 
     # Create a Stripe payment intent for the donation
     intent = stripe.PaymentIntent.create(

@@ -65,3 +65,4 @@ limiter = _make_limiter()
 AUTH_LIMIT = "10/minute"
 UPLOAD_LIMIT = "5/minute"
 READ_LIMIT = "60/minute"
+WRITE_LIMIT = "30/minute"

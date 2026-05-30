@@ -1,3 +1,4 @@
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -7,6 +8,7 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     secret_key: str = "dev-secret-key-change-in-production"
+    cors_allow_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]
 
     # Database
     database_url: str = "sqlite+aiosqlite:///./openoncology_dev.db"
@@ -51,6 +53,32 @@ class Settings(BaseSettings):
     # COSMIC (Catalogue of Somatic Mutations in Cancer)
     cosmic_email: str = ""
     cosmic_password: str = ""
+
+    # Observability
+    sentry_dsn: str = ""  # Set to Sentry DSN in production to enable error tracking
+
+    @field_validator("secret_key")
+    @classmethod
+    def _validate_secret_key(cls, v: str, info) -> str:
+        env = (info.data or {}).get("environment", "development")
+        if env == "production" and v == "dev-secret-key-change-in-production":
+            raise ValueError(
+                "SECRET_KEY must be changed from the default value in production. "
+                "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+            )
+        return v
+
+    @model_validator(mode="after")
+    def _validate_production_settings(self) -> "Settings":
+        if self.environment == "production":
+            if not self.sentry_dsn:
+                import logging
+                logging.getLogger("openoncology.config").warning(
+                    "SENTRY_DSN is not set — errors in production will not be tracked"
+                )
+            if self.minio_secret_key == "password":
+                raise ValueError("MINIO_SECRET_KEY must be changed from the default in production")
+        return self
 
 
 settings = Settings()

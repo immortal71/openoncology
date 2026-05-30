@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import api from '@/lib/api';
 
 interface Study {
   study_id: string;
@@ -14,11 +15,6 @@ interface Study {
   source: string | null;
 }
 
-interface StudiesResponse {
-  total: number;
-  studies: Study[];
-}
-
 export default function ExplorePage() {
   const [studies, setStudies] = useState<Study[]>([]);
   const [filtered, setFiltered] = useState<Study[]>([]);
@@ -28,24 +24,27 @@ export default function ExplorePage() {
   const [cancerTypeFilter, setCancerTypeFilter] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
 
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (cancerTypeFilter) params.append('cancer_type', cancerTypeFilter);
-    if (sourceFilter) params.append('source', sourceFilter);
-
+  const loadStudies = useCallback(() => {
     setLoading(true);
-    fetch(`/api/cohorts/studies?${params.toString()}`)
-      .then((r) => r.json())
-      .then((data: StudiesResponse) => {
+    setError(null);
+    api
+      .getStudies({
+        cancer_type: cancerTypeFilter || undefined,
+        source: sourceFilter || undefined,
+      })
+      .then((data) => {
         setStudies(data.studies ?? []);
         setFiltered(data.studies ?? []);
-        setLoading(false);
       })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
+      .catch((err: Error) => {
+        setError(err.message ?? 'Failed to load studies');
+      })
+      .finally(() => setLoading(false));
   }, [cancerTypeFilter, sourceFilter]);
+
+  useEffect(() => {
+    loadStudies();
+  }, [loadStudies]);
 
   useEffect(() => {
     if (!search.trim()) {
@@ -125,22 +124,63 @@ export default function ExplorePage() {
 
       {/* Content */}
       {loading && (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin h-10 w-10 rounded-full border-4 border-blue-600 border-t-transparent" role="status" aria-label="Loading" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-gray-200 bg-white p-5 h-44">
+              <div className="flex justify-between mb-3">
+                <div className="h-5 w-16 rounded-full bg-gray-200" />
+                <div className="h-4 w-20 rounded bg-gray-100" />
+              </div>
+              <div className="h-4 w-3/4 rounded bg-gray-200 mb-2" />
+              <div className="h-3 w-1/2 rounded bg-gray-100 mb-4" />
+              <div className="flex gap-2">
+                <div className="h-5 w-20 rounded-full bg-gray-100" />
+                <div className="h-5 w-14 rounded-full bg-blue-50" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4 text-red-700" role="alert">
-          Failed to load studies: {error}
+        <div className="rounded-xl border border-red-200 bg-red-50 p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4" role="alert">
+          <div className="flex-1">
+            <p className="font-semibold text-red-800 mb-1">Failed to load studies</p>
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+          <button
+            onClick={loadStudies}
+            className="shrink-0 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Retry
+          </button>
         </div>
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="text-center py-20 text-gray-500">No studies match your filters.</div>
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <svg className="mb-4 h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+          <p className="text-base font-medium text-gray-500">No studies found</p>
+          {(search || cancerTypeFilter || sourceFilter) && (
+            <p className="mt-1 text-sm text-gray-400">
+              Try clearing your filters or search term.
+            </p>
+          )}
+          {(cancerTypeFilter || sourceFilter) && (
+            <button
+              onClick={() => { setCancerTypeFilter(''); setSourceFilter(''); setSearch(''); }}
+              className="mt-4 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && filtered.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((study) => (
             <StudyCard key={study.study_id} study={study} />

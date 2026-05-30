@@ -26,6 +26,8 @@ from config import settings
 from database import get_db
 from models.pharma import PharmaCompany
 from routes.auth import get_current_patient
+from utils.http import bad_request_error, not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/stripe/connect", tags=["stripe-connect"])
@@ -43,6 +45,7 @@ def _require_admin(claims: dict = Depends(get_current_patient)) -> dict:
 # ── Account onboarding ────────────────────────────────────────────────────────
 
 @router.post("/onboard/{pharma_id}")
+@limiter.limit(WRITE_LIMIT)
 async def start_onboarding(
     pharma_id: str,
     request: Request,
@@ -52,7 +55,7 @@ async def start_onboarding(
     """Create or resume Stripe Connect Express onboarding for a pharma company."""
     company = await db.get(PharmaCompany, pharma_id)
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise not_found_error(request, "Company not found")
 
     # Create Express account if not yet created
     if not company.stripe_account_id:
@@ -80,14 +83,16 @@ async def start_onboarding(
 
 
 @router.get("/return/{pharma_id}")
+@limiter.limit(READ_LIMIT)
 async def onboarding_return(
     pharma_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Stripe redirects the pharma here after completing (or leaving) onboarding."""
     company = await db.get(PharmaCompany, pharma_id)
     if not company or not company.stripe_account_id:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise not_found_error(request, "Company not found")
 
     account = stripe.Account.retrieve(company.stripe_account_id)
     details_submitted = account.get("details_submitted", False)
@@ -104,15 +109,17 @@ async def onboarding_return(
 # ── Account status ────────────────────────────────────────────────────────────
 
 @router.get("/status/{pharma_id}")
+@limiter.limit(READ_LIMIT)
 async def account_status(
     pharma_id: str,
+    request: Request,
     _: dict = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
 ):
     """Admin: retrieve live Stripe account status for a pharma company."""
     company = await db.get(PharmaCompany, pharma_id)
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise not_found_error(request, "Company not found")
 
     if not company.stripe_account_id:
         return {"status": "no_account"}
@@ -136,9 +143,11 @@ class PayoutBody(_BaseModel):
 
 
 @router.post("/payout/{pharma_id}")
+@limiter.limit(WRITE_LIMIT)
 async def trigger_payout(
     pharma_id: str,
     body: PayoutBody,
+    request: Request,
     _: dict = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -149,11 +158,11 @@ async def trigger_payout(
     """
     company = await db.get(PharmaCompany, pharma_id)
     if not company or not company.stripe_account_id:
-        raise HTTPException(status_code=400, detail="Company has no Stripe account")
+        raise bad_request_error(request, "Company has no Stripe account")
 
     amount_cents = int(body.amount_usd * 100)
     if amount_cents < 100:
-        raise HTTPException(status_code=400, detail="Minimum payout is $1.00")
+        raise bad_request_error(request, "Minimum payout is $1.00")
 
     transfer = stripe.Transfer.create(
         amount=amount_cents,

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openoncology-config
+  namespace: openoncology
+data:
+  ENVIRONMENT: "production"
+  DATABASE_URL: "postgresql+asyncpg://openoncology:$(DB_PASSWORD)@db:5432/openoncology"
+  REDIS_URL: "redis://redis:6379/0"
+  MINIO_ENDPOINT: "storage:9000"
+  MINIO_SECURE: "false"
+  KEYCLOAK_URL: "http://keycloak:8080"
+  KEYCLOAK_REALM: "openoncology"
+  KEYCLOAK_CLIENT_ID: "openoncology-api"
+  BUCKET_RAW: "openoncology-raw"
+  BUCKET_VCF: "openoncology-vcf"
+  BUCKET_REPORTS: "openoncology-reports"

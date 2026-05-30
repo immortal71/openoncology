@@ -13,7 +13,7 @@ import uuid
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +21,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from models.pharma import PharmaCompany
 from routes.auth import get_current_patient
+from utils.http import not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/pharma", tags=["pharma"])
@@ -55,7 +57,8 @@ class PharmaVerifyRequest(BaseModel):
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
-async def apply(body: PharmaApplyRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit(WRITE_LIMIT)
+async def apply(body: PharmaApplyRequest, request: Request, db: AsyncSession = Depends(get_db)):
     """Any pharma company can submit an application. Starts unverified."""
     company = PharmaCompany(
         id=str(uuid.uuid4()),
@@ -73,7 +76,9 @@ async def apply(body: PharmaApplyRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/applications")
+@limiter.limit(READ_LIMIT)
 async def list_applications(
+    request: Request,
     _: dict = Depends(_require_admin),
     db: AsyncSession = Depends(get_db),
 ):
@@ -84,7 +89,9 @@ async def list_applications(
 
 
 @router.post("/verify/{company_id}")
+@limiter.limit(WRITE_LIMIT)
 async def verify(
+    request: Request,
     company_id: str,
     body: PharmaVerifyRequest,
     _: dict = Depends(_require_admin),
@@ -93,7 +100,7 @@ async def verify(
     """Admin: approve or reject a pharma company application."""
     company = await db.get(PharmaCompany, company_id)
     if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise not_found_error(request, "Company not found")
 
     company.verified = body.approved
     await db.commit()
@@ -104,7 +111,8 @@ async def verify(
 
 
 @router.get("/")
-async def list_verified(db: AsyncSession = Depends(get_db)):
+@limiter.limit(READ_LIMIT)
+async def list_verified(request: Request, db: AsyncSession = Depends(get_db)):
     """Public: list all verified pharma companies."""
     stmt = select(PharmaCompany).where(PharmaCompany.verified == True).order_by(PharmaCompany.name)  # noqa: E712
     companies = (await db.execute(stmt)).scalars().all()
@@ -112,11 +120,12 @@ async def list_verified(db: AsyncSession = Depends(get_db)):
 
 
 @router.get("/{company_id}")
-async def get_company(company_id: str, db: AsyncSession = Depends(get_db)):
+@limiter.limit(READ_LIMIT)
+async def get_company(request: Request, company_id: str, db: AsyncSession = Depends(get_db)):
     """Public: get a single verified pharma company profile."""
     company = await db.get(PharmaCompany, company_id)
     if not company or not company.verified:
-        raise HTTPException(status_code=404, detail="Company not found")
+        raise not_found_error(request, "Company not found")
     return _serialize(company)
 
 

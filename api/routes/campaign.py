@@ -20,7 +20,7 @@ import logging
 from typing import Optional
 
 import stripe
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,6 +30,8 @@ from database import get_db
 from models.campaign import Campaign
 from models.patient import Patient
 from routes.auth import get_current_patient
+from utils.http import bad_request_error, conflict_error, forbidden_error, not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/crowdfund", tags=["crowdfund"])
@@ -100,7 +102,9 @@ def _check_milestone(old_raised: float, new_raised: float, goal_usd: float, camp
 # ── Routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
+@limiter.limit(WRITE_LIMIT)
 async def create_campaign(
+    request: Request,
     body: CampaignCreateRequest,
     claims: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
@@ -109,14 +113,14 @@ async def create_campaign(
     # Verify slug is unique
     existing = (await db.execute(select(Campaign).where(Campaign.slug == body.slug))).scalar_one_or_none()
     if existing:
-        raise HTTPException(status_code=409, detail="Slug already taken")
+        raise conflict_error(request, "Slug already taken")
 
     # Find patient record
     patient = (await db.execute(
         select(Patient).where(Patient.keycloak_id == claims["sub"])
     )).scalar_one_or_none()
     if not patient:
-        raise HTTPException(status_code=404, detail="Patient record not found")
+        raise not_found_error(request, "Patient record not found")
 
     campaign = Campaign(
         id=str(uuid.uuid4()),
@@ -137,7 +141,8 @@ async def create_campaign(
 
 
 @router.get("/{slug}")
-async def get_campaign(slug: str, db: AsyncSession = Depends(get_db)):
+@limiter.limit(READ_LIMIT)
+async def get_campaign(request: Request, slug: str, db: AsyncSession = Depends(get_db)):
     """Public: view a campaign by slug."""
     campaign = (await db.execute(
         select(Campaign).where(
@@ -147,12 +152,14 @@ async def get_campaign(slug: str, db: AsyncSession = Depends(get_db)):
         )
     )).scalar_one_or_none()
     if not campaign:
-        raise HTTPException(status_code=404, detail="Campaign not found")
+        raise not_found_error(request, "Campaign not found")
     return _campaign_dict(campaign)
 
 
 @router.post("/{slug}/donate")
+@limiter.limit(WRITE_LIMIT)
 async def donate(
+    request: Request,
     slug: str,
     body: DonateRequest,
     db: AsyncSession = Depends(get_db),
@@ -176,7 +183,9 @@ async def donate(
 
 
 @router.post("/{slug}/activate")
+@limiter.limit(WRITE_LIMIT)
 async def activate_campaign(
+    request: Request,
     slug: str,
     claims: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
@@ -188,7 +197,7 @@ async def activate_campaign(
     )).scalar_one_or_none()
 
     if not patient or campaign.patient_id != patient.id:
-        raise HTTPException(status_code=403, detail="Not your campaign")
+        raise forbidden_error(request, "Not your campaign")
 
     campaign.is_active = True
     campaign.is_public = True
@@ -197,7 +206,9 @@ async def activate_campaign(
 
 
 @router.post("/{slug}/close")
+@limiter.limit(WRITE_LIMIT)
 async def close_campaign(
+    request: Request,
     slug: str,
     claims: dict = Depends(get_current_patient),
     db: AsyncSession = Depends(get_db),
@@ -212,7 +223,7 @@ async def close_campaign(
     is_owner = patient and campaign.patient_id == patient.id
     is_admin = "admin" in roles
     if not is_owner and not is_admin:
-        raise HTTPException(status_code=403, detail="Not authorised")
+        raise forbidden_error(request, "Not authorised")
 
     campaign.is_active = False
     await db.commit()
@@ -220,7 +231,9 @@ async def close_campaign(
 
 
 @router.post("/{slug}/complete")
+@limiter.limit(WRITE_LIMIT)
 async def complete_campaign(
+    request: Request,
     slug: str,
     pharma_id: str,
     claims: dict = Depends(get_current_patient),
@@ -229,18 +242,18 @@ async def complete_campaign(
     """Admin: mark goal reached and trigger pharma payout via Stripe Transfer."""
     roles: list[str] = claims.get("realm_access", {}).get("roles", [])
     if "admin" not in roles:
-        raise HTTPException(status_code=403, detail="admin role required")
+        raise forbidden_error(request, "admin role required")
 
     campaign = await _get_campaign_or_404(slug, db)
 
     from models.pharma import PharmaCompany
     pharma = await db.get(PharmaCompany, pharma_id)
     if not pharma or not pharma.stripe_account_id:
-        raise HTTPException(status_code=400, detail="Pharma company has no Stripe account")
+        raise bad_request_error(request, "Pharma company has no Stripe account")
 
     amount_cents = int((campaign.raised_usd or 0) * 100)
     if amount_cents < 100:
-        raise HTTPException(status_code=400, detail="No funds to transfer")
+        raise bad_request_error(request, "No funds to transfer")
 
     transfer = stripe.Transfer.create(
         amount=amount_cents,

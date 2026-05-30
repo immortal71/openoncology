@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
     bind=True,
     max_retries=2,
     default_retry_delay=120,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def run_ai_analysis(
     self,
@@ -130,7 +132,7 @@ def run_ai_analysis(
             )
 
             # Score each drug using the composite ranking algorithm
-            from api.ai.ranking import rank_candidates
+            from ai.ranking import rank_candidates
 
             for drug in drugs[:25]:  # Process top 25 candidates (expanded from 10)
                 drug["alphamissense_score"] = (
@@ -151,7 +153,104 @@ def run_ai_analysis(
                     "level": top_level,
                 }
 
-            ranked = rank_candidates(drugs[:25], resistance_context=resistance_context)
+            # Step 4b: Immunotherapy biomarkers (TMB, MSI-H, HRD, POLE)
+            mutation_dicts = [
+                {
+                    "gene": m.gene,
+                    "mutation_type": getattr(m, "mutation_type", ""),
+                    "ref": getattr(m, "ref_allele", ""),
+                    "alt": getattr(m, "alt_allele", ""),
+                }
+                for m in mutations
+            ]
+            try:
+                from services.immunotherapy_biomarkers import (
+                    compute_immunotherapy_profile,
+                    get_immunotherapy_candidates,
+                    immunotherapy_candidates_to_drug_dicts,
+                )
+                imm_profile = compute_immunotherapy_profile(mutation_dicts)
+                imm_candidates = get_immunotherapy_candidates(imm_profile, cancer_type)
+                imm_drug_dicts = immunotherapy_candidates_to_drug_dicts(imm_candidates)
+                logger.info("[ai] immunotherapy candidates: %d", len(imm_drug_dicts))
+            except Exception as _imm_exc:
+                logger.warning("[ai] immunotherapy biomarkers failed: %s", _imm_exc)
+                imm_drug_dicts = []
+
+            # Step 4c: Mutational signature analysis
+            try:
+                from services.mutational_signatures import (
+                    analyse_signatures_from_mutations,
+                    signature_candidates_to_drug_dicts,
+                )
+                sig_result = analyse_signatures_from_mutations(mutation_dicts)
+                sig_drug_dicts = signature_candidates_to_drug_dicts(sig_result)
+                logger.info("[ai] signature candidates: %d (sig=%s)", len(sig_drug_dicts), sig_result.dominant_signature)
+            except Exception as _sig_exc:
+                logger.warning("[ai] mutational signature analysis failed: %s", _sig_exc)
+                sig_drug_dicts = []
+
+            # Step 4d: RNA-seq fusion detection (optional — only when output files present)
+            fusion_drug_dicts = _get_fusion_candidates(submission_id)
+
+            # Merge all candidate sources; deduplicate by drug name (keep highest oncokb level)
+            drugs = _merge_drug_candidates(drugs, imm_drug_dicts + sig_drug_dicts + fusion_drug_dicts)
+
+            ranked = rank_candidates(drugs[:40], resistance_context=resistance_context)
+
+            # Combination therapy scoring against the final merged drug pool
+            combination_therapy_data: list[dict] = []
+            try:
+                from services.combination_therapy import score_combinations, combinations_to_summary
+                top_genes = list({m.gene for m in (targetable_mutations or mutations[:3])})
+                combos = score_combinations(ranked, mutated_genes=top_genes, cancer_type=cancer_type)
+                combination_therapy_data = combinations_to_summary(combos)
+                logger.info("[ai] combination suggestions: %d", len(combination_therapy_data))
+            except Exception as _combo_exc:
+                logger.warning("[ai] combination therapy scoring failed: %s", _combo_exc)
+
+            # Serialise immunotherapy + signature for DB storage
+            try:
+                imm_profile_data = {
+                    "tmb_per_mb": imm_profile.tmb_per_mb,
+                    "tmb_high": imm_profile.tmb_high,
+                    "msi_high": imm_profile.msi_high,
+                    "hrd": imm_profile.hrd,
+                    "pole_mutation": imm_profile.pole_mutation,
+                    "mmr_gene_hits": list(imm_profile.mmr_gene_hits),
+                    "hrd_gene_hits": list(imm_profile.hrd_gene_hits),
+                    "candidates": [
+                        {
+                            "drug_name": c.drug_name,
+                            "drug_class": c.drug_class,
+                            "oncokb_level": c.oncokb_level,
+                            "indication": c.indication,
+                            "evidence_note": c.evidence_note,
+                            "rank_score_estimate": c.rank_score_estimate,
+                        }
+                        for c in imm_candidates
+                    ],
+                }
+            except Exception:
+                imm_profile_data = None
+
+            try:
+                sig_data = {
+                    "dominant_signature": sig_result.dominant_signature,
+                    "signature_fraction": sig_result.signature_fraction,
+                    "confidence": sig_result.confidence,
+                    "mutation_count": sig_result.mutation_count,
+                    "all_fractions": sig_result.all_fractions,
+                    "implication": {
+                        "signature_name": sig_result.implication.signature_name,
+                        "drug_class": sig_result.implication.drug_class,
+                        "drug_recommendations": sig_result.implication.drug_recommendations,
+                        "oncokb_level": sig_result.implication.oncokb_level,
+                        "evidence_note": sig_result.implication.evidence_note,
+                    } if sig_result.implication else None,
+                }
+            except Exception:
+                sig_data = None
 
             repurposing_candidates = [
                 {
@@ -207,6 +306,9 @@ def run_ai_analysis(
                 plain_language_summary=plain_summary,
                 cbioportal_data=cbioportal_data or None,
                 cosmic_sample_count=str(cosmic_sample_count) if cosmic_sample_count else None,
+                immunotherapy_profile=imm_profile_data if targetable_mutations else None,
+                mutational_signature=sig_data if targetable_mutations else None,
+                combination_therapy=combination_therapy_data or None,
             )
             db.add(result)
             db.flush()
@@ -241,6 +343,101 @@ def run_ai_analysis(
     except Exception as exc:
         logger.error(f"[ai] Analysis failed for {submission_id}: {exc}")
         raise self.retry(exc=exc)
+
+
+def _get_fusion_candidates(submission_id: str) -> list[dict]:
+    """Check for RNA-seq fusion output files and return drug candidate dicts.
+
+    Looks for STAR-Fusion and Arriba output files in the local_storage working
+    directory for this submission.  Returns an empty list if no fusion files
+    are found (VCF-only submissions).
+    """
+    try:
+        from services.rnaseq import parse_star_fusion, parse_arriba_fusions, ACTIONABLE_FUSIONS
+    except ImportError:
+        return []
+
+    base_dir = Path(__file__).resolve().parents[1] / "local_storage" / "openoncology-raw" / submission_id
+    fusion_events = []
+
+    star_path = base_dir / "star-fusion.fusion_predictions.tsv"
+    if star_path.exists():
+        try:
+            fusion_events.extend(parse_star_fusion(str(star_path)))
+        except Exception as exc:
+            logger.warning("[ai] STAR-Fusion parse failed: %s", exc)
+
+    arriba_path = base_dir / "fusions.tsv"
+    if arriba_path.exists():
+        try:
+            fusion_events.extend(parse_arriba_fusions(str(arriba_path)))
+        except Exception as exc:
+            logger.warning("[ai] Arriba parse failed: %s", exc)
+
+    if not fusion_events:
+        return []
+
+    candidates = []
+    for event in fusion_events:
+        if not event.actionable:
+            continue
+        # Assign evidence level based on confidence
+        level_map = {"HIGH": "LEVEL_1", "MEDIUM": "LEVEL_2", "LOW": "LEVEL_3A"}
+        oncokb_level = level_map.get(event.confidence, "LEVEL_3A")
+        for drug_name in event.recommended_drugs:
+            candidates.append({
+                "drug_name": drug_name,
+                "chembl_id": None,
+                "mechanism": f"Fusion-targeted ({event.fusion_name})",
+                "oncokb_level": oncokb_level,
+                "is_approved": event.confidence == "HIGH",
+                "max_phase": 4 if event.confidence == "HIGH" else 3,
+                "binding_score": None,
+                "opentargets_score": None,
+                "civic_score": None,
+                "alphamissense_score": None,
+                "evidence_sources": ["rnaseq_fusion", event.source],
+                "matched_terms": [event.fusion_name, f"{event.gene1}::{event.gene2}"],
+            })
+
+    logger.info("[ai] fusion candidates: %d from %d events", len(candidates), len(fusion_events))
+    return candidates
+
+
+_ONCOKB_LEVEL_ORDER = {
+    "LEVEL_1": 7, "LEVEL_2": 6, "LEVEL_3A": 5, "LEVEL_3B": 4,
+    "LEVEL_4": 3, "LEVEL_R1": 2, "LEVEL_R2": 1,
+}
+
+
+def _merge_drug_candidates(base: list[dict], extra: list[dict]) -> list[dict]:
+    """Merge extra drug candidates into the base list, deduplicating by drug_name.
+
+    When the same drug appears in both lists, the entry with the higher
+    OncoKB evidence level (closer to LEVEL_1) is kept.  Extra candidates
+    not already in base are appended.
+    """
+    merged: dict[str, dict] = {}
+    for drug in base:
+        name = (drug.get("drug_name") or "").lower()
+        if name:
+            merged[name] = drug
+
+    for drug in extra:
+        name = (drug.get("drug_name") or "").lower()
+        if not name:
+            continue
+        if name not in merged:
+            merged[name] = drug
+        else:
+            existing_level = _ONCOKB_LEVEL_ORDER.get(
+                merged[name].get("oncokb_level") or "", 0
+            )
+            new_level = _ONCOKB_LEVEL_ORDER.get(drug.get("oncokb_level") or "", 0)
+            if new_level > existing_level:
+                merged[name] = drug
+
+    return list(merged.values())
 
 
 def _run_alphamissense(gene: str, hgvs: str | None) -> float | None:

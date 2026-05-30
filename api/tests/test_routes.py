@@ -86,6 +86,9 @@ class TestGetResults:
             headers={"Authorization": "Bearer test-token"},
         )
         assert resp.status_code == 404
+        body = resp.json()
+        assert body["error"] == "not_found"
+        assert "request_id" in body
 
     async def test_pending_submission_returns_processing_status(
         self, client: AsyncClient, db_session, seeded_patient
@@ -138,6 +141,9 @@ class TestGetResults:
             headers={"Authorization": "Bearer test-token"},
         )
         assert resp.status_code == 404
+        body = resp.json()
+        assert body["error"] == "not_found"
+        assert "request_id" in body
 
     async def test_custom_drug_possible_when_target_gene_set(
         self, client: AsyncClient, seeded_submission
@@ -181,6 +187,9 @@ class TestSubmitRoute:
             data={"cancer_type": "Lung adenocarcinoma"},
         )
         assert resp.status_code == 404
+        body = resp.json()
+        assert body["error"] == "not_found"
+        assert "request_id" in body
 
     async def test_post_with_valid_patient_returns_202(
         self, client: AsyncClient, seeded_patient, monkeypatch

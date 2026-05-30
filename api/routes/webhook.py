@@ -18,6 +18,7 @@ from config import settings
 from database import get_db
 from models.order import Order, OrderStatus
 from models.campaign import Campaign
+from utils.http import bad_request_error
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/webhook", tags=["webhook"])
@@ -34,9 +35,9 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
             payload, sig_header, settings.stripe_webhook_secret
         )
     except stripe.error.SignatureVerificationError:
-        raise HTTPException(status_code=400, detail="Invalid Stripe signature")
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise bad_request_error(request, "Invalid Stripe signature")
+    except Exception:
+        raise bad_request_error(request, "Invalid webhook payload")
 
     event_type: str = event["type"]
     obj = event["data"]["object"]

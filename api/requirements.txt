@@ -20,6 +20,11 @@ stripe==9.8.0
 resend==0.7.2
 python-dotenv==1.0.1
 
+# Observability
+sentry-sdk[fastapi]>=2.0.0
+prometheus-fastapi-instrumentator>=7.0.0
+structlog>=24.0.0
+
 # Phase 3 — AI / cheminformatics
 rdkit==2025.09.1           # SMILES → SDF conversion for DiffDock inputs
 ruff==0.4.4                # linter (also used by CI)

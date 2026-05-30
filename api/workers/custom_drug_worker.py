@@ -98,6 +98,8 @@ def _brief_to_drug_spec(brief: dict) -> str:
     bind=True,
     max_retries=1,
     default_retry_delay=120,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def build_custom_drug_brief(self, drug_request_id: str):
     from workers._db_sync import get_sync_session

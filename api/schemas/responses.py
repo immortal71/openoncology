@@ -54,6 +54,54 @@ class OncologistReportOut(BaseModel):
     plain_text: Optional[str] = None
 
 
+class ImmunotherapyCandidateOut(BaseModel):
+    drug_name: str
+    drug_class: str
+    oncokb_level: str
+    indication: Optional[str] = None
+    evidence_note: Optional[str] = None
+    rank_score_estimate: float = 0.0
+
+
+class ImmunotherapyProfileOut(BaseModel):
+    tmb_per_mb: float = 0.0
+    tmb_high: bool = False
+    msi_high: bool = False
+    hrd: bool = False
+    pole_mutation: bool = False
+    mmr_gene_hits: list[str] = Field(default_factory=list)
+    hrd_gene_hits: list[str] = Field(default_factory=list)
+    candidates: list[ImmunotherapyCandidateOut] = Field(default_factory=list)
+
+
+class SignatureImplicationOut(BaseModel):
+    signature_name: str
+    drug_class: str
+    drug_recommendations: list[str] = Field(default_factory=list)
+    oncokb_level: str
+    evidence_note: Optional[str] = None
+
+
+class MutationalSignatureOut(BaseModel):
+    dominant_signature: Optional[str] = None
+    signature_fraction: float = 0.0
+    confidence: str = "INSUFFICIENT"
+    mutation_count: int = 0
+    all_fractions: dict[str, float] = Field(default_factory=dict)
+    implication: Optional[SignatureImplicationOut] = None
+
+
+class CombinationSuggestionOut(BaseModel):
+    drugs: list[str]
+    synergy_type: str
+    rationale: str
+    combination_score: float
+    evidence_level: str
+    evidence_note: str
+    cancer_type_context: Optional[str] = None
+    trial_ids: list[str] = Field(default_factory=list)
+
+
 class ResultsResponse(BaseModel):
     submission_id: str
     cancer_type: Optional[str] = None
@@ -74,3 +122,6 @@ class ResultsResponse(BaseModel):
     oncologist_report: Optional[OncologistReportOut] = None
     mutations: list[MutationOut] = Field(default_factory=list)
     result_id: Optional[str] = None
+    immunotherapy_profile: Optional[ImmunotherapyProfileOut] = None
+    mutational_signature: Optional[MutationalSignatureOut] = None
+    combination_therapy: list[CombinationSuggestionOut] = Field(default_factory=list)

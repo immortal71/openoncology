@@ -23,6 +23,8 @@ logger = logging.getLogger(__name__)
     bind=True,
     max_retries=2,
     default_retry_delay=60,
+    acks_late=True,
+    reject_on_worker_lost=True,
 )
 def run_genomic_pipeline(
     self,
@@ -229,3 +231,33 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
         ExtraArgs={"ServerSideEncryption": "AES256"},
     )
     return key
+
+
+# ── Periodic maintenance tasks (invoked by Celery Beat) ───────────────────────
+
+@celery_app.task(
+    name="workers.genomic_worker.sweep_stale_submissions",
+    bind=True,
+    max_retries=1,
+    acks_late=True,
+)
+def sweep_stale_submissions(self):
+    """Re-queue or fail submissions that have been stuck in 'processing' > 6 hours."""
+    from datetime import datetime, timedelta, UTC
+    from sqlalchemy import select, update
+    from workers._db_sync import get_sync_session
+    from models.submission import Submission, SubmissionStatus
+
+    cutoff = datetime.now(UTC) - timedelta(hours=6)
+    with get_sync_session() as db:
+        stale = db.execute(
+            select(Submission).where(
+                Submission.status == SubmissionStatus.processing,
+                Submission.created_at < cutoff,
+            )
+        ).scalars().all()
+        for s in stale:
+            s.status = SubmissionStatus.failed
+            logger.warning("[genomic] Swept stale submission %s (stuck since %s)", s.id, s.created_at)
+        db.commit()
+    logger.info("[genomic] Swept %d stale submissions", len(stale))

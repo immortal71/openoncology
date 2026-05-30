@@ -98,17 +98,26 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt pytest pytest-asyncio httpx
+        run: pip install -r requirements.txt pytest pytest-asyncio pytest-cov httpx sentry-sdk prometheus-fastapi-instrumentator structlog
 
       - name: Run Alembic migrations
         run: alembic upgrade head
-        continue-on-error: true
+
+      - name: Detect uncommitted model changes
+        run: alembic check
+        continue-on-error: false
 
       - name: Run tests
         working-directory: ${{ github.workspace }}
-        run: pytest ai/tests/ -v --tb=short
+        run: pytest api/tests/ ai/tests/ -v --tb=short --cov=ai --cov=api --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=60
         env:
           PYTHONPATH: ${{ github.workspace }}
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-xml
+          path: coverage.xml
 
       - name: Hard clinical benchmark quality gate
         working-directory: ${{ github.workspace }}

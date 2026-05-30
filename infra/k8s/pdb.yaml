@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: openoncology-api-pdb
+  namespace: openoncology
+spec:
+  # Always keep at least 1 pod running during voluntary disruptions
+  # (node drains, rolling updates, cluster upgrades)
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api

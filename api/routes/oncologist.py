@@ -3,7 +3,7 @@
 GET  /api/oncologist/pending  — list results awaiting review (oncologist role required)
 POST /api/oncologist/review   — approve or flag a result
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,6 +13,8 @@ from models.result import Result
 from models.submission import Submission
 from models.mutation import Mutation
 from routes.auth import get_current_patient
+from utils.http import not_found_error
+from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 router = APIRouter(prefix="/api/oncologist", tags=["oncologist"])
 
@@ -37,7 +39,9 @@ class ReviewRequest(BaseModel):
 
 
 @router.get("/pending")
+@limiter.limit(READ_LIMIT)
 async def list_pending(
+    request: Request,
     _: dict = Depends(_require_oncologist),
     db: AsyncSession = Depends(get_db),
 ):
@@ -84,7 +88,9 @@ async def list_pending(
 
 
 @router.post("/review", status_code=status.HTTP_200_OK)
+@limiter.limit(WRITE_LIMIT)
 async def submit_review(
+    request: Request,
     body: ReviewRequest,
     _: dict = Depends(_require_oncologist),
     db: AsyncSession = Depends(get_db),
@@ -94,7 +100,7 @@ async def submit_review(
         select(Result).where(Result.submission_id == body.submission_id)
     )).scalar_one_or_none()
     if not result:
-        raise HTTPException(status_code=404, detail="Result not found")
+        raise not_found_error(request, "Result not found")
 
     result.oncologist_reviewed = True
     result.oncologist_notes = body.notes

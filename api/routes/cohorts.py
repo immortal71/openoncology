@@ -22,12 +22,14 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models.cohort import CohortMutation, Sample, Study
+from utils.http import not_found_error, validation_error
+from middleware.rate_limit import limiter, READ_LIMIT
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,9 @@ router = APIRouter(prefix="/api/cohorts", tags=["cohorts"])
 # ── Study listing ──────────────────────────────────────────────────────────────
 
 @router.get("/studies")
+@limiter.limit(READ_LIMIT)
 async def list_studies(
+    request: Request,
     cancer_type: Optional[str] = Query(None, description="Filter by cancer type ID (e.g. LUAD, BRCA)"),
     source: Optional[str] = Query(None, description="Filter by data source (TCGA, ICGC, GEO)"),
     db: AsyncSession = Depends(get_db),
@@ -58,8 +62,10 @@ async def list_studies(
 
 
 @router.get("/studies/{study_id}")
+@limiter.limit(READ_LIMIT)
 async def get_study(
     study_id: str,
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
     """Get details for a single study by its study_id."""
@@ -68,7 +74,7 @@ async def get_study(
     )).scalar_one_or_none()
 
     if not study:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Study not found")
+        raise not_found_error(request, "Study not found")
 
     # Count samples
     sample_count = await db.scalar(
@@ -91,8 +97,10 @@ async def get_study(
 # ── Study mutation queries ─────────────────────────────────────────────────────
 
 @router.get("/{study_id}/mutations")
+@limiter.limit(READ_LIMIT)
 async def get_study_mutations(
     study_id: str,
+    request: Request,
     gene: Optional[str] = Query(None, description="Filter by gene symbol (e.g. KRAS)"),
     classification: Optional[str] = Query(None, description="Filter by variant classification"),
     page: int = Query(1, ge=1),
@@ -104,7 +112,7 @@ async def get_study_mutations(
         select(Study).where(Study.study_id == study_id)
     )).scalar_one_or_none()
     if not study:
-        raise HTTPException(status_code=404, detail="Study not found")
+        raise not_found_error(request, "Study not found")
 
     stmt = select(CohortMutation).where(CohortMutation.study_id == study.id)
     if gene:
@@ -132,7 +140,9 @@ async def get_study_mutations(
 # ── Cross-study frequency ──────────────────────────────────────────────────────
 
 @router.get("/cross-study")
+@limiter.limit(READ_LIMIT)
 async def get_cross_study_frequency(
+    request: Request,
     gene: str = Query(..., description="Hugo gene symbol (e.g. EGFR)"),
     alteration: Optional[str] = Query(None, description="Protein change (e.g. L858R)"),
     db: AsyncSession = Depends(get_db),
@@ -212,7 +222,9 @@ async def get_cross_study_frequency(
 # ── OncoPrint data ─────────────────────────────────────────────────────────────
 
 @router.get("/oncoprint")
+@limiter.limit(READ_LIMIT)
 async def get_oncoprint_data(
+    request: Request,
     study_id: str = Query(..., description="Study ID to draw OncoPrint for"),
     genes: str = Query(..., description="Comma-separated gene list (e.g. EGFR,KRAS,TP53)"),
     max_samples: int = Query(200, ge=1, le=1000, description="Max samples to include"),
@@ -229,11 +241,11 @@ async def get_oncoprint_data(
         select(Study).where(Study.study_id == study_id)
     )).scalar_one_or_none()
     if not study:
-        raise HTTPException(status_code=404, detail="Study not found")
+        raise not_found_error(request, "Study not found")
 
     gene_list = [g.strip().upper() for g in genes.split(",") if g.strip()]
     if not gene_list:
-        raise HTTPException(status_code=422, detail="At least one gene required")
+        raise validation_error(request, "At least one gene required")
 
     # Fetch all mutations for the requested genes in this study
     stmt = (
@@ -302,7 +314,9 @@ async def get_oncoprint_data(
 # ── Gene summary ───────────────────────────────────────────────────────────────
 
 @router.get("/gene-summary")
+@limiter.limit(READ_LIMIT)
 async def get_gene_summary(
+    request: Request,
     gene: str = Query(..., description="Hugo gene symbol"),
     db: AsyncSession = Depends(get_db),
 ):

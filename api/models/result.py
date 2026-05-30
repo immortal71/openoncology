@@ -32,6 +32,16 @@ class Result(Base):
     # COSMIC sample count for the primary mutated gene (stored as string from worker)
     cosmic_sample_count: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
 
+    # ── AI analysis enrichment results (stored as JSON blobs) ────────────────
+    # Immunotherapy biomarker profile (TMB, MSI-H, HRD, POLE + candidate drugs)
+    immunotherapy_profile: Mapped[Any] = mapped_column(JSON, nullable=True)
+
+    # Dominant SBS mutational signature + treatment implication
+    mutational_signature: Mapped[Any] = mapped_column(JSON, nullable=True)
+
+    # Combination therapy suggestions (list of drug-pair recommendations)
+    combination_therapy: Mapped[Any] = mapped_column(JSON, nullable=True)
+
     # S3 key for the generated PDF report
     report_pdf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
 

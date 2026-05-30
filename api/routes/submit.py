@@ -13,6 +13,7 @@ from workers.genomic_worker import run_genomic_pipeline
 from routes.auth import get_current_patient
 from middleware.rate_limit import limiter, READ_LIMIT, UPLOAD_LIMIT
 from schemas import SubmissionResponse, SubmissionStatusOut
+from utils.http import not_found_error, validation_error
 
 router = APIRouter(prefix="/api/submit", tags=["submit"])
 
@@ -45,10 +46,7 @@ async def submit_sample(
     )).scalar_one_or_none()
 
     if not patient:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Patient profile not found. Please complete registration.",
-        )
+        raise not_found_error(request, "Patient profile not found. Please complete registration.")
 
     # Validate file types with extension fallback for browsers that send generic MIME
     biopsy_ext = (biopsy_file.filename or "").split(".")[-1].lower()
@@ -58,15 +56,9 @@ async def submit_sample(
     dna_ok = (dna_file.content_type in ALLOWED_DNA_TYPES) or (dna_ext in ALLOWED_DNA_EXT)
 
     if not biopsy_ok:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Biopsy file type '{biopsy_file.content_type}' not supported.",
-        )
+        raise validation_error(request, f"Biopsy file type '{biopsy_file.content_type}' not supported.")
     if not dna_ok:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"DNA file type '{dna_file.content_type}' not supported.",
-        )
+        raise validation_error(request, f"DNA file type '{dna_file.content_type}' not supported.")
 
     # Upload to encrypted MinIO/S3 storage
     biopsy_key = await upload_encrypted_file(
@@ -126,7 +118,7 @@ async def get_submission_status(
     )).scalar_one_or_none()
 
     if not submission:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found.")
+        raise not_found_error(request, "Submission not found.")
 
     return {
         "submission_id": submission.id,

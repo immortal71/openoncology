@@ -10,15 +10,14 @@ Primary sources:
 Provides:
   - fetch_trials_by_gene(): Get all trials studying a specific gene
   - fetch_trials_by_drug(): Get all trials using a specific drug
+  - fetch_trials_by_variant(): Mutation-specific trial search (NEW)
+  - score_trial_variant_relevance(): Score how relevant a trial is to a specific variant
   - parse_trial_xml(): Convert trial XML → structured trial dict
   - generate_benchmark_case(): Convert trial data → benchmark case format
 
 Usage:
-    from services.trial_integration import fetch_trials_by_gene, generate_benchmark_case
-    trials = await fetch_trials_by_gene(gene="EGFR", cancer_type="NSCLC")
-    for trial in trials:
-        case = generate_benchmark_case(trial)
-        print(case)
+    from services.trial_integration import fetch_trials_by_variant
+    trials = await fetch_trials_by_variant(gene="EGFR", variant="T790M", cancer_type="NSCLC")
 """
 
 from __future__ import annotations
@@ -95,6 +94,183 @@ TRIAL_PHASE_TO_LEVEL: dict[str, str] = {
     "PHASE_3": "LEVEL_1",  # Standard care pathway
     "PHASE_4": "LEVEL_2",  # Post-market surveillance
 }
+
+# ── Variant-specific trial search terms ───────────────────────────────────────
+# Maps (GENE, VARIANT) → extra search terms that appear in trial protocols
+# for this specific mutation.  Used by fetch_trials_by_variant() to boost
+# relevance scoring for trials that mention the exact variant.
+VARIANT_TO_TRIAL_TERMS: dict[tuple[str, str], list[str]] = {
+    # EGFR
+    ("EGFR", "T790M"):    ["T790M", "osimertinib resistance", "third-generation EGFR", "AZD9291"],
+    ("EGFR", "L858R"):    ["L858R", "exon 21", "erlotinib", "gefitinib", "afatinib", "osimertinib"],
+    ("EGFR", "exon19del"):["exon 19 deletion", "del19", "gefitinib", "erlotinib", "osimertinib"],
+    ("EGFR", "C797S"):    ["C797S", "fourth-generation EGFR", "allosteric EGFR"],
+    ("EGFR", "exon20ins"):["exon 20 insertion", "amivantamab", "mobocertinib"],
+    # KRAS
+    ("KRAS", "G12C"):     ["G12C", "sotorasib", "adagrasib", "AMG-510", "MRTX-849"],
+    ("KRAS", "G12D"):     ["G12D", "MRTX1133", "adagrasib G12D"],
+    ("KRAS", "G12V"):     ["G12V"],
+    # BRAF
+    ("BRAF", "V600E"):    ["V600E", "vemurafenib", "dabrafenib", "encorafenib"],
+    ("BRAF", "V600K"):    ["V600K", "dabrafenib", "trametinib"],
+    ("BRAF", "class_2"):  ["class 2 BRAF", "non-V600", "RAF dimer"],
+    # ALK
+    ("ALK", "fusion"):    ["ALK fusion", "ALK rearrangement", "alectinib", "brigatinib", "lorlatinib"],
+    ("ALK", "G1202R"):    ["G1202R", "lorlatinib resistance", "compound mutation"],
+    # MET
+    ("MET", "exon14skip"):["exon 14 skipping", "METex14", "capmatinib", "tepotinib"],
+    ("MET", "amplification"):["MET amplification", "MET copy number", "savolitinib"],
+    # RET
+    ("RET", "fusion"):    ["RET fusion", "selpercatinib", "pralsetinib", "BLU-667"],
+    ("RET", "M918T"):     ["M918T", "medullary thyroid", "vandetanib"],
+    # ERBB2 (HER2)
+    ("ERBB2", "amplification"):["HER2 amplification", "HER2 positive", "trastuzumab", "pertuzumab"],
+    ("ERBB2", "V777L"):   ["HER2 V777L", "neratinib", "afatinib"],
+    ("ERBB2", "exon20ins"):["HER2 exon 20", "trastuzumab deruxtecan", "poziotinib"],
+    # PIK3CA
+    ("PIK3CA", "H1047R"): ["PIK3CA H1047R", "alpelisib", "PI3K inhibitor"],
+    ("PIK3CA", "E545K"):  ["PIK3CA E545K", "alpelisib"],
+    ("PIK3CA", "E542K"):  ["PIK3CA E542K", "alpelisib"],
+    # BRCA
+    ("BRCA1", "pathogenic"):["BRCA1", "germline BRCA", "olaparib", "niraparib", "PARP inhibitor"],
+    ("BRCA2", "pathogenic"):["BRCA2", "germline BRCA", "olaparib", "niraparib", "PARP inhibitor"],
+    # IDH
+    ("IDH1", "R132H"):    ["IDH1 R132H", "ivosidenib", "olutasidenib"],
+    ("IDH2", "R172K"):    ["IDH2 R172K", "enasidenib"],
+    ("IDH2", "R140Q"):    ["IDH2 R140Q", "enasidenib"],
+    # FLT3
+    ("FLT3", "ITD"):      ["FLT3 ITD", "midostaurin", "quizartinib", "gilteritinib"],
+    ("FLT3", "D835"):     ["FLT3 TKD", "gilteritinib"],
+    # NTRK
+    ("NTRK1", "fusion"):  ["NTRK1 fusion", "larotrectinib", "entrectinib", "TRK fusion"],
+    ("NTRK2", "fusion"):  ["NTRK2 fusion", "larotrectinib", "entrectinib"],
+    ("NTRK3", "fusion"):  ["NTRK3 fusion", "larotrectinib", "entrectinib"],
+    # TP53
+    ("TP53", "R175H"):    ["TP53 R175H", "APR-246", "eprenetapopt", "p53 reactivation"],
+    ("TP53", "Y220C"):    ["TP53 Y220C", "PC14586", "p53 stabilizer"],
+    # ROS1
+    ("ROS1", "fusion"):   ["ROS1 fusion", "crizotinib", "entrectinib", "lorlatinib", "repotrectinib"],
+    # CDK4/6
+    ("CDKN2A", "deletion"):["p16 loss", "CDK4/6 inhibitor", "palbociclib", "ribociclib"],
+    ("CDK4", "amplification"):["CDK4 amplification", "abemaciclib"],
+    # PTEN
+    ("PTEN", "loss"):     ["PTEN loss", "PI3K inhibitor", "AKT inhibitor", "ipatasertib"],
+    # MSI/MMR
+    ("MLH1", "loss"):     ["MLH1 deficiency", "MMR deficient", "pembrolizumab", "MSI-H"],
+    ("MSH2", "loss"):     ["MSH2 deficiency", "MMR deficient", "pembrolizumab"],
+}
+
+
+def score_trial_variant_relevance(trial_title: str, trial_desc: str, gene: str, variant: str) -> float:
+    """Score how relevant a ClinicalTrials.gov trial is to a specific variant.
+
+    Args:
+        trial_title: Official trial title or brief title.
+        trial_desc:  Trial description / eligibility criteria (concatenated).
+        gene:        Gene symbol, e.g. "EGFR".
+        variant:     Variant descriptor, e.g. "T790M".
+
+    Returns:
+        Relevance score 0.0–1.0:
+          1.0 — exact variant term found in title/description
+          0.7 — variant-specific drug found in title/description
+          0.5 — gene-level match only (no variant-specific terms)
+          0.0 — not relevant
+    """
+    text = (trial_title + " " + trial_desc).lower()
+
+    # Exact variant terms
+    variant_terms = VARIANT_TO_TRIAL_TERMS.get((gene.upper(), variant), [variant])
+    for term in variant_terms:
+        if term.lower() in text:
+            return 1.0
+
+    # Variant itself by string
+    if variant.lower() in text:
+        return 1.0
+
+    # Gene-level match
+    gene_terms = GENE_TO_TRIAL_NAMES.get(gene.upper(), [gene])
+    for term in gene_terms:
+        if term.lower() in text:
+            return 0.5
+
+    return 0.0
+
+
+async def fetch_trials_by_variant(
+    gene: str,
+    variant: str,
+    cancer_type: Optional[str] = None,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    """Fetch ClinicalTrials.gov trials matched to a specific gene+variant.
+
+    First fetches gene-level trials, then re-scores each result for variant
+    specificity using the VARIANT_TO_TRIAL_TERMS lookup and string matching.
+
+    Args:
+        gene:        Gene symbol (e.g. "EGFR").
+        variant:     Variant descriptor (e.g. "T790M", "G12C").
+        cancer_type: Optional cancer type filter.
+        limit:       Maximum number of results.
+
+    Returns:
+        List of trial dicts sorted by relevance_score (descending).
+        Each dict has an added ``relevance_score`` field (0.0–1.0):
+          - 1.0: variant-specific match
+          - 0.5: gene-level match
+    """
+    # Also try variant-specific terms as direct intervention queries
+    variant_terms = VARIANT_TO_TRIAL_TERMS.get((gene.upper(), variant), [])
+    variant_specific_query = variant_terms[0] if variant_terms else variant
+
+    # Run gene-level + variant-specific queries in parallel
+    gene_trials_task = fetch_trials_by_gene(gene, cancer_type=cancer_type, limit=limit * 2)
+
+    variant_trials: list[dict] = []
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(
+                f"{CLINICALTRIALS_API_BASE}/studies",
+                params={
+                    "query.cond": cancer_type or "",
+                    "query.intr": variant_specific_query,
+                    "format": "json",
+                    "pageSize": min(limit, 50),
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            for study in data.get("studies", []):
+                parsed = _parse_trial_json(study, gene)
+                if parsed:
+                    variant_trials.append(parsed)
+    except Exception as exc:
+        logger.warning("[trials] variant query failed for %s %s: %s", gene, variant, exc)
+
+    gene_trials = await gene_trials_task
+
+    # Merge and deduplicate by trial_id
+    all_trials: dict[str, dict] = {}
+    for t in gene_trials + variant_trials:
+        tid = t.get("trial_id", "")
+        if tid and tid not in all_trials:
+            all_trials[tid] = t
+
+    # Score each trial for variant relevance
+    scored: list[dict] = []
+    for t in all_trials.values():
+        title = t.get("title", "")
+        # Use drugs list as additional text context
+        drugs_text = " ".join(t.get("drugs", []))
+        score = score_trial_variant_relevance(title, drugs_text, gene, variant)
+        t["relevance_score"] = score
+        scored.append(t)
+
+    # Sort: variant-specific (1.0) first, then gene-level (0.5)
+    scored.sort(key=lambda x: x.get("relevance_score", 0.0), reverse=True)
+    return scored[:limit]
 
 
 async def fetch_trials_by_gene(gene: str, cancer_type: Optional[str] = None, limit: int = 50) -> list[dict[str, Any]]:

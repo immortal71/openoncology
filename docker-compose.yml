@@ -21,6 +21,12 @@ services:
       - /app/.next
     depends_on:
       - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - openoncology
 
@@ -49,6 +55,12 @@ services:
       - db
       - redis
       - storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - openoncology
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -71,6 +83,12 @@ services:
     depends_on:
       - db
       - redis
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.genomic_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - openoncology
     command: celery -A workers.genomic_worker worker --loglevel=info -Q genomic
@@ -93,6 +111,12 @@ services:
     depends_on:
       - db
       - redis
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.ai_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - openoncology
     command: celery -A workers.ai_worker worker --loglevel=info -Q ai
@@ -113,6 +137,12 @@ services:
     depends_on:
       - db
       - redis
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.notify_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - openoncology
     command: celery -A workers.notify_worker worker --loglevel=info -Q notify
@@ -130,6 +160,12 @@ services:
       - POSTGRES_DB=openoncology
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "openoncology"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       - openoncology
 
@@ -142,6 +178,12 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - openoncology
 
@@ -172,6 +214,12 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
     networks:
       - openoncology
     command: start-dev
@@ -203,6 +251,46 @@ services:
       - prometheus
     networks:
       - openoncology
+
+  # ─────────────────────────────────────────────
+  # Celery Beat  →  scheduled tasks
+  # ─────────────────────────────────────────────
+  celery-beat:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=storage:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - openoncology
+    command: celery -A workers beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # Flower — Celery monitoring  →  localhost:5555
+  # ─────────────────────────────────────────────
+  flower:
+    image: mher/flower:2.0
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - FLOWER_BASIC_AUTH=${FLOWER_USER:-admin}:${FLOWER_PASSWORD:-changeme}
+    depends_on:
+      - redis
+    networks:
+      - openoncology
+    restart: unless-stopped
 
 volumes:
   postgres_data:

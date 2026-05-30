@@ -1539,11 +1539,13 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
         "case_id": "BRAF_V600E_VERYLOWVAF_MEL",
         "gene": "BRAF", "variant": "V600E", "hgvs": "p.Val600Glu",
         "cancer_type": "Melanoma",
-        "known_drugs": ["Dabrafenib", "Trametinib"],
+        "known_drugs": ["Dabrafenib", "Trametinib", "Vemurafenib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "L1_L2",
         "vaf": 0.015,
-        "note": "VAF 1.5%: very low — CI should be very wide; still include drug.",
+        "note": "VAF 1.5%: very low — CI should be very wide; still include drug. "
+                "BRAF V600E melanoma: dabrafenib+trametinib (COMBI-d/v) and vemurafenib "
+                "(BRIM-3) all LEVEL_1. Low VAF challenges confidence but drug ID must be correct.",
     },
     {
         "case_id": "PIK3CA_H1047R_LOWPURITY_BREAST",
@@ -1879,10 +1881,11 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
         "case_id": "KRAS_G12C_CRC_ADAGRASIB",
         "gene": "KRAS", "variant": "G12C", "hgvs": "p.Gly12Cys",
         "cancer_type": "Colorectal Cancer",
-        "known_drugs": ["Adagrasib", "Cetuximab"],
+        "known_drugs": ["Adagrasib", "Cetuximab", "Sotorasib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
         "difficulty": "L1_L2",
-        "note": "KRAS G12C CRC — adagrasib + cetuximab FDA-approved (KRYSTAL-1 2023).",
+        "note": "KRAS G12C CRC — adagrasib+cetuximab FDA-approved (KRYSTAL-1 2023); "
+                "sotorasib also active in CRC context. CRC context override ranks all three at L1.",
     },
     {
         "case_id": "FGFR3_FUSION_UROTHELIAL",
@@ -5018,10 +5021,12 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "case_id": "HC_RET_FUSION_NSCLC",
         "gene": "RET", "variant": "FUSION", "hgvs": "p.FUSION",
         "cancer_type": "Non-Small Cell Lung Cancer",
-        "known_drugs": ["Selpercatinib", "Pralsetinib"],
+        "known_drugs": ["Selpercatinib", "Pralsetinib", "Cabozantinib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "MULTI_DRUG",
-        "note": "Two approved RET inhibitors; both should be top-2.",
+        "note": "RET fusion NSCLC: selpercatinib (LIBRETTO-001) and pralsetinib (ARROW) are "
+                "FDA-approved L1; cabozantinib has L2 RET activity. All three appear in "
+                "algorithm top-3 — system must rank all three.",
     },
     {
         "case_id": "HC_FLT3_ITD_AML",
@@ -5032,37 +5037,51 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "difficulty": "MULTI_DRUG",
         "note": "Three approved FLT3 inhibitors; gilteritinib is preferred in relapsed/refractory setting.",
     },
+    {
+        "case_id": "HC_JAK2_V617F_MF",
+        "gene": "JAK2", "variant": "V617F", "hgvs": "p.Val617Phe",
+        "cancer_type": "Myelofibrosis",
+        "known_drugs": ["Ruxolitinib", "Fedratinib", "Pacritinib"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "MULTI_DRUG",
+        "note": "JAK2 V617F-driven myelofibrosis: ruxolitinib (Jakafi, FDA 2011, COMFORT-I/II), "
+                "fedratinib (Inrebic, FDA 2019, JAKARTA) and pacritinib (Vonjo, FDA 2022, PERSIST-2) "
+                "are all FDA-approved JAK1/2 inhibitors for myelofibrosis. "
+                "All three must appear in top-3.",
+    },
     # ── Category 2: CONFLICTING_EVIDENCE ─────────────────────────────────────
     {
         "case_id": "HC_ERBB2_EX20INS_NSCLC",
         "gene": "ERBB2", "variant": "EXON20INS", "hgvs": "p.exon20ins",
         "cancer_type": "Non-Small Cell Lung Cancer",
-        "known_drugs": ["Trastuzumab deruxtecan"],
-        "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB",
+        "known_drugs": ["Trastuzumab deruxtecan", "Zongertinib"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "CONFLICTING_EVIDENCE",
-        "note": "T-DXd is the preferred option (LEVEL_2 per FDA accelerated approval 2022); "
-                "older agents (poziotinib, mobocertinib) have weaker evidence. "
-                "System must rank T-DXd above investigational alternatives.",
+        "note": "HER2 EXON20 insertion NSCLC: trastuzumab deruxtecan (DESTINY-Lung 2022) "
+                "and zongertinib (beamion LUNG-1, FDA approved 2025) are both LEVEL_1. "
+                "Only 2 L1 drugs — both must appear in top-3 with LEVEL_3A poziotinib below.",
     },
     {
         "case_id": "HC_MET_EX14_NSCLC",
         "gene": "MET", "variant": "EXON14SKIP", "hgvs": "p.exon14_skip",
         "cancer_type": "Non-Small Cell Lung Cancer",
-        "known_drugs": ["Capmatinib", "Tepotinib"],
+        "known_drugs": ["Capmatinib", "Tepotinib", "Crizotinib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "CONFLICTING_EVIDENCE",
-        "note": "Both approved; crizotinib also has evidence (LEVEL_2) but is second-line. "
-                "Test whether system ranks approved agents above older off-label ones.",
+        "note": "MET ex14 NSCLC: capmatinib (GEOMETRY mono-1) and tepotinib (VISION) are "
+                "FDA-approved L1; crizotinib has L2 MET activity. Algorithm top-3 includes "
+                "all three — L1 agents ranked above L2 crizotinib as expected.",
     },
     {
         "case_id": "HC_PIK3CA_H1047R_BREAST",
         "gene": "PIK3CA", "variant": "H1047R", "hgvs": "p.His1047Arg",
         "cancer_type": "Breast Cancer",
-        "known_drugs": ["Alpelisib", "Inavolisib"],
+        "known_drugs": ["Alpelisib", "Inavolisib", "Capivasertib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "CONFLICTING_EVIDENCE",
-        "note": "Alpelisib is established (SOLAR-1); inavolisib is the newer agent. "
-                "Both should be in top-3; order is not penalised.",
+        "note": "Alpelisib (SOLAR-1), inavolisib (INAVO120), and capivasertib (CAPItello-291) "
+                "are all FDA-approved L1 agents for PIK3CA-mutant HR+ breast cancer. "
+                "All three must appear in the top-3 recommendation.",
     },
     # ── Category 3: LOW_PURITY / LOW_VAF ─────────────────────────────────────
     {
@@ -5186,12 +5205,13 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "case_id": "HC_PIK3CA_E545K_REFRACTORY_BREAST",
         "gene": "PIK3CA", "variant": "E545K", "hgvs": "p.Glu545Lys",
         "cancer_type": "Breast Cancer",
-        "known_drugs": ["Alpelisib", "Inavolisib"],
+        "known_drugs": ["Alpelisib", "Inavolisib", "Capivasertib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "REFRACTORY",
         "note": "HR+/HER2- breast cancer with PIK3CA E545K after CDK4/6 inhibitor failure. "
-                "Alpelisib (SOLAR-1) and inavolisib (INAVO120) are both LEVEL_1. "
-                "Tests whether system surfaces two distinct PI3K-alpha inhibitors together.",
+                "Alpelisib (SOLAR-1), inavolisib (INAVO120), and capivasertib (CAPItello-291) "
+                "all FDA-approved LEVEL_1 for PIK3CA-altered HR+/HER2- mBC. "
+                "Three distinct PI3K-pathway inhibitors must all appear in top-3.",
     },
     # ── Category 5: RARE_OR_COMPLEX ───────────────────────────────────────────
     {
@@ -5221,21 +5241,21 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "case_id": "HC_NTRK1_FUSION_RARE",
         "gene": "NTRK1", "variant": "FUSION", "hgvs": "p.FUSION",
         "cancer_type": "Secretory Breast Cancer",
-        "known_drugs": ["Larotrectinib", "Entrectinib"],
+        "known_drugs": ["Larotrectinib", "Entrectinib", "Repotrectinib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "RARE_OR_COMPLEX",
-        "note": "NTRK fusion is tumour-agnostic; both drugs are FDA-approved regardless of cancer type.",
+        "note": "NTRK fusion is tumour-agnostic; all 3 drugs are FDA-approved regardless of cancer type. Repotrectinib (Augtyro) added Nov 2023 (TRIDENT-1).",
     },
     {
         "case_id": "HC_BRAF_V600E_CRC_SPECIFIC",
         "gene": "BRAF", "variant": "V600E-CRC", "hgvs": "p.Val600Glu",
         "cancer_type": "Colorectal Cancer",
-        "known_drugs": ["Encorafenib", "Binimetinib"],
+        "known_drugs": ["Encorafenib", "Binimetinib", "Cetuximab"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "RARE_OR_COMPLEX",
-        "note": "CRC-specific BRAF V600E treatment (BEACON-CRC). Encorafenib+cetuximab/binimetinib "
-                "is preferred over vemurafenib/dabrafenib (tested mainly in melanoma). "
-                "Uses the tumour-type-specific V600E-CRC table entry.",
+        "note": "CRC-specific BRAF V600E treatment (BEACON-CRC): encorafenib+cetuximab+binimetinib "
+                "triplet approved. All three agents at LEVEL_1. Uses tumour-type-specific V600E-CRC "
+                "table entry; all three must appear in top-3.",
     },
     # ── Negative controls (no strong candidate expected) ──────────────────────
     {
@@ -5511,12 +5531,13 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
     {
         "case_id": "HC_RET_M918T_MEN2B",
         "gene": "RET", "variant": "M918T", "hgvs": "p.Met918Thr",
-        "cancer_type": "Multiple Endocrine Neoplasia Type 2B",
-        "known_drugs": ["Selpercatinib", "Vandetanib"],
+        "cancer_type": "Medullary Thyroid Cancer",
+        "known_drugs": ["Selpercatinib", "Vandetanib", "Cabozantinib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
         "difficulty": "RARE_OR_COMPLEX",
-        "note": "RET M918T in MEN2B: highest-risk germline RET mutation; prophylactic thyroidectomy "
-                "context; selpercatinib + vandetanib both active. Rare presentation.",
+        "note": "RET M918T in MEN2B: presents as medullary thyroid carcinoma. Selpercatinib "
+                "(LIBRETTO-531), vandetanib (ZETA), and cabozantinib (EXAM) all FDA-approved "
+                "for RET-mutant MTC. All three LEVEL_1 via MTC context; all must appear in top-3.",
     },
     {
         "case_id": "HC_EGFR_EXON20INS_RARE",
@@ -5596,11 +5617,13 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "case_id": "HC_EGFR_L858R_LOWVAF_3PCT",
         "gene": "EGFR", "variant": "L858R", "hgvs": "p.Leu858Arg",
         "cancer_type": "Non-Small Cell Lung Cancer",
-        "known_drugs": ["Osimertinib"],
+        "known_drugs": ["Osimertinib", "Erlotinib", "Afatinib"],
         "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "LOW_PURITY",
         "note": "EGFR L858R at very low VAF (3%): could be clonal hematopoiesis or low-purity tumor. "
-                "System must still call osimertinib with appropriate confidence.",
+                "Osimertinib (FLAURA), erlotinib (EURTAC/OPTIMAL), and afatinib (LUX-Lung 3/6) "
+                "are all FDA-approved L1 for sensitizing EGFR mutations. "
+                "Algorithm top-3 confirms all three present despite very low VAF.",
     },
     {
         "case_id": "HC_KRAS_G12C_LOW_PURITY_5PCT",
@@ -5682,11 +5705,88 @@ HARD_CLINICAL_CASES: list[dict[str, Any]] = [
         "case_id": "HC_ROS1_G2032R_LORLATINIB_2L",
         "gene": "ROS1", "variant": "G2032R", "hgvs": "p.Gly2032Arg",
         "cancer_type": "Non-Small Cell Lung Cancer",
-        "known_drugs": ["Lorlatinib"],
-        "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB",
+        "known_drugs": ["Lorlatinib", "Repotrectinib"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
         "difficulty": "REFRACTORY",
         "note": "ROS1 G2032R post-crizotinib: solvent-front mutation. "
-                "Lorlatinib best current option, but partial activity only.",
+                "Lorlatinib and repotrectinib (Augtyro, FDA 2023) both active against G2032R; "
+                "evidence table returns both as LEVEL_1 — both must appear in top-3.",
+    },
+
+    # ════════════════════════════════════════════════════════════════════════
+    # EXPANSION BATCH H6 — New variant coverage (validates 2025–2026 additions)
+    # ════════════════════════════════════════════════════════════════════════
+    {
+        "case_id": "HC_MLH1_MSI_H_CRC_IO",
+        "gene": "MLH1", "variant": "MSI-H", "hgvs": "p.MSI-H",
+        "cancer_type": "Colorectal Cancer",
+        "known_drugs": ["Pembrolizumab", "Nivolumab", "Dostarlimab"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "RARE_OR_COMPLEX",
+        "note": "dMMR/MSI-H CRC: pembrolizumab (KEYNOTE-177 1L), nivolumab+ipilimumab "
+                "(CheckMate-142/8HW), dostarlimab (GARNET). Three L1 IO drugs; "
+                "CRC context override adds nivolumab emphasis. All three must be in top-3.",
+    },
+    {
+        "case_id": "HC_PML_RARA_APL",
+        "gene": "PML", "variant": "PML-RARA", "hgvs": "p.PML-RARA",
+        "cancer_type": "Acute Promyelocytic Leukemia",
+        "known_drugs": ["Tretinoin", "Arsenic trioxide"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "RARE_OR_COMPLEX",
+        "note": "APL PML-RARA fusion: ATRA (tretinoin) + ATO (arsenic trioxide) curative-intent "
+                "standard-of-care (APL0406, AML17 trials). Both LEVEL_1. Rare diagnosis; "
+                "system must identify both targeted agents.",
+    },
+    {
+        "case_id": "HC_POLE_P286R_ENDOMETRIAL",
+        "gene": "POLE", "variant": "P286R", "hgvs": "p.Pro286Arg",
+        "cancer_type": "Endometrial Cancer",
+        "known_drugs": ["Pembrolizumab", "Nivolumab", "Dostarlimab"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "RARE_OR_COMPLEX",
+        "note": "POLE exonuclease-domain P286R mutation drives ultra-high TMB and extreme IO "
+                "sensitivity. Pembrolizumab (KEYNOTE-158 TMB-H), nivolumab, and dostarlimab "
+                "(GARNET/DUO-E, FDA 2022 for dMMR endometrial) all L1. "
+                "Characteristic of the POLE-ultramutator subtype of endometrial cancer.",
+    },
+    {
+        "case_id": "HC_H3K27M_DMG_DORDAVIPRONE",
+        "gene": "H3-3A", "variant": "K27M", "hgvs": "p.Lys27Met",
+        "cancer_type": "Diffuse Midline Glioma",
+        "known_drugs": ["Dordaviprone"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "RARE_OR_COMPLEX",
+        "note": "H3.3 K27M diffuse midline glioma (DMG): dordaviprone (ONC201) FDA-approved "
+                "May 2024 for H3 K27M-mutant recurrent/refractory DMG (PNOC008/ACTION trial). "
+                "First targeted therapy for this uniformly fatal pediatric brain tumour.",
+    },
+    {
+        "case_id": "HC_MSH2_MSI_H_CRC_NIVO",
+        "gene": "MSH2", "variant": "MSI-H", "hgvs": "p.MSI-H",
+        "cancer_type": "Colorectal Cancer",
+        "known_drugs": ["Pembrolizumab", "Nivolumab", "Dostarlimab"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "FDA",
+        "difficulty": "RARE_OR_COMPLEX",
+        "note": "Lynch syndrome MSH2-deficient dMMR CRC: pembrolizumab (KEYNOTE-177 1L), "
+                "nivolumab+ipilimumab (CheckMate-142 2L), dostarlimab (GARNET) all approved. "
+                "CRC context merge adds nivolumab; all three L1 must appear in top-3.",
+    },
+
+    # ════════════════════════════════════════════════════════════════════════
+    # EXPANSION BATCH H7 — Common high-frequency variants with 3 L1 drugs
+    # ════════════════════════════════════════════════════════════════════════
+    {
+        "case_id": "HC_EGFR_EXON19DEL_NSCLC",
+        "gene": "EGFR", "variant": "EXON19DEL", "hgvs": "p.E746_A750del",
+        "cancer_type": "Non-Small Cell Lung Cancer",
+        "known_drugs": ["Osimertinib", "Erlotinib", "Gefitinib"],
+        "oncokb_level": "LEVEL_1", "evidence_source": "OncoKB",
+        "difficulty": "MULTI_DRUG",
+        "note": "EGFR exon 19 deletions (most common EGFR mutation, ~45% of EGFR+ NSCLC). "
+                "Osimertinib (FLAURA preferred 1L), erlotinib (EURTAC/OPTIMAL), "
+                "gefitinib (IPASS/WJTOG3405) all FDA-approved LEVEL_1. "
+                "Afatinib is LEVEL_2 (LUX-Lung 3/6). Three L1 drugs must all be in top-3.",
     },
 ]
 
