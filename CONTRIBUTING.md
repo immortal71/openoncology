@@ -2,15 +2,26 @@
 
 Thank you for your interest in contributing. OpenOncology is a research prototype — contributions that improve scientific rigour, test coverage, documentation, or developer experience are especially welcome.
 
+> **Fastest start:** `git clone https://github.com/immortal71/openoncology.git && cd openoncology && docker-compose up --build`  
+> For detailed setup, troubleshooting, and Windows steps see [docs/SETUP.md](docs/SETUP.md).
+
 ## Table of Contents
 
 - [Development setup](#development-setup)
 - [How to add a new evidence source](#how-to-add-a-new-evidence-source)
+- [How to add an evidence entry (drug/variant)](#how-to-add-an-evidence-entry-drugvariant)
 - [How to run benchmarks](#how-to-run-benchmarks)
 - [How the scoring algorithm works](#how-the-scoring-algorithm-works)
+- [Drug decision tiers](#drug-decision-tiers)
 - [Code review requirements](#code-review-requirements)
 - [Good first issues](#good-first-issues)
 - [Reporting bugs](#reporting-bugs)
+
+Related documentation:
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system components and data flow
+- [docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) — FDA vs repurposed vs custom three-tier logic
+- [docs/REPURPOSING_ALGORITHM.md](docs/REPURPOSING_ALGORITHM.md) — repurposing scoring + comparison with other tools
+- [docs/METHODS.md](docs/METHODS.md) — full scientific methods
 
 ---
 
@@ -126,6 +137,87 @@ from api.services.benchmark import run_ablation_sync, LEVEL_1_CASES
 report = run_ablation_sync(cases=LEVEL_1_CASES[:30])
 print(report.summary())
 ```
+
+---
+
+## How to add an evidence entry (drug/variant)
+
+Adding a drug–variant pair to the evidence table (e.g. a newly FDA-approved drug)
+takes 3 steps:
+
+### Step 1 — Add to `_LEVEL_TABLE` in `api/services/oncokb_evidence.py`
+
+```python
+("GENE_NAME", "ALTERATION"): {
+    "DrugName": "LEVEL_1",   # FDA-approved for this exact variant + cancer type
+    "OtherDrug": "LEVEL_2",  # Guideline-recommended
+},
+```
+
+Keys are `(gene_uppercase, normalised_alteration)`. Use
+`_normalise_alteration()` to convert a human-readable variant like `"L858R"` to
+its normalised form. For fusions use the form `"FUSION"` or `"GENE1-GENE2"`.
+
+For cancer-type-specific levels, add to `_CANCER_CONTEXT_OVERRIDES`:
+
+```python
+("BRAF", "V600E", "Colorectal Cancer"): {
+    "Encorafenib": "LEVEL_1",
+    "Cetuximab": "LEVEL_1",
+},
+```
+
+### Step 2 — Add or update the benchmark case
+
+Add a case to `HARD_CLINICAL_CASES` in `api/services/benchmark.py`:
+
+```python
+BenchmarkCase(
+    case_id="HC_BRAF_V600E_CRC",
+    gene="BRAF", alteration="V600E",
+    cancer_type="Colorectal Cancer",
+    known_drugs=["Encorafenib", "Cetuximab"],
+    description="BRAF V600E CRC — BEACON-CRC trial",
+),
+```
+
+**Benchmark integrity rules:**
+- Never add a case by checking algorithm output first (that is data leakage)
+- `known_drugs` must be sourced from FDA approval or published clinical guidelines
+- Never expand `known_drugs` to manufacture a higher P@3 score
+- Include the source trial ID or publication in the description
+
+### Step 3 — Run the gate and confirm PASS
+
+```bash
+python scripts/hard_benchmark_gate.py
+# Expected: Gate result: PASS
+```
+
+If the gate fails, investigate before adding more cases. Do not lower the gate
+threshold.
+
+---
+
+## Drug decision tiers
+
+All evidence entries should be assigned the correct tier. See
+[docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) for full details.
+Quick reference:
+
+| OncoKB level | Drug tier | Meaning |
+|-------------|----------|---------|
+| LEVEL_1 | `fda_approved` | FDA-approved for this variant + cancer type |
+| LEVEL_2 | `fda_approved` | Standard of care / guideline-recommended |
+| LEVEL_3A | `repurposed` | Clinical evidence in different cancer type |
+| LEVEL_3B | `repurposed` | Evidence from case reports / small trials |
+| LEVEL_4 | `repurposed` | Biological rationale, limited clinical data |
+| LEVEL_R1 | — | Known resistance — drug is blocked for this variant |
+| LEVEL_R2 | — | Putative resistance |
+
+**Withdrawn drugs** must not be added (or must be removed if already present):
+- Mobocertinib (Takeda, Nov 2023 — EXCLAIM-2 failed)
+- Belzutifan in non-approved contexts until full label review
 
 ---
 

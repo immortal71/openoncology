@@ -14,8 +14,36 @@ from routes.auth import get_current_patient
 from services.trial_integration import fetch_trials_by_gene, fetch_trials_by_variant
 from utils.http import not_found_error
 from middleware.rate_limit import limiter, READ_LIMIT
+from ai.ranking import classify_drug_tier, _decision_path
 
 router = APIRouter(prefix="/api/repurposing", tags=["repurposing"])
+
+_V1_SCOPE_NOTE = (
+    "Version 1 focuses on FDA-approved and repurposable drugs with mechanistic rationale. "
+    "Custom drug synthesis is a research tool only and is deferred to v2."
+)
+
+
+def _repurposing_confidence(c) -> str:
+    """Derive a confidence label for a repurposing candidate."""
+    score = float(c.rank_score or 0.0)
+    if score >= 0.60:
+        return "SUPPORTED"
+    if score >= 0.35:
+        return "EXPLORATORY"
+    return "WEAK"
+
+
+def _build_disclaimer(c) -> str:
+    """Build an explicit off-label disclaimer for a repurposing candidate."""
+    approved_for = c.approval_status or "another indication"
+    confidence = _repurposing_confidence(c)
+    return (
+        f"{c.drug_name} is FDA-approved for {approved_for} but is not approved "
+        f"for this cancer type or mutation combination. "
+        f"Clinical benefit is {confidence} based on available evidence. "
+        "Oncologist review is required before any clinical decision."
+    )
 
 
 @router.get("/{result_id}")
@@ -49,6 +77,8 @@ async def get_repurposing_candidates(
             "has_targetable_mutation": False,
             "message": "No targetable mutations were found for this sample.",
             "candidates": [],
+            "decision_path": "abstain",
+            "scope_note": _V1_SCOPE_NOTE,
         }
 
     candidates = sorted(
@@ -57,25 +87,42 @@ async def get_repurposing_candidates(
         reverse=True,
     )
 
+    candidate_dicts = [
+        {
+            "drug_name": c.drug_name,
+            "chembl_id": c.chembl_id,
+            "approval_status": c.approval_status,
+            "mechanism": c.mechanism,
+            "binding_score": c.binding_score,
+            "opentargets_score": c.opentargets_score,
+            "rank_score": c.rank_score,
+            "evidence_sources": c.evidence_sources or [],
+            "matched_terms": c.matched_terms or [],
+            "drug_tier": classify_drug_tier(
+                oncokb_level=getattr(c, "oncokb_level", None),
+                is_approved="approved" in (c.approval_status or "").lower(),
+                max_phase=getattr(c, "max_phase", None),
+                approval_status=c.approval_status,
+            ),
+            "repurposing_confidence": _repurposing_confidence(c),
+            "disclaimer": _build_disclaimer(c),
+            "oncologist_review_required": True,
+        }
+        for c in candidates
+    ]
+
+    tiers_present = [d["drug_tier"] for d in candidate_dicts]
+    decision_path = _decision_path(tiers_present)
+
     return {
         "result_id": result_id,
         "target_gene": result.target_gene,
         "has_targetable_mutation": True,
-        "candidates": [
-            {
-                "drug_name": c.drug_name,
-                "chembl_id": c.chembl_id,
-                "approval_status": c.approval_status,
-                "mechanism": c.mechanism,
-                "binding_score": c.binding_score,
-                "opentargets_score": c.opentargets_score,
-                "rank_score": c.rank_score,
-                "evidence_sources": c.evidence_sources or [],
-                "matched_terms": c.matched_terms or [],
-            }
-            for c in candidates
-        ],
+        "decision_path": decision_path,
+        "candidates": candidate_dicts,
+        "scope_note": _V1_SCOPE_NOTE,
     }
+
 
 
 @router.get("/{result_id}/trials")

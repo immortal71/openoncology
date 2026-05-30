@@ -156,6 +156,67 @@ _RESISTANCE_NEXT_LINE_BY_VARIANT: dict[tuple[str, str], tuple[str, ...]] = {
 }
 
 
+# ── Drug tier classification ──────────────────────────────────────────────────
+
+def classify_drug_tier(
+    oncokb_level: Optional[str],
+    is_approved: bool,
+    max_phase: Optional[int],
+    approval_status: Optional[str] = None,
+) -> str:
+    """Classify a drug candidate into an explicit tier label.
+
+    Tiers (in priority order):
+      fda_approved        — OncoKB Level 1/2 + drug is FDA-approved
+      repurposed          — FDA-approved for *different* indication; no L1/L2
+      investigational_late  — Phase 3 trial, not yet approved
+      investigational_early — Phase 1 or 2 trial
+      preclinical         — No human trial data
+
+    The result is stored as ``drug_tier`` on each ranked candidate and is
+    returned in every API response so the frontend can display the correct
+    badge without re-deriving the logic.
+    """
+    level = _normalize_oncokb_level(oncokb_level) or ""
+
+    # Resistance-annotated drugs — never display as actionable tier
+    if level in {"LEVEL_R1", "LEVEL_R2"}:
+        return "resistance_mechanism"
+
+    # Tier 1: FDA-approved for this specific variant + cancer type
+    if level in {"LEVEL_1", "LEVEL_2"} and is_approved:
+        return "fda_approved"
+
+    # Tier 1 edge case: Level 1/2 evidence but approval status unknown
+    if level in {"LEVEL_1", "LEVEL_2"}:
+        return "fda_approved"
+
+    # Tier 2: Approved drug with weaker evidence (Level 3/4 or off-label)
+    _approval_str = (approval_status or "").lower()
+    if is_approved or "approved" in _approval_str:
+        return "repurposed"
+
+    # Tier 3: Investigational
+    _phase = max_phase or 0
+    if _phase >= 3:
+        return "investigational_late"
+    if _phase >= 1:
+        return "investigational_early"
+
+    return "preclinical"
+
+
+def _decision_path(tiers_present: list[str]) -> str:
+    """Return a decision_path string based on which tiers have candidates."""
+    if "fda_approved" in tiers_present:
+        return "tier1_found"
+    if "repurposed" in tiers_present:
+        return "tier2_only"
+    if "investigational_late" in tiers_present or "investigational_early" in tiers_present:
+        return "tier3_escalation"
+    return "abstain"
+
+
 def _resistance_next_line_boost(
     candidate: dict,
     resistance_context: Optional[dict],
@@ -471,6 +532,14 @@ def rank_candidates(
         c["rank_score"] = compute_rank_score(components, cfg)
         c.update(compute_uncertainty(components, cfg))
 
+        # Drug tier classification — explicit tier for UI display and API consumers
+        c["drug_tier"] = classify_drug_tier(
+            oncokb_level=c.get("oncokb_level"),
+            is_approved=bool(c.get("is_approved")),
+            max_phase=c.get("max_phase") or c.get("phase"),
+            approval_status=c.get("approval_status"),
+        )
+
         boost, rationale = _clinical_priority_boost(c, cfg)
         c["clinical_priority_boost"] = boost
         c["clinical_priority_rationale"] = rationale
@@ -494,7 +563,16 @@ def rank_candidates(
             return 1
         return 0
 
-    return sorted(candidates, key=cmp_to_key(_rank_compare))
+    sorted_candidates = sorted(candidates, key=cmp_to_key(_rank_compare))
+
+    # Attach a decision_path to every candidate so callers can see the
+    # overall conclusion without inspecting every drug_tier individually.
+    tiers_present = [c.get("drug_tier", "preclinical") for c in sorted_candidates]
+    path = _decision_path(tiers_present)
+    for c in sorted_candidates:
+        c["decision_path"] = path
+
+    return sorted_candidates
 
 
 def _tiebreaker_key(c: dict, cfg: RankingConfig = DEFAULT_CONFIG) -> tuple:

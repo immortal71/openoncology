@@ -1239,6 +1239,64 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     # Glecirasib (BBI-2493) also showing Phase 2 activity.
     # KRAS G12C is already in the primary table above with full drug set.
     # Duplicate removed to prevent last-write overwrite.
+
+    # ── CLDN18 (Claudin-18.2) — Gastric/GEJ cancer ───────────────────────────
+    # Zolbetuximab (VYLOY) FDA-approved Oct 2024 (SPOTLIGHT + GLOW trials).
+    # First-line gastric/GEJ for CLDN18.2-positive (≥75% cells 2+/3+ IHC).
+    # Combines with FOLFOX or CAPOX chemotherapy backbone.
+    ("CLDN18", "OVEREXPRESSION"):   {"zolbetuximab": "LEVEL_1"},
+    ("CLDN18", "AMPLIFICATION"):    {"zolbetuximab": "LEVEL_1"},
+    # Fallback: generic CLDN18.2 positivity (IHC-reported, not sequencing-based)
+    ("CLDN18", "EXPRESSION"):       {"zolbetuximab": "LEVEL_2"},
+
+    # ── DLL3 (Delta-like ligand 3) — Small Cell Lung Cancer (SCLC) ───────────
+    # Tarlatamab-dlle (Imdelltra) FDA-approved May 2024 (DeLLphi-301 trial).
+    # Bispecific T-cell engager (BiTE) for relapsed/refractory SCLC after platinum.
+    # DLL3 is highly expressed in SCLC vs normal tissue → tumour-selective.
+    ("DLL3", "OVEREXPRESSION"):     {"tarlatamab": "LEVEL_1"},
+    ("DLL3", "AMPLIFICATION"):      {"tarlatamab": "LEVEL_1"},
+    ("DLL3", "EXPRESSION"):         {"tarlatamab": "LEVEL_2"},
+
+    # ── TROP2 (TACSTD2) — TNBC / NSCLC / Urothelial / Cervical ─────────────
+    # Sacituzumab govitecan (Trodelvy) FDA-approved 2020/2021/2023/2024:
+    #   - TNBC (relapsed/refractory, ASCENT trial) — 2020
+    #   - Urothelial (after platinum + PD-1/L1, TROPHY-U-01) — 2021
+    #   - NSCLC (after platinum + IO, EVOKE-01) — 2024 (accelerated)
+    #   - HR+/HER2- breast (SG-TROPiCS-02) — 2023
+    # Datopotamab deruxtecan (Dato-DXd) FDA-approved 2024 for NSCLC + HR+/HER2- breast.
+    ("TACSTD2", "OVEREXPRESSION"):  {
+        "sacituzumab govitecan": "LEVEL_1",
+        "datopotamab deruxtecan": "LEVEL_1",
+    },
+    ("TACSTD2", "AMPLIFICATION"):   {
+        "sacituzumab govitecan": "LEVEL_1",
+        "datopotamab deruxtecan": "LEVEL_1",
+    },
+
+    # ── NECTIN4 — Urothelial carcinoma ───────────────────────────────────────
+    # Enfortumab vedotin (Padcev) FDA-approved 2019 (accelerated), 2023 (full).
+    # EV-302 trial: EV + pembrolizumab superior to platinum-based chemo in 1L.
+    # Combination EV + pembrolizumab FDA-approved Dec 2023 (1L unresectable/metastatic UC).
+    ("NECTIN4", "OVEREXPRESSION"):  {
+        "enfortumab vedotin": "LEVEL_1",
+        "pembrolizumab": "LEVEL_1",
+    },
+    ("NECTIN4", "AMPLIFICATION"):   {"enfortumab vedotin": "LEVEL_1"},
+
+    # ── HER3 (ERBB3) — NSCLC / Breast cancer ────────────────────────────────
+    # Patritumab deruxtecan (HER3-DXd) FDA-accelerated approval Jan 2025
+    # for HER3-expressing NSCLC after EGFR-targeted therapy + platinum (HERTHENA-Lung01).
+    # Already present in primary table (line ~908); adding EXPRESSION key as fallback.
+    ("ERBB3", "OVEREXPRESSION"):    {"patritumab deruxtecan": "LEVEL_1"},
+    ("ERBB3", "AMPLIFICATION"):     {"patritumab deruxtecan": "LEVEL_2"},
+
+    # ── FRα (FOLR1) — Ovarian cancer / Endometrial cancer ───────────────────
+    # Mirvetuximab soravtansine (Elahere) FDA-approved Nov 2022 (SORAYA trial),
+    # full approval Oct 2023 (MIRASOL trial) for FRα-high platinum-resistant ovarian cancer.
+    # Luveltamab tazevibulin (IMGN151) FDA Breakthrough designation.
+    ("FOLR1", "OVEREXPRESSION"):    {"mirvetuximab soravtansine": "LEVEL_1"},
+    ("FOLR1", "AMPLIFICATION"):     {"mirvetuximab soravtansine": "LEVEL_1"},
+    ("FOLR1", "HIGH"):              {"mirvetuximab soravtansine": "LEVEL_1"},
 }
 
 
@@ -1528,6 +1586,17 @@ _ALTERATION_ALIASES: dict[str, str] = {
     "tpm3ntrk1": "tpm3-ntrk1",
     "tprntrk1": "tpr-ntrk1",
     "strnntrk2": "strn-ntrk2",
+    # FGFR fusion aliases — hyphen stripped by normalisation
+    "fgfr2bicc1": "fusion",      # FGFR2-BICC1 ICC/CCA fusion → resolves to FGFR2 FUSION
+    "fgfr2pphln1": "fusion",     # FGFR2-PPHLN1 (already existed — kept)
+    "fgfr3tacc3": "fusion",      # FGFR3-TACC3 UC/glioblastoma fusion → resolves to FGFR3 FUSION
+    "fgfr2ahcyl1": "fusion",     # FGFR2-AHCYL1 (ICC)
+    "fgfr2casp7": "fusion",      # FGFR2-CASP7 (ICC)
+    # BRCA truncating frameshift aliases → resolve to "truncation" for BRCA PARP-i evidence
+    "q1395fs": "truncation",     # BRCA1 Q1395fs — pathogenic truncating frameshift
+    "q1429fs": "truncation",     # BRCA1 Q1429fs
+    "e1143fs": "truncation",     # BRCA2 E1143fs
+    "s1982fs": "truncation",     # BRCA1 S1982fs
 }
 
 
@@ -2158,6 +2227,87 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
             "ipilimumab": "LEVEL_2",
         },
     },
+
+    # ── CLDN18 gastric/GEJ context ────────────────────────────────────────────
+    # Zolbetuximab (VYLOY) FDA-approved Oct 2024 for CLDN18.2-positive gastric/GEJ
+    # adenocarcinoma, 1L in combination with FOLFOX or CAPOX.
+    # Trastuzumab adds L1 for HER2+ subset — but most CLDN18.2+ patients are HER2-negative.
+    (
+        "CLDN18",
+        "OVEREXPRESSION",
+        "GASTRIC",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "zolbetuximab": "LEVEL_1",
+            "pembrolizumab": "LEVEL_2",   # nivolumab checkmate 649 approved regardless of CLDN18 status
+        },
+    },
+    (
+        "CLDN18",
+        "OVEREXPRESSION",
+        "GEJ",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "zolbetuximab": "LEVEL_1",
+            "pembrolizumab": "LEVEL_2",
+        },
+    },
+
+    # ── DLL3 SCLC context ─────────────────────────────────────────────────────
+    # Tarlatamab (Imdelltra) FDA-approved May 2024 for DLL3-expressing SCLC
+    # after ≥2 prior lines including platinum-based chemotherapy.
+    # DLL3 is essentially universally expressed in SCLC — this context adds
+    # specificity to avoid returning tarlatamab outside of SCLC.
+    (
+        "DLL3",
+        "OVEREXPRESSION",
+        "SCLC",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "tarlatamab": "LEVEL_1",
+            "topotecan": "LEVEL_2",    # standard 2L SCLC chemotherapy (context reference)
+        },
+    },
+    (
+        "DLL3",
+        "EXPRESSION",
+        "SCLC",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "tarlatamab": "LEVEL_1",
+        },
+    },
+
+    # ── FOLR1 ovarian cancer context ──────────────────────────────────────────
+    # Mirvetuximab soravtansine (Elahere) FDA full approval Oct 2023 (MIRASOL)
+    # for FRα-high platinum-resistant ovarian cancer after 1-3 prior regimens.
+    # "High" expression = ≥50% of cells ≥2+ by IHC (Ventana SP213 assay).
+    (
+        "FOLR1",
+        "OVEREXPRESSION",
+        "OVARIAN",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "mirvetuximab soravtansine": "LEVEL_1",
+            "olaparib": "LEVEL_2",       # BRCA-wild-type patients may still have HRD benefit
+            "niraparib": "LEVEL_2",
+        },
+    },
+    (
+        "FOLR1",
+        "HIGH",
+        "OVARIAN",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "mirvetuximab soravtansine": "LEVEL_1",
+        },
+    },
 }
 
 
@@ -2171,6 +2321,8 @@ def _normalise_cancer_context(cancer_type: Optional[str]) -> Optional[str]:
         return "BREAST"
     if "gastric" in s:
         return "GASTRIC"
+    if "gastroesophageal" in s or "gastro-esophageal" in s or " gej" in s or s.startswith("gej"):
+        return "GEJ"
     if ("pediatric" in s or "paediatric" in s) and "glioma" in s:
         return "PEDS_GLIOMA"
     if "glioma" in s or "glioblastoma" in s or "gbm" in s:
