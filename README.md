@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/HIPAA-Compliant-6366f1?style=for-the-badge" alt="HIPAA Compliant"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready"/>
-  <img src="https://img.shields.io/badge/Hard%20Gate%20P@3-0.818-22c55e?style=for-the-badge" alt="Hard Gate P@3 0.818"/>
+  <img src="https://img.shields.io/badge/Hard%20Gate%20P@3-0.822-22c55e?style=for-the-badge" alt="Hard Gate P@3 0.822"/>
 </p>
 
 </div>
@@ -281,7 +281,7 @@ Holdout covers 40 sensitivity cases (12 single-drug, 28 multi-drug) and 10 negat
 
 | Metric | Value | Gate threshold | Status |
 |:-------|:------|:---------------|:-------|
-| **Standard P@3** | **0.8178** (≈ 0.818) | ≥ 0.65 | ✅ PASS |
+| **Standard P@3** | **0.8222** (≈ 0.822) | ≥ 0.65 | ✅ PASS |
 | **Hit@3** | **100.0%** | ≥ 90% | ✅ PASS |
 | **False positives** | **0** | ≤ 0 | ✅ PASS |
 | Cases | 83 total | — | 75 sensitivity + 8 negative controls |

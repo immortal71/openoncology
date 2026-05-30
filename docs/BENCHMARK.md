@@ -63,7 +63,7 @@ Artifact: `hard_benchmark_results.json` (updated on every gate run)
 
 | Metric | Value | Gate threshold | Status |
 |--------|-------|----------------|--------|
-| **Standard P@3** | **0.8178** (≈ 0.818) | ≥ 0.65 | ✅ PASS |
+| **Standard P@3** | **0.8222** (≈ 0.822) | ≥ 0.65 | ✅ PASS |
 | **Hit@3** | **100.0%** | ≥ 90% | ✅ PASS |
 | **False Positives** | **0** | ≤ 0 | ✅ PASS |
 | Cases | 83 total | — | 75 sensitivity + 8 negative controls |

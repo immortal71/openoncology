@@ -234,18 +234,21 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "entrectinib": "LEVEL_1",
         "lorlatinib": "LEVEL_1",
         "repotrectinib": "LEVEL_1",
+        "taletrectinib": "LEVEL_1",   # Nektumb; FDA Jul 2024, TRUST-II (ROS1+ NSCLC, TKI-naive & post-crizotinib)
     },
     ("ROS1", "CD74-ROS1"): {
         "crizotinib": "LEVEL_1",
         "entrectinib": "LEVEL_1",
         "lorlatinib": "LEVEL_1",
         "repotrectinib": "LEVEL_1",
+        "taletrectinib": "LEVEL_1",   # most common ROS1 partner in NSCLC; TRUST-II enrolled CD74-ROS1
     },
     # ROS1 solvent-front resistance mutation (mirrors ALK G1202R)
-    # Crizotinib and entrectinib lose activity; lorlatinib and repotrectinib retain it.
+    # Crizotinib and entrectinib lose activity; lorlatinib, repotrectinib and taletrectinib retain it.
     ("ROS1", "G2032R"): {
         "lorlatinib": "LEVEL_1",
         "repotrectinib": "LEVEL_1",
+        "taletrectinib": "LEVEL_1",   # TRUST-II maintained activity against G2032R (solvent-front)
         "crizotinib": "LEVEL_R1",
         "entrectinib": "LEVEL_R1",
     },
@@ -444,6 +447,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("FGFR3", "FUSION"): {
         "erdafitinib": "LEVEL_1",
         "pemigatinib": "LEVEL_2",
+        "infigratinib": "LEVEL_2",  # BLC2001 ph2 (FGFR3-altered UC); withdrawn US Aug 2023 (commercial, not safety)
     },
     # ── NTRK ──────────────────────────────────────────────────────────────────
     ("NTRK1", "FUSION"): {
@@ -556,6 +560,17 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
         "midostaurin": "LEVEL_1",
         "venetoclax": "LEVEL_2",
         "azacitidine": "LEVEL_2",
+    },
+    # ── KMT2A (MLL) rearrangements — AML ─────────────────────────────────────
+    # Revumenib (Revuforj): FDA approved Dec 2023 (AUGMENT-101) for relapsed/refractory
+    # AML with KMT2A rearrangement. Menin inhibitor; inhibits menin-KMT2A oncogenic complex.
+    ("KMT2A", "REARRANGEMENT"): {
+        "revumenib": "LEVEL_1",
+        "venetoclax": "LEVEL_2",    # venetoclax+azacitidine has broad R/R AML activity
+    },
+    ("KMT2A", "FUSION"): {
+        "revumenib": "LEVEL_1",
+        "venetoclax": "LEVEL_2",
     },
     # ── JAK2 ──────────────────────────────────────────────────────────────────
     # JAK2 V617F drives myeloproliferative neoplasms; ruxolitinib + fedratinib
@@ -798,7 +813,7 @@ _LEVEL_TABLE: dict[tuple[str, str], dict[str, str]] = {
     ("RET", "PRKAR1A-RET"): {"selpercatinib": "LEVEL_1", "pralsetinib": "LEVEL_1"},
 
     # ── ROS1 additional fusion variants ──────────────────────────────────────
-    ("ROS1", "SLC34A2-ROS1"): {"crizotinib": "LEVEL_1", "entrectinib": "LEVEL_1", "lorlatinib": "LEVEL_1", "repotrectinib": "LEVEL_1"},
+    ("ROS1", "SLC34A2-ROS1"): {"crizotinib": "LEVEL_1", "entrectinib": "LEVEL_1", "lorlatinib": "LEVEL_1", "repotrectinib": "LEVEL_1", "taletrectinib": "LEVEL_1"},
     ("ROS1", "EZR-ROS1"):     {"crizotinib": "LEVEL_1", "entrectinib": "LEVEL_1", "lorlatinib": "LEVEL_1"},
     ("ROS1", "GOPC-ROS1"):    {"crizotinib": "LEVEL_1", "entrectinib": "LEVEL_1", "lorlatinib": "LEVEL_1"},
 
@@ -1592,6 +1607,12 @@ _ALTERATION_ALIASES: dict[str, str] = {
     "fgfr3tacc3": "fusion",      # FGFR3-TACC3 UC/glioblastoma fusion → resolves to FGFR3 FUSION
     "fgfr2ahcyl1": "fusion",     # FGFR2-AHCYL1 (ICC)
     "fgfr2casp7": "fusion",      # FGFR2-CASP7 (ICC)
+    # KMT2A (MLL) rearrangement aliases — menin inhibitor target (revumenib FDA Dec 2023)
+    "kmt2aaff1": "rearrangement",    # t(4;11) — most common in infant ALL/AML
+    "kmt2amllt3": "rearrangement",   # t(9;11) — common in AML
+    "kmt2amllt10": "rearrangement",  # t(10;11)
+    "kmt2amllt1": "rearrangement",   # t(11;19)
+    "kmt2arearranged": "rearrangement",
     # BRCA truncating frameshift aliases → resolve to "truncation" for BRCA PARP-i evidence
     "q1395fs": "truncation",     # BRCA1 Q1395fs — pathogenic truncating frameshift
     "q1429fs": "truncation",     # BRCA1 Q1429fs
@@ -2094,6 +2115,23 @@ _CANCER_CONTEXT_OVERRIDES: dict[tuple[str, str, str], dict[str, object]] = {
         "drugs": {
             "afatinib": "LEVEL_2",
             "osimertinib": "LEVEL_2",
+        },
+    },
+
+    # ── KRAS G12C NSCLC context — exclude CRC-only agents ───────────────────
+    # Cetuximab & panitumumab are NOT indicated for NSCLC; they are KRAS-WT CRC
+    # drugs repurposed in combination for CRC-specific KRAS G12C combos.
+    # Override removes them from NSCLC results.
+    (
+        "KRAS",
+        "G12C",
+        "NSCLC",
+    ): {
+        "mode": "replace",
+        "drugs": {
+            "sotorasib": "LEVEL_1",
+            "adagrasib": "LEVEL_1",
+            "divarasib": "LEVEL_3A",  # GDC-6036; phase 2 in NSCLC (not FDA-approved)
         },
     },
 

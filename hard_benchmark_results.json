@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-05-30T03:54:38.793758+00:00",
+  "run_at": "2026-05-30T04:27:04.217647+00:00",
   "metric_lock": "standard_precision_at_3",
   "targets": {
     "standard_precision_at_3": 0.65,
@@ -7,7 +7,7 @@
     "false_positives": 0
   },
   "actual": {
-    "standard_precision_at_3": 0.8178,
+    "standard_precision_at_3": 0.8222,
     "hit_at_3": 1.0,
     "false_positives": 0,
     "n_cases": 83,
@@ -24,7 +24,7 @@
       "standard_precision_at_3_ceiling": 0.8333
     },
     "MULTI_DRUG": {
-      "standard_precision_at_3": 0.9583,
+      "standard_precision_at_3": 0.9792,
       "standard_precision_at_3_ceiling": 0.9792
     },
     "RARE_OR_COMPLEX": {
