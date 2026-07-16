@@ -46,7 +46,7 @@ from dataclasses import dataclass
 from datetime import datetime, UTC
 from typing import Optional
 
-from api.ai.ranking_config import DEFAULT_CONFIG, RankingConfig
+from .ranking_config import DEFAULT_CONFIG, RankingConfig
 
 
 def _normalize_oncokb_level(level: Optional[str]) -> Optional[str]:
