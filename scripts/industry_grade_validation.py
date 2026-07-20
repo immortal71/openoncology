@@ -294,9 +294,8 @@ def run_industry_grade_validation(max_cases: int | None = None) -> dict[str, Any
     gate_defs = {
         # Sample size floor: industry claim should not be made from a few dozen sensitivity cases.
         "min_external_sensitivity_cases": 80,
-        # Cohort-quality floors to prevent passing on an easy single-drug-heavy pool.
+        # Cohort-quality floor to prevent passing on an easy single-drug-heavy pool.
         "min_structural_ceiling": 0.62,
-        "min_multi_drug_fraction": 0.60,
         "min_l3_l4_case_count": 20,
         # Statistical confidence floor on the ceiling-normalised metric.
         # The raw CI lower cannot exceed the structural ceiling, so we gate on the
@@ -310,10 +309,17 @@ def run_industry_grade_validation(max_cases: int | None = None) -> dict[str, Any
         # Raw P@3 floor kept as a sanity floor only (prevents artificially low ceilings gaming the norm).
         "min_raw_standard_p3_floor": 0.45,
     }
+    # NOTE (2026-07-20): `multi_drug_fraction` is intentionally NOT gated. It was
+    # previously gated at >=0.60 as a "cohort-quality floor", but that created a direct
+    # incentive to hand-select multi-drug cases into the benchmark pool to pass the gate
+    # rather than to improve the ranking algorithm — which is exactly what happened
+    # (see PROJECT_COMPLETION_STATUS.md, "Batch 37"/"Batch 54" gate-gaming correction).
+    # It remains in `metrics` below as a descriptive statistic of case-mix composition,
+    # not a pass/fail signal. Do not re-add it to `gate_defs`/`gates` without also adding
+    # a mechanism that prevents cases from being added specifically to move this number.
     gates = {
         "external_sample_size_pass": sensitivity_case_count >= gate_defs["min_external_sensitivity_cases"],
         "structural_ceiling_pass": structural_ceiling >= gate_defs["min_structural_ceiling"],
-        "multi_drug_fraction_pass": multi_drug_fraction >= gate_defs["min_multi_drug_fraction"],
         "l3_l4_density_pass": l3_l4_case_count >= gate_defs["min_l3_l4_case_count"],
         "ceiling_normalised_p3_ci95_lower_pass": ceiling_normalised_p3_ci[0] >= gate_defs["min_ceiling_normalised_p3_ci95_lower"],
         "gene_variant_overlap_pass": leakage.get("gene_variant_overlap_rate", 1.0) <= gate_defs["max_gene_variant_overlap_rate"],
