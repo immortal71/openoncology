@@ -1,7 +1,17 @@
 # OpenOncology — Project Completion Status
 
-**Date:** April 25, 2026  
-**Status:** ✅ **FULLY FUNCTIONAL & PRODUCTION-READY**
+**Last reconciled:** 2026-07-20
+**Status:** ⚠️ **Research prototype — not production-ready, not clinically validated.**
+
+> **Superseded framing below:** The "FULLY FUNCTIONAL & PRODUCTION-READY" assessment
+> originally dated April 25, 2026 was written before the May 2, 2026 "Brutal Honesty"
+> benchmark review further down this file, and before the doc-vs-artifact reconciliation
+> on 2026-07-20 (see `docs/BENCHMARK.md` for the authoritative current metrics). That
+> section is kept below for engineering-completeness context only (routes/workers/models
+> are implemented and import cleanly) — it is **not** a claim about clinical readiness,
+> validation status, or production deployment. The **Current Honest Status** block near
+> the end of this file is the accurate summary. Treat any "production-ready" or "no
+> further changes required" language below as historical and superseded.
 
 ---
 
@@ -170,23 +180,49 @@ npm run dev
   - Keycloak auth server
   - **These are all included in docker-compose.yml**
 
-- **AlphaFold API**: Currently stubbed via `mock_api.py` until real API credentials are available
+- **AlphaFold API**: Requires `ALPHAFOLD_API_KEY` to be set and DiffDock to be installed
+  (`DIFFDOCK_DIR`) for mutation-specific structure scoring. When either is missing, the
+  real pipeline (`ai/services/alphafold.py`, `ai/diffdock/score.py`) degrades gracefully
+  to wild-type EBI structure / no binding score — it does **not** fabricate data. Note:
+  `api/mock_api.py` (previously referenced here) is an unrelated standalone local-dev
+  fixture server for the frontend and is never called by `ai_worker.py`; it does not
+  represent what the real pipeline does.
+  >
+  > **Confirmed 2026-07-20**: neither is currently configured in this environment.
+  > `ALPHAFOLD_API_KEY` is absent from `.env` and `.env.example`, and `ai/diffdock/`
+  > contains only the wrapper code (`score.py`, `prepare_inputs.py`) — no cloned
+  > `DiffDock/` model directory exists at the `DIFFDOCK_DIR` default path or anywhere
+  > else in the repo. **Practical consequence: every benchmark run to date (50-case
+  > holdout, hard clinical gate, industry-grade audit) almost certainly scored binding
+  > against wild-type EBI structures or produced no `binding_score` at all — not
+  > mutation-specific DiffDock poses.** Binding confidence (`w.binding = 0.15` in
+  > `api/ai/ranking_config.py`) is the *smallest* of the three primary weights —
+  > OncoKB actionability is largest at `0.40`, OpenTargets at `0.15` — and when
+  > `binding_score` is `None`, `api/ai/ranking.py`'s weighted-mean function drops it
+  > from the sum entirely and renormalises the remaining weights to 1.0, rather than
+  > scoring it as zero. So this gap does **not** invalidate the Hit@3/P@3 results (which
+  > are driven primarily by OncoKB/evidence-table matching, not docking), and does not
+  > match the earlier (external) concern that DiffDock was the "largest-weighted,
+  > 30%" component — it isn't, per the current config. It does mean any claim of
+  > "mutation-specific structure prediction" or "docking-informed ranking" should be
+  > caveated until real AlphaFold credentials + a DiffDock install are verified
+  > end-to-end on at least one real case.
 - **OpenAI**: Required for plain-language result summaries; optional for basic operation
 - **Stripe**: Optional; required only for payment flows
 
 ---
 
-## ✅ Conclusion
+## ⚠️ Conclusion (superseded — see banner at top of file)
 
-**The project is complete and production-ready.** All documented features are implemented, all routes work, all database models are defined, and the frontend is type-safe and build-ready. The only external requirement is running the Docker Compose stack (which is already fully defined).
+All documented features are implemented at the code level: routes, workers, and database
+models import cleanly, and the frontend type-checks. That is an engineering-completeness
+statement, not a production-readiness or clinical-validation claim — see "Current Honest
+Status" below for the accurate assessment, and `docs/BENCHMARK.md` for the reconciled
+benchmark numbers.
 
-To deploy to production:
-1. Set environment variables in `.env`
-2. Run `docker-compose -f docker-compose.yml up -d`
-3. Navigate to `http://localhost:3000`
-4. Log in with Keycloak credentials
-
-**No further code changes are required.**
+**A full live Docker Compose end-to-end run (real submission → real result) has not yet
+been confirmed to complete successfully.** This should be verified before any
+production-readiness claim is restored.
 
 ---
 
@@ -195,15 +231,30 @@ To deploy to production:
 ### Current Metrics
 
 **Industry-Grade Validation Audit** (External Pool)
-- **Status**: ✅ **PASS** — Industry-grade ready: True
-- **Sample size**: n=222 sensitivity cases + 27 specificity controls
-- **Primary metric**: Standard P@3 = 0.545 (95% CI 0.508–0.582)
-- **Structural ceiling**: 0.628 (case-mix dominated by LEVEL_1/L1_L2 cases)
-- **Ceiling-normalized P@3**: 0.868 (95% CI 0.810–0.927)
-- **Hit@3**: 0.937 (95% CI 0.897–0.962)
-- **Multi-drug fraction**: 0.635 (65% of sensitivity cases have ≥2 known drugs)
-- **False positive rate**: 0.037 (1 FP out of 27 specificity controls)
-- **Gene/variant overlap** vs hard benchmark: 11.66% (low leakage, good separation)
+
+> ✅ **Re-run 2026-07-20 after the gate-gaming fix.** The 105 gate-gamed cases
+> (Batch 37, 37 cases; Batch 54's 68 multi-drug cases) were removed from
+> `ADDITIONAL_VALIDATION_CASES` in `api/services/benchmark.py`, and
+> `multi_drug_fraction` was removed from the pass/fail readiness gates in
+> `scripts/industry_grade_validation.py` (it is now reported as a descriptive
+> statistic only — see the gate-gaming correction note below for why). The script was
+> then re-run fresh against the corrected dataset. Figures below are read directly
+> from the resulting `industry_validation_report.json` (run_at
+> 2026-07-20T12:12:17Z).
+
+- **Status**: ❌ **FAIL** — `industry_grade_ready: false` (1 of 10 readiness gates
+  fails: `structural_ceiling_pass`, i.e. the case mix is now harder on average — an
+  honest result, not a gamed one)
+- **Sample size**: n=279 sensitivity cases + 42 specificity controls
+- **Primary metric**: Standard P@3 = 0.5054 (95% CI 0.4739–0.5368)
+- **Structural ceiling**: 0.5663 (below the 0.62 gate threshold)
+- **Ceiling-normalized P@3**: 0.8924 (95% CI 0.8369–0.9479) — passes
+- **Hit@3**: 0.9283 (95% CI 0.8919–0.9531)
+- **Multi-drug fraction**: 0.552 (55% of sensitivity cases have ≥2 known drugs) —
+  descriptive only, not gated; down from the pre-fix 0.6695
+- **False positive rate**: 0.0238 (1 FP out of 42 specificity controls)
+- **Gene/variant overlap** vs hard benchmark: 13.85% (low leakage, good separation)
+- **Source**: `industry_validation_report.json`, `scripts/industry_grade_validation.py`
 
 **Hard Clinical Benchmark Gate** (Internal Validation)
 - **Status**: ✅ **PASS**
@@ -364,43 +415,63 @@ We implemented a **three-part framework** to address all 6 problems and satisfy 
 ### Validation Results
 
 #### P@3 Stability Report (Train vs Holdout — 30% Unseen Data)
-```
-Train Set (173 cases):
-  Standard P@3:     0.540 (95% CI 0.495–0.584)
-  Hit@3:            0.929
-  False Positive Rate: 0.056
 
-Holdout Set (85 unseen cases):
-  Standard P@3:     0.529 (95% CI 0.464–0.593)
-  Hit@3:            0.920
+> ⚠️ **Corrected 2026-07-20.** The figures previously stated here (train n=173,
+> holdout n=85, "2.0% degradation") did not match the only `p3_stability_report.json`
+> artifact in the repo (timestamp 2026-05-03T03:33:21Z). Actual artifact values below.
+
+```
+Train Set (297 cases):
+  Standard P@3:     0.5512 (95% CI 0.517–0.5853)
+  Hit@3:            0.9357
+  False Positive Rate: 0.000
+
+Holdout Set (139 unseen cases):
+  Standard P@3:     0.600 (95% CI 0.5509–0.6491)
+  Hit@3:            0.9538
   False Positive Rate: 0.000
 
 Stability Metrics:
-  P@3 degradation:  2.0% ✅ (acceptable: < 5%)
-  Hit@3 degradation: 1.0% ✅ (acceptable: < 5%)
-  FP rate change:   -5.6pp ✅ (actually IMPROVED, not degraded)
+  P@3 change:       -8.86% (holdout scored BETTER than train, not worse)
+  Hit@3 change:     -1.94% (holdout scored BETTER than train, not worse)
+  FP rate change:   0.0pp
 
-Overfitting Detection: NO ✅
-Overall Stability: PASS ✅
+Overfitting Detection: NO
+Overall Stability: PASS
 ```
 
-**Interpretation**: P@3 nearly identical on unseen data = **NO OVERFITTING**. The 2% degradation is tiny and well within acceptable margins. This proves the benchmark is **legitimate, not gamed**.
+**Interpretation**: Holdout P@3 (0.600) is actually *higher* than train P@3 (0.5512) —
+the "degradation" figures are negative because the sign convention treats holdout-minus-train,
+and the artifact's own `is_overfitting: false, is_stable: true` gates confirm no overfitting
+signal. This is a stronger result than the originally-stated "2% degradation" framing, but the
+originally-stated case counts and values were simply wrong and are corrected above. This
+remains reasonable evidence the benchmark isn't collapsing on unseen data, though it does not
+by itself prove the multi-drug-fraction gate-gaming issue is resolved (see caveat below).
 
-#### Industry-Grade Validation (Full ~260-Case Dataset)
+#### Industry-Grade Validation (Full ~321-Case Dataset, post gate-gaming fix)
+
+> ✅ **Re-run 2026-07-20 after removing gate-gamed cases** — see the Industry-Grade
+> Validation Audit section earlier in this file for full detail and the gate-gaming
+> correction note. Numbers below are the current, honest state.
+
 ```
-Standard P@3:        0.545 (95% CI 0.508–0.582)
-Structural ceiling:  0.628
-Multi-drug fraction: 0.635
-Ceiling-norm P@3:    0.868 (95% CI 0.810–0.927)
-Hit@3:               0.937 (95% CI 0.897–0.962)
-False Positive Rate: 0.037 (1 FP)
-Sensitivity cases:   ~222
-Specificity cases:   ~27
-Industry-grade ready: TRUE ✅
+Standard P@3:        0.5054 (95% CI 0.4739–0.5368)
+Structural ceiling:  0.5663
+Multi-drug fraction: 0.552  (descriptive only, no longer gated)
+Ceiling-norm P@3:    0.8924 (95% CI 0.8369–0.9479)
+Hit@3:               0.9283 (95% CI 0.8919–0.9531)
+False Positive Rate: 0.0238 (1 FP)
+Sensitivity cases:   279
+Specificity cases:   42
+Industry-grade ready: FALSE ❌ (fails structural_ceiling_pass at 0.62 threshold — the
+case mix is honestly harder now that gate-gamed multi-drug cases are gone)
 ```
 
-**Stability Check**: P@3 = 0.545 (same as with n=222 before trial integration)  
-→ **No artificial inflation from adding trial-derived cases**
+**Stability check**: P@3 moved from ~0.545 (pre-fix narrative, gamed dataset) to 0.5054
+(post-fix, honest dataset) — a small, expected decrease consistent with removing cases
+that were inflating both structural ceiling and multi-drug fraction. This is the
+correct direction for a legitimate fix: metrics should get slightly harder, not easier,
+when gamed cases are removed.
 
 ### How This Addresses Each Problem
 
@@ -408,10 +479,32 @@ Industry-grade ready: TRUE ✅
 |---------|-------------------|--------------|---------|
 | **1. Synthetic data** | All cases from literature | Trial integration + real PMID citations | ✅ Removed dependency |
 | **2. Weak ceiling** | Cases similar to original 90 | Added conflicting evidence + resistance | ✅ Addressed |
-| **3. Gate gaming** | Batch 37 selected to pass 0.60 threshold | Natural trial drug distributions | ✅ Addressed |
+| **3. Gate gaming** | Batch 37 selected to pass 0.60 threshold | Removed Batch 37 + Batch 54's multi-drug cases (105 total); ungated `multi_drug_fraction` | ✅ **Actually addressed 2026-07-20** — see note below |
 | **4. Evidence table** | Stuck at 76 entries | Infrastructure for 200+ with trial citations | ✅ Ready to deploy |
 | **5. FP rate stuck** | Unchanged at 3.7% | Holdout validation shows 0% on unseen data | ✅ Addressed |
 | **6. Refractory weak** | 0.533 P@3 | Added resistance cases + conflicting evidence | ✅ Addressed |
+
+> ⚠️→✅ **History: flagged 2026-07-20 as still live/unaddressed, then actually fixed
+> the same day.** Verified directly against the codebase: `ADDITIONAL_VALIDATION_CASES`
+> still contained all 480 cases as of this morning, 61.5–68% multi-drug depending on
+> denominator — the flagged 38 (actually 37) Batch-37 cases were never removed, and a
+> second, previously-undisclosed gamed batch was found (Batch 54, comment literally
+> reads "ceiling boost", 68 additional multi-drug cases). The commit that claimed to fix
+> this (`589e47e`, 2026-05-03) had only *added* a separate 15-case
+> `TRIAL_DERIVED_CASES` list on top, never touching the flagged block — so
+> `multi_drug_fraction` had actually gotten worse (0.635 → 0.6695) while this table
+> claimed the problem was "✅ Addressed."
+>
+> **Actual fix applied 2026-07-20**: removed all 37 Batch-37 cases and the 68 multi-drug
+> cases from Batch 54 (105 total) from `ADDITIONAL_VALIDATION_CASES` in
+> `api/services/benchmark.py`, keeping Batch 54's legitimate single-drug and
+> negative-control cases. Also removed `multi_drug_fraction` from the pass/fail
+> readiness gates in `scripts/industry_grade_validation.py` — it is now reported as a
+> descriptive statistic only, so it can't be silently re-inflated by future case
+> additions without someone noticing it's no longer a gate. Re-running the script
+> against the corrected 375-case dataset gives `multi_drug_fraction = 0.552` (down from
+> 0.6695) — see the Industry-Grade Validation Audit section above for the full re-run
+> results (`industry_validation_report.json`, run_at 2026-07-20T12:12:17Z).
 
 ### How This Satisfies 10× Legitimacy Criteria
 
@@ -491,12 +584,15 @@ In a gamed benchmark:
 - Holdout P@3 ≈ 0.40– (true distribution)
 - Degradation ≈ 33% (collapse)
 
-In our legitimate benchmark:
-- Train P@3 = 0.540 (real distribution)
-- Holdout P@3 = 0.529 (truly unseen data)
-- Degradation = 2% (STABLE)
+In our benchmark (corrected 2026-07-20 to match `p3_stability_report.json`):
+- Train P@3 = 0.5512 (n=297)
+- Holdout P@3 = 0.600 (n=139, truly unseen data — scored higher, not lower)
+- No overfitting signal detected (STABLE)
 
-**This is the mark of a real benchmark, not an inflated one.**
+This is evidence against gross overfitting, but see the "Multi-drug gate still gamed"
+caveat immediately below — passing a train/holdout stability check on a dataset that
+still contains the flagged Batch 37 cases does not by itself validate the multi-drug
+fraction metric specifically.
 
 ---
 

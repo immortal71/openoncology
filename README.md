@@ -267,13 +267,13 @@ Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11
 | Metric | Result | Meaning |
 |:-------|:-------|:--------|
 | **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.508** (ceiling: 0.650) | 50.8% of top-3 slots match gold standard; ceiling is 65% for this mixed-difficulty holdout |
+| **Standard Precision@3** | **0.508** (ceiling: 0.625) | 50.8% of top-3 slots match gold standard; ceiling is 62.5% for this mixed-difficulty holdout |
 | **Normalised Precision@3** | **0.817** | Near-perfect when normalised for single-drug gold standards |
 | **False positives** | **0** (FP rate 0%) | No cases had a spurious high-confidence recommendation |
 | **Mean Reciprocal Rank** | **0.883** | Gold drug appears near the top of the ranked list on average |
-| **NDCG@3** | **0.845** | Strong ranking quality across the full holdout |
+| **NDCG@3** | **0.883** | Strong ranking quality across the full holdout |
 
-Holdout covers 40 sensitivity cases (12 single-drug, 28 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`.
+Holdout covers 40 sensitivity cases (16 single-drug, 24 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`; exact per-case scoring in `blind_review_key_scoring.json`.
 
 ### POST-PUBLICATION — Ongoing hard clinical gate (main branch)
 
@@ -390,7 +390,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Phase 5** | ✅ | Kubernetes/Helm deploy · HIPAA/GDPR compliance · Security CI |
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
 | **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
-| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8178 · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
+| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
 | **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
 | **v2** | 🔜 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
 
