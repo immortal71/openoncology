@@ -271,10 +271,19 @@ production-readiness claim is restored.
   - REFRACTORY (worst case): 0.533
 
 ### Evidence Table Coverage
-- **Total entries**: 76 distinct (gene, variant) pairs
-- **Genes represented**: 38 (ABL1, ALK, AR, BRAF, BRCA1/2, EGFR, ERBB2, ESR1, EZH2, FGFR2/3, FLT3, GNAQ, IDH1/2, JAK2, KIT, KRAS, MET, MLH1/MSH2/MSH6/PMS2, NPM1, NRAS, NTRK1/2/3, PDGFRA/B, PIK3CA, RET, ROS1, TMB)
-- **FDA approvals covered**: 120+ drugs across all LEVEL_1 variants
-- **Context-specific overrides**: 15 cancer-type normalizations (breast, prostate, ovarian, lung, etc.)
+- **Total entries** (as of 2026-05-02, when this section was written): 76 distinct (gene, variant) pairs
+- **Genes represented** (2026-05-02): 38 (ABL1, ALK, AR, BRAF, BRCA1/2, EGFR, ERBB2, ESR1, EZH2, FGFR2/3, FLT3, GNAQ, IDH1/2, JAK2, KIT, KRAS, MET, MLH1/MSH2/MSH6/PMS2, NPM1, NRAS, NTRK1/2/3, PDGFRA/B, PIK3CA, RET, ROS1, TMB)
+- **FDA approvals covered** (2026-05-02): 120+ drugs across all LEVEL_1 variants
+- **Context-specific overrides** (2026-05-02): 15 cancer-type normalizations (breast, prostate, ovarian, lung, etc.)
+
+> ✅ **Updated 2026-07-20**: This table has grown substantially since the count above
+> was written and never revisited — the "evidence table bottleneck" flagged later in
+> this document (Problem #4) is stale. Live count from `_LEVEL_TABLE` in
+> `api/services/oncokb_evidence.py`: **335 (gene, variant) pairs across 111 genes**,
+> grown through real, individually-cited commits since May 2 (e.g. taletrectinib/ROS1,
+> infigratinib/FGFR3, revumenib/KMT2A, repotrectinib/NTRK — see git log on that file).
+> This is well past the "200+ entries" target the "Legitimate 10x Expansion Framework"
+> section below treats as future work — that target has already been exceeded.
 
 ### What Was Added This Session
 
@@ -480,7 +489,7 @@ when gamed cases are removed.
 | **1. Synthetic data** | All cases from literature | Trial integration + real PMID citations | ✅ Removed dependency |
 | **2. Weak ceiling** | Cases similar to original 90 | Added conflicting evidence + resistance | ✅ Addressed |
 | **3. Gate gaming** | Batch 37 selected to pass 0.60 threshold | Removed Batch 37 + Batch 54's multi-drug cases (105 total); ungated `multi_drug_fraction` | ✅ **Actually addressed 2026-07-20** — see note below |
-| **4. Evidence table** | Stuck at 76 entries | Infrastructure for 200+ with trial citations | ✅ Ready to deploy |
+| **4. Evidence table** | Stuck at 76 entries (as of 2026-05-02) | Grown organically to 335 entries / 111 genes via individually-cited commits since | ✅ **Done** — exceeded the 200+ target (verified 2026-07-20) |
 | **5. FP rate stuck** | Unchanged at 3.7% | Holdout validation shows 0% on unseen data | ✅ Addressed |
 | **6. Refractory weak** | 0.533 P@3 | Added resistance cases + conflicting evidence | ✅ Addressed |
 

@@ -100,7 +100,7 @@ docker-compose up --build
 > **OncoKB token setup (optional — improves Tier 1 coverage):**
 > 1. Register for a free academic token at https://oncokb.org/account/register
 > 2. Set `ONCOKB_API_TOKEN=<your-token>` in `.env`
-> 3. Without the token the pipeline uses a curated static evidence table (74 actionable genes)
+> 3. Without the token the pipeline uses a curated static evidence table (111 actionable genes, 335 gene/variant pairs as of 2026-07-20 — see `api/services/oncokb_evidence.py`)
 
 **No Docker?** See [docs/SETUP.md](docs/SETUP.md) for local Python + Node.js setup, environment variables, and Windows-specific steps.
 
