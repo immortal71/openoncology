@@ -11,6 +11,16 @@ module.exports = {
       fontFamily: {
         mono: ['var(--font-mono)', 'JetBrains Mono', 'ui-monospace', 'monospace'],
       },
+      colors: {
+        'accent-warm': 'hsl(var(--accent-warm))',
+        'accent-warm-deep': 'hsl(var(--accent-warm-deep))',
+        neutral: {
+          bg: 'var(--neutral-bg)',
+          muted: 'var(--neutral-muted)',
+          body: 'var(--neutral-body)',
+          heading: 'var(--neutral-heading)',
+        },
+      },
     },
   },
   plugins: [],

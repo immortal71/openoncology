@@ -4,6 +4,12 @@
 
 @layer base {
   :root {
+    /* True neutrals — no hue skew (not Tailwind slate/gray, which lean blue). */
+    --neutral-bg: #111311;
+    --neutral-muted: #8B8D89;
+    --neutral-body: #C4C6C1;
+    --neutral-heading: #EDEBE4;
+
     --background: 208 44% 98%;
     --foreground: 216 31% 16%;
     --muted: 210 24% 95%;
@@ -42,6 +48,8 @@
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     --ring: 216 34% 17%;
+    --accent-warm: 14.2 62.6% 60.2%;
+    --accent-warm-deep: 16.6 55.9% 41.8%;
   }
 }
 
@@ -51,11 +59,8 @@
     border-color: hsl(var(--border));
   }
   body {
-    background:
-      radial-gradient(circle at 0% 0%, rgba(10, 128, 169, 0.15), transparent 36%),
-      radial-gradient(circle at 100% 0%, rgba(6, 182, 212, 0.1), transparent 28%),
-      linear-gradient(180deg, #020617 0%, #030a1c 100%);
-    color: hsl(var(--foreground));
+    background: var(--neutral-bg);
+    color: var(--neutral-heading);
     min-height: 100vh;
   }
 
@@ -69,6 +74,14 @@
 @keyframes cursor-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
+}
+
+::view-transition-group(root),
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 @layer components {

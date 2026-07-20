@@ -316,9 +316,9 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
           )}
 
           {/* Story */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-6">
-            <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
-              <Users size={18} className="text-cyan-500" /> Their Story
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-accent-warm/25 dark:bg-accent-warm/5 p-6">
+            <h3 className="font-semibold text-slate-900 dark:text-accent-warm mb-3 flex items-center gap-2">
+              <Users size={18} className="text-accent-warm-deep" /> Their Story
             </h3>
             <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed whitespace-pre-line">
               {(data as Record<string, unknown>).patient_story as string ?? data.description}

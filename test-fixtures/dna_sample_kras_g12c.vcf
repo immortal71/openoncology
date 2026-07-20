@@ -1,0 +1,20 @@
+##fileformat=VCFv4.2
+##source=OpenOncology-TestFixture-KRASG12C
+##reference=GRCh38
+##FILTER=<ID=PASS,Description="All filters passed">
+##INFO=<ID=GENE,Number=1,Type=String,Description="Gene symbol">
+##INFO=<ID=HGVS_C,Number=1,Type=String,Description="Coding HGVS notation">
+##INFO=<ID=HGVS_P,Number=1,Type=String,Description="Protein HGVS notation">
+##INFO=<ID=SO,Number=1,Type=String,Description="Sequence ontology term">
+##INFO=<ID=CLINVAR_ID,Number=1,Type=String,Description="ClinVar identifier">
+##INFO=<ID=COSMIC_ID,Number=1,Type=String,Description="COSMIC identifier">
+##INFO=<ID=CLNSIG,Number=1,Type=String,Description="ClinVar clinical significance">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Total depth">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TUMOUR
+12	25398284	.	C	A	99	PASS	GENE=KRAS;HGVS_C=c.34G>T;HGVS_P=p.Gly12Cys;SO=missense_variant;CLINVAR_ID=VCV000012583;COSMIC_ID=COSV57014428;CLNSIG=Pathogenic	GT:AD:DP:AF	0/1:495,355:850:0.42
+17	7673803	.	G	A	93	PASS	GENE=TP53;HGVS_C=c.524G>A;HGVS_P=p.Arg175His;SO=missense_variant;CLINVAR_ID=VCV000009999;COSMIC_ID=COSM10660;CLNSIG=Pathogenic	GT:AD:DP:AF	0/1:499,281:780:0.36
+9	21971020	.	C	T	88	PASS	GENE=CDKN2A;HGVS_C=c.172C>T;HGVS_P=p.Arg58Ter;SO=stop_gained;CLINVAR_ID=VCV000012796;COSMIC_ID=COSM13478;CLNSIG=Pathogenic	GT:AD:DP:AF	0/1:410,190:600:0.32
+1	115256529	.	C	A	85	PASS	GENE=NRAS;HGVS_C=c.181C>A;HGVS_P=p.Gln61Lys;SO=missense_variant;CLINVAR_ID=VCV000012596;COSMIC_ID=COSM584;CLNSIG=Pathogenic	GT:AD:DP:AF	0/1:365,140:505:0.28
