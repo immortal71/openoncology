@@ -78,6 +78,12 @@ class Settings(BaseSettings):
                 )
             if self.minio_secret_key == "password":
                 raise ValueError("MINIO_SECRET_KEY must be changed from the default in production")
+        if self.environment == "development" and self.sentry_dsn:
+            raise ValueError(
+                "ENVIRONMENT is 'development' but SENTRY_DSN is set — this looks like a "
+                "production deploy with ENVIRONMENT misconfigured. Set ENVIRONMENT=production "
+                "(or unset SENTRY_DSN if this really is a dev environment)."
+            )
         return self
 
 
