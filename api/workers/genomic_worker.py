@@ -8,12 +8,14 @@ Pipeline steps:
   4. Store mutations in DB, update submission status
   5. Queue AI worker for classification + repurposing
 """
+import shutil
 import subprocess
 import tempfile
 import os
 import logging
 
 from workers import celery_app
+from config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +140,30 @@ def _run_nextflow_pipeline(dna_file: str, workdir: str, cancer_type: str) -> str
     """
     Execute the Nextflow pipeline. Returns path to output VCF.
     Nextflow handles: FastQC → Trimmomatic → BWA-MEM2 → GATK → OpenCRAVAT
+
+    Dev-mode shortcut: pre-called VCF input already carries GENE/HGVS/CLINVAR/
+    COSMIC annotations (see samples/), and Nextflow itself isn't installed in
+    the local dev image (it needs Conda + OpenCRAVAT's multi-GB reference DBs).
+    main.nf takes the same shortcut for .vcf input — skip straight to OpenCRAVAT
+    — so locally we skip straight to treating the input as already-annotated.
     """
+    if (
+        settings.environment == "development"
+        and shutil.which("nextflow") is None
+        and dna_file.lower().endswith((".vcf", ".vcf.gz"))
+    ):
+        output_dir = os.path.join(workdir, "results")
+        os.makedirs(output_dir, exist_ok=True)
+        annotated_path = os.path.join(
+            output_dir, os.path.basename(dna_file).rsplit(".", 1)[0] + ".annotated.vcf"
+        )
+        shutil.copyfile(dna_file, annotated_path)
+        logger.warning(
+            "[genomic] DEV MODE: nextflow not installed — using input VCF as "
+            "pre-annotated output instead of running the real OpenCRAVAT pipeline."
+        )
+        return annotated_path
+
     pipeline_dir = os.path.join(os.path.dirname(__file__), "..", "..", "pipeline")
     output_dir = os.path.join(workdir, "results")
     os.makedirs(output_dir, exist_ok=True)
@@ -212,6 +237,7 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
     """Upload processed VCF to the vcf bucket. Returns S3 key."""
     import boto3
     from botocore.config import Config
+    from botocore.exceptions import ClientError
     from config import settings
 
     scheme = "https" if settings.minio_secure else "http"
@@ -223,6 +249,11 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
         config=Config(signature_version="s3v4"),
         region_name="us-east-1",
     )
+    try:
+        s3.head_bucket(Bucket=settings.bucket_vcf)
+    except ClientError:
+        s3.create_bucket(Bucket=settings.bucket_vcf)
+
     key = f"{patient_id}/{submission_id}/annotated.vcf"
     s3.upload_file(
         vcf_path,

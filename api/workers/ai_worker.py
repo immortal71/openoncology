@@ -113,6 +113,7 @@ def run_ai_analysis(
         repurposing_candidates = []
         target_gene = None
         alphafold_pdb_path: str | None = None
+        combination_therapy_data: list[dict] = []
 
         if targetable_mutations:
             top_mutation = targetable_mutations[0]
@@ -199,7 +200,6 @@ def run_ai_analysis(
             ranked = rank_candidates(drugs[:40], resistance_context=resistance_context)
 
             # Combination therapy scoring against the final merged drug pool
-            combination_therapy_data: list[dict] = []
             try:
                 from services.combination_therapy import score_combinations, combinations_to_summary
                 top_genes = list({m.gene for m in (targetable_mutations or mutations[:3])})

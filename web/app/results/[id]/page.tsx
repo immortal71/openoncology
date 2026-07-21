@@ -384,7 +384,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 				)}
 
 				{/* ── Combination Therapy ──────────────────────────────── */}
-				{(combinationQuery.data?.combinations?.length ?? 0) > 0 && (
+				{combinationQuery.data?.combinations && combinationQuery.data.combinations.length > 0 && (
 					<CombinationTable combinations={combinationQuery.data.combinations} />
 				)}
 

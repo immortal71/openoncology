@@ -1,0 +1,12 @@
+.git
+node_modules
+**/node_modules
+**/__pycache__
+**/*.pyc
+.next
+web/.next
+artifacts
+samples
+test-fixtures
+*.vcf
+*.log
