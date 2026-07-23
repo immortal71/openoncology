@@ -1,0 +1,70 @@
+{
+  "_header": {
+    "status": "ESTIMATE_ONLY_NOT_A_BENCHMARK_RUN",
+    "purpose": "Runtime estimate for re-scoring the 375-case reconciled validation dataset (ADDITIONAL_VALIDATION_CASES in api/services/benchmark.py) with real GPU-backed DiffDock docking, produced after DiffDock was first verified working end-to-end on a real GPU.",
+    "distinct_from": "industry_validation_report.json — that file is the existing 375-case result, produced by scripts/industry_grade_validation.py, which hardcodes binding_score=None for every case (see finding below). This file does NOT contain new benchmark numbers. No DiffDock re-scoring run has been executed yet.",
+    "date_utc": "2026-07-21",
+    "author": "Claude Code session, following up on same-session Vultr GPU / DiffDock verification work"
+  },
+
+  "critical_finding_before_any_estimate": {
+    "claim_checked": "Whether the existing 375-case results reflect 'wild-type fallback' DiffDock scoring, as opposed to no DiffDock scoring at all.",
+    "finding": "scripts/industry_grade_validation.py never calls score_binding or any DiffDock code path. binding_score is hardcoded to None at line 174 for every one of the 375 cases. This is not a fallback-to-wild-type-structure scenario — DiffDock is entirely absent from this script's execution, by construction, for all 375 cases today.",
+    "consequence": "ai/ai/ranking.py's weighted-mean function drops a None binding_score from the sum and renormalises the remaining evidence weights to 1.0 (documented behavior, confirmed against api/ai/ranking_config.py and prior PROJECT_COMPLETION_STATUS.md investigation). So the existing 375-case Hit@3/P@3 numbers are driven entirely by OncoKB/OpenTargets/AlphaMissense/Phase/CIViC evidence — never by docking — not degraded-by-fallback-structure numbers.",
+    "implication_for_this_estimate": "There is no existing script that re-scores this dataset with DiffDock. Wiring score_binding into a per-case loop is new integration work, not a config flip. The estimate below assumes the simplest possible integration: exactly one DiffDock call per case (its single best/known drug candidate), NOT the full ai_worker.py pipeline's up-to-25-candidates-per-case loop. A full-fidelity re-score matching production behavior would take meaningfully longer than this estimate — bounded below, not represented as the real production cost."
+  },
+
+  "measured_runtime_basis": {
+    "method": "Two independent, isolated single-complex DiffDock inference runs on the actual Vultr GPU instance, timed with the shell `time` builtin and cross-checked against nvidia-smi dmon GPU utilization sampling to confirm the workload is genuinely GPU-bound (not an artifact of a CPU-bound step being mistaken for GPU work).",
+    "hardware": "Vultr Cloud GPU instance, NVIDIA A16-16Q (vGPU slice), driver 550.90.07, CUDA 12.4 (PyTorch built against CUDA 11.7, backward compatible)",
+    "diffdock_config": {
+      "samples_per_complex": 10,
+      "batch_size": 10,
+      "no_final_step_noise": true
+    },
+    "runs": [
+      {
+        "run": 1,
+        "protein": "1a0q (repo example protein)",
+        "ligand": "SMILES COc(cc1)ccc1C#N",
+        "wall_clock_seconds": 133,
+        "note": "cold process start (conda env activation + ESM model load + inference)"
+      },
+      {
+        "run": 2,
+        "protein": "1a0q (repo example protein)",
+        "ligand": "SMILES COc(cc1)ccc1C#N",
+        "wall_clock_seconds": 142,
+        "note": "measured with `time`, GPU utilization sampled every 5s throughout — confirmed 93-99% sustained GPU-sm utilization during the ~114s diffusion sampling phase; remaining ~20-28s is ESM embedding generation + input featurization, which is CPU-bound and does not saturate the GPU"
+      }
+    ],
+    "average_seconds_per_case": 137.5,
+    "note_on_scaling": "This measurement is for a single protein-ligand complex processed alone (fresh process each time). A batch run over many cases in one process would avoid repeated conda/environment startup overhead per case, and could reuse cached ESM embeddings for cases that share the same protein target (91 unique genes across the 375 cases, per api/services/benchmark.py) — so a well-implemented batch script would likely run somewhat faster than 375 x 137.5s in practice. This estimate does not assume that optimization, since it doesn't exist yet, and states the simpler sequential-process bound instead."
+  },
+
+  "extrapolated_estimate": {
+    "assumption": "1 DiffDock call per case, 375 cases, sequential (no parallelism), single GPU",
+    "total_seconds": 51562,
+    "total_minutes": 859.4,
+    "total_hours": 14.32,
+    "range_note": "Using the two measured data points (133s, 142s) as low/high bounds instead of a single average: 375 x 133s = 13.85 hours; 375 x 142s = 14.79 hours. Real total likely falls in this ~13.9-14.8 hour range for the bounded (1 call/case) scope. If re-scoring instead matched full production behavior (score_binding called once per surviving candidate drug per case, up to 25 per case per api/workers/ai_worker.py:138), the real total could be several times higher — this is not estimated here because that integration doesn't exist and the per-case candidate survival rate after the FDA-approval filter is not currently known without running it."
+  },
+
+  "execution_path_recommendation": {
+    "options_considered": [
+      {
+        "option": "Run directly on the Vultr GPU box (copy a standalone re-scoring script over via scp/ssh, run there, pull results back)",
+        "assessment": "Faster path. Requires writing one new script that loops over ADDITIONAL_VALIDATION_CASES, calls score_binding (or an equivalent direct DiffDock invocation) per case, and writes results to a JSON file — then scp'ing it to the already-configured Vultr instance and running it there directly. No changes to the production codebase's env-var wiring are required for this."
+      },
+      {
+        "option": "Wait for the remote-wiring feature (ai/diffdock/score.py calling out to the Vultr box via SSH/DIFFDOCK_DIR indirection) to land first, then run the existing pipeline unmodified",
+        "assessment": "Slower path. The remote-wiring feature is a superset of the work in option 1 — it still requires the Vultr box to be reachable and DiffDock installed there (already true), plus additional abstraction code in score.py to transparently proxy calls over SSH, plus handling of file transfer for structures/ligands per call, plus error handling for the remote channel itself. This is strictly more engineering than writing one standalone script."
+      }
+    ],
+    "recommendation": "Run directly on the Vultr GPU box with a standalone script (option 1). It reaches a real result faster because the remote-wiring feature is additional, not alternative, work — it exists to let the production pipeline call DiffDock transparently in normal day-to-day operation, not to make a one-off 375-case re-scoring run faster. Building the standalone script is strictly less work and unblocks getting a real number sooner; the remote-wiring feature can still be built afterward for ongoing production use without being on the critical path for this specific re-scoring task."
+  },
+
+  "not_yet_done": {
+    "note": "This file contains only the runtime estimate and recommendation requested. It does NOT contain actual re-scored Hit@3/P@3/binding_score results — that re-scoring run has not been executed. A follow-up file with a different, clearly-dated name should be produced once the actual run completes, so this estimate file and that future results file never coexist ambiguously."
+  }
+}

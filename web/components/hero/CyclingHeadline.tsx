@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 const SENTENCES = [
-  "Rank a mutation. Cite the evidence.",
-  "Repurposed drugs, ranked and cited.",
-  "When nothing matches, we say so.",
-  "An unmatched mutation, queued — not dead.",
+  "Nothing is ranked without a source.",
+  "Precision oncology, free and open to everyone.",
+  "No verdict without a reason.",
+  "Free personalized cancer treatment for everyone.",
 ];
 
 const TYPE_MS = 45;

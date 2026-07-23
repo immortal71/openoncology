@@ -52,6 +52,9 @@ Thumbs.db
 *.db
 *.sqlite3
 
+# Celery Beat scheduler state (runtime, not source)
+celerybeat-schedule
+
 # Local object-storage mirrors (may contain PHI — never commit)
 local_storage/
 api/local_storage/

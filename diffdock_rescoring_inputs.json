@@ -1,0 +1,2629 @@
+{
+  "total_cases": 375,
+  "prepared": 280,
+  "skipped": 95,
+  "skip_reasons": [
+    {
+      "case_id": "EGFR_T790M_C797S_COMUT_NSCLC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "VUS_LOWVAF_TP53_NSCLC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "EGFR_L858R_ORALCAVITY_INDIA",
+      "reason": "no SMILES for drug 'Cetuximab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_AMP_GASTRIC_INDIA",
+      "reason": "no SMILES for drug 'Trastuzumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "KRAS_G12D_GALLBLADDER",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TP53_R248W_ESOPHAGEAL_INDIA",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "CDKN2A_DEL_ORALCAVITY_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "CDH1_TRUNCATION_GASTRIC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "ARID1A_FRAMESHIFT_GASTRIC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "FAT1_TRUNCATION_NSCLC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "NOTCH1_MISSENSE_CLL_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "MYC_AMP_DLBCL_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "RB1_LOSS_BREAST_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TERT_PROMOTER_GLIOMA_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "DNMT3A_R882H_AML_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TET2_FRAMESHIFT_AML_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TP53_R248H_OSTEOSARCOMA_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "EGFR_OSIMERTINIB_ACQUIRED_NSCLC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "ERBB2_EXON20INS_NSCLC",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "NF2_LOSS_MESOTHELIOMA_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "CTNNB1_S45F_HCC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "ATM_TRUNCATION_PROSTATE_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "SF3B1_K700E_MDS_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TSC2_TRUNCATION_RCC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "GNAQ_Q209L_UVEAL_MEL",
+      "reason": "no SMILES for drug 'Tebentafusp' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_AMP_BREAST_FULLSTACK",
+      "reason": "no SMILES for drug 'Trastuzumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_AMPLIFICATION_GASTRIC_INDIA_2",
+      "reason": "no SMILES for drug 'Trastuzumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_EXON20INS_NSCLC_DUAL",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "EGFR_AMP_HEAD_NECK",
+      "reason": "no SMILES for drug 'Cetuximab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MLH1_MSI_H_COLORECTAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH2_MSI_H_ENDOMETRIAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH6_MSI_H_GASTRIC",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "PMS2_MSI_H_UROTHELIAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "TMB_HIGH_TUMOR_AGNOSTIC",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "MSH2_MSI_H_PANCREATIC",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MLH1_MSI_H_GASTRIC",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_EXON20INS_LUNG_EXTENDED",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ARID1A_FRAMESHIFT_OVARIAN_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "SMAD4_TRUNCATION_CRC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "SETD2_FRAMESHIFT_RCC_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "BAP1_LOSS_MESOTHELIOMA_VUS",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TMB_HIGH_CERVICAL",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "GNAQ_Q209L_UVEAL_MEL",
+      "reason": "no SMILES for drug 'Tebentafusp' (biologic or unmatched)"
+    },
+    {
+      "case_id": "GNAQ_Q209P_UVEAL_MEL",
+      "reason": "no SMILES for drug 'Tebentafusp' (biologic or unmatched)"
+    },
+    {
+      "case_id": "GNA11_Q209L_UVEAL_MEL",
+      "reason": "no SMILES for drug 'Tebentafusp' (biologic or unmatched)"
+    },
+    {
+      "case_id": "HRAS_Q61R_HNSCC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "HRAS_Q61K_HNSCC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "HRAS_G12V_HNSCC",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "POLE_EXONUCLEASE_ENDOMETRIAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MLH1_MSI_H_OVARIAN",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH2_MSI_H_LUNG",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH6_MSI_H_COLORECTAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MLH1_MSI_H_PROSTATE",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "PMS2_MSI_H_ENDOMETRIAL",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "TMB_HIGH_COLORECTAL",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_BLADDER",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_GASTRIC",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_SARCOMA",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_ENDOMETRIAL",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "ERBB2_AMP_ENDOMETRIAL",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_AMP_COLORECTAL",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_EXON20INS_LUNG_ADENO",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "TP53_R273H_CRC_NEG",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "RB1_TRUNCATING_SCLC_NEG",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TET2_TRUNCATING_MPN_NEG",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "ASXL1_TRUNCATING_MDS_NEG",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "KRAS_G12D_PDAC_NEG",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "EGFR_L792H_COMBO_NOTE",
+      "reason": "no SMILES for drug 'Amivantamab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB3_AMP_BREAST_01",
+      "reason": "no SMILES for drug 'Patritumab-deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB3_AMP_NSCLC_01",
+      "reason": "no SMILES for drug 'Patritumab-deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "FGFR4_AMP_HCC_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "NTRK1_G595R_RESISTANCE_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "KRAS_G12D_PDAC_EMERGING_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "KRAS_G13D_CRC_SOTO_NOTE",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "MLH1_LOSS_GASTRIC_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH2_PATHOGENIC_ENDO_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MSH6_PATHOGENIC_CRC_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "PMS2_PATHOGENIC_OVARIAN_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "HRAS_Q61R_HNSCC_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "HRAS_G13R_HNSCC_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "CD274_AMP_NSCLC_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "CD274_AMP_GASTRIC_01",
+      "reason": "no SMILES for drug 'Pembrolizumab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "MDM2_AMP_SARCOMA_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "TMB_HIGH_CERVICAL_01",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_HEPATO_01",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "TMB_HIGH_NEURO_01",
+      "reason": "no UniProt mapping for gene TMB"
+    },
+    {
+      "case_id": "MET_Y1230H_RESISTANCE_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "EGFR_EXON20INS_NSCLC_01",
+      "reason": "no SMILES for drug 'Amivantamab' (biologic or unmatched)"
+    },
+    {
+      "case_id": "ERBB2_Y772DUP_LUNG_01",
+      "reason": "no SMILES for drug 'Trastuzumab deruxtecan' (biologic or unmatched)"
+    },
+    {
+      "case_id": "LIT_KRAS_G12V_GBM_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "LIT_STK11_LOF_NSCLC_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "LIT_TP53_R248W_NSCLC_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "LIT_MYC_AMP_DLBCL_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "LIT_CDH1_GERM_BREAST_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    },
+    {
+      "case_id": "LIT_PTEN_LOF_GBM_NEG_01",
+      "reason": "no known_drugs (negative control)"
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "ABL1_T315I_E255K_COMUT_CML",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Asciminib",
+      "chembl_id": "CHEMBL4208229",
+      "smiles": "O=C(Nc1ccc(OC(F)(F)Cl)cc1)c1cnc(N2CC[C@@H](O)C2)c(-c2cc[nH]n2)c1"
+    },
+    {
+      "case_id": "EGFR_L858R_MET_AMP_COMUT_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "KRAS_G12C_STK11_COMUT_NSCLC",
+      "gene": "KRAS",
+      "uniprot_id": "P01116",
+      "drug_name": "Sotorasib",
+      "chembl_id": "CHEMBL4523582",
+      "smiles": "COc1ccc2c(NC3=NC(=O)c4cc(F)c(Cl)c(NC5=N/C(=C\\[NH]C5=O)c5cc(F)c(Cl)c(OC)c5)c4N3)c(=O)n(C)n2c1"
+    },
+    {
+      "case_id": "BRAF_V600E_CDKN2A_DEL_MEL",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "EGFR_T790M_LOWVAF_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "KRAS_G12C_LOWVAF_NSCLC",
+      "gene": "KRAS",
+      "uniprot_id": "P01116",
+      "drug_name": "Sotorasib",
+      "chembl_id": "CHEMBL4523582",
+      "smiles": "COc1ccc2c(NC3=NC(=O)c4cc(F)c(Cl)c(NC5=N/C(=C\\[NH]C5=O)c5cc(F)c(Cl)c(OC)c5)c4N3)c(=O)n(C)n2c1"
+    },
+    {
+      "case_id": "BRAF_V600E_VERYLOWVAF_MEL",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "PIK3CA_H1047R_LOWPURITY_BREAST",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "PIK3CA_E545K_CERVICAL_INDIA",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "FGFR2_FUSION_GALLBLADDER",
+      "gene": "FGFR2",
+      "uniprot_id": "P21802",
+      "drug_name": "Pemigatinib",
+      "chembl_id": "CHEMBL4297522",
+      "smiles": "CCN1C(=O)N(c2c(F)c(OC)cc(OC)c2F)Cc2cnc3[nH]c(CN4CCOCC4)cc3c21"
+    },
+    {
+      "case_id": "NRAS_Q61R_MELANOMA_INDIA",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "VHL_TRUNCATION_RENAL_VUS",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "ALK_F1174L_NEUROBLASTOMA",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "BRAF_V600E_PEDS_GLIOMA",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "NTRK1_FUSION_PEDIATRIC",
+      "gene": "NTRK1",
+      "uniprot_id": "P04629",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "RET_FUSION_PEDS_THYROID",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "ALK_G1202R_NSCLC",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Lorlatinib",
+      "chembl_id": "CHEMBL3833333",
+      "smiles": "CC#Cc1ccnc(-c2cc3cc(OC)c(OC)cc3n2-c2ccc(F)cc2F)n1"
+    },
+    {
+      "case_id": "KIT_D816V_SYSTEMIC_MASTO",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "PDGFRA_D842V_GIST_AVAPRITINIB",
+      "gene": "PDGFRA",
+      "uniprot_id": "P16234",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "ESR1_D538G_BREAST",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "HIF2A_V155L_VHL_RCC",
+      "gene": "HIF2A",
+      "uniprot_id": "Q99814",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "PTEN_LOSS_ENDOMETRIAL",
+      "gene": "PTEN",
+      "uniprot_id": "P60484",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "KRAS_G12C_CRC_ADAGRASIB",
+      "gene": "KRAS",
+      "uniprot_id": "P01116",
+      "drug_name": "Adagrasib",
+      "chembl_id": "CHEMBL4630513",
+      "smiles": "O=C1CNC(=O)c2cc(Cl)ccc2N2CCNCC2c2ccc(F)cn2"
+    },
+    {
+      "case_id": "FGFR3_FUSION_UROTHELIAL",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "IDH2_R140Q_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "IDH2_R172K_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "MET_EXON14_NSCLC_TEPOTINIB",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "BRCA1_PATHOGENIC_OVARIAN",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "EZH2_Y646N_DLBCL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "ROS1_FUSION_NSCLC_LORLATINIB",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Lorlatinib",
+      "chembl_id": "CHEMBL3833333",
+      "smiles": "CC#Cc1ccnc(-c2cc3cc(OC)c(OC)cc3n2-c2ccc(F)cc2F)n1"
+    },
+    {
+      "case_id": "JAK2_V617F_MPN",
+      "gene": "JAK2",
+      "uniprot_id": "O60674",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "CALR_EXON9_MPN",
+      "gene": "CALR",
+      "uniprot_id": "P27797",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "BCL2_AMP_DLBCL_VENETOCLAX",
+      "gene": "BCL2",
+      "uniprot_id": "P10415",
+      "drug_name": "Venetoclax",
+      "chembl_id": "CHEMBL3214697",
+      "smiles": "CC1(CCC(=C1)c1ccc(Oc2ccc(N3CCN(CC3)C(=O)c3ccc4c(c3)CC(=O)N4c3ccc(Cl)cc3Cl)cc2)cc1)C"
+    },
+    {
+      "case_id": "ABL1_BCRABL1_CML_CHRONIC",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Imatinib",
+      "chembl_id": "CHEMBL941",
+      "smiles": "Cc1ccc(-c2ccc(NC(=O)c3ccc(CN4CCN(C)CC4)cc3)cc2N)cc1"
+    },
+    {
+      "case_id": "BRAF_V600E_THYROID",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Vemurafenib",
+      "chembl_id": "CHEMBL1229517",
+      "smiles": "CCCS(=O)(=O)Nc1ccc(F)c(C(=O)c2ccc(Cl)cc2)c1-c1ccc(F)c(C(=O)N2CC(C)(C)CC2)c1"
+    },
+    {
+      "case_id": "AR_AMP_PROSTATE",
+      "gene": "AR",
+      "uniprot_id": "P10275",
+      "drug_name": "Enzalutamide",
+      "chembl_id": "CHEMBL1082407",
+      "smiles": "CNC(=O)c1ccc(N2C(=S)N(c3ccc(C#N)c(C(F)(F)F)c3)C(=O)C2(C)C)cc1F"
+    },
+    {
+      "case_id": "ATM_PATHOGENIC_PROSTATE",
+      "gene": "ATM",
+      "uniprot_id": "Q13315",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "FGFR2_FUSION_CHOLANGIO_EXTENDED",
+      "gene": "FGFR2",
+      "uniprot_id": "P21802",
+      "drug_name": "Pemigatinib",
+      "chembl_id": "CHEMBL4297522",
+      "smiles": "CCN1C(=O)N(c2c(F)c(OC)cc(OC)c2F)Cc2cnc3[nH]c(CN4CCOCC4)cc3c21"
+    },
+    {
+      "case_id": "BRCA2_PATHOGENIC_PROSTATE",
+      "gene": "BRCA2",
+      "uniprot_id": "P51587",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "RET_M918T_MTC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "JAK2_V617F_MYELOFIBROSIS",
+      "gene": "JAK2",
+      "uniprot_id": "O60674",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "IDH1_R132H_AML",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "FGFR2_FUSION_CHOLANGIO",
+      "gene": "FGFR2",
+      "uniprot_id": "P21802",
+      "drug_name": "Pemigatinib",
+      "chembl_id": "CHEMBL4297522",
+      "smiles": "CCN1C(=O)N(c2c(F)c(OC)cc(OC)c2F)Cc2cnc3[nH]c(CN4CCOCC4)cc3c21"
+    },
+    {
+      "case_id": "ALK_FUSION_NSCLC_FIRSTLINE",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Alectinib",
+      "chembl_id": "CHEMBL2180688",
+      "smiles": "COc1cc2c(cc1N1CCOCC1)Nc1ncnc(c1C2=O)-c1cc(NC(=O)C(C)(C)CO)ccc1F"
+    },
+    {
+      "case_id": "RET_FUSION_THYROID_NSCLC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "NTRK3_FUSION_INFANTILE_FIBRO",
+      "gene": "NTRK3",
+      "uniprot_id": "Q16288",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "KIT_EXON11_GIST_MULTILINE",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Imatinib",
+      "chembl_id": "CHEMBL941",
+      "smiles": "Cc1ccc(-c2ccc(NC(=O)c3ccc(CN4CCN(C)CC4)cc3)cc2N)cc1"
+    },
+    {
+      "case_id": "ABL1_BCRABL1_CML_BLAST",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Imatinib",
+      "chembl_id": "CHEMBL941",
+      "smiles": "Cc1ccc(-c2ccc(NC(=O)c3ccc(CN4CCN(C)CC4)cc3)cc2N)cc1"
+    },
+    {
+      "case_id": "EGFR_EXON19DEL_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "PDGFRA_D842V_GIST_AVAPRITINIB",
+      "gene": "PDGFRA",
+      "uniprot_id": "P16234",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "BRAF_V600E_NSCLC_COMBO",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "MET_AMP_NSCLC_EXPANDED",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "FGFR2_AMP_CHOLANGIO_L3",
+      "gene": "FGFR2",
+      "uniprot_id": "P21802",
+      "drug_name": "Pemigatinib",
+      "chembl_id": "CHEMBL4297522",
+      "smiles": "CCN1C(=O)N(c2c(F)c(OC)cc(OC)c2F)Cc2cnc3[nH]c(CN4CCOCC4)cc3c21"
+    },
+    {
+      "case_id": "NRAS_Q61R_MELANOMA_COMBO",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "CD79B_Y196C_DLBCL_BTKi",
+      "gene": "CD79B",
+      "uniprot_id": "P40259",
+      "drug_name": "Ibrutinib",
+      "chembl_id": "CHEMBL1873475",
+      "smiles": "C=CC(=O)N1CCC[C@@H](n2nc(-c3ccc(Oc4ccccc4)cc3)c3c(N)ncnc32)C1"
+    },
+    {
+      "case_id": "NPM1_W288FS_AML_COMBO",
+      "gene": "NPM1",
+      "uniprot_id": "P06748",
+      "drug_name": "Venetoclax",
+      "chembl_id": "CHEMBL3214697",
+      "smiles": "CC1(CCC(=C1)c1ccc(Oc2ccc(N3CCN(CC3)C(=O)c3ccc4c(c3)CC(=O)N4c3ccc(Cl)cc3Cl)cc2)cc1)C"
+    },
+    {
+      "case_id": "FGFR3_FUSION_UROTHELIAL_DUAL",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "RET_FUSION_NSCLC_MIXEDLINES",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "PDGFRB_FUSION_MYELOID",
+      "gene": "PDGFRB",
+      "uniprot_id": "P09619",
+      "drug_name": "Imatinib",
+      "chembl_id": "CHEMBL941",
+      "smiles": "Cc1ccc(-c2ccc(NC(=O)c3ccc(CN4CCN(C)CC4)cc3)cc2N)cc1"
+    },
+    {
+      "case_id": "CALR_EXON9DEL_MPN_EXTENDED",
+      "gene": "CALR",
+      "uniprot_id": "P27797",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "ATM_PATHOGENIC_PANCREATIC_DDR",
+      "gene": "ATM",
+      "uniprot_id": "Q13315",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "KIT_EXON9MUT_GIST_DUAL",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Sunitinib",
+      "chembl_id": "CHEMBL597365",
+      "smiles": "CCN(CC)CCNC(=O)c1c(C)[nH]c(/C=C2\\C(=O)Nc3cccc(F)c32)c1C"
+    },
+    {
+      "case_id": "ABL1_T315I_CML_RESISTANT",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Ponatinib",
+      "chembl_id": "CHEMBL1171837",
+      "smiles": "Cc1ccc(C(=O)Nc2ccc(CN3CCN(C)CC3)c(C(F)(F)F)c2)cc1C#Cc1cnc2cccnn12"
+    },
+    {
+      "case_id": "BRAF_V600K_MELANOMA",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "EGFR_E746A750DEL_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "ESR1_Y537S_BREAST_REFRACTORY",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "KIT_EXON11MUT_GIST_FIRSTLINE",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Imatinib",
+      "chembl_id": "CHEMBL941",
+      "smiles": "Cc1ccc(-c2ccc(NC(=O)c3ccc(CN4CCN(C)CC4)cc3)cc2N)cc1"
+    },
+    {
+      "case_id": "NTRK2_FUSION_GLIOMA",
+      "gene": "NTRK2",
+      "uniprot_id": "Q16620",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "RET_KIF5B_NSCLC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "ROS1_CD74_NSCLC",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "IDH1_R132C_AML",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH2_R172S_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "IDH2_R140Q_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "FLT3_D835Y_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "PIK3CA_E542K_BREAST",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "FGFR3_S249C_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "EGFR_AMP_NSCLC_L2",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Erlotinib",
+      "chembl_id": "CHEMBL553",
+      "smiles": "C#Cc1cccc(Nc2ncnc3cc(OCCOC)c(OCCOC)cc23)c1"
+    },
+    {
+      "case_id": "NRAS_Q61H_MELANOMA",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "NRAS_Q61K_NSCLC",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "NRAS_Q61L_COLORECTAL",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "CD79B_Y196H_DLBCL",
+      "gene": "CD79B",
+      "uniprot_id": "P40259",
+      "drug_name": "Ibrutinib",
+      "chembl_id": "CHEMBL1873475",
+      "smiles": "C=CC(=O)N1CCC[C@@H](n2nc(-c3ccc(Oc4ccccc4)cc3)c3c(N)ncnc32)C1"
+    },
+    {
+      "case_id": "NRAS_Q61R_CRC_REFRACTORY",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "MET_AMP_GASTRIC_L3",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "FGFR2_AMP_GASTRIC_L3",
+      "gene": "FGFR2",
+      "uniprot_id": "P21802",
+      "drug_name": "Pemigatinib",
+      "chembl_id": "CHEMBL4297522",
+      "smiles": "CCN1C(=O)N(c2c(F)c(OC)cc(OC)c2F)Cc2cnc3[nH]c(CN4CCOCC4)cc3c21"
+    },
+    {
+      "case_id": "NPM1_W288FS_AML_VENETOCLAX",
+      "gene": "NPM1",
+      "uniprot_id": "P06748",
+      "drug_name": "Venetoclax",
+      "chembl_id": "CHEMBL3214697",
+      "smiles": "CC1(CCC(=C1)c1ccc(Oc2ccc(N3CCN(CC3)C(=O)c3ccc4c(c3)CC(=O)N4c3ccc(Cl)cc3Cl)cc2)cc1)C"
+    },
+    {
+      "case_id": "EGFR_E746A750DEL_LUNG_ADENO",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "NRAS_Q61P_MELANOMA",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "IDH1_R132S_CHOLANGIO",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "ERBB2_L755S_BREAST_L3",
+      "gene": "ERBB2",
+      "uniprot_id": "P04626",
+      "drug_name": "Neratinib",
+      "chembl_id": "CHEMBL3989921",
+      "smiles": "CCOc1cc2ncc(C#N)c(Nc3ccc(OCc4ccccn4)c(Cl)c3)c2cc1NC(=O)/C=C/CN(C)C.O=C(O)/C=C\\C(=O)O"
+    },
+    {
+      "case_id": "RET_KIF5B_THYROID",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "ROS1_CD74_NSCLC_EXTENDED",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "FLT3_D835Y_RELAPSED_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FGFR3_S249C_BLADDER_EXTENDED",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "NTRK2_FUSION_BRAIN_TUMOR",
+      "gene": "NTRK2",
+      "uniprot_id": "Q16620",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "PIK3CA_E542K_ENDOMETRIAL",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "CD79B_Y196H_DLBCL_EXTENDED",
+      "gene": "CD79B",
+      "uniprot_id": "P40259",
+      "drug_name": "Ibrutinib",
+      "chembl_id": "CHEMBL1873475",
+      "smiles": "C=CC(=O)N1CCC[C@@H](n2nc(-c3ccc(Oc4ccccc4)cc3)c3c(N)ncnc32)C1"
+    },
+    {
+      "case_id": "MYD88_L265P_WM_VALIDATED",
+      "gene": "MYD88",
+      "uniprot_id": "Q99836",
+      "drug_name": "Ibrutinib",
+      "chembl_id": "CHEMBL1873475",
+      "smiles": "C=CC(=O)N1CCC[C@@H](n2nc(-c3ccc(Oc4ccccc4)cc3)c3c(N)ncnc32)C1"
+    },
+    {
+      "case_id": "JAK2_V617F_MPN_VALIDATED",
+      "gene": "JAK2",
+      "uniprot_id": "O60674",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "MET_EXON14SKIP_GASTRIC",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "CALR_EXON9DEL_MF_EXTENDED",
+      "gene": "CALR",
+      "uniprot_id": "P27797",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "BRAF_V600E_NSCLC_VALIDATED",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Dabrafenib",
+      "chembl_id": "CHEMBL2028663",
+      "smiles": "CC(C)(C)c1nc(Nc2ccc(F)c(Cl)c2)c(-c2cc(F)cc(F)c2)s1"
+    },
+    {
+      "case_id": "EGFR_G719A_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "EGFR_G719S_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "EGFR_G719C_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "EGFR_L861Q_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "EGFR_S768I_NSCLC",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "FLT3_D835V_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_D835H_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_D835E_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_Y842C_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_Y842H_AML",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "IDH1_R132L_AML",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH1_R132G_AML",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH1_R132W_CHOLANGIO",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH1_R132H_CHOLANGIO",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH2_R172W_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "IDH2_R172M_AML",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "SMO_W535L_BCC",
+      "gene": "SMO",
+      "uniprot_id": "Q9NWM0",
+      "drug_name": "Vismodegib",
+      "chembl_id": "CHEMBL473417",
+      "smiles": "CS(=O)(=O)c1ccc(C(=O)Nc2ccc(Cl)c(-c3ccccn3)c2)c(Cl)c1"
+    },
+    {
+      "case_id": "SMO_L412F_BCC",
+      "gene": "SMO",
+      "uniprot_id": "Q9NWM0",
+      "drug_name": "Vismodegib",
+      "chembl_id": "CHEMBL473417",
+      "smiles": "CS(=O)(=O)c1ccc(C(=O)Nc2ccc(Cl)c(-c3ccccn3)c2)c(Cl)c1"
+    },
+    {
+      "case_id": "PTCH1_LOSS_BCC",
+      "gene": "PTCH1",
+      "uniprot_id": "Q13635",
+      "drug_name": "Vismodegib",
+      "chembl_id": "CHEMBL473417",
+      "smiles": "CS(=O)(=O)c1ccc(C(=O)Nc2ccc(Cl)c(-c3ccccn3)c2)c(Cl)c1"
+    },
+    {
+      "case_id": "SMO_MUTATION_MEDULLOBLASTOMA",
+      "gene": "SMO",
+      "uniprot_id": "Q9NWM0",
+      "drug_name": "Sonidegib",
+      "chembl_id": "CHEMBL2105737",
+      "smiles": "Cc1c(C(=O)Nc2ccc(N3C[C@@H](C)O[C@@H](C)C3)nc2)cccc1-c1ccc(OC(F)(F)F)cc1"
+    },
+    {
+      "case_id": "VHL_LOSS_CLEAR_CELL_RCC",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "VHL_MUTATION_CLEAR_CELL_RCC",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "VHL_TRUNCATING_RCC",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "EZH2_Y646N_FL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_Y646F_FL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_Y646S_FL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_Y646C_FL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_Y646H_FL",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "RET_C634F_MTC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_C634R_MTC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_C634Y_MTC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_M918T_SPORADIC_MTC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_CCDC6_NSCLC",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_NCOA4_THYROID",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "ROS1_SLC34A2_NSCLC",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "ROS1_EZR_NSCLC",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "NTRK1_FUSION_THYROID",
+      "gene": "NTRK1",
+      "uniprot_id": "P04629",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "NTRK1_ETV6NTRK3_SECRETORY_BREAST",
+      "gene": "NTRK1",
+      "uniprot_id": "P04629",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "NTRK3_ETV6_INFANTILE_FIBROSARCOMA",
+      "gene": "NTRK3",
+      "uniprot_id": "Q16288",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "NTRK3_FUSION_COLORECTAL",
+      "gene": "NTRK3",
+      "uniprot_id": "Q16288",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "ALK_NPM1ALK_ALCL",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "ALK_EML4ALK_LUNG_ADENO_EXTENDED",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Alectinib",
+      "chembl_id": "CHEMBL2180688",
+      "smiles": "COc1cc2c(cc1N1CCOCC1)Nc1ncnc(c1C2=O)-c1cc(NC(=O)C(C)(C)CO)ccc1F"
+    },
+    {
+      "case_id": "MPL_W515L_MYELOFIBROSIS",
+      "gene": "MPL",
+      "uniprot_id": "P40238",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "MPL_W515K_ET",
+      "gene": "MPL",
+      "uniprot_id": "P40238",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "JAK2_V617F_ET",
+      "gene": "JAK2",
+      "uniprot_id": "O60674",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "JAK2_V617F_PV",
+      "gene": "JAK2",
+      "uniprot_id": "O60674",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "ESR1_Y537N_BREAST",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "ESR1_D538G_ELACESTRANT",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "PIK3CA_H1047R_HR_POS_BREAST",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "PIK3CA_E545K_BREAST_EXT",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "PIK3CA_H1047L_BREAST",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "PIK3CA_E542K_CERVICAL",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "TSC1_MUTATION_ANGIO",
+      "gene": "TSC1",
+      "uniprot_id": "Q92574",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "TSC2_MUTATION_LAM",
+      "gene": "TSC2",
+      "uniprot_id": "P49815",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "MTOR_E2014K_BREAST",
+      "gene": "MTOR",
+      "uniprot_id": "P42345",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "MTOR_E1799K_RCC",
+      "gene": "MTOR",
+      "uniprot_id": "P42345",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "KIT_EXON13MUT_GIST",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Regorafenib",
+      "chembl_id": "CHEMBL1946170",
+      "smiles": "CNC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccc(Cl)c(C(F)(F)F)c3)c(F)c2)ccn1"
+    },
+    {
+      "case_id": "KIT_EXON17MUT_GIST",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "KIT_D816V_MASTOCYTOSIS",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "FGFR3_Y373C_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "FGFR3_R248C_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "FGFR3_G370C_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "FGFR3_K650E_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "FGFR3_FUSION_BLADDER",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "BRCA1_PATHOGENIC_HGSOC",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA2_PATHOGENIC_HGSOC",
+      "gene": "BRCA2",
+      "uniprot_id": "P51587",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA2_PATHOGENIC_PANCREATIC_V2",
+      "gene": "BRCA2",
+      "uniprot_id": "P51587",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA1_PATHOGENIC_PANCREATIC",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA1_TRUNCATING_BREAST",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA2_TRUNCATING_BREAST",
+      "gene": "BRCA2",
+      "uniprot_id": "P51587",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "PALB2_PATHOGENIC_BREAST",
+      "gene": "PALB2",
+      "uniprot_id": "Q86YC2",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "CDK12_BIALLELIC_PROSTATE",
+      "gene": "CDK12",
+      "uniprot_id": "Q9NYV4",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "KRAS_G12C_LUNG_SQUAMOUS",
+      "gene": "KRAS",
+      "uniprot_id": "P01116",
+      "drug_name": "Sotorasib",
+      "chembl_id": "CHEMBL4523582",
+      "smiles": "COc1ccc2c(NC3=NC(=O)c4cc(F)c(Cl)c(NC5=N/C(=C\\[NH]C5=O)c5cc(F)c(Cl)c(OC)c5)c4N3)c(=O)n(C)n2c1"
+    },
+    {
+      "case_id": "MAP2K1_E203K_MELANOMA",
+      "gene": "MAP2K1",
+      "uniprot_id": "Q02750",
+      "drug_name": "Cobimetinib",
+      "chembl_id": "CHEMBL2146883",
+      "smiles": "O=C(c1ccc(F)c(F)c1Nc1ccc(I)cc1F)N1CC(O)([C@@H]2CCCCN2)C1"
+    },
+    {
+      "case_id": "NF1_TRUNCATING_MPNST",
+      "gene": "NF1",
+      "uniprot_id": "P21359",
+      "drug_name": "Selumetinib",
+      "chembl_id": "CHEMBL2105684",
+      "smiles": "Cn1cnc2c(F)c(Nc3ccc(Br)cc3Cl)c(C(=O)NOCCO)cc21.O=S(=O)(O)O"
+    },
+    {
+      "case_id": "NF1_LOSS_NSCLC",
+      "gene": "NF1",
+      "uniprot_id": "P21359",
+      "drug_name": "Selumetinib",
+      "chembl_id": "CHEMBL2105684",
+      "smiles": "Cn1cnc2c(F)c(Nc3ccc(Br)cc3Cl)c(C(=O)NOCCO)cc21.O=S(=O)(O)O"
+    },
+    {
+      "case_id": "BCL2_AMP_CLL",
+      "gene": "BCL2",
+      "uniprot_id": "P10415",
+      "drug_name": "Venetoclax",
+      "chembl_id": "CHEMBL3214697",
+      "smiles": "CC1(CCC(=C1)c1ccc(Oc2ccc(N3CCN(CC3)C(=O)c3ccc4c(c3)CC(=O)N4c3ccc(Cl)cc3Cl)cc2)cc1)C"
+    },
+    {
+      "case_id": "AR_AMP_CRPC_EXTENDED",
+      "gene": "AR",
+      "uniprot_id": "P10275",
+      "drug_name": "Enzalutamide",
+      "chembl_id": "CHEMBL1082407",
+      "smiles": "CNC(=O)c1ccc(N2C(=S)N(c3ccc(C#N)c(C(F)(F)F)c3)C(=O)C2(C)C)cc1F"
+    },
+    {
+      "case_id": "ATM_PATHOGENIC_CRPC",
+      "gene": "ATM",
+      "uniprot_id": "Q13315",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "ABL1_BCRABL1_PH_ALL",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Ponatinib",
+      "chembl_id": "CHEMBL1171837",
+      "smiles": "Cc1ccc(C(=O)Nc2ccc(CN3CCN(C)CC3)c(C(F)(F)F)c2)cc1C#Cc1cnc2cccnn12"
+    },
+    {
+      "case_id": "ABL1_T315I_ALL",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Ponatinib",
+      "chembl_id": "CHEMBL1171837",
+      "smiles": "Cc1ccc(C(=O)Nc2ccc(CN3CCN(C)CC3)c(C(F)(F)F)c2)cc1C#Cc1cnc2cccnn12"
+    },
+    {
+      "case_id": "MET_EXON14_SQUAMOUS",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "MET_AMP_NSCLC_HIGH",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "PDGFRA_D842V_MET_GIST",
+      "gene": "PDGFRA",
+      "uniprot_id": "P16234",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "CDKN2A_LOSS_MELANOMA_01",
+      "gene": "CDKN2A",
+      "uniprot_id": "P42771",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "CDKN2A_HOMO_DEL_NSCLC_01",
+      "gene": "CDKN2A",
+      "uniprot_id": "P42771",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "CDK4_AMP_LIPOSARCOMA_01",
+      "gene": "CDK4",
+      "uniprot_id": "P11802",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "CDK4_AMP_BREAST_01",
+      "gene": "CDK4",
+      "uniprot_id": "P11802",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "AKT1_E17K_BREAST_01",
+      "gene": "AKT1",
+      "uniprot_id": "P31749",
+      "drug_name": "Capivasertib",
+      "chembl_id": "CHEMBL2325741",
+      "smiles": "NC1(C(=O)N[C@@H](CCO)c2ccc(Cl)cc2)CCN(c2nc[nH]c3nccc2-3)CC1"
+    },
+    {
+      "case_id": "AKT1_E17K_NSCLC_01",
+      "gene": "AKT1",
+      "uniprot_id": "P31749",
+      "drug_name": "Capivasertib",
+      "chembl_id": "CHEMBL2325741",
+      "smiles": "NC1(C(=O)N[C@@H](CCO)c2ccc(Cl)cc2)CCN(c2nc[nH]c3nccc2-3)CC1"
+    },
+    {
+      "case_id": "PTEN_LOSS_BREAST_01",
+      "gene": "PTEN",
+      "uniprot_id": "P60484",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "PTEN_HOMO_DEL_GBM_01",
+      "gene": "PTEN",
+      "uniprot_id": "P60484",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "PTEN_R130Q_ENDO_01",
+      "gene": "PTEN",
+      "uniprot_id": "P60484",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "SMARCA4_LOF_NSCLC_01",
+      "gene": "SMARCA4",
+      "uniprot_id": "P51532",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "SMARCA4_LOF_OVARIAN_01",
+      "gene": "SMARCA4",
+      "uniprot_id": "P51532",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "ARID1A_LOF_OVARIAN_01",
+      "gene": "ARID1A",
+      "uniprot_id": "O14497",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "ARID1A_LOF_GC_01",
+      "gene": "ARID1A",
+      "uniprot_id": "O14497",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "RB1_LOF_BREAST_CDK_NOTE",
+      "gene": "RB1",
+      "uniprot_id": "P06400",
+      "drug_name": "Abemaciclib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CCN1CCN(Cc2ccc(Nc3ncc(F)c(-c4cc(F)c5nc(C)n(C(C)C)c5c4)n3)nc2)CC1"
+    },
+    {
+      "case_id": "CCND1_AMP_MANTLE_01",
+      "gene": "CCND1",
+      "uniprot_id": "P24385",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "CCND1_AMP_BREAST_01",
+      "gene": "CCND1",
+      "uniprot_id": "P24385",
+      "drug_name": "Palbociclib",
+      "chembl_id": "CHEMBL2364621",
+      "smiles": "CC(=O)c1c(C)c2cnc(Nc3ccc(N4CCNCC4)cn3)nc2n(C2CCCC2)c1=O.O=S(=O)(O)CCO"
+    },
+    {
+      "case_id": "EGFR_C797S_CONTEXT_NOTE",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Osimertinib",
+      "chembl_id": "CHEMBL3353410",
+      "smiles": "C=CC(=O)Nc1cc2c(Nc3ccc(N(C)CCN(C)C)cc3OC)ncnc2cc1OC"
+    },
+    {
+      "case_id": "ALK_G1202R_RESISTANCE_01",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Lorlatinib",
+      "chembl_id": "CHEMBL3833333",
+      "smiles": "CC#Cc1ccnc(-c2cc3cc(OC)c(OC)cc3n2-c2ccc(F)cc2F)n1"
+    },
+    {
+      "case_id": "ROS1_G2032R_RESISTANCE_01",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Lorlatinib",
+      "chembl_id": "CHEMBL3833333",
+      "smiles": "CC#Cc1ccnc(-c2cc3cc(OC)c(OC)cc3n2-c2ccc(F)cc2F)n1"
+    },
+    {
+      "case_id": "ABL1_T315I_ASCIMINIB_01",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Asciminib",
+      "chembl_id": "CHEMBL4208229",
+      "smiles": "O=C(Nc1ccc(OC(F)(F)Cl)cc1)c1cnc(N2CC[C@@H](O)C2)c(-c2cc[nH]n2)c1"
+    },
+    {
+      "case_id": "ABL1_V299L_CML_01",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Bosutinib",
+      "chembl_id": "CHEMBL2095206",
+      "smiles": "COc1cc(Nc2c(C#N)cnc3cc(OCCCN4CCN(C)CC4)c(OC)cc23)c(Cl)cc1Cl.O"
+    },
+    {
+      "case_id": "ABL1_F317L_CML_01",
+      "gene": "ABL1",
+      "uniprot_id": "P00519",
+      "drug_name": "Bosutinib",
+      "chembl_id": "CHEMBL2095206",
+      "smiles": "COc1cc(Nc2c(C#N)cnc3cc(OCCCN4CCN(C)CC4)c(OC)cc23)c(Cl)cc1Cl.O"
+    },
+    {
+      "case_id": "ESR1_Y537N_BREAST_01",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "ESR1_Y537C_BREAST_01",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "ESR1_D538G_ELAC_01",
+      "gene": "ESR1",
+      "uniprot_id": "P03372",
+      "drug_name": "Elacestrant",
+      "chembl_id": "CHEMBL4630514",
+      "smiles": "OC1Cc2cc(C(O)(c3ccc(Cl)cc3)c3ccc(Cl)cc3)ccc2C[C@@H]1c1ccc(OC)cc1"
+    },
+    {
+      "case_id": "BTK_AMP_CLL_01",
+      "gene": "BTK",
+      "uniprot_id": "Q06187",
+      "drug_name": "Ibrutinib",
+      "chembl_id": "CHEMBL1873475",
+      "smiles": "C=CC(=O)N1CCC[C@@H](n2nc(-c3ccc(Oc4ccccc4)cc3)c3c(N)ncnc32)C1"
+    },
+    {
+      "case_id": "BTK_C481S_CLL_RESISTANCE_01",
+      "gene": "BTK",
+      "uniprot_id": "Q06187",
+      "drug_name": "Pirtobrutinib",
+      "chembl_id": "CHEMBL6165320",
+      "smiles": "COc1ccc(F)cc1C(=O)NCc1ccc(-c2nn([C@H](C)C(F)(F)F)c(N)c2C(N)=O)cc1"
+    },
+    {
+      "case_id": "EZH2_Y646F_FL_01",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_A677G_FL_01",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_F687L_DLBCL_01",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "FGFR1_AMP_MBC_01",
+      "gene": "FGFR1",
+      "uniprot_id": "P11362",
+      "drug_name": "Infigratinib",
+      "chembl_id": "CHEMBL1852688",
+      "smiles": "CCN1CCN(c2ccc(Nc3cc(N(C)C(=O)Nc4c(Cl)c(OC)cc(OC)c4Cl)ncn3)cc2)CC1"
+    },
+    {
+      "case_id": "IDH1_R132C_AML_01",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH1_R132H_CC_01",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH1_R132G_AML_01",
+      "gene": "IDH1",
+      "uniprot_id": "O75874",
+      "drug_name": "Ivosidenib",
+      "chembl_id": "CHEMBL3989861",
+      "smiles": "Cc1ccc(-c2cccc3cc(F)cnc23)cc1NC(=O)c1cnc(N2CC[C@@H](F)C2)c(F)c1"
+    },
+    {
+      "case_id": "IDH2_R172W_AML_01",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "FLT3_D835Y_AML_01",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_D835H_AML_01",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "FLT3_Y842C_AML_01",
+      "gene": "FLT3",
+      "uniprot_id": "P36888",
+      "drug_name": "Gilteritinib",
+      "chembl_id": "CHEMBL3215903",
+      "smiles": "O=C(Nc1cc2ccc(Oc3ccc(N4CCN(C)CC4)cc3F)cc2n2ccccc12)C=C"
+    },
+    {
+      "case_id": "KIT_D816V_SM_01",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "KIT_D816V_GIST_RESISTANCE_01",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "KIT_V654A_GIST_RESISTANCE_01",
+      "gene": "KIT",
+      "uniprot_id": "P10721",
+      "drug_name": "Regorafenib",
+      "chembl_id": "CHEMBL1946170",
+      "smiles": "CNC(=O)c1cc(Oc2ccc(NC(=O)Nc3ccc(Cl)c(C(F)(F)F)c3)c(F)c2)ccn1"
+    },
+    {
+      "case_id": "PDGFRA_D842E_GIST_01",
+      "gene": "PDGFRA",
+      "uniprot_id": "P16234",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "RET_M918T_MTC_01",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_C634F_MTC_01",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_CCDC6_RET_NSCLC_01",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "RET_NCOA4_RET_TC_01",
+      "gene": "RET",
+      "uniprot_id": "P07949",
+      "drug_name": "Selpercatinib",
+      "chembl_id": "CHEMBL4523149",
+      "smiles": "CCC(CC)Cc1ccc2c(c1)c(=O)n1cccc1n2CC#N"
+    },
+    {
+      "case_id": "KRAS_G12V_NSCLC_EMERGING_01",
+      "gene": "KRAS",
+      "uniprot_id": "P01116",
+      "drug_name": "Adagrasib",
+      "chembl_id": "CHEMBL4630513",
+      "smiles": "O=C1CNC(=O)c2cc(Cl)ccc2N2CCNCC2c2ccc(F)cn2"
+    },
+    {
+      "case_id": "BRAF_L597V_MELANOMA_01",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Trametinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "BRAF_K601E_MELANOMA_01",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Trametinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "BRAF_D594N_NSCLC_01",
+      "gene": "BRAF",
+      "uniprot_id": "P15056",
+      "drug_name": "Trametinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "MAP2K2_Q60P_MELANOMA_01",
+      "gene": "MAP2K2",
+      "uniprot_id": "P36507",
+      "drug_name": "Trametinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "NRAS_Q61K_MELANOMA_01",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "NRAS_Q61L_MELANOMA_01",
+      "gene": "NRAS",
+      "uniprot_id": "P01111",
+      "drug_name": "Binimetinib",
+      "chembl_id": "CHEMBL2103875",
+      "smiles": "Cc1nc2ccc(-c3cc4c(cc3F)C[C@@H](NS(=O)(=O)CCC(F)(F)F)CC4)cc2nc1-c1ccc(F)cc1F"
+    },
+    {
+      "case_id": "VHL_LOF_RCC_BELZU_01",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "VHL_R167W_RCC_01",
+      "gene": "VHL",
+      "uniprot_id": "P40337",
+      "drug_name": "Belzutifan",
+      "chembl_id": "CHEMBL4585668",
+      "smiles": "CS(=O)(=O)c1ccc(Oc2cc(F)cc(C#N)c2)c2c1[C@H](O)[C@H](F)[C@@H]2F"
+    },
+    {
+      "case_id": "TSC1_LOF_ENDO_01",
+      "gene": "TSC1",
+      "uniprot_id": "Q92574",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "TSC2_LOF_AML_01",
+      "gene": "TSC2",
+      "uniprot_id": "P49815",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "MTOR_E2014K_RCC_01",
+      "gene": "MTOR",
+      "uniprot_id": "P42345",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "MTOR_L2427Q_BREAST_01",
+      "gene": "MTOR",
+      "uniprot_id": "P42345",
+      "drug_name": "Everolimus",
+      "chembl_id": "CHEMBL1908360",
+      "smiles": "CO[C@H]1C[C@@H]2CC[C@@H](C)[C@@](O)(O2)C(=O)C(=O)N2CCCC[C@H]2C(=O)O[C@H]([C@H](C)C[C@@H]2CC[C@@H](OCCO)[C@H](OC)C2)CC(=O)[C@H](C)/C=C(\\C)[C@@H](O)[C@@H](OC)C(=O)[C@H](C)C[C@H](C)/C=C/C=C/C=C/1C"
+    },
+    {
+      "case_id": "JAK1_V658F_MPN_01",
+      "gene": "JAK1",
+      "uniprot_id": "P23458",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "DNMT3A_R882H_AML_01",
+      "gene": "DNMT3A",
+      "uniprot_id": "Q9Y6K1",
+      "drug_name": "Azacitidine",
+      "chembl_id": "CHEMBL1489",
+      "smiles": "Nc1ncn([C@@H]2O[C@H](CO)[C@@H](O)[C@H]2O)c(=O)n1"
+    },
+    {
+      "case_id": "TET2_LOF_MDS_01",
+      "gene": "TET2",
+      "uniprot_id": "Q6N021",
+      "drug_name": "Azacitidine",
+      "chembl_id": "CHEMBL1489",
+      "smiles": "Nc1ncn([C@@H]2O[C@H](CO)[C@@H](O)[C@H]2O)c(=O)n1"
+    },
+    {
+      "case_id": "ASXL1_G646WFS_MF_01",
+      "gene": "ASXL1",
+      "uniprot_id": "Q8IXJ9",
+      "drug_name": "Ruxolitinib",
+      "chembl_id": "CHEMBL1287854",
+      "smiles": "N#CC[C@@H](C1CCCC1)n1cc(-c2ncnc3[nH]ccc23)cn1"
+    },
+    {
+      "case_id": "NPM1_W288CFS_AML_01",
+      "gene": "NPM1",
+      "uniprot_id": "P06748",
+      "drug_name": "Midostaurin",
+      "chembl_id": "CHEMBL178",
+      "smiles": "C[C@@H]1CCc2c(sc(N)n2)N1c1cccnc1"
+    },
+    {
+      "case_id": "NPM1_TYPE_B_AML_01",
+      "gene": "NPM1",
+      "uniprot_id": "P06748",
+      "drug_name": "Midostaurin",
+      "chembl_id": "CHEMBL178",
+      "smiles": "C[C@@H]1CCc2c(sc(N)n2)N1c1cccnc1"
+    },
+    {
+      "case_id": "BRCA1_5382INSC_OC_01",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA1_SPLICE_SITE_BREAST_01",
+      "gene": "BRCA1",
+      "uniprot_id": "P38398",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "BRCA2_6174DELT_OC_01",
+      "gene": "BRCA2",
+      "uniprot_id": "P51587",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "RAD51C_PATH_OC_01",
+      "gene": "RAD51C",
+      "uniprot_id": "O43502",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "RAD51D_PATH_OC_01",
+      "gene": "RAD51D",
+      "uniprot_id": "O75771",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "PALB2_PATHOGENIC_BREAST_01",
+      "gene": "PALB2",
+      "uniprot_id": "Q86YC2",
+      "drug_name": "Olaparib",
+      "chembl_id": "CHEMBL521686",
+      "smiles": "O=C1CCc2ccc(C(=O)N3CCN(C(=O)c4ccc5[nH]nc(=O)c5c4)CC3)cc2N1"
+    },
+    {
+      "case_id": "AR_L702H_CRPC_DAROLUTAMIDE",
+      "gene": "AR",
+      "uniprot_id": "P10275",
+      "drug_name": "Darolutamide",
+      "chembl_id": "CHEMBL4297185",
+      "smiles": "CC(O)c1cc(C(=O)N[C@@H](C)Cn2ccc(-c3ccc(C#N)c(Cl)c3)n2)n[nH]1"
+    },
+    {
+      "case_id": "AR_W742C_CRPC_DARO",
+      "gene": "AR",
+      "uniprot_id": "P10275",
+      "drug_name": "Darolutamide",
+      "chembl_id": "CHEMBL4297185",
+      "smiles": "CC(O)c1cc(C(=O)N[C@@H](C)Cn2ccc(-c3ccc(C#N)c(Cl)c3)n2)n[nH]1"
+    },
+    {
+      "case_id": "ERBB2_L755S_BREAST_01",
+      "gene": "ERBB2",
+      "uniprot_id": "P04626",
+      "drug_name": "Neratinib",
+      "chembl_id": "CHEMBL3989921",
+      "smiles": "CCOc1cc2ncc(C#N)c(Nc3ccc(OCc4ccccn4)c(Cl)c3)c2cc1NC(=O)/C=C/CN(C)C.O=C(O)/C=C\\C(=O)O"
+    },
+    {
+      "case_id": "MET_AMP_NSCLC_ACQUIRED_01",
+      "gene": "MET",
+      "uniprot_id": "P08581",
+      "drug_name": "Capmatinib",
+      "chembl_id": "CHEMBL3301612",
+      "smiles": "Cc1c(NC(=O)c2cc3cc(F)cc(Cl)c3n2C)cccc1-c1ccc2[nH]ccc2c1"
+    },
+    {
+      "case_id": "EGFR_G719S_NSCLC_01",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "EGFR_S768I_NSCLC_01",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "ERBB2_V777L_BREAST_01",
+      "gene": "ERBB2",
+      "uniprot_id": "P04626",
+      "drug_name": "Neratinib",
+      "chembl_id": "CHEMBL3989921",
+      "smiles": "CCOc1cc2ncc(C#N)c(Nc3ccc(OCc4ccccn4)c(Cl)c3)c2cc1NC(=O)/C=C/CN(C)C.O=C(O)/C=C\\C(=O)O"
+    },
+    {
+      "case_id": "ALK_I1171N_NSCLC_01",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Brigatinib",
+      "chembl_id": "CHEMBL3707353",
+      "smiles": "COc1cc2c(cc1OC)Nc1ncnc(c1C2=O)-c1ccc(N)cc1"
+    },
+    {
+      "case_id": "ALK_L1196M_NSCLC_01",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Alectinib",
+      "chembl_id": "CHEMBL2180688",
+      "smiles": "COc1cc2c(cc1N1CCOCC1)Nc1ncnc(c1C2=O)-c1cc(NC(=O)C(C)(C)CO)ccc1F"
+    },
+    {
+      "case_id": "ROS1_EZR_ROS1_NSCLC_01",
+      "gene": "ROS1",
+      "uniprot_id": "P08922",
+      "drug_name": "Crizotinib",
+      "chembl_id": "CHEMBL1213491",
+      "smiles": "Cc1cn(-c2cc3c(cc2F)c(N2CCNCC2)c(Cl)nc3-c2ccc(Cl)cc2)nn1"
+    },
+    {
+      "case_id": "NTRK1_TPM3_FUSIONS_01",
+      "gene": "NTRK1",
+      "uniprot_id": "P04629",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "NTRK2_STRN_FUSION_01",
+      "gene": "NTRK2",
+      "uniprot_id": "Q16620",
+      "drug_name": "Larotrectinib",
+      "chembl_id": "CHEMBL3833334",
+      "smiles": "O=C1NC2=NC(=O)c3cc(F)ccc3N2c2ccncc21"
+    },
+    {
+      "case_id": "EZH2_Y646S_FL_MULTI_01",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "EZH2_Y646H_DLBCL_MULTI_01",
+      "gene": "EZH2",
+      "uniprot_id": "Q15910",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "LIT_FGFR3_S249C_UBC_01",
+      "gene": "FGFR3",
+      "uniprot_id": "P22607",
+      "drug_name": "Erdafitinib",
+      "chembl_id": "CHEMBL3989753",
+      "smiles": "CCn1cc(-c2ccc3c(c2)cc(C4CC4)cn3)c(C#N)c1"
+    },
+    {
+      "case_id": "LIT_EGFR_G719X_NSCLC_01",
+      "gene": "EGFR",
+      "uniprot_id": "P00533",
+      "drug_name": "Afatinib",
+      "chembl_id": "CHEMBL1173655",
+      "smiles": "CN(C)C/C=C/C(=O)Nc1cc2c(Nc3ccc(F)c(Cl)c3)ncnc2cc1OCC[NH+]1CCC[C@@H]1CO"
+    },
+    {
+      "case_id": "LIT_PDGFRA_D842V_GIST_01",
+      "gene": "PDGFRA",
+      "uniprot_id": "P16234",
+      "drug_name": "Avapritinib",
+      "chembl_id": "CHEMBL4523339",
+      "smiles": "Cc1ccc2c(c1)cc(-c1cc3c(cc1N1CC[C@@H](N)C1)cccc3)n2C(=O)N1CCCC1"
+    },
+    {
+      "case_id": "LIT_PIK3CA_H1047L_BREAST_01",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "LIT_ALK_G1202R_RESIST_NSCLC_01",
+      "gene": "ALK",
+      "uniprot_id": "Q9UM73",
+      "drug_name": "Lorlatinib",
+      "chembl_id": "CHEMBL3833333",
+      "smiles": "CC#Cc1ccnc(-c2cc3cc(OC)c(OC)cc3n2-c2ccc(F)cc2F)n1"
+    },
+    {
+      "case_id": "LIT_HRAS_Q61R_HNSCC_01",
+      "gene": "HRAS",
+      "uniprot_id": "P01112",
+      "drug_name": "Tipifarnib",
+      "chembl_id": "CHEMBL289228",
+      "smiles": "Cn1cncc1[C@@](N)(c1ccc(Cl)cc1)c1ccc2c(c1)c(-c1cccc(Cl)c1)cc(=O)n2C"
+    },
+    {
+      "case_id": "LIT_SMARCB1_LOF_EPS_01",
+      "gene": "SMARCB1",
+      "uniprot_id": "Q12824",
+      "drug_name": "Tazemetostat",
+      "chembl_id": "CHEMBL3989677",
+      "smiles": "CCN1CC[C@@H](c2ccc(-n3cc(C)c(-c4cccc5ccccc45)c3=O)cc2F)C1"
+    },
+    {
+      "case_id": "LIT_PIK3CA_E545K_CERVIX_01",
+      "gene": "PIK3CA",
+      "uniprot_id": "P42336",
+      "drug_name": "Alpelisib",
+      "chembl_id": "CHEMBL3301610",
+      "smiles": "CC(NC(=O)c1cc2cc(F)ccc2[nH]1)[C@H]1CCCO1"
+    },
+    {
+      "case_id": "LIT_IDH2_R172K_CHONDRO_01",
+      "gene": "IDH2",
+      "uniprot_id": "P48735",
+      "drug_name": "Enasidenib",
+      "chembl_id": "CHEMBL3989683",
+      "smiles": "Cc1nc(NC(=O)c2cc(C(F)(F)F)ccc2-c2ccc(C(F)(F)F)cc2)nc(C)n1C"
+    },
+    {
+      "case_id": "LIT_KMT2A_MLLT3_AML_01",
+      "gene": "KMT2A",
+      "uniprot_id": "Q03164",
+      "drug_name": "Revumenib",
+      "chembl_id": "CHEMBL6068395",
+      "smiles": "CCN(C(=O)c1cc(F)ccc1Oc1cncnc1N1CC2(CCN(C[C@H]3CC[C@H](NS(=O)(=O)CC)CC3)CC2)C1)C(C)C.O.O=C(O)CC(O)(CC(=O)O)C(=O)O"
+    }
+  ]
+}
