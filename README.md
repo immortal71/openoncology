@@ -314,15 +314,15 @@ The 200-patient set is intentionally harder and includes many variants with no d
 
 | Cohort | JSON artifact |
 |:-------|:--------------|
-| 100 patients | [real_patient_benchmark_100.json](real_patient_benchmark_100.json) |
-| 200 patients | [real_patient_benchmark_200.json](real_patient_benchmark_200.json) |
+| 100 patients | [real_patient_benchmark_100.json](validation_results/real_patient_benchmark_100.json) |
+| 200 patients | [real_patient_benchmark_200.json](validation_results/real_patient_benchmark_200.json) |
 
 **Run it yourself:**
 ```bash
 python scripts/blind_external_validation.py --n-cases 50   # 50-case blinded holdout (replicates paper)
 python scripts/hard_benchmark_gate.py                       # ongoing hard clinical gate
-python scripts/fetch_real_patients.py --n 100 --out-json real_patient_benchmark_100.json
-python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_200.json
+python scripts/fetch_real_patients.py --n 100 --out-json validation_results/real_patient_benchmark_100.json
+python scripts/fetch_real_patients.py --n 200 --out-json validation_results/real_patient_benchmark_200.json
 ```
 
 For oncologist concordance stats and plain-language interpretation see [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).

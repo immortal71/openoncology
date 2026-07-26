@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "screenshot": "npx ts-node --esm ../scripts/screenshot.ts",
     "banner": "npx ts-node --esm ../scripts/banner.ts"
   },
@@ -45,17 +49,23 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/three": "^0.185.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.0.5",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.35",
+    "jsdom": "^24.1.1",
     "playwright": "^1.61.1",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
     "tsx": "^4.22.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^2.0.5"
   }
 }

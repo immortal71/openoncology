@@ -32,6 +32,66 @@ jobs:
       - name: ESLint
         run: npx eslint . --ext .ts,.tsx --max-warnings 0
 
+  test-frontend:
+    name: Frontend unit tests (Vitest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Vitest with coverage
+        run: npm run test:coverage
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: web/coverage
+          if-no-files-found: ignore
+
+  e2e-frontend:
+    name: Frontend E2E (Playwright, demo mode)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E (boots app in demo mode)
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report
+          if-no-files-found: ignore
+
   # ── Backend ───────────────────────────────────────────────────────────────
   lint-backend:
     name: Backend lint
@@ -130,7 +190,7 @@ jobs:
     name: Docker build (no push)
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [lint-frontend, test-backend]
+    needs: [lint-frontend, test-frontend, e2e-frontend, test-backend]
 
     steps:
       - uses: actions/checkout@v4
