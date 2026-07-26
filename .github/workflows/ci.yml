@@ -16,7 +16,7 @@ jobs:
         working-directory: web
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,7 +40,7 @@ jobs:
         working-directory: web
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -68,7 +68,7 @@ jobs:
         working-directory: web
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -101,7 +101,7 @@ jobs:
         working-directory: api
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -149,7 +149,7 @@ jobs:
       ENVIRONMENT: test
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -204,7 +204,7 @@ jobs:
     needs: [lint-frontend, test-frontend, e2e-frontend, test-backend]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build API image
         run: docker build -t openoncology-api:ci ./api
