@@ -32,15 +32,30 @@ jobs:
       - name: Install pip-audit
         run: pip install pip-audit
 
-      - name: Audit dependencies
+      # Blocking: a known-CVE dependency fails the build. pip-audit is
+      # deterministic (advisory-DB lookups, not heuristic SAST), so it is a
+      # low-false-positive gate. Accepted/unfixable advisories can be added to
+      # api/.pip-audit-ignore (one GHSA/CVE id per line) to unblock explicitly.
+      - name: Write SBOM artifact (non-blocking)
         run: pip-audit -r requirements.txt --format=cyclonedx-json -o pip-audit-results.json
         continue-on-error: true
 
-      - name: Upload pip-audit results
+      - name: Upload pip-audit SBOM
         uses: actions/upload-artifact@v4
         with:
           name: pip-audit-results
           path: api/pip-audit-results.json
+
+      - name: Audit dependencies (blocking on known CVEs)
+        run: |
+          IGNORE_ARGS=""
+          if [ -f .pip-audit-ignore ]; then
+            while IFS= read -r vuln_id; do
+              case "$vuln_id" in ""|\#*) continue ;; esac
+              IGNORE_ARGS="$IGNORE_ARGS --ignore-vuln $vuln_id"
+            done < .pip-audit-ignore
+          fi
+          pip-audit -r requirements.txt $IGNORE_ARGS
 
   # ── npm audit ─────────────────────────────────────────────────────────────
   npm-audit:
@@ -234,16 +249,21 @@ jobs:
       - name: Build API image
         run: docker build -t openoncology-api:trivy ./api
 
-      - name: Run Trivy scan
+      # Blocking: HIGH/CRITICAL image vulnerabilities fail the build.
+      # ignore-unfixed:true means a CVE with no available fix in the base image
+      # won't break CI (nothing actionable), keeping the gate low-noise.
+      - name: Run Trivy scan (blocking on fixable HIGH/CRITICAL)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: "openoncology-api:trivy"
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "HIGH,CRITICAL"
-          exit-code: "0"
+          ignore-unfixed: true
+          exit-code: "1"
 
       - name: Upload Trivy SARIF
+        if: always()   # still publish to the Security tab even when the gate fails
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif

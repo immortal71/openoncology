@@ -1,0 +1,9 @@
+# Accepted / unfixable dependency advisories, one id per line (GHSA-... or CVE-...).
+# The Security Scan workflow's blocking pip-audit step passes each as
+# --ignore-vuln. Add an entry only with a short justification comment and a
+# link to the advisory, and remove it once a fixed version is available.
+#
+# Example:
+#   # GHSA-xxxx-yyyy-zzzz: transitive dep, not reachable from our code paths;
+#   # tracked upstream at <url>. Re-check 2026-Q4.
+#   GHSA-xxxx-yyyy-zzzz
