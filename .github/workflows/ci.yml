@@ -180,7 +180,7 @@ jobs:
 
       - name: Run backend tests (ai suite)
         working-directory: ${{ github.workspace }}
-        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=60
+        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=62
         env:
           PYTHONPATH: ${{ github.workspace }}
 
