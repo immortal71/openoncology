@@ -167,9 +167,20 @@ jobs:
         run: alembic check
         continue-on-error: false
 
-      - name: Run tests
+      # The api/tests and ai/tests suites cannot share one interpreter: both the
+      # FastAPI app (api/ai/) and the top-level ai/ package claim the import name
+      # `ai`, and a single process can only bind it to one. So they run as two
+      # separate pytest invocations, with coverage accumulated via --cov-append
+      # and the threshold enforced once at the end. (See pyproject.toml.)
+      - name: Run backend tests (api suite)
         working-directory: ${{ github.workspace }}
-        run: pytest api/tests/ ai/tests/ -v --tb=short --cov=ai --cov=api --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=60
+        run: pytest api/tests/ -v --tb=short --cov=ai --cov=api --cov-report= --cov-fail-under=0
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Run backend tests (ai suite)
+        working-directory: ${{ github.workspace }}
+        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=60
         env:
           PYTHONPATH: ${{ github.workspace }}
 

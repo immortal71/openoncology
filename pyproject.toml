@@ -1,2 +1,18 @@
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+# The repo contains two distinct packages both named `ai`:
+#   - top-level `ai/`   (used by ai/tests: ai.services.alphafold, ai.alphamissense)
+#   - `api/ai/`         (used by the FastAPI app: `from ai.ranking import ...`,
+#                        with api/ on sys.path — this is how it runs in prod)
+# A single Python process can only bind the name `ai` to one of them, so the two
+# test suites cannot share one interpreter. CI runs them as separate pytest
+# invocations (see .github/workflows/ci.yml): `api/tests` gets api/ on the path
+# via its conftest (sys.path.insert(0, ..)); `ai/tests` runs from the repo root
+# where the top-level `ai/` wins.
+#
+# `--import-mode=importlib` imports each test module by file path instead of
+# deriving a dotted package name from its location. Without it, collecting
+# `ai/tests/*` under the default "prepend" mode fails with
+# `ModuleNotFoundError: No module named 'ai.tests'`. pytest 8.2 has no
+# `import_mode` ini key, so it is passed via addopts, which that version honors.
+addopts = "--import-mode=importlib"
