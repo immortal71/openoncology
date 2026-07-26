@@ -221,13 +221,38 @@ Quick reference:
 
 ---
 
-## How to run benchmarks
+## How to run tests
 
-### Unit / integration tests
+A `Makefile` at the repo root wraps the common commands — run `make test` to run
+the whole suite (backend + frontend unit + E2E), or use the targeted commands below.
+
+### Backend (pytest)
+
+The backend has two suites that **must run as separate invocations** — the
+top-level `ai/` package and the app's `api/ai/` package both claim the import
+name `ai`, so a single interpreter can't load both (see `pyproject.toml`):
 
 ```bash
-cd api
-python -m pytest tests/ -v
+# from the repo root, with the repo root on PYTHONPATH
+PYTHONPATH=. pytest api/tests/                    # FastAPI app + service tests
+PYTHONPATH=. pytest ai/tests/                     # top-level ai/ package tests
+
+# with coverage across both (mirrors CI):
+PYTHONPATH=. pytest api/tests/ --cov=ai --cov=api --cov-report= --cov-fail-under=0
+PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-fail-under=62
+```
+
+Tests must be **hermetic** — no live network. Service tests that hit external
+APIs (OncoKB, OpenTargets, ChEMBL, cBioPortal) mock the HTTP layer. If you add a
+test that genuinely needs the network, keep it out of the default CI path.
+
+### Frontend (Vitest + Playwright)
+
+```bash
+cd web
+npm run test:run      # Vitest unit tests (lib/ pure logic)
+npm run test:e2e      # Playwright E2E — boots the app in demo mode, no backend
+npm run type-check    # tsc --noEmit
 ```
 
 ### Benchmark suite (retrospective validation)
@@ -265,14 +290,17 @@ print(report.summary())
 
 ### CI integration
 
-The test suite is configured for `pytest`. To add benchmarks to CI:
+CI already runs the backend and frontend suites on every push/PR — see
+[.github/workflows/ci.yml](.github/workflows/ci.yml). It enforces a backend
+coverage gate (`--cov-fail-under=62`), the hard clinical benchmark gate, ESLint
+(`--max-warnings 0`), `tsc --noEmit`, Vitest, and Playwright. A separate
+[.github/workflows/security.yml](.github/workflows/security.yml) runs pip-audit
+(blocking), Trivy (blocking on fixable HIGH/CRITICAL), plus report-only Bandit,
+Semgrep, and ZAP; CodeQL runs from
+[.github/workflows/codeql.yml](.github/workflows/codeql.yml).
 
-```yaml
-# .github/workflows/test.yml (example)
-- run: cd api && python -m pytest tests/ -v
-```
-
-For the slower benchmark suite, run it in a nightly job rather than on every PR.
+The slower live-API benchmark suite is intentionally **not** on the PR path —
+run it locally or in a nightly job.
 
 ---
 

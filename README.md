@@ -5,10 +5,15 @@
 **Free AI-powered personalized cancer drug analysis — no insurance, no subscription, no gatekeeping.**
 
 <p>
+  <a href="https://github.com/immortal71/openoncology/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"/></a>
+  <a href="https://github.com/immortal71/openoncology/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/codeql.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=CodeQL" alt="CodeQL"/></a>
+  <img src="https://img.shields.io/badge/coverage-%E2%89%A562%25-22c55e?style=for-the-badge" alt="Backend coverage >= 62%"/>
+  <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
+</p>
+<p>
   <a href="https://github.com/immortal71/openoncology/stargazers"><img src="https://img.shields.io/github/stars/immortal71/openoncology?style=for-the-badge&logo=github&color=f59e0b&logoColor=white" alt="Stars"/></a>
   <a href="https://github.com/immortal71/openoncology/network/members"><img src="https://img.shields.io/github/forks/immortal71/openoncology?style=for-the-badge&logo=github&color=0ea5e9&logoColor=white" alt="Forks"/></a>
   <a href="https://github.com/immortal71/openoncology/issues"><img src="https://img.shields.io/github/issues/immortal71/openoncology?style=for-the-badge&color=ef4444&logo=github&logoColor=white" alt="Issues"/></a>
-  <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
 </p>
 <p>
   <img src="https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11"/>
