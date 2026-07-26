@@ -16,3 +16,7 @@ asyncio_mode = "auto"
 # `ModuleNotFoundError: No module named 'ai.tests'`. pytest 8.2 has no
 # `import_mode` ini key, so it is passed via addopts, which that version honors.
 addopts = "--import-mode=importlib"
+# Bare `pytest` (no path args) defaults to the api suite only, so it can never
+# accidentally pull both `ai` packages into one process. Run the ai suite
+# explicitly: `pytest ai/tests/` (see the Makefile and CONTRIBUTING.md).
+testpaths = ["api/tests"]
