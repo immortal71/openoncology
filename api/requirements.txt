@@ -18,6 +18,7 @@ tenacity==8.5.0
 slowapi==0.1.9
 pytest==8.2.0
 pytest-asyncio==0.23.6
+aiosqlite==0.20.0          # async sqlite driver for the in-memory test DB (api/tests/conftest.py)
 stripe==9.8.0
 resend==2.13.1            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
 python-dotenv==1.2.2
