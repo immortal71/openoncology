@@ -8,6 +8,10 @@ Covers:
   - get_drugs_for_target: respects max_drugs limit
   - get_drugs_for_target: returns empty list when target not found
   - get_drugs_for_target: returns empty list on network error
+
+Both functions route their HTTP call through a shared `_gql()` -> `fetch_with_
+retry()` helper (api/utils/http.py) rather than constructing `httpx.AsyncClient`
+themselves, so tests mock `fetch_with_retry` directly instead of the client class.
 """
 
 import sys
@@ -23,21 +27,16 @@ from api.services.opentargets import get_target_id, get_drugs_for_target
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _mock_post_response(data: dict) -> MagicMock:
-    """Create a mock httpx response that returns the given data."""
+def _mock_fetch(data: dict):
+    """Build a fetch_with_retry replacement whose .json() is {"data": data}."""
     resp = MagicMock()
     resp.raise_for_status = MagicMock()
     resp.json = MagicMock(return_value={"data": data})
-    return resp
+    return AsyncMock(return_value=resp)
 
 
-def _make_gql_post_mock(return_data: dict):
-    """Context manager mock for httpx.AsyncClient with a .post method."""
-    mock_client = AsyncMock()
-    mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-    mock_client.__aexit__ = AsyncMock(return_value=False)
-    mock_client.post = AsyncMock(return_value=_mock_post_response(return_data))
-    return mock_client
+def _mock_fetch_raising(exc: Exception):
+    return AsyncMock(side_effect=exc)
 
 
 # ── get_target_id ─────────────────────────────────────────────────────────────
@@ -49,28 +48,23 @@ class TestGetTargetId:
                 "hits": [{"id": "ENSG00000146648", "object": {"approvedSymbol": "EGFR"}}]
             }
         }
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(data)
+        with patch("api.services.opentargets.fetch_with_retry", _mock_fetch(data)):
             result = await get_target_id("EGFR")
 
         assert result == "ENSG00000146648"
 
     async def test_returns_none_when_no_hits(self):
         data = {"search": {"hits": []}}
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(data)
+        with patch("api.services.opentargets.fetch_with_retry", _mock_fetch(data)):
             result = await get_target_id("FAKEGENE123")
 
         assert result is None
 
     async def test_returns_none_on_network_error(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.post = AsyncMock(side_effect=httpx.ConnectError("timeout"))
-            cls.return_value = mock_client
-
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch_raising(httpx.ConnectError("timeout")),
+        ):
             result = await get_target_id("EGFR")
 
         assert result is None
@@ -85,8 +79,7 @@ class TestGetTargetId:
                 ]
             }
         }
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(data)
+        with patch("api.services.opentargets.fetch_with_retry", _mock_fetch(data)):
             result = await get_target_id("SOME_GENE")
 
         assert result == "ENSG00000001"
@@ -136,15 +129,19 @@ def _make_drugs_response(num_drugs: int = 2) -> dict:
 
 class TestGetDrugsForTarget:
     async def test_returns_list_of_drugs(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(_make_drugs_response(2))
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch(_make_drugs_response(2)),
+        ):
             drugs = await get_drugs_for_target("ENSG00000146648")
 
         assert len(drugs) == 2
 
     async def test_drug_has_required_fields(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(_make_drugs_response(1))
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch(_make_drugs_response(1)),
+        ):
             drugs = await get_drugs_for_target("ENSG00000146648")
 
         d = drugs[0]
@@ -154,37 +151,36 @@ class TestGetDrugsForTarget:
         assert "mechanism" in d
 
     async def test_first_drug_is_approved(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(_make_drugs_response(2))
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch(_make_drugs_response(2)),
+        ):
             drugs = await get_drugs_for_target("ENSG00000146648")
 
-        # Drug1 has maxClinicalStage=4 → is_approved
         approved = [d for d in drugs if d.get("is_approved")]
         assert len(approved) >= 1
 
     async def test_max_drugs_limit_respected(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(_make_drugs_response(10))
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch(_make_drugs_response(10)),
+        ):
             drugs = await get_drugs_for_target("ENSG00000146648", max_drugs=3)
 
         assert len(drugs) <= 3
 
     async def test_returns_empty_list_when_target_not_found(self):
         data = {"target": None}
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(data)
+        with patch("api.services.opentargets.fetch_with_retry", _mock_fetch(data)):
             drugs = await get_drugs_for_target("ENSG00000000000")
 
         assert drugs == []
 
     async def test_returns_empty_list_on_network_error(self):
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.post = AsyncMock(side_effect=Exception("network down"))
-            cls.return_value = mock_client
-
+        with patch(
+            "api.services.opentargets.fetch_with_retry",
+            _mock_fetch_raising(Exception("network down")),
+        ):
             drugs = await get_drugs_for_target("ENSG00000146648")
 
         assert drugs == []
@@ -197,8 +193,7 @@ class TestGetDrugsForTarget:
                 "drugAndClinicalCandidates": {"count": 0, "rows": []},
             }
         }
-        with patch("api.services.opentargets.httpx.AsyncClient") as cls:
-            cls.return_value = _make_gql_post_mock(data)
+        with patch("api.services.opentargets.fetch_with_retry", _mock_fetch(data)):
             drugs = await get_drugs_for_target("ENSG00000146648")
 
         assert drugs == []

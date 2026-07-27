@@ -103,19 +103,19 @@ class TestPredictBBBPenetration:
     def test_aspirin_returns_result(self):
         result = predict_bbb_penetration(_drug_aspirin())
         assert result is not None
-        assert hasattr(result, "prediction")
+        assert hasattr(result, "penetrates")
 
     def test_large_molecule_fails_bbb(self):
         """Paclitaxel (MW 854, PSA 221) should NOT penetrate BBB."""
         result = predict_bbb_penetration(_drug_paclitaxel())
         if result is not None:
-            assert result.prediction in ("LOW", "VERY_LOW", "NONE", False, "unlikely")
+            assert result.penetrates is False
 
     def test_missing_data_returns_none_or_result(self):
         """Should not raise even when all fields missing."""
         result = predict_bbb_penetration(_drug_minimal())
         # Either returns None or a low-confidence result
-        assert result is None or hasattr(result, "prediction")
+        assert result is None or hasattr(result, "penetrates")
 
     def test_bbb_result_has_confidence(self):
         result = predict_bbb_penetration(_drug_aspirin())
@@ -149,19 +149,19 @@ class TestPredictPgpSubstrate:
 class TestPredictMetabolicStability:
     def test_aspirin_returns_result_or_none(self):
         result = predict_metabolic_stability(_drug_aspirin())
-        assert result is None or hasattr(result, "stability_class")
+        assert result is None or hasattr(result, "clearance_class")
 
     def test_high_logp_reduced_stability(self):
         """High logP compounds are typically less stable (CYP3A4 substrates)."""
         high_logp = dict(_drug_aspirin())
         high_logp["alogp"] = 5.5
         result = predict_metabolic_stability(high_logp)
-        if result is not None and hasattr(result, "stability_class"):
-            assert result.stability_class in ("LOW", "MEDIUM", "HIGH", "VERY_LOW")
+        if result is not None and hasattr(result, "clearance_class"):
+            assert result.clearance_class in ("LOW", "MEDIUM", "HIGH", "VERY_LOW")
 
     def test_minimal_drug_graceful(self):
         result = predict_metabolic_stability(_drug_minimal())
-        assert result is None or hasattr(result, "stability_class")
+        assert result is None or hasattr(result, "clearance_class")
 
 
 # ── predict_plasma_protein_binding ────────────────────────────────────────────
@@ -169,13 +169,13 @@ class TestPredictMetabolicStability:
 class TestPredictPlasmaProteinBinding:
     def test_aspirin_returns_result_or_none(self):
         result = predict_plasma_protein_binding(_drug_aspirin())
-        assert result is None or hasattr(result, "ppb_fraction")
+        assert result is None or hasattr(result, "ppb_pct")
 
     def test_fraction_in_valid_range(self):
         result = predict_plasma_protein_binding(_drug_aspirin())
-        if result is not None and hasattr(result, "ppb_fraction"):
-            assert 0.0 <= result.ppb_fraction <= 1.0, (
-                f"PPB fraction must be in [0, 1], got {result.ppb_fraction}"
+        if result is not None and hasattr(result, "ppb_pct"):
+            assert 0.0 <= result.ppb_pct <= 100.0, (
+                f"PPB percent must be in [0, 100], got {result.ppb_pct}"
             )
 
     def test_highly_lipophilic_high_ppb(self):
@@ -183,8 +183,8 @@ class TestPredictPlasmaProteinBinding:
         lipophilic = dict(_drug_aspirin())
         lipophilic["alogp"] = 6.0
         result = predict_plasma_protein_binding(lipophilic)
-        if result is not None and hasattr(result, "ppb_fraction"):
-            assert result.ppb_fraction > 0.5, (
+        if result is not None and hasattr(result, "ppb_pct"):
+            assert result.ppb_pct > 50.0, (
                 "Highly lipophilic compounds should have high PPB"
             )
 
@@ -203,7 +203,11 @@ class TestComputeAdmeProfile:
     def test_profile_has_key_attributes(self):
         profile = compute_adme_profile(_drug_aspirin())
         # At minimum a profile should expose some sub-result or summary
-        assert hasattr(profile, "sa_score") or hasattr(profile, "bbb") or hasattr(profile, "summary")
+        assert (
+            hasattr(profile, "synthetic_accessibility")
+            or hasattr(profile, "bbb_penetration")
+            or hasattr(profile, "developability_notes")
+        )
 
     def test_paclitaxel_profile_flags_concerns(self):
         """Paclitaxel has known ADME liabilities; profile should surface them."""
