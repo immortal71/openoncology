@@ -230,7 +230,7 @@ def _send_erasure_confirmation(to_email: str) -> None:
 )
 def enforce_retention_policy(self):
     """Auto-delete patient data past their consent retention_days. Runs daily via Beat."""
-    from datetime import datetime, timedelta, UTC
+    from datetime import datetime, UTC
     from sqlalchemy import select
     from workers._db_sync import get_sync_session
     from models.patient import Patient
