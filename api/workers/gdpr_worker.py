@@ -59,22 +59,40 @@ def erase_patient_data(self, deletion_request_id: str):
                 ).all()
             ]
 
-            minio_keys: list[str] = []
+            minio_keys: list[tuple[str, str]] = []
             if submission_ids:
-                # Collect MinIO keys from submissions before deleting
+                from config import settings
+
+                # Collect MinIO keys from submissions before deleting. All
+                # uploaded files (biopsy, DNA/VCF) live in the single
+                # settings.bucket_raw bucket -- see services/storage.py's
+                # upload_encrypted_file(), which is the only place these keys
+                # are written. There is no separate report file key: reports
+                # are generated on demand (services/pdf_export.py), not stored.
                 submissions = db.execute(
                     select(Submission).where(Submission.id.in_(submission_ids))
                 ).scalars().all()
                 for s in submissions:
-                    if s.raw_file_key:
-                        minio_keys.append((s.bucket_raw or "openoncology-raw", s.raw_file_key))
-                    if s.vcf_key:
-                        minio_keys.append((s.bucket_vcf or "openoncology-vcf", s.vcf_key))
-                    if s.report_key:
-                        minio_keys.append((s.bucket_reports or "openoncology-reports", s.report_key))
+                    if s.biopsy_s3_key:
+                        minio_keys.append((settings.bucket_raw, s.biopsy_s3_key))
+                    if s.dna_s3_key:
+                        minio_keys.append((settings.bucket_raw, s.dna_s3_key))
+                    if s.vcf_s3_key:
+                        minio_keys.append((settings.bucket_raw, s.vcf_s3_key))
+
+                # RepurposingCandidate keys off result_id (not submission_id --
+                # it moved to Result as its parent at some point), so its
+                # rows must be deleted via the Results tied to these
+                # submissions, before the Results themselves are deleted.
+                result_ids = [
+                    rid for (rid,) in db.execute(
+                        select(Result.id).where(Result.submission_id.in_(submission_ids))
+                    ).all()
+                ]
 
                 db.execute(delete(Mutation).where(Mutation.submission_id.in_(submission_ids)))
-                db.execute(delete(RepurposingCandidate).where(RepurposingCandidate.submission_id.in_(submission_ids)))
+                if result_ids:
+                    db.execute(delete(RepurposingCandidate).where(RepurposingCandidate.result_id.in_(result_ids)))
                 db.execute(delete(Result).where(Result.submission_id.in_(submission_ids)))
                 db.execute(delete(Submission).where(Submission.id.in_(submission_ids)))
 
