@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # ─────────────────────────────────────────────
   # Next.js Frontend  →  http://localhost:3000
@@ -22,7 +20,7 @@ services:
     depends_on:
       - api
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,8 +33,8 @@ services:
   # ─────────────────────────────────────────────
   api:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -51,6 +49,10 @@ services:
       - ENVIRONMENT=development
     volumes:
       - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
     depends_on:
       - db
       - redis
@@ -70,8 +72,8 @@ services:
   # ─────────────────────────────────────────────
   worker-genomic:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     environment:
       - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
       - REDIS_URL=redis://redis:6379/0
@@ -80,11 +82,15 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     volumes:
       - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
     depends_on:
       - db
       - redis
     healthcheck:
-      test: ["CMD", "celery", "-A", "workers.genomic_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      test: ["CMD", "celery", "-A", "workers.genomic_worker", "inspect", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -98,8 +104,8 @@ services:
   # ─────────────────────────────────────────────
   worker-ai:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     environment:
       - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
       - REDIS_URL=redis://redis:6379/0
@@ -108,11 +114,15 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     volumes:
       - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
     depends_on:
       - db
       - redis
     healthcheck:
-      test: ["CMD", "celery", "-A", "workers.ai_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      test: ["CMD", "celery", "-A", "workers.ai_worker", "inspect", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -126,19 +136,23 @@ services:
   # ─────────────────────────────────────────────
   worker-notify:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     environment:
       - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
       - REDIS_URL=redis://redis:6379/0
       - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
     depends_on:
       - db
       - redis
     healthcheck:
-      test: ["CMD", "celery", "-A", "workers.notify_worker", "inspect", "ping", "-d", "celery@$HOSTNAME"]
+      test: ["CMD", "celery", "-A", "workers.notify_worker", "inspect", "ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -198,6 +212,7 @@ services:
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
       - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+      - MINIO_KMS_SECRET_KEY=openoncology-local-key:bLOmhTrCwm5/bUjzPSrhR9Imz6xRY4PKiRl1v5AD3Wg=
     volumes:
       - minio_data:/data
     networks:
@@ -214,8 +229,9 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HEALTH_ENABLED=true
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q 'UP'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -257,8 +273,8 @@ services:
   # ─────────────────────────────────────────────
   celery-beat:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api/Dockerfile
     environment:
       - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
       - REDIS_URL=redis://redis:6379/0
@@ -267,12 +283,16 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
     volumes:
       - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
     depends_on:
       - db
       - redis
     networks:
       - openoncology
-    command: celery -A workers beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A workers beat --loglevel=info
     restart: unless-stopped
 
   # ─────────────────────────────────────────────

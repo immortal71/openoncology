@@ -88,7 +88,7 @@ def estimate_sa_score(molecule: dict[str, Any]) -> Optional[SyntheticAccessibili
             ring_complexity = sum(len(r) - 5 for r in rings if len(r) > 5)
 
             # Stereocentre count
-            stereocentre_count = len(rdMolDescriptors.FindPotentialStereo(mol))
+            stereocentre_count = len(Chem.FindPotentialStereo(mol))
 
             # Fragment complexity via BRICS decomposition
             try:
@@ -105,6 +105,15 @@ def estimate_sa_score(molecule: dict[str, Any]) -> Optional[SyntheticAccessibili
             stereo_pen = min(stereocentre_count * 0.25, 1.5)
             frag_pen = min(fragment_complexity * 0.12, 1.5)
             sa = _clamp(base + ring_pen + stereo_pen + frag_pen, 1.0, 10.0)
+        else:
+            # SMILES present but unparseable by RDKit — fall back to the
+            # same MW-based heuristic used when RDKit itself is unavailable.
+            if mw is None:
+                return None
+            fragment_complexity = mw / 100.0
+            ring_complexity = int(mw / 120)
+            sa_raw = 1.0 + math.log10(max(mw, 1)) * 1.4
+            sa = _clamp(sa_raw, 1.0, 10.0)
 
     except ImportError:
         # Fallback: MW-based heuristic

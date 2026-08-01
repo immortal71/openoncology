@@ -4,21 +4,24 @@ pydantic[email]==2.7.1
 pydantic-settings==2.2.1
 sqlalchemy[asyncio]==2.0.30
 asyncpg==0.29.0
+psycopg2-binary==2.9.9
 alembic==1.13.1
 celery[redis]==5.4.0
 redis==5.0.4
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.9
+python-multipart==0.0.31
 boto3==1.34.100
+requests>=2.32.4          # pin transitive dep to a version past PYSEC-2026-187x/2275
 httpx==0.27.0
 tenacity==8.5.0
 slowapi==0.1.9
 pytest==8.2.0
 pytest-asyncio==0.23.6
+aiosqlite==0.20.0          # async sqlite driver for the in-memory test DB (api/tests/conftest.py)
 stripe==9.8.0
-resend==0.7.2
-python-dotenv==1.0.1
+resend==2.13.1            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
+python-dotenv==1.2.2
 
 # Observability
 sentry-sdk[fastapi]>=2.0.0
@@ -28,5 +31,5 @@ structlog>=24.0.0
 # Phase 3 — AI / cheminformatics
 rdkit==2025.09.1           # SMILES → SDF conversion for DiffDock inputs
 ruff==0.4.4                # linter (also used by CI)
-biopython==1.83            # CIF → PDB conversion for AlphaFold Server outputs
+biopython==1.87            # CIF → PDB conversion for AlphaFold Server outputs
 weasyprint>=60.0           # PDF export (patient letter + oncologist report)

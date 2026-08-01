@@ -164,7 +164,7 @@ def score_binding(
             "--ligand", str(sdf_path),
             "--out_dir", str(out_dir),
             "--samples_per_complex", str(samples),
-            "--batch_size", "6",
+            "--batch_size", str(samples),
             "--no_final_step_noise",
         ]
 

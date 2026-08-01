@@ -26,6 +26,16 @@ def upgrade() -> None:
         )
 
     with op.batch_alter_table("drug_requests") as batch_op:
+        # The existing server_default ('true', a VARCHAR literal) cannot be
+        # implicitly cast to boolean in the same ALTER COLUMN ... TYPE step —
+        # Postgres raises DatatypeMismatchError because postgresql_using only
+        # converts the column *data*, not the default expression. Drop the old
+        # default first, retype the column, then apply the new boolean default.
+        batch_op.alter_column(
+            "is_open",
+            existing_type=sa.String(length=8),
+            server_default=None,
+        )
         batch_op.alter_column(
             "is_open",
             existing_type=sa.String(length=8),
@@ -36,7 +46,10 @@ def upgrade() -> None:
             ),
             existing_nullable=True,
             nullable=False,
-            existing_server_default=sa.text("true"),
+        )
+        batch_op.alter_column(
+            "is_open",
+            existing_type=sa.Boolean(),
             server_default=sa.text("true"),
         )
 

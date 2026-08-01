@@ -3497,239 +3497,13 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
      "note": "KRAS G12D PDAC — no FDA-approved KRAS G12D inhibitor; MRTX1133 investigational only."},
 
     # ═══════════════════════════════════════════════════════════════════════════
-    # EXPANSION BATCH 37 — Multi-drug combos to raise structural ceiling
-    # ═══════════════════════════════════════════════════════════════════════════
-    # Multi-target RCC (sunitinib, pazopanib, cabozantinib, axitinib, everolimus)
-    {"case_id": "VHL_LOSS_RCC_MULTI", "gene": "VHL", "variant": "LOSS", "hgvs": "p.loss",
-     "cancer_type": "Metastatic Clear Cell RCC",
-     "known_drugs": ["Sunitinib", "Pazopanib", "Cabozantinib", "Axitinib", "Nivolumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "VHL loss metastatic ccRCC — multiple VEGFR-TKIs and IO/VEGFR combos standard of care."},
-    {"case_id": "VHL_MUT_RCC_MULTI", "gene": "VHL", "variant": "MUTATION", "hgvs": "p.mut",
-     "cancer_type": "Metastatic Renal Cell Carcinoma",
-     "known_drugs": ["Belzutifan", "Sunitinib", "Pazopanib", "Cabozantinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "VHL mutation mRCC — belzutifan + historic VEGFR-TKI standards."},
-
-    # BRAF V600E melanoma multi-drug
-    {"case_id": "BRAF_V600E_MEL_MULTI_EXT", "gene": "BRAF", "variant": "V600E", "hgvs": "p.Val600Glu",
-     "cancer_type": "Unresectable Melanoma",
-     "known_drugs": ["Dabrafenib", "Trametinib", "Vemurafenib", "Cobimetinib", "Encorafenib", "Binimetinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRAF V600E unresectable melanoma — three doublet regimens all approved."},
-    {"case_id": "BRAF_V600K_MEL_MULTI", "gene": "BRAF", "variant": "V600K", "hgvs": "p.Val600Lys",
-     "cancer_type": "Unresectable Melanoma",
-     "known_drugs": ["Dabrafenib", "Trametinib", "Vemurafenib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRAF V600K melanoma — dabrafenib+trametinib and vemurafenib both approved."},
-
-    # EGFR NSCLC multi-drug (L858R, Exon19del)
-    {"case_id": "EGFR_L858R_NSCLC_MULTI", "gene": "EGFR", "variant": "L858R", "hgvs": "p.Leu858Arg",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Osimertinib", "Erlotinib", "Gefitinib", "Afatinib", "Dacomitinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "EGFR L858R NSCLC — five approved EGFR TKIs across three generations."},
-    {"case_id": "EGFR_EXON19DEL_NSCLC_MULTI", "gene": "EGFR", "variant": "EXON19DEL", "hgvs": "p.exon19del",
-     "cancer_type": "NSCLC",
-     "known_drugs": ["Osimertinib", "Erlotinib", "Gefitinib", "Afatinib", "Dacomitinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "EGFR exon19del NSCLC — five approved TKIs."},
-
-    # ALK NSCLC multi-drug
-    {"case_id": "ALK_FUSION_NSCLC_MULTI", "gene": "ALK", "variant": "FUSION", "hgvs": "p.ALK-fusion",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Alectinib", "Brigatinib", "Lorlatinib", "Crizotinib", "Ceritinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "ALK fusion NSCLC — five approved ALK TKIs."},
-
-    # HER2+ breast multi-drug
-    {"case_id": "ERBB2_AMP_BREAST_MULTI", "gene": "ERBB2", "variant": "AMPLIFICATION", "hgvs": "p.amp",
-     "cancer_type": "HER2-Positive Breast Cancer",
-     "known_drugs": ["Trastuzumab", "Pertuzumab", "Trastuzumab deruxtecan", "Tucatinib", "Lapatinib", "Neratinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "HER2+ breast cancer — six HER2-directed agents approved."},
-    {"case_id": "ERBB2_AMP_GASTRIC_MULTI", "gene": "ERBB2", "variant": "AMPLIFICATION", "hgvs": "p.amp",
-     "cancer_type": "HER2-Positive Gastric Cancer",
-     "known_drugs": ["Trastuzumab", "Trastuzumab deruxtecan"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "HER2+ gastric — trastuzumab ToGA, T-DXd DESTINY-Gastric02."},
-
-    # RET MTC multi-drug
-    {"case_id": "RET_MTC_MULTI", "gene": "RET", "variant": "M918T", "hgvs": "p.Met918Thr",
-     "cancer_type": "Advanced Medullary Thyroid Cancer",
-     "known_drugs": ["Selpercatinib", "Pralsetinib", "Vandetanib", "Cabozantinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "RET M918T advanced MTC — four approved agents."},
-
-    # BCR-ABL1 CML multi-drug
-    {"case_id": "BCR_ABL1_CML_MULTI", "gene": "ABL1", "variant": "BCR-ABL1", "hgvs": "p.BCR-ABL1",
-     "cancer_type": "Chronic Myeloid Leukemia",
-     "known_drugs": ["Imatinib", "Dasatinib", "Nilotinib", "Bosutinib", "Ponatinib", "Asciminib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BCR-ABL1 CML — six approved TKIs spanning four generations."},
-
-    # KRAS G12C NSCLC multi-drug
-    {"case_id": "KRAS_G12C_NSCLC_MULTI", "gene": "KRAS", "variant": "G12C", "hgvs": "p.Gly12Cys",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Sotorasib", "Adagrasib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KRAS G12C NSCLC — two approved direct inhibitors."},
-    {"case_id": "KRAS_G12C_CRC_COMBO", "gene": "KRAS", "variant": "G12C", "hgvs": "p.Gly12Cys",
-     "cancer_type": "Colorectal Cancer",
-     "known_drugs": ["Adagrasib", "Cetuximab"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KRAS G12C CRC — adagrasib+cetuximab KRYSTAL-1 FDA 2024."},
-
-    # BRCA mCRPC multi-drug
-    {"case_id": "BRCA1_CRPC_MULTI", "gene": "BRCA1", "variant": "PATHOGENIC", "hgvs": "p.Pathogenic",
-     "cancer_type": "Metastatic Castration-Resistant Prostate Cancer",
-     "known_drugs": ["Olaparib", "Rucaparib", "Niraparib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRCA1 mCRPC — three PARP inhibitors approved (PROfound, TRITON, BRAVO)."},
-    {"case_id": "BRCA2_CRPC_MULTI", "gene": "BRCA2", "variant": "PATHOGENIC", "hgvs": "p.Pathogenic",
-     "cancer_type": "Metastatic Castration-Resistant Prostate Cancer",
-     "known_drugs": ["Olaparib", "Rucaparib", "Niraparib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRCA2 mCRPC — three PARP inhibitors."},
-
-    # EZH2 DLBCL (tazemetostat + ibrutinib)
-    {"case_id": "EZH2_DLBCL_MULTI", "gene": "EZH2", "variant": "Y646N", "hgvs": "p.Tyr646Asn",
-     "cancer_type": "Diffuse Large B-Cell Lymphoma",
-     "known_drugs": ["Tazemetostat", "Ibrutinib"], "oncokb_level": "LEVEL_2",
-     "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "EZH2 Y646N DLBCL — tazemetostat investigational; ibrutinib parallel evidence."},
-
-    # SMO/PTCH1 BCC multi-drug
-    {"case_id": "SMO_BCC_MULTI", "gene": "SMO", "variant": "W535L", "hgvs": "p.Trp535Leu",
-     "cancer_type": "Advanced Basal Cell Carcinoma",
-     "known_drugs": ["Vismodegib", "Sonidegib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "SMO W535L advanced BCC — both Hh inhibitors approved."},
-    {"case_id": "PTCH1_BCC_MULTI", "gene": "PTCH1", "variant": "TRUNCATING", "hgvs": "p.truncating",
-     "cancer_type": "Advanced Basal Cell Carcinoma",
-     "known_drugs": ["Vismodegib", "Sonidegib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PTCH1 truncating advanced BCC."},
-
-    # IDH1/IDH2 AML multi-drug
-    {"case_id": "IDH1_R132H_AML_COMBO", "gene": "IDH1", "variant": "R132H", "hgvs": "p.Arg132His",
-     "cancer_type": "Relapsed Refractory AML",
-     "known_drugs": ["Ivosidenib", "Azacitidine"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L3_L4",
-     "note": "IDH1 R132H R/R AML — ivosidenib monotherapy or +azacitidine AGILE trial (FDA 2022)."},
-    {"case_id": "IDH2_R140Q_AML_COMBO", "gene": "IDH2", "variant": "R140Q", "hgvs": "p.Arg140Gln",
-     "cancer_type": "Relapsed Refractory AML",
-     "known_drugs": ["Enasidenib", "Azacitidine"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L3_L4",
-     "note": "IDH2 R140Q R/R AML — enasidenib + azacitidine."},
-
-    # FLT3 AML multi-drug
-    {"case_id": "FLT3_ITD_AML_MULTI", "gene": "FLT3", "variant": "ITD", "hgvs": "p.FLT3-ITD",
-     "cancer_type": "AML",
-     "known_drugs": ["Midostaurin", "Gilteritinib", "Quizartinib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FLT3-ITD AML — three approved FLT3 inhibitors."},
-    {"case_id": "FLT3_TKD_AML_MULTI", "gene": "FLT3", "variant": "D835Y", "hgvs": "p.Asp835Tyr",
-     "cancer_type": "AML",
-     "known_drugs": ["Midostaurin", "Gilteritinib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L3_L4",
-     "note": "FLT3 TKD D835Y AML — midostaurin/gilteritinib retain activity."},
-
-    # FGFR2 cholangiocarcinoma multi-drug
-    {"case_id": "FGFR2_FUSION_CHOLANGIO_MULTI", "gene": "FGFR2", "variant": "FUSION", "hgvs": "p.FGFR2-fusion",
-     "cancer_type": "Cholangiocarcinoma",
-     "known_drugs": ["Pemigatinib", "Infigratinib", "Futibatinib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FGFR2 fusion cholangiocarcinoma — three approved FGFR inhibitors."},
-
-    # NRAS melanoma multi-drug
-    {"case_id": "NRAS_Q61K_MEL_MULTI", "gene": "NRAS", "variant": "Q61K", "hgvs": "p.Gln61Lys",
-     "cancer_type": "Melanoma",
-     "known_drugs": ["Binimetinib", "Cobimetinib"], "oncokb_level": "LEVEL_2",
-     "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "NRAS Q61K melanoma — binimetinib (NEMO) and cobimetinib (MEK inhibitors)."},
-    {"case_id": "NRAS_Q61R_MEL_MULTI", "gene": "NRAS", "variant": "Q61R", "hgvs": "p.Gln61Arg",
-     "cancer_type": "Melanoma",
-     "known_drugs": ["Binimetinib", "Cobimetinib"], "oncokb_level": "LEVEL_2",
-     "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "NRAS Q61R melanoma — MEK inhibitors Level 2."},
-    {"case_id": "NRAS_Q61H_MEL_MULTI", "gene": "NRAS", "variant": "Q61H", "hgvs": "p.Gln61His",
-     "cancer_type": "Melanoma",
-     "known_drugs": ["Binimetinib", "Cobimetinib"], "oncokb_level": "LEVEL_2",
-     "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "NRAS Q61H melanoma."},
-
-    # KIT GIST first-line multi-drug
-    {"case_id": "KIT_EXON11_GIST_MULTI", "gene": "KIT", "variant": "EXON11MUT", "hgvs": "p.exon11mut",
-     "cancer_type": "Metastatic GIST",
-     "known_drugs": ["Imatinib", "Sunitinib", "Regorafenib", "Ripretinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KIT exon11 metastatic GIST — sequential: imatinib→sunitinib→regorafenib→ripretinib."},
-    {"case_id": "KIT_EXON9_GIST_MULTI", "gene": "KIT", "variant": "EXON9MUT", "hgvs": "p.exon9mut",
-     "cancer_type": "Metastatic GIST",
-     "known_drugs": ["Imatinib", "Sunitinib", "Regorafenib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KIT exon9 metastatic GIST."},
-
-    # ROS1 multi-drug
-    {"case_id": "ROS1_FUSION_NSCLC_MULTI", "gene": "ROS1", "variant": "FUSION", "hgvs": "p.ROS1-fusion",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Crizotinib", "Entrectinib", "Lorlatinib", "Repotrectinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "ROS1 fusion NSCLC — four approved ROS1 TKIs."},
-
-    # NTRK multi-drug
-    {"case_id": "NTRK_FUSION_SOLID_MULTI", "gene": "NTRK1", "variant": "FUSION", "hgvs": "p.NTRK-fusion",
-     "cancer_type": "Solid Tumor",
-     "known_drugs": ["Larotrectinib", "Entrectinib"], "oncokb_level": "LEVEL_1",
-     "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "NTRK fusion solid tumor — tumour-agnostic approval for both TRK inhibitors."},
-
-    # MSI-H CRC multi-drug
-    {"case_id": "MSI_H_CRC_MULTI", "gene": "MLH1", "variant": "MSI-H", "hgvs": "p.MSI-H",
-     "cancer_type": "Colorectal Cancer",
-     "known_drugs": ["Pembrolizumab", "Nivolumab", "Ipilimumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "MSI-H CRC — pembrolizumab (KEYNOTE-177 1L); nivolumab +/- ipilimumab (CheckMate 142)."},
-
-    # JAK2 MF multi-drug
-    {"case_id": "JAK2_V617F_MF_MULTI", "gene": "JAK2", "variant": "V617F", "hgvs": "p.Val617Phe",
-     "cancer_type": "Myelofibrosis",
-     "known_drugs": ["Ruxolitinib", "Fedratinib", "Pacritinib", "Momelotinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "JAK2 V617F myelofibrosis — four approved JAK inhibitors."},
-
-    # CD79B DLBCL multi-drug
-    {"case_id": "CD79B_Y196H_DLBCL_MULTI", "gene": "CD79B", "variant": "Y196H", "hgvs": "p.Tyr196His",
-     "cancer_type": "Diffuse Large B-Cell Lymphoma",
-     "known_drugs": ["Ibrutinib", "Zanubrutinib", "Acalabrutinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "CD79B Y196H DLBCL — BTK inhibitors three approved options."},
-    {"case_id": "CD79B_Y196C_DLBCL_MULTI", "gene": "CD79B", "variant": "Y196C", "hgvs": "p.Tyr196Cys",
-     "cancer_type": "Diffuse Large B-Cell Lymphoma",
-     "known_drugs": ["Ibrutinib", "Zanubrutinib"], "oncokb_level": "LEVEL_2",
-     "evidence_source": "OncoKB", "difficulty": "L3_L4",
-     "note": "CD79B Y196C DLBCL — BTK inhibitors."},
-
-    # PIK3CA breast multi-drug
-    {"case_id": "PIK3CA_H1047R_BREAST_MULTI", "gene": "PIK3CA", "variant": "H1047R", "hgvs": "p.His1047Arg",
-     "cancer_type": "Metastatic Breast Cancer",
-     "known_drugs": ["Alpelisib", "Inavolisib", "Fulvestrant"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PIK3CA H1047R metastatic breast — alpelisib+fulvestrant (SOLAR-1) or inavolisib (INAVO120)."},
-    {"case_id": "PIK3CA_E545K_BREAST_MULTI", "gene": "PIK3CA", "variant": "E545K", "hgvs": "p.Glu545Lys",
-     "cancer_type": "Metastatic Breast Cancer",
-     "known_drugs": ["Alpelisib", "Inavolisib", "Fulvestrant"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PIK3CA E545K metastatic breast."},
-    {"case_id": "PIK3CA_E542K_BREAST_MULTI", "gene": "PIK3CA", "variant": "E542K", "hgvs": "p.Glu542Lys",
-     "cancer_type": "Metastatic Breast Cancer",
-     "known_drugs": ["Alpelisib", "Inavolisib", "Fulvestrant"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PIK3CA E542K metastatic breast."},
-
-    # ════════════════════════════════════════════════════════════════════════
-    # EXPANSION BATCH 38 — New evidence table genes (CDKN2A/CDK4/AKT1/PTEN)
+        # EXPANSION BATCH 37 — REMOVED 2026-07-20 (gate-gaming correction)
+    # This batch originally contained 37 multi-drug cases added specifically to push
+    # multi_drug_fraction above the 0.60 gate threshold, not to reflect natural case
+    # distribution (self-disclosed in PROJECT_COMPLETION_STATUS.md). Removed entirely
+    # rather than rebalanced, since every case in the original batch was multi-drug by
+    # construction. See PROJECT_COMPLETION_STATUS.md and docs/BENCHMARK.md for detail.
+# EXPANSION BATCH 38 — New evidence table genes (CDKN2A/CDK4/AKT1/PTEN)
     # ════════════════════════════════════════════════════════════════════════
     {"case_id": "CDKN2A_LOSS_MELANOMA_01", "gene": "CDKN2A", "variant": "Loss", "cancer_type": "Melanoma",
      "known_drugs": ["Palbociclib", "Abemaciclib"], "oncokb_level": "LEVEL_3",
@@ -4314,331 +4088,18 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
     # EXPANSION BATCH 54 — Multi-drug L1/L2 cases (ceiling boost)
     # ════════════════════════════════════════════════════════════════════════
     # BRAF V600E – broad cancer types
-    {"case_id": "BRAF_V600E_ANAPLASTIC_THYROID_01", "gene": "BRAF", "variant": "V600E",
-     "cancer_type": "Anaplastic Thyroid Cancer",
-     "known_drugs": ["Dabrafenib", "Trametinib", "Vemurafenib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRAF V600E in anaplastic thyroid: dabrafenib+trametinib FDA-approved (BRAFi+MEKi)."},
-    {"case_id": "BRAF_V600E_HAIRY_CELL_LEUK_01", "gene": "BRAF", "variant": "V600E",
-     "cancer_type": "Hairy Cell Leukemia",
-     "known_drugs": ["Vemurafenib", "Dabrafenib", "Trametinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "BRAF V600E virtually universal in HCL; vemurafenib active."},
-    {"case_id": "BRAF_V600E_OVARIAN_01", "gene": "BRAF", "variant": "V600E",
-     "cancer_type": "Low Grade Serous Ovarian Cancer",
-     "known_drugs": ["Trametinib", "Dabrafenib", "Cobimetinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "BRAF V600E in LGSOC: MEK pathway; trametinib/dabrafenib."},
-    {"case_id": "BRAF_V600E_GLIOMA_01", "gene": "BRAF", "variant": "V600E",
-     "cancer_type": "Pediatric Low Grade Glioma",
-     "known_drugs": ["Dabrafenib", "Trametinib", "Vemurafenib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "FDA_TADPOLE", "difficulty": "L1_L2",
-     "note": "BRAF V600E in pediatric LGG; dabrafenib+trametinib FDA-approved (TADPOLE)."},
-    # EGFR exon 19 del – multi-TKI
-    {"case_id": "EGFR_EX19DEL_NSCLC_MULTI_01", "gene": "EGFR", "variant": "Exon19del",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Osimertinib", "Erlotinib", "Gefitinib", "Afatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "EGFR ex19del NSCLC: osimertinib preferred 1L; erlotinib/gefitinib/afatinib also approved."},
-    {"case_id": "EGFR_EX19DEL_NSCLC_MULTI_02", "gene": "EGFR", "variant": "E746_A750del",
-     "cancer_type": "Stage IV NSCLC",
-     "known_drugs": ["Osimertinib", "Erlotinib", "Afatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "Classic exon 19 deletion E746-A750."},
-    # HER2 amplification – multi-drug, multiple contexts
-    {"case_id": "HER2_AMP_GASTRIC_MULTI_01", "gene": "ERBB2", "variant": "Amplification",
-     "cancer_type": "Gastric Cancer",
-     "known_drugs": ["Trastuzumab", "Ramucirumab", "Pembrolizumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_ToGA", "difficulty": "L1_L2",
-     "note": "HER2-amplified gastric/GEJ cancer: trastuzumab+chemo standard (ToGA trial)."},
-    {"case_id": "HER2_AMP_NSCLC_MULTI_01", "gene": "ERBB2", "variant": "Amplification",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Trastuzumab deruxtecan", "Trastuzumab", "Pertuzumab"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "FDA_DESTINY", "difficulty": "L1_L2",
-     "note": "HER2 amplification in NSCLC; T-DXd FDA-approved (DESTINY-Lung)."},
-    {"case_id": "HER2_AMP_ENDO_MULTI_01", "gene": "ERBB2", "variant": "Amplification",
-     "cancer_type": "Endometrial Cancer",
-     "known_drugs": ["Trastuzumab deruxtecan", "Trastuzumab", "Tucatinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "HER2 amplification in endometrial cancer; T-DXd active."},
-    {"case_id": "HER2_AMP_BLADDER_MULTI_01", "gene": "ERBB2", "variant": "Amplification",
-     "cancer_type": "Urothelial Carcinoma",
-     "known_drugs": ["Trastuzumab deruxtecan", "Trastuzumab", "Pembrolizumab"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "HER2 amplification in urothelial carcinoma."},
-    # ALK fusions – multi-TKI, different tissues
-    {"case_id": "ALK_EML4_NSCLC_MULTI_01", "gene": "ALK", "variant": "EML4-ALK",
-     "cancer_type": "Advanced NSCLC",
-     "known_drugs": ["Alectinib", "Brigatinib", "Lorlatinib", "Crizotinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "ALK EML4 fusion: 4 FDA-approved TKIs; alectinib preferred 1L (ALEX trial)."},
-    {"case_id": "ALK_FUSION_IMT_MULTI_01", "gene": "ALK", "variant": "Fusion",
-     "cancer_type": "Inflammatory Myofibroblastic Tumor",
-     "known_drugs": ["Crizotinib", "Alectinib", "Brigatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "ALK-rearranged IMT: crizotinib FDA-approved; alectinib/brigatinib also active."},
-    # BRCA1/2 – multi-drug, different cancers
-    {"case_id": "BRCA1_185DELAG_BREAST_MULTI_01", "gene": "BRCA1", "variant": "185delAG",
-     "cancer_type": "Breast Cancer",
-     "known_drugs": ["Olaparib", "Talazoparib", "Niraparib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRCA1 185delAG Ashkenazi founder in breast; 3 PARP inhibitors approved."},
-    {"case_id": "BRCA2_D2723H_PROSTATE_MULTI_01", "gene": "BRCA2", "variant": "D2723H",
-     "cancer_type": "Prostate Cancer",
-     "known_drugs": ["Olaparib", "Rucaparib", "Niraparib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BRCA2 pathogenic in prostate; olaparib+niraparib+rucaparib all approved."},
-    {"case_id": "BRCA1_PATHOGENIC_PANCREATIC_MULTI_01", "gene": "BRCA1", "variant": "Pathogenic",
-     "cancer_type": "Pancreatic Adenocarcinoma",
-     "known_drugs": ["Olaparib", "Niraparib", "Rucaparib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "BRCA1 germline in pancreatic cancer; PARP inhibitors active."},
-    {"case_id": "BRCA2_PATHOGENIC_PANCREATIC_MULTI_01", "gene": "BRCA2", "variant": "Pathogenic",
-     "cancer_type": "Pancreatic Adenocarcinoma",
-     "known_drugs": ["Olaparib", "Niraparib", "Rucaparib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_POLO", "difficulty": "L1_L2",
-     "note": "BRCA2 germline in pancreatic cancer; olaparib maintenance (POLO trial)."},
-    # PIK3CA variants – multi-drug
-    {"case_id": "PIK3CA_H1047L_BREAST_MULTI_01", "gene": "PIK3CA", "variant": "H1047L",
-     "cancer_type": "ER+ HER2- Metastatic Breast Cancer",
-     "known_drugs": ["Alpelisib", "Inavolisib", "Capivasertib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PIK3CA H1047L: same hotspot class as H1047R; alpelisib+inavolisib+capivasertib."},
-    {"case_id": "PIK3CA_E545K_ENDO_MULTI_01", "gene": "PIK3CA", "variant": "E545K",
-     "cancer_type": "Endometrial Cancer",
-     "known_drugs": ["Alpelisib", "Capivasertib", "Everolimus"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PIK3CA E545K in endometrial cancer; alpelisib/capivasertib/everolimus."},
-    {"case_id": "PIK3CA_E542K_CERVICAL_MULTI_01", "gene": "PIK3CA", "variant": "E542K",
-     "cancer_type": "Cervical Cancer",
-     "known_drugs": ["Alpelisib", "Everolimus", "Temsirolimus"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "PIK3CA E542K in cervical cancer; PI3K/mTOR pathway."},
-    # RET fusions – 3 drugs
-    {"case_id": "RET_NCOA4_TC_MULTI_01", "gene": "RET", "variant": "NCOA4-RET",
-     "cancer_type": "Papillary Thyroid Cancer",
-     "known_drugs": ["Selpercatinib", "Pralsetinib", "Cabozantinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "NCOA4-RET fusion in thyroid: selpercatinib+pralsetinib+cabozantinib."},
-    {"case_id": "RET_KIF5B_RET_NSCLC_MULTI_01", "gene": "RET", "variant": "KIF5B-RET",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Selpercatinib", "Pralsetinib", "Vandetanib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KIF5B-RET most common RET fusion in NSCLC."},
-    # FGFR2 fusions – cholangiocarcinoma (3 FDA-approved agents)
-    {"case_id": "FGFR2_BICC1_CHOLANGIO_MULTI_01", "gene": "FGFR2", "variant": "Fusion",
-     "cancer_type": "Intrahepatic Cholangiocarcinoma",
-     "known_drugs": ["Pemigatinib", "Infigratinib", "Futibatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FGFR2-BICC1 fusion; 3 FDA-approved FGFR inhibitors."},
-    {"case_id": "FGFR2_AHCYL1_CHOLANGIO_MULTI_01", "gene": "FGFR2", "variant": "Fusion",
-     "cancer_type": "Intrahepatic Cholangiocarcinoma",
-     "known_drugs": ["Pemigatinib", "Infigratinib", "Futibatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FGFR2-AHCYL1 fusion; same drug class as BICC1."},
-    # MET Exon14 skipping – 3 approved TKIs
-    {"case_id": "MET_EX14_SKIP_NSCLC_MULTI_01", "gene": "MET", "variant": "Exon14_Skipping",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Capmatinib", "Tepotinib", "Crizotinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "MET exon14 skip: capmatinib (GEOMETRY-mono-1), tepotinib (VISION), crizotinib."},
-    {"case_id": "MET_EX14_SKIP_NSCLC_MULTI_02", "gene": "MET", "variant": "Exon14_Skipping",
-     "cancer_type": "Pulmonary Sarcomatoid Carcinoma",
-     "known_drugs": ["Capmatinib", "Tepotinib", "Crizotinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "MET ex14 skip in sarcomatoid carcinoma (enriched subset)."},
-    # NTRK – pan-cancer, multiple types
-    {"case_id": "NTRK1_FUSION_NSCLC_MULTI_01", "gene": "NTRK1", "variant": "Fusion",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Larotrectinib", "Entrectinib", "Repotrectinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "NTRK1 fusion NSCLC: larotrectinib/entrectinib/repotrectinib."},
-    {"case_id": "NTRK2_FUSION_GBM_MULTI_01", "gene": "NTRK2", "variant": "Fusion",
-     "cancer_type": "Glioblastoma Multiforme",
-     "known_drugs": ["Larotrectinib", "Entrectinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "NTRK2 fusion in pediatric GBM; larotrectinib/entrectinib tumor-agnostic."},
-    {"case_id": "NTRK3_FUSION_SALIVARY_MULTI_01", "gene": "NTRK3", "variant": "ETV6-NTRK3",
-     "cancer_type": "Salivary Gland Carcinoma",
-     "known_drugs": ["Larotrectinib", "Entrectinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "ETV6-NTRK3 in salivary gland carcinoma; larotrectinib."},
-    # MSI-H/dMMR – multi-ICI
-    {"case_id": "MSIH_ENDOMETRIAL_MULTI_01", "gene": "MLH1", "variant": "MSI-H",
-     "cancer_type": "Endometrial Cancer",
-     "known_drugs": ["Pembrolizumab", "Dostarlimab", "Nivolumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "MLH1 silencing in endometrial cancer: pembrolizumab/dostarlimab FDA-approved."},
-    {"case_id": "MSIH_CRC_MULTI_01", "gene": "MSH2", "variant": "MSI-H",
-     "cancer_type": "Colorectal Cancer",
-     "known_drugs": ["Pembrolizumab", "Nivolumab", "Ipilimumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_KEYNOTE177", "difficulty": "L1_L2",
-     "note": "dMMR/MSH2 LOF CRC: pembrolizumab 1L (KEYNOTE-177); nivo+ipi also approved."},
-    {"case_id": "MSIH_GASTRIC_MULTI_01", "gene": "MSH6", "variant": "MSI-H",
-     "cancer_type": "Gastric Cancer",
-     "known_drugs": ["Pembrolizumab", "Nivolumab", "Dostarlimab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "dMMR in gastric cancer: pembrolizumab/nivolumab/dostarlimab active."},
-    # IDH1 variants – multi-drug AML
-    {"case_id": "IDH1_R132H_AML_MULTI_01", "gene": "IDH1", "variant": "R132H",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Ivosidenib", "Olutasidenib", "Azacitidine"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "IDH1 R132H in AML: ivosidenib+olutasidenib both FDA-approved; aza combo emerging."},
-    {"case_id": "IDH1_R132C_CHOLANGIO_MULTI_01", "gene": "IDH1", "variant": "R132C",
-     "cancer_type": "Cholangiocarcinoma",
-     "known_drugs": ["Ivosidenib", "Olutasidenib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_ClarIDHy", "difficulty": "L1_L2",
-     "note": "IDH1 R132C in cholangiocarcinoma; ivosidenib FDA-approved."},
-    # IDH2 variants – multi-drug AML
-    {"case_id": "IDH2_R140Q_AML_MULTI_01", "gene": "IDH2", "variant": "R140Q",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Enasidenib", "Azacitidine", "Venetoclax"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "IDH2 R140Q (most common IDH2 hotspot) in AML; enasidenib FDA-approved."},
-    {"case_id": "IDH2_R172K_AML_MULTI_01", "gene": "IDH2", "variant": "R172K",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Enasidenib", "Venetoclax", "Azacitidine"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "IDH2 R172K; enasidenib covers all R172 hotspots."},
-    # FLT3 ITD – multi-drug
-    {"case_id": "FLT3_ITD_AML_MULTI_01", "gene": "FLT3", "variant": "ITD",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Midostaurin", "Gilteritinib", "Quizartinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FLT3 ITD: midostaurin (RATIFY), gilteritinib (ADMIRAL), quizartinib (QuANTUM-R)."},
-    {"case_id": "FLT3_ITD_HIGH_ALLELIC_MULTI_01", "gene": "FLT3", "variant": "ITD_High",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Gilteritinib", "Midostaurin", "Quizartinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "FLT3 ITD high allelic ratio: gilteritinib preferred for R/R."},
-    # KIT GIST – multiple approved TKIs
-    {"case_id": "KIT_EX11_GIST_MULTI_01", "gene": "KIT", "variant": "Exon11_Deletion",
-     "cancer_type": "Gastrointestinal Stromal Tumor",
-     "known_drugs": ["Imatinib", "Sunitinib", "Regorafenib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KIT exon 11 del GIST: imatinib 1L, sunitinib 2L, regorafenib 3L."},
-    {"case_id": "KIT_EX9_GIST_MULTI_01", "gene": "KIT", "variant": "Exon9_Mutation",
-     "cancer_type": "Gastrointestinal Stromal Tumor",
-     "known_drugs": ["Imatinib", "Sunitinib", "Avapritinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "KIT exon 9 GIST: imatinib 800 mg/d, sunitinib, avapritinib for refractory."},
-    # PDGFRA D842V – avapritinib
-    {"case_id": "PDGFRA_D842V_GIST_MULTI_01", "gene": "PDGFRA", "variant": "D842V",
-     "cancer_type": "Gastrointestinal Stromal Tumor",
-     "known_drugs": ["Avapritinib", "Ripretinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_NAVIGATOR", "difficulty": "L1_L2",
-     "note": "PDGFRA D842V: avapritinib first-in-class; ripretinib also active."},
-    # AKT1 E17K – capivasertib
-    {"case_id": "AKT1_E17K_ENDO_MULTI_01", "gene": "AKT1", "variant": "E17K",
-     "cancer_type": "Endometrial Cancer",
-     "known_drugs": ["Capivasertib", "Alpelisib", "Everolimus"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "AKT1 E17K in endometrial cancer; capivasertib+alpelisib+everolimus all PI3K/AKT/mTOR."},
-    # ROS1 fusions – multi-TKI
-    {"case_id": "ROS1_EZR_NSCLC_MULTI_01", "gene": "ROS1", "variant": "EZR-ROS1",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Crizotinib", "Entrectinib", "Lorlatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "EZR-ROS1 in NSCLC: crizotinib+entrectinib FDA-approved; lorlatinib also active."},
-    {"case_id": "ROS1_SLC34A2_NSCLC_MULTI_01", "gene": "ROS1", "variant": "SLC34A2-ROS1",
-     "cancer_type": "Non-Small Cell Lung Cancer",
-     "known_drugs": ["Crizotinib", "Entrectinib", "Lorlatinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "SLC34A2-ROS1 fusion: crizotinib/entrectinib/lorlatinib."},
-    # EZH2 – FL multi-drug
-    {"case_id": "EZH2_Y646N_FL_MULTI_01", "gene": "EZH2", "variant": "Y646N",
-     "cancer_type": "Follicular Lymphoma",
-     "known_drugs": ["Tazemetostat", "Rituximab", "Bendamustine"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "EZH2 Y646N in FL: tazemetostat FDA-approved; often combined with standard regimens."},
+
     {"case_id": "EZH2_Y646S_FL_MULTI_01", "gene": "EZH2", "variant": "Y646S",
      "cancer_type": "Follicular Lymphoma",
      "known_drugs": ["Tazemetostat"],
      "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
      "note": "EZH2 Y646S: same hotspot class as Y646N; tazemetostat active."},
     # BTK in CLL/MCL
-    {"case_id": "BTK_AMP_MCL_MULTI_01", "gene": "BTK", "variant": "Amplification",
-     "cancer_type": "Mantle Cell Lymphoma",
-     "known_drugs": ["Ibrutinib", "Acalabrutinib", "Zanubrutinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "BTK in MCL: ibrutinib/acalabrutinib/zanubrutinib all FDA-approved."},
-    # CALR JAK2 – MPN multi-drug
-    {"case_id": "JAK2_V617F_PV_MULTI_01", "gene": "JAK2", "variant": "V617F",
-     "cancer_type": "Polycythemia Vera",
-     "known_drugs": ["Ruxolitinib", "Fedratinib", "Ropeginterferon"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "JAK2 V617F in PV: ruxolitinib (RESPONSE), fedratinib, ropeginterferon."},
-    {"case_id": "JAK2_V617F_MF_MULTI_01", "gene": "JAK2", "variant": "V617F",
-     "cancer_type": "Myelofibrosis",
-     "known_drugs": ["Ruxolitinib", "Fedratinib", "Pacritinib", "Momelotinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "JAK2 V617F in MF: 4 FDA-approved JAK inhibitors."},
-    # NPM1 in AML
-    {"case_id": "NPM1_INSERTION_AML_MULTI_01", "gene": "NPM1", "variant": "W288Cfs",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Midostaurin", "Venetoclax"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "NPM1 W288Cfs (type A insertion) in AML: midostaurin standard-of-care; venetoclax+aza active."},
-    # VHL ccRCC
-    {"case_id": "VHL_LOF_RCC_MULTI_01", "gene": "VHL", "variant": "Loss_of_Function",
-     "cancer_type": "Clear Cell Renal Cell Carcinoma",
-     "known_drugs": ["Belzutifan", "Cabozantinib", "Pazopanib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "VHL LOF in ccRCC: belzutifan (HIF2α), cabozantinib/pazopanib (VEGFR)."},
-    # KRAS G12C in CRC vs NSCLC multi-drug
-    {"case_id": "KRAS_G12C_CRC_MULTI_01", "gene": "KRAS", "variant": "G12C",
-     "cancer_type": "Colorectal Cancer",
-     "known_drugs": ["Sotorasib", "Adagrasib", "Cetuximab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA_CodeBreaK300", "difficulty": "L1_L2",
-     "note": "KRAS G12C CRC: sotorasib+panitumumab (CodeBreaK300), adagrasib+cetuximab (KRYSTAL-10)."},
-    # Emerging targets
-    {"case_id": "DNMT3A_R882H_AML_MULTI_01", "gene": "DNMT3A", "variant": "R882H",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Azacitidine", "Venetoclax", "Midostaurin"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "DNMT3A R882H in AML: ven+aza combination; midostaurin if FLT3 co-mutation."},
-    {"case_id": "TET2_LOF_AML_MULTI_01", "gene": "TET2", "variant": "Loss_of_Function",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Azacitidine", "Venetoclax"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "TET2 LOF in AML; ven+aza preferred."},
-    {"case_id": "SDHB_LOF_GIST_MULTI_01", "gene": "SDHB", "variant": "Loss_of_Function",
-     "cancer_type": "Gastrointestinal Stromal Tumor",
-     "known_drugs": ["Sunitinib", "Regorafenib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
-     "note": "SDH-deficient GIST: imatinib-resistant; sunitinib/regorafenib."},
     {"case_id": "EZH2_Y646H_DLBCL_MULTI_01", "gene": "EZH2", "variant": "Y646H",
      "cancer_type": "Diffuse Large B-Cell Lymphoma",
      "known_drugs": ["Tazemetostat"],
      "oncokb_level": "LEVEL_2", "evidence_source": "OncoKB", "difficulty": "L1_L2",
      "note": "EZH2 Y646H in DLBCL; tazemetostat active."},
-    {"case_id": "CD274_AMP_HNSCC_MULTI_01", "gene": "CD274", "variant": "Amplification",
-     "cancer_type": "Head and Neck Squamous Cell Carcinoma",
-     "known_drugs": ["Pembrolizumab", "Nivolumab", "Atezolizumab"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "FDA", "difficulty": "L1_L2",
-     "note": "PD-L1 amplification in HNSCC; pembrolizumab/nivolumab FDA-approved."},
-
-    # ─────────────────────────────────────────────────────────────────────────
-    # PUBLISHED TUMOR BOARD CASES — mined from peer-reviewed journals
-    # Sources: JCO Precision Oncology, Annals of Oncology, Nature Medicine
-    # Added to expand holdout validation set from n=24 to n=50+
-    # ─────────────────────────────────────────────────────────────────────────
-
-    # ── L1_L2 Literature Cases (Level 1–2 evidence) ───────────────────────────
-
-    # FGFR2 fusion intrahepatic cholangiocarcinoma → pemigatinib
-    # Source: JCO Precision Oncology 2020; PMID 32442065 (FIGHT-202 tumor board series)
-    {"case_id": "LIT_FGFR2_FUSION_IHCC_01", "gene": "FGFR2", "variant": "FGFR2-BICC1",
-     "cancer_type": "Intrahepatic Cholangiocarcinoma",
-     "known_drugs": ["Pemigatinib", "Futibatinib", "Infigratinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "JCO_PO_2020",
-     "difficulty": "L1_L2",
-     "literature_source": "JCO Precision Oncology 2020, PMID 32442065",
-     "note": "FGFR2 fusion in iCCA: pemigatinib (FIGHT-202) and futibatinib FDA-approved."},
-
-    # FGFR3 S249C urothelial bladder → erdafitinib
-    # Source: JCO Precision Oncology 2022 tumor board; FIGHT-201 trial
     {"case_id": "LIT_FGFR3_S249C_UBC_01", "gene": "FGFR3", "variant": "S249C",
      "cancer_type": "Urothelial Bladder Cancer",
      "known_drugs": ["Erdafitinib"],
@@ -4649,36 +4110,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # IDH1 R132H AML → ivosidenib
     # Source: JCO Precision Oncology 2019 tumor board series (Roboz et al.)
-    {"case_id": "LIT_IDH1_R132H_AML_01", "gene": "IDH1", "variant": "R132H",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Ivosidenib", "Olutasidenib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "JCO_PO_2019",
-     "difficulty": "L1_L2",
-     "literature_source": "JCO Precision Oncology 2019",
-     "note": "IDH1 R132H in AML: ivosidenib (AG120-C-001) and olutasidenib FDA-approved."},
-
-    # ERBB2 amplification gastric adenocarcinoma → trastuzumab
-    # Source: Annals of Oncology 2020 precision tumor board
-    {"case_id": "LIT_ERBB2_AMP_GASTRIC_01", "gene": "ERBB2", "variant": "Amplification",
-     "cancer_type": "Gastric Adenocarcinoma",
-     "known_drugs": ["Trastuzumab", "Trastuzumab Deruxtecan"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "ANN_ONCOL_2020",
-     "difficulty": "L1_L2",
-     "literature_source": "Annals of Oncology 2020 (ToGA trial-era tumor board)",
-     "note": "HER2 amplification in gastric: trastuzumab+chemo (ToGA) and T-DXd FDA-approved."},
-
-    # ATM loss-of-function prostate → olaparib
-    # Source: Annals of Oncology 2022 molecular tumor board
-    {"case_id": "LIT_ATM_LOF_PROSTATE_01", "gene": "ATM", "variant": "Loss_of_Function",
-     "cancer_type": "Prostate Adenocarcinoma",
-     "known_drugs": ["Olaparib", "Rucaparib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "ANN_ONCOL_2022",
-     "difficulty": "L1_L2",
-     "literature_source": "Annals of Oncology 2022 molecular tumor board",
-     "note": "ATM LOF in mCRPC: olaparib (PROfound) and rucaparib (TRITON2/3) active."},
-
-    # EGFR G719X unusual variant NSCLC → afatinib
-    # Source: JCO Precision Oncology 2020 LUX-Lung 2/3/6 pooled analysis tumor board
     {"case_id": "LIT_EGFR_G719X_NSCLC_01", "gene": "EGFR", "variant": "G719X",
      "cancer_type": "Non-Small Cell Lung Cancer",
      "known_drugs": ["Afatinib"],
@@ -4689,16 +4120,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # KIT D816V systemic mastocytosis → avapritinib
     # Source: JCO Precision Oncology 2021 (PATHFINDER tumor board)
-    {"case_id": "LIT_KIT_D816V_MASTOCYTOSIS_01", "gene": "KIT", "variant": "D816V",
-     "cancer_type": "Systemic Mastocytosis",
-     "known_drugs": ["Avapritinib", "Midostaurin"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "JCO_PO_2021",
-     "difficulty": "L1_L2",
-     "literature_source": "JCO Precision Oncology 2021 (PATHFINDER trial tumor board)",
-     "note": "KIT D816V in systemic mastocytosis: avapritinib (PATHFINDER) FDA-approved 2021."},
-
-    # PDGFRA D842V GIST → avapritinib
-    # Source: JCO Precision Oncology 2019 (NAVIGATOR trial series)
     {"case_id": "LIT_PDGFRA_D842V_GIST_01", "gene": "PDGFRA", "variant": "D842V",
      "cancer_type": "Gastrointestinal Stromal Tumor",
      "known_drugs": ["Avapritinib"],
@@ -4709,16 +4130,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # BRAF V600E papillary thyroid cancer → dabrafenib + trametinib
     # Source: Annals of Oncology 2022 tumor board
-    {"case_id": "LIT_BRAF_V600E_THYROID_01", "gene": "BRAF", "variant": "V600E",
-     "cancer_type": "Papillary Thyroid Cancer",
-     "known_drugs": ["Dabrafenib", "Trametinib"],
-     "oncokb_level": "LEVEL_1", "evidence_source": "ANN_ONCOL_2022",
-     "difficulty": "L1_L2",
-     "literature_source": "Annals of Oncology 2022 (ROAR basket tumor board)",
-     "note": "BRAF V600E in PTC: dabrafenib+trametinib FDA-approved (ROAR basket)."},
-
-    # PIK3CA H1047L HR+ breast → alpelisib
-    # Source: Annals of Oncology 2021 molecular tumor board
     {"case_id": "LIT_PIK3CA_H1047L_BREAST_01", "gene": "PIK3CA", "variant": "H1047L",
      "cancer_type": "Breast Cancer",
      "known_drugs": ["Alpelisib"],
@@ -4729,16 +4140,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # ERBB2 V777L atypical breast → neratinib
     # Source: JCO Precision Oncology 2022 SUMMIT tumor board
-    {"case_id": "LIT_ERBB2_V777L_BREAST_01", "gene": "ERBB2", "variant": "V777L",
-     "cancer_type": "Breast Cancer",
-     "known_drugs": ["Neratinib", "Tucatinib"],
-     "oncokb_level": "LEVEL_2", "evidence_source": "JCO_PO_2022",
-     "difficulty": "L1_L2",
-     "literature_source": "JCO Precision Oncology 2022 (SUMMIT basket trial tumor board)",
-     "note": "ERBB2 V777L activating mutation: neratinib (SUMMIT basket) and tucatinib active."},
-
-    # ALK G1202R resistance NSCLC → lorlatinib (2nd/3rd gen)
-    # Source: JCO Precision Oncology 2021 resistance mechanisms tumor board
     {"case_id": "LIT_ALK_G1202R_RESIST_NSCLC_01", "gene": "ALK", "variant": "G1202R",
      "cancer_type": "Non-Small Cell Lung Cancer",
      "known_drugs": ["Lorlatinib"],
@@ -4771,26 +4172,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # CDK4 amplification liposarcoma → palbociclib
     # Source: Annals of Oncology 2022 molecular tumor board
-    {"case_id": "LIT_CDK4_AMP_LIPO_01", "gene": "CDK4", "variant": "Amplification",
-     "cancer_type": "Well-Differentiated Liposarcoma",
-     "known_drugs": ["Palbociclib", "Abemaciclib"],
-     "oncokb_level": "LEVEL_3A", "evidence_source": "ANN_ONCOL_2022",
-     "difficulty": "L3_L4",
-     "literature_source": "Annals of Oncology 2022 (CDK4 amp sarcoma tumor board)",
-     "note": "CDK4 amplification in WD/DD liposarcoma: CDK4/6 inhibitors active in Phase 2; palbociclib explored."},
-
-    # MET amplification gastric → capmatinib / tepotinib
-    # Source: Annals of Oncology 2022 molecular tumor board
-    {"case_id": "LIT_MET_AMP_GASTRIC_01", "gene": "MET", "variant": "Amplification",
-     "cancer_type": "Gastric Adenocarcinoma",
-     "known_drugs": ["Capmatinib", "Tepotinib"],
-     "oncokb_level": "LEVEL_3A", "evidence_source": "ANN_ONCOL_2022",
-     "difficulty": "L3_L4",
-     "literature_source": "Annals of Oncology 2022",
-     "note": "High-level MET amplification in gastric: capmatinib/tepotinib active; no FDA approval in gastric yet."},
-
-    # PIK3CA E545K cervical → alpelisib
-    # Source: JCO Precision Oncology 2021 cervical basket
     {"case_id": "LIT_PIK3CA_E545K_CERVIX_01", "gene": "PIK3CA", "variant": "E545K",
      "cancer_type": "Cervical Cancer",
      "known_drugs": ["Alpelisib"],
@@ -4801,27 +4182,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # BRCA2 somatic pancreatic adenocarcinoma → olaparib
     # Source: JCO Precision Oncology 2020 (POLO-adjacent tumor board)
-    {"case_id": "LIT_BRCA2_SOM_PDAC_01", "gene": "BRCA2", "variant": "Loss_of_Function",
-     "cancer_type": "Pancreatic Adenocarcinoma",
-     "known_drugs": ["Olaparib", "Rucaparib"],
-     "oncokb_level": "LEVEL_3A", "evidence_source": "JCO_PO_2020",
-     "difficulty": "L3_L4",
-     "network_dependent": True,
-     "literature_source": "JCO Precision Oncology 2020",
-     "note": "Somatic BRCA2 LOF in PDAC: olaparib approved for germline BRCA; somatic context has evidence from POLO."},
-
-    # TP53 R175H gain-of-function AML → eprenetapopt (APR-246)
-    # Source: Annals of Oncology 2021 (APR-246 AML Phase 2 tumor board)
-    {"case_id": "LIT_TP53_R175H_AML_GOF_01", "gene": "TP53", "variant": "R175H",
-     "cancer_type": "Acute Myeloid Leukemia",
-     "known_drugs": ["Eprenetapopt", "Azacitidine"],
-     "oncokb_level": "LEVEL_3A", "evidence_source": "ANN_ONCOL_2021",
-     "difficulty": "L3_L4",
-     "literature_source": "Annals of Oncology 2021 (APR-246 Phase 2 tumor board)",
-     "note": "TP53 R175H GOF in AML: eprenetapopt+aza (Phase 2 ORR ~33%); Phase 3 missed endpoint."},
-
-    # IDH2 R172K chondrosarcoma → enasidenib
-    # Source: JCO Precision Oncology 2022 sarcoma molecular tumor board
     {"case_id": "LIT_IDH2_R172K_CHONDRO_01", "gene": "IDH2", "variant": "R172K",
      "cancer_type": "Chondrosarcoma",
      "known_drugs": ["Enasidenib"],
@@ -4832,26 +4192,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # NF1 LOF MPNST → selumetinib / binimetinib
     # Source: JCO Precision Oncology 2022 (NF1 sarcoma tumor board)
-    {"case_id": "LIT_NF1_LOF_MPNST_01", "gene": "NF1", "variant": "Loss_of_Function",
-     "cancer_type": "Malignant Peripheral Nerve Sheath Tumor",
-     "known_drugs": ["Selumetinib", "Binimetinib"],
-     "oncokb_level": "LEVEL_3B", "evidence_source": "JCO_PO_2022",
-     "difficulty": "L3_L4",
-     "literature_source": "JCO Precision Oncology 2022 (NF1-MPNST tumor board)",
-     "note": "NF1 LOF in MPNST: selumetinib FDA-approved for pediatric NF1 (SPRINT); activity in MPNST explored."},
-
-    # TSC1 LOF urothelial → everolimus / temsirolimus
-    # Source: Annals of Oncology 2021 (mTOR pathway basket tumor board)
-    {"case_id": "LIT_TSC1_LOF_UBC_01", "gene": "TSC1", "variant": "Loss_of_Function",
-     "cancer_type": "Urothelial Bladder Cancer",
-     "known_drugs": ["Everolimus", "Temsirolimus"],
-     "oncokb_level": "LEVEL_3B", "evidence_source": "ANN_ONCOL_2021",
-     "difficulty": "L3_L4",
-     "literature_source": "Annals of Oncology 2021 (TSC1 mTOR basket)",
-     "note": "TSC1 LOF in urothelial: everolimus/temsirolimus active in TSC1-mutant tumors; basket evidence."},
-
-    # KMT2A::MLLT3 AML → revumenib / menin inhibitor
-    # Source: JCO Precision Oncology 2023 (AUGMENT-101 tumor board)
     {"case_id": "LIT_KMT2A_MLLT3_AML_01", "gene": "KMT2A", "variant": "KMT2A-MLLT3",
      "cancer_type": "Acute Myeloid Leukemia",
      "known_drugs": ["Revumenib"],
@@ -4862,18 +4202,6 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
 
     # EGFR amplification GBM → erlotinib / osimertinib
     # Source: Annals of Oncology 2020 GBM molecular tumor board
-    {"case_id": "LIT_EGFR_AMP_GBM_01", "gene": "EGFR", "variant": "Amplification",
-     "cancer_type": "Glioblastoma",
-     "known_drugs": ["Erlotinib", "Gefitinib"],
-     "oncokb_level": "LEVEL_3B", "evidence_source": "ANN_ONCOL_2020",
-     "difficulty": "L3_L4",
-     "literature_source": "Annals of Oncology 2020 (GBM molecular tumor board)",
-     "note": "EGFR amplification in GBM: EGFR TKIs have limited CNS penetration; erlotinib/gefitinib modest activity."},
-
-    # ── VUS_NEG Literature Cases (negative controls) ──────────────────────────
-
-    # KRAS G12V GBM — no approved targeted therapy for this context
-    # Source: JCO Precision Oncology 2022 GBM tumor board (reported as actionability gap)
     {"case_id": "LIT_KRAS_G12V_GBM_NEG_01", "gene": "KRAS", "variant": "G12V",
      "cancer_type": "Glioblastoma",
      "known_drugs": [],

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Manrope, IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -43,21 +42,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${manrope.variable} ${plex.variable} ${jetbrainsMono.variable} font-[var(--font-plex)] bg-[#020617] text-slate-100`}>
+      <body className={`${manrope.variable} ${plex.variable} ${jetbrainsMono.variable} font-[var(--font-plex)] bg-neutral-bg text-neutral-heading`}>
         <QueryProvider>
           <AuthProvider>
-            <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0f1e]/90 backdrop-blur-md">
-              <div className="clinical-shell h-16 flex items-center justify-between gap-4">
+            <nav className="sticky top-0 z-50 border-b border-white/5 bg-neutral-bg/90 backdrop-blur-md">
+              <div className="clinical-shell h-16 flex items-center">
                 <LogoAnimated />
-                <div className="flex items-center gap-1 sm:gap-2 text-xs">
-                  <Link href="/explore" className="uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Explore</Link>
-                  <Link href="/submit" className="uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Submit</Link>
-                  <Link href="/orders" className="uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Orders</Link>
-                  <Link href="/marketplace" className="hidden sm:inline uppercase tracking-wider text-slate-400 hover:text-white transition-colors px-2.5 py-1.5">Marketplace</Link>
-                  <Link href="/submit" className="ml-2 rounded-md bg-cyan-700 px-3 py-1.5 text-white font-semibold hover:bg-cyan-600 transition-colors text-xs uppercase tracking-wider">
-                    Start Case
-                  </Link>
-                </div>
               </div>
             </nav>
             {children}

@@ -59,6 +59,40 @@ async function request<T>(
   return res.json() as Promise<T>;
 }
 
+/**
+ * Like request(), but for binary responses (PDF downloads etc.) that
+ * shouldn't be parsed as JSON. Still attaches the Bearer token, since these
+ * routes are behind get_current_patient the same as every other endpoint.
+ */
+async function requestBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const token = getToken();
+  const headers: HeadersInit = {
+    ...(options.headers as Record<string, string>),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...options, headers, signal: controller.signal });
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
+    }
+    throw new Error("Network error: unable to reach API");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status}`);
+  }
+
+  return res.blob();
+}
+
 function normalizeDrugRequests<T extends { requests?: unknown }>(payload: T | unknown[]): unknown[] {
   if (Array.isArray(payload)) {
     return payload;
@@ -126,6 +160,7 @@ export const api = {
       target_gene: string | null;
       has_targetable_mutation: boolean;
       message?: string;
+      decision_path?: string;
       candidates: {
         drug_name: string;
         chembl_id: string;
@@ -136,6 +171,9 @@ export const api = {
         rank_score: number | null;
         evidence_sources: string[];
         matched_terms: string[];
+        /** Server-computed via classify_drug_tier() — api/ai/ranking.py:161 */
+        drug_tier?: string;
+        disclaimer?: string;
       }[];
     }>(`/api/repurposing/${resultId}`),
 
@@ -377,6 +415,10 @@ export const api = {
       report_text: string;
       brief: Record<string, unknown>;
     }>(`/api/marketplace/custom-drug-report/${resultId}`),
+
+  /** Download the structured oncologist report as a PDF (requires auth) */
+  getOncologistReportPdf: (submissionId: string) =>
+    requestBlob(`/api/results/${submissionId}/oncologist-report.pdf`),
 
   /** Nearby pharmacy placeholder list */
   getNearbyPharmacies: () =>

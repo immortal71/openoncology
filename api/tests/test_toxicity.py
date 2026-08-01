@@ -37,8 +37,8 @@ HERG_OFFENDER = _molecule(
     alogp=2.5, molecular_weight=238.3,
 )
 
-# Ames mutagen: nitroaromatic
-AMES_MUTAGEN = _molecule("[N+](=O)[O-]c1ccccc1", alogp=1.9, molecular_weight=123.1)
+# Ames mutagen: nitroaromatic (nitrobenzene)
+AMES_MUTAGEN = _molecule("c1ccc(cc1)[N+](=O)[O-]", alogp=1.9, molecular_weight=123.1)
 
 # PAINS: rhodanine scaffold
 PAINS_COMPOUND = _molecule("O=C1NC(=S)SC1", alogp=0.9, molecular_weight=119.1)

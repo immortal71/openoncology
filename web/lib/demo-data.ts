@@ -70,6 +70,9 @@ export const DEMO_REPURPOSING = {
       rank_score: 0.9827,
       evidence_sources: ["OncoKB", "OpenTargets", "DiffDock", "ClinicalPhase"],
       matched_terms: ["KRAS G12C", "NSCLC", "AMG-510"],
+      // classify_drug_tier() output (api/ai/ranking.py:161) for a real
+      // OncoKB Level 1 match — same field the live endpoint returns.
+      drug_tier: "fda_approved",
     },
     {
       drug_name: "Adagrasib",
@@ -80,16 +83,18 @@ export const DEMO_REPURPOSING = {
       rank_score: 0.9731,
       evidence_sources: ["OncoKB", "OpenTargets", "DiffDock", "ClinicalPhase"],
       matched_terms: ["KRAS G12C", "NSCLC", "MRTX849"],
+      drug_tier: "fda_approved",
     },
     {
       drug_name: "Osimertinib",
       chembl_id: "CHEMBL3353410",
-      approval_status: "FDA Approved",
+      approval_status: "FDA Approved — different indication (EGFR)",
       mechanism: "EGFR T790M inhibitor — included as combination therapy candidate",
       opentargets_score: 0.61,
       rank_score: 0.71,
       evidence_sources: ["OncoKB", "ClinVar"],
       matched_terms: ["EGFR", "NSCLC", "combination"],
+      drug_tier: "repurposed",
     },
   ],
 };

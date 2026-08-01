@@ -36,17 +36,24 @@ Artifact: `validation_results/holdout_50_metrics.json`
 | Metric | Value | Notes |
 |--------|-------|-------|
 | **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.508** | Ceiling for this mixed-difficulty holdout: **0.650** |
+| **Standard Precision@3** | **0.508** | Ceiling for this mixed-difficulty holdout: **0.625** |
 | **Normalised Precision@3** | **0.817** | Near-perfect when normalised for single-drug gold standards |
 | **False Positives** | **0** | FP rate 0% — no spurious high-confidence recommendations |
 | **Mean Reciprocal Rank (MRR)** | **0.883** | Gold drug appears near the top on average |
-| **NDCG@3** | **0.845** | Strong ranking quality across the full holdout |
+| **NDCG@3** | **0.883** | Strong ranking quality across the full holdout |
 
-**Holdout composition:** 40 sensitivity cases (12 single-drug gold standard, 28 multi-drug gold standard) + 10 negative-control specificity cases.  
-**Source material:** JCO Precision Oncology, Annals of Oncology, Nature Medicine tumour board reports.  
-**Full case list:** `validation_results/holdout_50_results.txt`
+**Holdout composition:** 40 sensitivity cases (16 single-drug gold standard, 24 multi-drug gold standard) + 10 negative-control specificity cases.
+**Source material:** JCO Precision Oncology, Annals of Oncology, Nature Medicine tumour board reports.
+**Full case list:** `validation_results/holdout_50_results.txt` · **Per-case scoring:** `blind_review_key_scoring.json`
 
-> **Why Standard P@3 = 0.508 while Hit@3 = 0.900?** Standard P@3 uses a fixed denominator of 3 regardless of how many gold-standard drugs exist. When a case has only one gold-standard drug, even a perfect top-3 result gives P@3 = 1/3 = 0.333. Most cases in precision oncology have a single targetable drug per mutation — this is expected behaviour, not a failure. The ceiling of 0.650 reflects the realistic maximum for this holdout's case mix.
+> **Why Standard P@3 = 0.508 while Hit@3 = 0.900?** Standard P@3 uses a fixed denominator of 3 regardless of how many gold-standard drugs exist. When a case has only one gold-standard drug, even a perfect top-3 result gives P@3 = 1/3 = 0.333. Most cases in precision oncology have a single targetable drug per mutation — this is expected behaviour, not a failure. The ceiling of 0.625 reflects the realistic maximum for this holdout's case mix.
+
+> **2026-07-20 reconciliation note:** NDCG@3, the P@3 ceiling, and the single/multi-drug
+> case split previously stated here (0.845, 0.650, 12/28) did not match either raw
+> artifact (`holdout_50_results.txt`, `blind_review_key_scoring.json`) and have been
+> corrected to the artifact values above. `holdout_50_metrics.json` (this section's cited
+> source) does not itself contain NDCG/ceiling/split fields — those three values are
+> sourced from the two artifacts named above instead.
 
 ---
 
@@ -75,7 +82,13 @@ Artifact: `hard_benchmark_results.json` (updated on every gate run)
 | Date | Change | P@3 before | P@3 after |
 |------|--------|-----------|-----------|
 | 2026-05-03 | Repotrectinib NTRK evidence; EGFR exon20ins bug fix | ~0.800 | 0.817 |
-| 2026-05-29 | FGFR2-BICC1/FGFR3-TACC3 aliases; CLDN18/DLL3/FOLR1 evidence + context overrides | 0.817 | 0.8178 |
+| 2026-05-29 (early run) | FGFR2-BICC1/FGFR3-TACC3 aliases; CLDN18/DLL3/FOLR1 evidence + context overrides | 0.817 | 0.8178 |
+| 2026-05-30 (current) | Additional case/evidence updates since the 0.8178 run | 0.8178 | **0.8222** (see table above — this is the current `hard_benchmark_results.json`) |
+
+> The 0.817 / 0.8178 entries above are a same-week earlier snapshot, superseded by the
+> 0.8222 run now current at the top of this section. See
+> `docs/BENCHMARK_v0817_2026-05-29.md` for that snapshot's full detail (kept for
+> forensic/methodology reference, not as a current number).
 
 ---
 
@@ -112,6 +125,18 @@ python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_
 The 200-patient set is intentionally harder and includes many variants with no direct approved match — useful for evaluating escalation behaviour and safe abstention.
 
 Artifact: [real_patient_benchmark_200.json](../real_patient_benchmark_200.json)
+
+---
+
+## 5-fold cross-validation (not previously cited anywhere)
+
+An additional 5-fold CV run exists at [benchmark_results.json](../benchmark_results.json)
+(n=60 sensitivity cases, 623 total cases including negatives): mean CV score 0.8639
+(std 0.0773), normalised P@3 = 0.9424, standard P@3 = 0.5758, Hit@3 = 0.9818, MRR =
+0.9273, FP rate = 0.0. This run was not previously referenced in any doc — flagged here
+for visibility rather than left silently orphaned. It should not be treated as
+independently confirmed until its methodology (fold construction, case source) is
+re-verified; it is listed here as a pointer, not yet as a headline claim.
 
 ---
 

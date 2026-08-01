@@ -1,7 +1,7 @@
 """
 Submit route — receives patient biopsy PDF + DNA file, queues genomic pipeline.
 """
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, Request, status
+from fastapi import APIRouter, UploadFile, File, Form, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 

@@ -47,6 +47,17 @@ We present OpenOncology, a fully open-source platform that solves both problems 
 
 Validation against a blinded 50-case oncologist holdout yielded Hit@3 = 0.900, Standard Precision@3 = 0.508 (ceiling: 0.625), Normalised Precision@3 = 0.817, Mean Reciprocal Rank = 0.883, and zero false-positive recommendations. The 50-case holdout included 12 Level 3–4 literature-sourced cases and 6 negative controls, representing a deliberately harder validation set than smaller prior holdouts; the metric profile reflects increased case difficulty. Stage two (custom drug discovery) validation is structural — discovery briefs are verified to contain real ChEMBL and OpenTargets records; clinical validation of lead molecule selection requires experimental binding assays outside the scope of this release. Equivalence-adjusted oncologist concordance reached 100% at both Top-1 and Top-3 across 36 actionable TCGA cases. TCGA benchmarks at 100 and 200 patients demonstrated 100% pipeline coverage with zero empty outputs — every patient received either an approved drug recommendation or a structured custom discovery brief.
 
+> ⚠️ **Unresolved discrepancy, flagged 2026-07-20 — do not silently edit, this text
+> mirrors the published DOI abstract.** This paragraph states "6 negative controls."
+> The scoring artifact for this exact run (`blind_review_key_scoring.json`,
+> `specificity_case_count: 10`) says **10** negative controls, matching README.md and
+> docs/BENCHMARK.md. All other numbers in this paragraph (Hit@3, P@3, ceiling, MRR, FP)
+> match the artifact exactly. Since this text corresponds to an already-published
+> preprint (DOI above), this single figure should not be silently changed here — if the
+> published abstract is wrong, that needs an explicit erratum/correction on Research
+> Square, the same way the project's prior dedup-bug erratum was handled, rather than a
+> quiet edit to this file.
+
 **Conclusions**
 
 OpenOncology is the first open-source precision oncology platform to provide a complete, safe escalation pathway from approved drug matching through to de novo custom drug discovery for patients with no existing therapeutic option. All code, benchmark scripts, and validation artifacts are publicly available at github.com/immortal71/openoncology under the MIT licence.

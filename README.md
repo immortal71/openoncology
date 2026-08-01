@@ -5,10 +5,15 @@
 **Free AI-powered personalized cancer drug analysis — no insurance, no subscription, no gatekeeping.**
 
 <p>
+  <a href="https://github.com/immortal71/openoncology/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"/></a>
+  <a href="https://github.com/immortal71/openoncology/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/codeql.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=CodeQL" alt="CodeQL"/></a>
+  <img src="https://img.shields.io/badge/coverage-%E2%89%A562%25-22c55e?style=for-the-badge" alt="Backend coverage >= 62%"/>
+  <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
+</p>
+<p>
   <a href="https://github.com/immortal71/openoncology/stargazers"><img src="https://img.shields.io/github/stars/immortal71/openoncology?style=for-the-badge&logo=github&color=f59e0b&logoColor=white" alt="Stars"/></a>
   <a href="https://github.com/immortal71/openoncology/network/members"><img src="https://img.shields.io/github/forks/immortal71/openoncology?style=for-the-badge&logo=github&color=0ea5e9&logoColor=white" alt="Forks"/></a>
   <a href="https://github.com/immortal71/openoncology/issues"><img src="https://img.shields.io/github/issues/immortal71/openoncology?style=for-the-badge&color=ef4444&logo=github&logoColor=white" alt="Issues"/></a>
-  <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
 </p>
 <p>
   <img src="https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11"/>
@@ -100,7 +105,7 @@ docker-compose up --build
 > **OncoKB token setup (optional — improves Tier 1 coverage):**
 > 1. Register for a free academic token at https://oncokb.org/account/register
 > 2. Set `ONCOKB_API_TOKEN=<your-token>` in `.env`
-> 3. Without the token the pipeline uses a curated static evidence table (74 actionable genes)
+> 3. Without the token the pipeline uses a curated static evidence table (111 actionable genes, 335 gene/variant pairs as of 2026-07-20 — see `api/services/oncokb_evidence.py`)
 
 **No Docker?** See [docs/SETUP.md](docs/SETUP.md) for local Python + Node.js setup, environment variables, and Windows-specific steps.
 
@@ -267,13 +272,13 @@ Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11
 | Metric | Result | Meaning |
 |:-------|:-------|:--------|
 | **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.508** (ceiling: 0.650) | 50.8% of top-3 slots match gold standard; ceiling is 65% for this mixed-difficulty holdout |
+| **Standard Precision@3** | **0.508** (ceiling: 0.625) | 50.8% of top-3 slots match gold standard; ceiling is 62.5% for this mixed-difficulty holdout |
 | **Normalised Precision@3** | **0.817** | Near-perfect when normalised for single-drug gold standards |
 | **False positives** | **0** (FP rate 0%) | No cases had a spurious high-confidence recommendation |
 | **Mean Reciprocal Rank** | **0.883** | Gold drug appears near the top of the ranked list on average |
-| **NDCG@3** | **0.845** | Strong ranking quality across the full holdout |
+| **NDCG@3** | **0.883** | Strong ranking quality across the full holdout |
 
-Holdout covers 40 sensitivity cases (12 single-drug, 28 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`.
+Holdout covers 40 sensitivity cases (16 single-drug, 24 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`; exact per-case scoring in `blind_review_key_scoring.json`.
 
 ### POST-PUBLICATION — Ongoing hard clinical gate (main branch)
 
@@ -314,15 +319,15 @@ The 200-patient set is intentionally harder and includes many variants with no d
 
 | Cohort | JSON artifact |
 |:-------|:--------------|
-| 100 patients | [real_patient_benchmark_100.json](real_patient_benchmark_100.json) |
-| 200 patients | [real_patient_benchmark_200.json](real_patient_benchmark_200.json) |
+| 100 patients | [real_patient_benchmark_100.json](validation_results/real_patient_benchmark_100.json) |
+| 200 patients | [real_patient_benchmark_200.json](validation_results/real_patient_benchmark_200.json) |
 
 **Run it yourself:**
 ```bash
 python scripts/blind_external_validation.py --n-cases 50   # 50-case blinded holdout (replicates paper)
 python scripts/hard_benchmark_gate.py                       # ongoing hard clinical gate
-python scripts/fetch_real_patients.py --n 100 --out-json real_patient_benchmark_100.json
-python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_200.json
+python scripts/fetch_real_patients.py --n 100 --out-json validation_results/real_patient_benchmark_100.json
+python scripts/fetch_real_patients.py --n 200 --out-json validation_results/real_patient_benchmark_200.json
 ```
 
 For oncologist concordance stats and plain-language interpretation see [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).
@@ -390,7 +395,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Phase 5** | ✅ | Kubernetes/Helm deploy · HIPAA/GDPR compliance · Security CI |
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
 | **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
-| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8178 · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
+| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
 | **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
 | **v2** | 🔜 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
 

@@ -22,7 +22,7 @@ if _sync_url.startswith("sqlite:"):
     _engine_kwargs["connect_args"] = {"check_same_thread": False}
 
 _engine = create_engine(_sync_url, **_engine_kwargs)
-_SessionLocal = sessionmaker(bind=_engine, autocommit=False, autoflush=False)
+_SessionLocal = sessionmaker(bind=_engine, autocommit=False, autoflush=False, expire_on_commit=False)
 
 
 @contextmanager
