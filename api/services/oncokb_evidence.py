@@ -2583,6 +2583,28 @@ def _is_erbb2_exon20_range_ins(alt_norm_upper: str) -> bool:
     return _is_range_ins_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
 
 
+# CALR exon 9 (UniProt P27797) spans roughly codons 359-417; essentially all
+# clinically reported MPN-driver CALR mutations are frameshifts starting in
+# this span (Type 1: 52bp del, canonical L367fs*46; Type 2: 5bp ins,
+# canonical K385fs*47; plus dozens of less common indels reported the same
+# way). The table has only the Type 2-named entry plus a generic EXON9DEL
+# bucket -- real variants are reported as HGVS frameshift notation
+# (L367fs*46, K385Nfs*47, ...), which never matches either literal key.
+# Scoped to CALR only and to the documented exon 9 span, same conservative
+# rationale as the EGFR/KIT/ERBB2 range fixes above.
+_CALR_EXON9_FS_RANGE = (359, 417)
+_FS_RE = re.compile(r"^([A-Z])(\d+)[A-Z]?FS\*?\d*$")
+
+
+def _is_calr_exon9_range_fs(alt_norm_upper: str) -> bool:
+    m = _FS_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    pos = int(m.group(2))
+    lo, hi = _CALR_EXON9_FS_RANGE
+    return lo <= pos <= hi
+
+
 def _normalise_drug(name: str) -> str:
     """Normalise drug name for matching."""
     return re.sub(r"[\s\-.]", "", name.lower())
@@ -2706,6 +2728,8 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("EGFR", "EXON20INS"), {})
     if not result and gene_upper == "ERBB2" and _is_erbb2_exon20_range_ins(alt_norm):
         result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
+    if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
+        result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
     if result:
         return dict(result), set()
 

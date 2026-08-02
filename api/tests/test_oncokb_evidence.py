@@ -192,6 +192,40 @@ class TestGetAllDrugsForVariant:
         drugs = get_all_drugs_for_variant("EGFR", "A763_Y764insFQEA")
         assert {k.lower() for k in drugs} == {"amivantamab"}
 
+    def test_calr_type1_real_world_exon9_frameshift_matches(self):
+        """L367fs*46 is the canonical CALR Type 1 (52bp deletion) MPN driver
+        mutation -- real-world HGVS notation that never matches the table's
+        literal 'EXON9DEL' or 'TYPE2' keys without range-based fallback."""
+        drugs = get_all_drugs_for_variant("CALR", "L367fs*46")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+
+    def test_calr_type2_real_world_exon9_frameshift_matches(self):
+        """K385fs*47 is the canonical CALR Type 2 (5bp insertion) MPN driver
+        mutation, reported in HGVS frameshift notation rather than the
+        table's named 'TYPE2' key."""
+        drugs = get_all_drugs_for_variant("CALR", "K385fs*47")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+
+    def test_calr_frameshift_outside_exon9_range_does_not_match(self):
+        drugs = get_all_drugs_for_variant("CALR", "E230fs*32")
+        assert drugs == {}
+
+    def test_frameshift_on_other_gene_not_treated_as_calr_exon9(self):
+        drugs = get_all_drugs_for_variant("TP53", "R213fs*10")
+        assert drugs == {}
+
+    def test_calr_point_mutation_in_exon9_range_not_treated_as_frameshift(self):
+        drugs = get_all_drugs_for_variant("CALR", "D374N")
+        assert drugs == {}
+
+    def test_calr_named_type2_entry_unaffected_by_range_fs_fallback(self):
+        drugs = get_all_drugs_for_variant("CALR", "TYPE2")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+        assert drug_levels.get("fedratinib") == "LEVEL_2"
+
     def test_egfr_deletion_outside_exon19_range_does_not_match(self):
         """A deletion with residue numbers outside the exon 19 span (e.g. in
         the kinase domain near T790M/exon 20) must NOT be treated as an

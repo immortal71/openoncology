@@ -104,7 +104,7 @@ justified their real prescribed drug (see "Known limitations" below).
 
 ## Results (raw, exact-name matching + drug-class equivalence)
 
-This pilot was run four times as real, code-level bugs were found and
+This pilot was run five times as real, code-level bugs were found and
 fixed in `api/services/oncokb_evidence.py` — each rerun used the exact same
 69 patients and the exact same scoring logic, so the numbers below are a
 genuine before/after, not a re-selected or re-scored comparison.
@@ -115,6 +115,7 @@ genuine before/after, not a re-selected or re-scored comparison.
 | **Run 2 (after EGFR exon-19 range-deletion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
 | **Run 3 (after KIT exon-11 range-deletion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
 | **Run 4 (after EGFR/ERBB2 exon-20 range-insertion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
+| **Run 5 (after CALR exon-9 range-frameshift fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
 
 Drug-class equivalence groups used (same rationale as
 `docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md`): EGFR TKIs, ALK inhibitors,
@@ -165,6 +166,31 @@ residue endpoints don't match any hardcoded alias.
   all 69 patients. Like the KIT fix, this is included because it is a
   real, independently tested defect fix that will help future real
   patients, not because it moved this benchmark.
+- **CALR exon 9 (codons 359–417, the classic MPN driver region)**: found
+  during a systematic audit of every gene in the evidence table for this
+  same class of gap. The table has a correct, populated generic bucket
+  (`("CALR", "EXON9DEL")`, LEVEL_1 ruxolitinib) plus a named `TYPE2` entry,
+  but real-world CALR MPN mutations are reported in HGVS frameshift
+  notation (Type 1: canonical `L367fs*46`; Type 2: canonical `K385fs*47`;
+  and other less common variants in between) — neither form matches either
+  literal table key. Added a frameshift detector scoped to CALR only and
+  to the documented exon-9 span, routing matching variants to the
+  `EXON9DEL` bucket. Verified with 6 new unit tests (Type 1, Type 2,
+  out-of-range frameshift, frameshift on an unrelated gene, an in-range
+  point mutation, and the pre-existing named `TYPE2` entry — all confirming
+  no false positives). **No patient in this 69-patient dataset has a CALR
+  mutation**, so this fix has zero impact on the pilot's numbers; it is
+  included for the same reason as the KIT and exon-20 fixes.
+- **Audited and ruled out as not applicable**: `POLE`/`POLD1`
+  `EXONUCLEASEDOMAINMUT` looks like the same class of gap at first glance,
+  but isn't — both genes already have a working, AlphaMissense-gated
+  generic fallback (`("POLE"/"POLD1", "MUTATION")`) that correctly resolves
+  any real exonuclease-domain point mutation once a pathogenicity score is
+  supplied (verified directly: `POLE A456P` with a supplied AlphaMissense
+  score resolves to `pembrolizumab LEVEL_2B` via that path). The literal
+  string `"EXONUCLEASEDOMAINMUT"` is a category label no real HGVS variant
+  will ever equal — it is inert, not broken, and was left unchanged rather
+  than built a redundant fallback for a string nothing will ever send.
 
 ### What was deliberately NOT changed, and why
 
