@@ -1,0 +1,1415 @@
+[
+  {
+    "patient_id": "TCGA-02-0011",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "R175G",
+    "cancer_type": "Glioblastoma Multiforme",
+    "oncologist_drugs": [
+      "Carboplatin",
+      "Gefitinib",
+      "Temozolomide"
+    ],
+    "targeted_drugs": [
+      "Carboplatin",
+      "Gefitinib",
+      "Temozolomide"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-02-0116",
+    "cohort": "local_sample",
+    "gene": "EGFR",
+    "variant_raw": "A597P",
+    "cancer_type": "Glioblastoma Multiforme",
+    "oncologist_drugs": [
+      "Hydroxyurea",
+      "Imatinib Mesylate",
+      "Temozolomide"
+    ],
+    "targeted_drugs": [
+      "Hydroxyurea",
+      "Imatinib Mesylate",
+      "Temozolomide"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AFATINIB",
+      "AFATINIB DIMALEATE",
+      "AMIVANTAMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-05-4402",
+    "cohort": "local_sample",
+    "gene": "EGFR",
+    "variant_raw": "T751_E758del",
+    "cancer_type": "Lung Adenocarcinoma",
+    "oncologist_drugs": [
+      "Carboplatin",
+      "Erlotinib",
+      "Vinorelbine"
+    ],
+    "targeted_drugs": [
+      "Carboplatin",
+      "Erlotinib",
+      "Vinorelbine"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "afatinib",
+      "dacomitinib",
+      "erlotinib"
+    ]
+  },
+  {
+    "patient_id": "TCGA-06-0185",
+    "cohort": "local_sample",
+    "gene": "EGFR",
+    "variant_raw": "V651M",
+    "cancer_type": "Glioblastoma Multiforme",
+    "oncologist_drugs": [
+      "Arsenic Trioxide",
+      "Bevacizumab",
+      "Cabozantinib S-malate",
+      "Irinotecan",
+      "Lomustine",
+      "Temozolomide"
+    ],
+    "targeted_drugs": [
+      "Arsenic Trioxide",
+      "Bevacizumab",
+      "Cabozantinib S-malate",
+      "Irinotecan",
+      "Lomustine",
+      "Temozolomide"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AFATINIB",
+      "AFATINIB DIMALEATE",
+      "AMIVANTAMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-64-5781",
+    "cohort": "local_sample",
+    "gene": "ALK",
+    "variant_raw": "H1475Q",
+    "cancer_type": "Lung Adenocarcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Cisplatin",
+      "Gemcitabine"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Cisplatin",
+      "Gemcitabine"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ALECTINIB",
+      "ALECTINIB HYDROCHLORIDE",
+      "BRIGATINIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A04W",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "V272M",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Paclitaxel",
+      "Trastuzumab",
+      "Zoledronic Acid"
+    ],
+    "targeted_drugs": [
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Paclitaxel",
+      "Trastuzumab",
+      "Zoledronic Acid"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A0CX",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "R273C",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Goserelin Acetate",
+      "Letrozole",
+      "Paclitaxel",
+      "Tamoxifen",
+      "Trastuzumab"
+    ],
+    "targeted_drugs": [
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Goserelin Acetate",
+      "Letrozole",
+      "Paclitaxel",
+      "Tamoxifen",
+      "Trastuzumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A0D1",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "Q331*",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "Carboplatin",
+      "Docetaxel",
+      "Nab-paclitaxel",
+      "Trastuzumab"
+    ],
+    "targeted_drugs": [
+      "Carboplatin",
+      "Docetaxel",
+      "Nab-paclitaxel",
+      "Trastuzumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A0EQ",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "I162_Y163delinsN",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "AE37 Peptide/GM-CSF Vaccine",
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Paclitaxel",
+      "Trastuzumab"
+    ],
+    "targeted_drugs": [
+      "AE37 Peptide/GM-CSF Vaccine",
+      "Cyclophosphamide",
+      "Doxorubicin Hydrochloride",
+      "Paclitaxel",
+      "Trastuzumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A0EY",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "Y234C",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "Anastrozole",
+      "Cyclophosphamide",
+      "Docetaxel",
+      "Doxorubicin Hydrochloride",
+      "Lapatinib",
+      "Trastuzumab"
+    ],
+    "targeted_drugs": [
+      "Anastrozole",
+      "Cyclophosphamide",
+      "Docetaxel",
+      "Doxorubicin Hydrochloride",
+      "Lapatinib",
+      "Trastuzumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A2-A0T1",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "R273C",
+    "cancer_type": "Breast Invasive Carcinoma",
+    "oncologist_drugs": [
+      "Carboplatin",
+      "Docetaxel",
+      "Trastuzumab"
+    ],
+    "targeted_drugs": [
+      "Carboplatin",
+      "Docetaxel",
+      "Trastuzumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A6-2674",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "R213*",
+    "cancer_type": "Colorectal Adenocarcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Leucovorin",
+      "Oxaliplatin"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Leucovorin",
+      "Oxaliplatin"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A6-2683",
+    "cohort": "local_sample",
+    "gene": "KRAS",
+    "variant_raw": "G12V",
+    "cancer_type": "Colorectal Adenocarcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Irinotecan",
+      "Leucovorin",
+      "Mitomycin",
+      "Oxaliplatin"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Irinotecan",
+      "Leucovorin",
+      "Mitomycin",
+      "Oxaliplatin"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ADAGRASIB",
+      "CETUXIMAB",
+      "PANITUMUMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-AA-3517",
+    "cohort": "local_sample",
+    "gene": "TP53",
+    "variant_raw": "Q331H",
+    "cancer_type": "Colorectal Adenocarcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Irinotecan",
+      "Leucovorin Calcium",
+      "Oxaliplatin"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Irinotecan",
+      "Leucovorin Calcium",
+      "Oxaliplatin"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CISPLATIN",
+      "DOXORUBICIN HYDROCHLORIDE",
+      "CARBOPLATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-KK-A6E0",
+    "cohort": "TCGA-PRAD",
+    "gene": "BICD1",
+    "variant_raw": "F77S",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Abiraterone",
+      "Leuprolide",
+      "Leuprolide Acetate"
+    ],
+    "targeted_drugs": [
+      "Abiraterone"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-HC-8257",
+    "cohort": "TCGA-PRAD",
+    "gene": "CCNF",
+    "variant_raw": "P660L",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Goserelin"
+    ],
+    "targeted_drugs": [
+      "Goserelin"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-J9-A52B",
+    "cohort": "TCGA-PRAD",
+    "gene": "ATF4",
+    "variant_raw": "Q136Rfs*3",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Goserelin Acetate"
+    ],
+    "targeted_drugs": [
+      "Goserelin Acetate"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-YL-A8HM",
+    "cohort": "TCGA-PRAD",
+    "gene": "CAD",
+    "variant_raw": "I632M",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Bicalutamide",
+      "Goserelin Acetate"
+    ],
+    "targeted_drugs": [
+      "Goserelin Acetate"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-VP-A878",
+    "cohort": "TCGA-PRAD",
+    "gene": "ARSF",
+    "variant_raw": "E186G",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Goserelin Acetate",
+      "Leuprolide Acetate"
+    ],
+    "targeted_drugs": [
+      "Goserelin Acetate"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-VN-A88R",
+    "cohort": "TCGA-PRAD",
+    "gene": "ZFHX3",
+    "variant_raw": "L2644Ffs*84",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Bicalutamide",
+      "Goserelin"
+    ],
+    "targeted_drugs": [
+      "Goserelin"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-YL-A8SO",
+    "cohort": "TCGA-PRAD",
+    "gene": "AEBP1",
+    "variant_raw": "P881H",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Bicalutamide",
+      "Goserelin Acetate"
+    ],
+    "targeted_drugs": [
+      "Goserelin Acetate"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-YL-A8HJ",
+    "cohort": "TCGA-PRAD",
+    "gene": "SMPD2",
+    "variant_raw": "I78F",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Bicalutamide",
+      "Goserelin Acetate"
+    ],
+    "targeted_drugs": [
+      "Goserelin Acetate"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-KK-A8IC",
+    "cohort": "TCGA-PRAD",
+    "gene": "CDS1",
+    "variant_raw": "P435L",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Abiraterone",
+      "Leuprolide Acetate"
+    ],
+    "targeted_drugs": [
+      "Abiraterone"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-KK-A59X",
+    "cohort": "TCGA-PRAD",
+    "gene": "KLK3",
+    "variant_raw": "V42L",
+    "cancer_type": "Prostate Cancer",
+    "oncologist_drugs": [
+      "Abiraterone",
+      "Cabazitaxel",
+      "Carboplatin",
+      "Leuprolide Acetate"
+    ],
+    "targeted_drugs": [
+      "Abiraterone"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ABARELIX",
+      "BCG VACCINE",
+      "CAPROMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4354",
+    "cohort": "TCGA-KIRC",
+    "gene": "EGFR",
+    "variant_raw": "L838P",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Gefitinib",
+      "Sorafenib",
+      "Sunitinib",
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Gefitinib",
+      "Sorafenib",
+      "Sunitinib",
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AFATINIB",
+      "AFATINIB DIMALEATE",
+      "AMIVANTAMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-4861",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "L158V",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sorafenib"
+    ],
+    "targeted_drugs": [
+      "Sorafenib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-DV-5565",
+    "cohort": "TCGA-KIRC",
+    "gene": "DPYS",
+    "variant_raw": "D341G",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Vandetanib"
+    ],
+    "targeted_drugs": [
+      "Vandetanib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ATENOLOL",
+      "DEXRAZOXANE"
+    ]
+  },
+  {
+    "patient_id": "TCGA-DV-5568",
+    "cohort": "TCGA-KIRC",
+    "gene": "ARHGAP5",
+    "variant_raw": "I994F",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "VINCRISTINE"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-5009",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "N78Y",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Everolimus",
+      "Interferon",
+      "Pazopanib",
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Everolimus",
+      "Pazopanib",
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-5189",
+    "cohort": "TCGA-KIRC",
+    "gene": "ATP1A2",
+    "variant_raw": "T415M",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ACETYLDIGITOXIN",
+      "DESLANOSIDE",
+      "DIGITOXIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-5178",
+    "cohort": "TCGA-KIRC",
+    "gene": "SMO",
+    "variant_raw": "S699R",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sorafenib"
+    ],
+    "targeted_drugs": [
+      "Sorafenib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "sonidegib",
+      "vismodegib"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4338",
+    "cohort": "TCGA-KIRC",
+    "gene": "CLGN",
+    "variant_raw": "D183H",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Everolimus",
+      "Sorafenib",
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Everolimus",
+      "Sorafenib",
+      "Sunitinib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-CJ-5680",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "D179Afs*22",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Erlotinib Hydrochloride",
+      "Recombinant Interleukin-2",
+      "Vitespen"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4329",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "L129P",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Interferon",
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4888",
+    "cohort": "TCGA-KIRC",
+    "gene": "APLP1",
+    "variant_raw": "L603R",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-B0-5094",
+    "cohort": "TCGA-KIRC",
+    "gene": "CBL",
+    "variant_raw": "A719V",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AVAPRITINIB",
+      "QUIZARTINIB",
+      "GILTERITINIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-5454",
+    "cohort": "TCGA-KIRC",
+    "gene": "ARG1",
+    "variant_raw": "G215Rfs*26",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "GLYCEROL PHENYLBUTYRATE",
+      "SILDENAFIL"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A3-3317",
+    "cohort": "TCGA-KIRC",
+    "gene": "ARSB",
+    "variant_raw": "W532*",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Recombinant Interferon Alfa",
+      "Sorafenib"
+    ],
+    "targeted_drugs": [
+      "Sorafenib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ASCORBIC ACID",
+      "GALSULFASE"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4644",
+    "cohort": "TCGA-KIRC",
+    "gene": "MTOR",
+    "variant_raw": "V2006L",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Capecitabine",
+      "Erlotinib Hydrochloride",
+      "Interferon Alfa-2B",
+      "Vitespen"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "everolimus",
+      "temsirolimus"
+    ]
+  },
+  {
+    "patient_id": "TCGA-B8-4153",
+    "cohort": "TCGA-KIRC",
+    "gene": "PTCH1",
+    "variant_raw": "S1008N",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Pazopanib"
+    ],
+    "targeted_drugs": [
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "SONIDEGIB",
+      "VISMODEGIB",
+      "TRETINOIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-5456",
+    "cohort": "TCGA-KIRC",
+    "gene": "ADRA1A",
+    "variant_raw": "T76S",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Pazopanib"
+    ],
+    "targeted_drugs": [
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ALFUZOSIN HYDROCHLORIDE",
+      "DOXAZOSIN",
+      "DOXAZOSIN MESYLATE"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-5462",
+    "cohort": "TCGA-KIRC",
+    "gene": "ADAM10",
+    "variant_raw": "P373H",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-CW-5585",
+    "cohort": "TCGA-KIRC",
+    "gene": "PDGFRA",
+    "variant_raw": "D1026E",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AVAPRITINIB",
+      "BECAPLERMIN",
+      "CEDIRANIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4638",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "D121Y",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Fluorouracil",
+      "Gemcitabine",
+      "Recombinant Interleukin-2"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4868",
+    "cohort": "TCGA-KIRC",
+    "gene": "EGFR",
+    "variant_raw": "L838M",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Aldesleukin",
+      "Bevacizumab",
+      "Capecitabine",
+      "Erlotinib Hydrochloride",
+      "Gemcitabine",
+      "Sorafenib Tosylate"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AFATINIB",
+      "AFATINIB DIMALEATE",
+      "AMIVANTAMAB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-5681",
+    "cohort": "TCGA-KIRC",
+    "gene": "ARHGAP5",
+    "variant_raw": "V474A",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Everolimus",
+      "Gemcitabine",
+      "Recombinant Interleukin-2"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Everolimus"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "VINCRISTINE"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-5676",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "R161*",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Pazopanib",
+      "Vitespen"
+    ],
+    "targeted_drugs": [
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-A3-3347",
+    "cohort": "TCGA-KIRC",
+    "gene": "MTOR",
+    "variant_raw": "M2327I",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Perifosine",
+      "Sorafenib"
+    ],
+    "targeted_drugs": [
+      "Sorafenib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "everolimus",
+      "temsirolimus"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-5461",
+    "cohort": "TCGA-KIRC",
+    "gene": "NTRK3",
+    "variant_raw": "R735H",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "CENEGERMIN",
+      "ENTRECTINIB",
+      "LAROTRECTINIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4165",
+    "cohort": "TCGA-KIRC",
+    "gene": "KIT",
+    "variant_raw": "R2I",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "AVAPRITINIB",
+      "DASATINIB ANHYDROUS",
+      "IMATINIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4169",
+    "cohort": "TCGA-KIRC",
+    "gene": "BCL6",
+    "variant_raw": "G159C",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Axitinib",
+      "Interferon"
+    ],
+    "targeted_drugs": [
+      "Axitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "POLATUZUMAB VEDOTIN",
+      "FENRETINIDE",
+      "BRENTUXIMAB VEDOTIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-5679",
+    "cohort": "TCGA-KIRC",
+    "gene": "MTOR",
+    "variant_raw": "S2215Y",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Capecitabine",
+      "Gemcitabine",
+      "Recombinant Interferon Alfa",
+      "Thalidomide"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "everolimus",
+      "temsirolimus"
+    ]
+  },
+  {
+    "patient_id": "TCGA-B0-5115",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "T124Hfs*35",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Everolimus",
+      "Pazopanib"
+    ],
+    "targeted_drugs": [
+      "Everolimus",
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4890",
+    "cohort": "TCGA-KIRC",
+    "gene": "FOXN3",
+    "variant_raw": "I16M",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Everolimus",
+      "Interferon",
+      "Sorafenib",
+      "Sorafenib Tosylate",
+      "Sunitinib Malate",
+      "Tipifarnib"
+    ],
+    "targeted_drugs": [
+      "Everolimus",
+      "Sorafenib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-CJ-6033",
+    "cohort": "TCGA-KIRC",
+    "gene": "PIK3CA",
+    "variant_raw": "E545K",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Capecitabine",
+      "Gefitinib",
+      "Gemcitabine",
+      "Interferon"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Gefitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "alpelisib",
+      "capivasertib",
+      "inavolisib"
+    ]
+  },
+  {
+    "patient_id": "TCGA-B0-5694",
+    "cohort": "TCGA-KIRC",
+    "gene": "ALK",
+    "variant_raw": "D282E",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Pazopanib"
+    ],
+    "targeted_drugs": [
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ALECTINIB",
+      "ALECTINIB HYDROCHLORIDE",
+      "BRIGATINIB"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4787",
+    "cohort": "TCGA-KIRC",
+    "gene": "ARCN1",
+    "variant_raw": "G182V",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sorafenib",
+      "Sunitinib",
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Sorafenib",
+      "Sunitinib",
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-CZ-5464",
+    "cohort": "TCGA-KIRC",
+    "gene": "TSC1",
+    "variant_raw": "T62S",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Pazopanib",
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Pazopanib",
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "everolimus",
+      "temsirolimus"
+    ]
+  },
+  {
+    "patient_id": "TCGA-B0-4718",
+    "cohort": "TCGA-KIRC",
+    "gene": "PTCH1",
+    "variant_raw": "P689H",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Pazopanib"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Pazopanib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "SONIDEGIB",
+      "VISMODEGIB",
+      "TRETINOIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4637",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "W117Gfs*42",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Bortezomib",
+      "Interferon Alfa-2B",
+      "Nanoparticle Albumin-Bound Rapamycin",
+      "Pazopanib",
+      "Recombinant Interferon Alfa-2a",
+      "Sorafenib",
+      "Sunitinib Malate",
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab",
+      "Pazopanib",
+      "Sorafenib",
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CZ-5469",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "L89H",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-4881",
+    "cohort": "TCGA-KIRC",
+    "gene": "SCARB1",
+    "variant_raw": "G399V",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Temsirolimus"
+    ],
+    "targeted_drugs": [
+      "Temsirolimus"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "FENOFIBRATE MICRONIZED",
+      "ROSUVASTATIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-CJ-6028",
+    "cohort": "TCGA-KIRC",
+    "gene": "BRS3",
+    "variant_raw": "S15*",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Capecitabine",
+      "Gemcitabine",
+      "Interferon",
+      "Sorafenib",
+      "Sunitinib",
+      "Vitespen"
+    ],
+    "targeted_drugs": [
+      "Sorafenib",
+      "Sunitinib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-CJ-4895",
+    "cohort": "TCGA-KIRC",
+    "gene": "BCL6",
+    "variant_raw": "P586Q",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Bevacizumab",
+      "Capecitabine",
+      "Erlotinib Hydrochloride",
+      "Gemcitabine Hydrochloride"
+    ],
+    "targeted_drugs": [
+      "Bevacizumab"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "POLATUZUMAB VEDOTIN",
+      "FENRETINIDE",
+      "BRENTUXIMAB VEDOTIN"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4804",
+    "cohort": "TCGA-KIRC",
+    "gene": "BMP8B",
+    "variant_raw": "H293R",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "NO_RECOMMENDATION",
+    "pipeline_top3": []
+  },
+  {
+    "patient_id": "TCGA-BP-4974",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "R82P",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Gefitinib",
+      "Sorafenib",
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Gefitinib",
+      "Sorafenib",
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4161",
+    "cohort": "TCGA-KIRC",
+    "gene": "VHL",
+    "variant_raw": "Q96*",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER1_FDA_APPROVED",
+    "pipeline_top3": [
+      "belzutifan"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4985",
+    "cohort": "TCGA-KIRC",
+    "gene": "ALOX5",
+    "variant_raw": "P332L",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "BALSALAZIDE",
+      "BALSALAZIDE DISODIUM",
+      "MECLOFENAMATE SODIUM"
+    ]
+  },
+  {
+    "patient_id": "TCGA-BP-4352",
+    "cohort": "TCGA-KIRC",
+    "gene": "PIK3CA",
+    "variant_raw": "E81K",
+    "cancer_type": "Renal Cell Carcinoma",
+    "oncologist_drugs": [
+      "Sunitinib"
+    ],
+    "targeted_drugs": [
+      "Sunitinib"
+    ],
+    "pipeline_tier": "TIER2_REPURPOSING",
+    "pipeline_top3": [
+      "ALPELISIB",
+      "COPANLISIB",
+      "COPANLISIB HYDROCHLORIDE"
+    ]
+  }
+]

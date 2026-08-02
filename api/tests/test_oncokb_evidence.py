@@ -115,6 +115,52 @@ class TestGetAllDrugsForVariant:
             "Osimertinib should appear for EGFR T790M"
         )
 
+    def test_egfr_real_world_exon19_range_deletion_matches(self):
+        """T751_E758del is a real deletion found in TCGA patient data
+        (docs/REAL_PATIENT_CONCORDANCE_PILOT_2026-07-28.md) that doesn't match
+        any exact alias but falls entirely within the EGFR exon 19 span
+        (729-761) and should resolve to the same drugs as the canonical
+        E746_A750del / Exon19del entries."""
+        drugs = get_all_drugs_for_variant("EGFR", "T751_E758del")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert "osimertinib" in drug_levels
+        assert drug_levels["osimertinib"] == "LEVEL_1"
+
+    def test_kit_real_world_exon11_range_deletion_matches(self):
+        """W557_K558del is a real, well-documented KIT exon 11 GIST deletion
+        (codons 550-592, the classic juxtamembrane driver region) that isn't
+        one of the table's named endpoint pairs but should resolve to the
+        same drugs as the generic EXON11DEL bucket."""
+        drugs = get_all_drugs_for_variant("KIT", "W557_K558del")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert "imatinib" in drug_levels
+        assert drug_levels["imatinib"] == "LEVEL_1"
+
+    def test_kit_point_mutation_in_exon11_range_not_treated_as_deletion(self):
+        """V559D is a real KIT exon 11 point mutation (not a deletion) inside
+        the same residue range -- the range-del heuristic must only match
+        actual deletions, never point substitutions, since a point mutation's
+        drug sensitivity profile isn't necessarily the same as EXON11DEL's."""
+        drugs = get_all_drugs_for_variant("KIT", "V559D")
+        assert drugs == {}
+
+    def test_kit_existing_hotspot_entries_unaffected_by_range_del_fallback(self):
+        """D816V and V654A are existing named KIT entries outside/unrelated to
+        the exon 11 deletion range -- confirms the new fallback doesn't
+        interfere with entries that already resolve correctly."""
+        d816v = get_all_drugs_for_variant("KIT", "D816V")
+        assert "avapritinib" in {k.lower() for k in d816v}
+        v654a = get_all_drugs_for_variant("KIT", "V654A")
+        assert "sunitinib" in {k.lower() for k in v654a}
+
+    def test_egfr_deletion_outside_exon19_range_does_not_match(self):
+        """A deletion with residue numbers outside the exon 19 span (e.g. in
+        the kinase domain near T790M/exon 20) must NOT be treated as an
+        exon 19 deletion just because it matches the DEL pattern shape."""
+        drugs = get_all_drugs_for_variant("EGFR", "D770_N771del")
+        # Should not silently inherit the exon19del drug set.
+        assert "E746A750DEL" not in [k.upper() for k in drugs]
+
 
 # ── annotate_candidates ────────────────────────────────────────────────────────
 
