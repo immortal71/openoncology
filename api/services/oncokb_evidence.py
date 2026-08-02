@@ -2530,11 +2530,36 @@ _KIT_EXON11_DEL_RANGE = (550, 592)
 # letter+digit run except at the second residue boundary.
 _RANGE_DEL_RE = re.compile(r"^([A-Z])(\d+)([A-Z])(\d+)DEL(INS[A-Z*]+)?$")
 
+# EGFR/ERBB2 exon 20 span codons ~762-823 (UniProt P00533 / P04626 kinase
+# domain annotation). Real exon 20 insertions (a distinct, well-studied class
+# from exon 19 deletions -- they confer resistance to classical EGFR TKIs,
+# per the EXON20INS table entry's own R1 resistance flags) occur at dozens of
+# documented insertion points within this span; the table only has 2-3 named
+# examples plus the generic bucket. Same rationale and same conservative,
+# gene-specific scoping as the exon 19 / KIT exon 11 fixes above.
+_EGFR_EXON20_INS_RANGE = (762, 823)
+_ERBB2_EXON20_INS_RANGE = (762, 823)  # ERBB2 (HER2) kinase domain is
+# structurally homologous to EGFR's; same codon numbering convention is used
+# in the clinical literature for HER2 exon 20 (e.g. A775_G776insYVMA).
+# Pure insertion, no deletion: "H773_V774insH" -> normalised "H773V774INSH".
+_RANGE_INS_RE = re.compile(r"^([A-Z])(\d+)([A-Z])(\d+)INS[A-Z*]+$")
+
 
 def _is_range_del_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
     """True if alt_norm_upper is an in-frame deletion (optionally delins)
     whose residue range falls entirely within the given (lo, hi) span."""
     m = _RANGE_DEL_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    start, end = int(m.group(2)), int(m.group(4))
+    lo, hi = residue_range
+    return lo <= start <= hi and lo <= end <= hi
+
+
+def _is_range_ins_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
+    """True if alt_norm_upper is a pure in-frame insertion whose residue
+    range falls entirely within the given (lo, hi) span."""
+    m = _RANGE_INS_RE.match(alt_norm_upper)
     if not m:
         return False
     start, end = int(m.group(2)), int(m.group(4))
@@ -2548,6 +2573,14 @@ def _is_egfr_exon19_range_del(alt_norm_upper: str) -> bool:
 
 def _is_kit_exon11_range_del(alt_norm_upper: str) -> bool:
     return _is_range_del_within(alt_norm_upper, _KIT_EXON11_DEL_RANGE)
+
+
+def _is_egfr_exon20_range_ins(alt_norm_upper: str) -> bool:
+    return _is_range_ins_within(alt_norm_upper, _EGFR_EXON20_INS_RANGE)
+
+
+def _is_erbb2_exon20_range_ins(alt_norm_upper: str) -> bool:
+    return _is_range_ins_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
 
 
 def _normalise_drug(name: str) -> str:
@@ -2669,6 +2702,10 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("EGFR", "EXON19DEL"), {})
     if not result and gene_upper == "KIT" and _is_kit_exon11_range_del(alt_norm):
         result = _LEVEL_TABLE.get(("KIT", "EXON11DEL"), {})
+    if not result and gene_upper == "EGFR" and _is_egfr_exon20_range_ins(alt_norm):
+        result = _LEVEL_TABLE.get(("EGFR", "EXON20INS"), {})
+    if not result and gene_upper == "ERBB2" and _is_erbb2_exon20_range_ins(alt_norm):
+        result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
     if result:
         return dict(result), set()
 

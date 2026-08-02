@@ -104,7 +104,7 @@ justified their real prescribed drug (see "Known limitations" below).
 
 ## Results (raw, exact-name matching + drug-class equivalence)
 
-This pilot was run three times as real, code-level bugs were found and
+This pilot was run four times as real, code-level bugs were found and
 fixed in `api/services/oncokb_evidence.py` — each rerun used the exact same
 69 patients and the exact same scoring logic, so the numbers below are a
 genuine before/after, not a re-selected or re-scored comparison.
@@ -114,6 +114,7 @@ genuine before/after, not a re-selected or re-scored comparison.
 | **Run 1 (initial)** | 0/53 (0.0%) | 7/53 (13.2%) | 2/53 (3.8%) | 9/53 (17.0%) |
 | **Run 2 (after EGFR exon-19 range-deletion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
 | **Run 3 (after KIT exon-11 range-deletion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
+| **Run 4 (after EGFR/ERBB2 exon-20 range-insertion fix)** | 0/53 (0.0%) | 8/53 (15.1%) | 2/53 (3.8%) | 9/53 (17.0%) |
 
 Drug-class equivalence groups used (same rationale as
 `docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md`): EGFR TKIs, ALK inhibitors,
@@ -150,6 +151,20 @@ residue endpoints don't match any hardcoded alias.
   verified fix (see `api/tests/test_oncokb_evidence.py`) that will help
   future real KIT/GIST patients, not something added to move this
   benchmark.
+- **EGFR/ERBB2 exon 20 (codons 762–823, the kinase-domain insertion
+  hotspot)**: the same class of fix, extended to in-frame insertions (not
+  just deletions) — real-world variants like `H773_V774insH`
+  (EGFR, resolves to amivantamab as LEVEL_1, with osimertinib correctly
+  flagged LEVEL_R1 resistance) and `P780_Y781insGSP` (ERBB2/HER2) weren't
+  matching the table's few named exon-20-insertion aliases. Verified with
+  4 new unit tests, including negative tests confirming ordinary point
+  mutations (`L858R`, `T790M`) and already-named insertion entries
+  (`A763_Y764insFQEA`) are unaffected. **No patient in this 69-patient
+  dataset has an EGFR/ERBB2 exon-20 insertion** — confirmed by both a
+  pre-run data scan and a full rerun showing zero verdict changes across
+  all 69 patients. Like the KIT fix, this is included because it is a
+  real, independently tested defect fix that will help future real
+  patients, not because it moved this benchmark.
 
 ### What was deliberately NOT changed, and why
 

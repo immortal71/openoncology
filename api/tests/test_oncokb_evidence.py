@@ -153,6 +153,45 @@ class TestGetAllDrugsForVariant:
         v654a = get_all_drugs_for_variant("KIT", "V654A")
         assert "sunitinib" in {k.lower() for k in v654a}
 
+    def test_egfr_real_world_exon20_range_insertion_matches(self):
+        """H773_V774insH is a real, documented EGFR exon 20 insertion (codons
+        762-823) that isn't one of the table's 2 named insertion examples but
+        should resolve to the same drugs as the generic EXON20INS bucket --
+        including the LEVEL_R1 resistance flags on classical TKIs, since
+        exon 20 insertions are a clinically distinct, TKI-resistant class."""
+        drugs = get_all_drugs_for_variant("EGFR", "H773_V774insH")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("amivantamab") == "LEVEL_1"
+        assert drug_levels.get("osimertinib") == "LEVEL_R1"
+
+    def test_erbb2_real_world_exon20_range_insertion_matches(self):
+        """P780_Y781insGSP is a real HER2/ERBB2 exon 20 insertion outside the
+        table's single named example (A775_G776insYVMA) but within the same
+        documented exon 20 span; should resolve to the generic EXON20INS
+        bucket."""
+        drugs = get_all_drugs_for_variant("ERBB2", "P780_Y781insGSP")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert len(drug_levels) > 0
+
+    def test_point_mutations_are_never_treated_as_range_insertions(self):
+        """L858R and T790M are real EGFR point mutations, not insertions --
+        the range-insertion heuristic must never fire for them, since a bare
+        point-mutation string has no ins-range token to match."""
+        l858r = get_all_drugs_for_variant("EGFR", "L858R")
+        assert {k.lower() for k in l858r} == {
+            "osimertinib", "erlotinib", "gefitinib", "afatinib", "dacomitinib",
+        }
+        t790m = get_all_drugs_for_variant("EGFR", "T790M")
+        drug_levels = {k.lower(): v for k, v in t790m.items()}
+        assert drug_levels.get("osimertinib") == "LEVEL_1"
+
+    def test_named_exon20_insertion_entries_unaffected_by_range_fallback(self):
+        """A763_Y764insFQEA is an existing named entry -- confirms the new
+        range-insertion fallback doesn't interfere with entries that already
+        resolve correctly via exact match."""
+        drugs = get_all_drugs_for_variant("EGFR", "A763_Y764insFQEA")
+        assert {k.lower() for k in drugs} == {"amivantamab"}
+
     def test_egfr_deletion_outside_exon19_range_does_not_match(self):
         """A deletion with residue numbers outside the exon 19 span (e.g. in
         the kinase domain near T790M/exon 20) must NOT be treated as an
