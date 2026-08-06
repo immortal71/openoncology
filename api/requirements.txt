@@ -25,7 +25,7 @@ python-dotenv==1.2.2
 
 # Observability
 sentry-sdk[fastapi]>=2.0.0
-prometheus-fastapi-instrumentator>=7.0.0
+prometheus-fastapi-instrumentator>=8.1.0
 structlog>=24.0.0
 
 # Phase 3 — AI / cheminformatics
