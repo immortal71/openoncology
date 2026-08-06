@@ -16,7 +16,7 @@ requests>=2.32.4          # pin transitive dep to a version past PYSEC-2026-187x
 httpx==0.27.0
 tenacity==8.5.0
 slowapi==0.1.9
-pytest==8.2.0
+pytest==9.1.1
 pytest-asyncio==0.23.6
 aiosqlite==0.20.0          # async sqlite driver for the in-memory test DB (api/tests/conftest.py)
 stripe==9.8.0
