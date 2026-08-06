@@ -32,4 +32,4 @@ structlog>=24.0.0
 rdkit==2025.09.1           # SMILES → SDF conversion for DiffDock inputs
 ruff==0.4.4                # linter (also used by CI)
 biopython==1.87            # CIF → PDB conversion for AlphaFold Server outputs
-weasyprint>=60.0           # PDF export (patient letter + oncologist report)
+weasyprint>=69.0           # PDF export (patient letter + oncologist report)
