@@ -102,13 +102,54 @@ These are coverage benchmarks (does the system return *any* drug candidate?), no
 python scripts/fetch_real_patients.py --n 100 --out-json real_patient_benchmark_100.json
 ```
 
+Measured 2026-08-12. The request was for 100 cases and cBioPortal returned 72,
+see the reproducibility note below.
+
 | Tier | Patients | % |
 |------|----------|---|
-| Tier 1 — FDA-approved direct match | 36 | 36% |
-| Tier 2 — Repurposing candidate | 64 | 64% |
-| **Total covered** | **100** | **100%** |
+| Tier 1 (FDA-approved direct match) | 10 | 13.9% |
+| Tier 2 (off-label FDA repurposing) | 31 | 43.1% |
+| Tier 3 (clinical trial match) | 11 | 15.3% |
+| No recommendation | 20 | 27.8% |
+| **Total covered** | **52** | **72.2%** |
 
-Artifact: [real_patient_benchmark_100.json](../real_patient_benchmark_100.json)
+Artifact: [validation_results/real_patient_benchmark_100.json](../validation_results/real_patient_benchmark_100.json)
+
+The per-patient VCF and biopsy files under `samples/real/` are regenerated on every
+run from whatever cohort cBioPortal returns, so they are not pinned to the numbers
+above.
+
+#### Why this is no longer 100%
+
+The earlier table reported 36% Tier 1, 64% Tier 2 and 100% total coverage. That
+figure counted the Tier 4 custom-design escalation path as covered. Custom drug
+design now requires explicit user action and is never auto-generated, so
+`tier4_custom_drug()` is no longer invoked from the benchmark loop and
+`CUSTOM_DESIGN` is unreachable. Those cases report as "no recommendation"
+instead of being counted as covered.
+
+So the drop is a change in what counts as coverage, not a regression in the
+pipeline. The old number answered "did we produce any output, including an
+offer to design something", and the new one answers "did we find a drug".
+The 20 uncovered cases are still eligible for manual custom-design escalation,
+reported as `manual_tier4_eligible_cases` in the artifact.
+
+#### The oncology gate removed nothing here
+
+The WHO ATC gate (`api/services/oncology_atc.py`) excluded 0 drugs across all 72
+cases. That is not evidence the gate is inert. This benchmark's Tier 2 additionally
+requires a cancer-context match or trial backing before a drug is admitted, which
+is stricter than production's Tier 2, so the cardiac glycosides and beta blockers
+the gate was built to remove never entered this code path in the first place.
+The gate is measured here because the benchmark should run what production runs,
+not because this cohort exercises it.
+
+#### Reproducibility
+
+The cohort is drawn live from cBioPortal rather than pinned, so the patient set
+differs between runs and `--n 100` returned 72 cases on this one. Treat the
+percentages as a reading taken on a date, not as a fixed score. Comparing two
+runs compares two different cohorts as well as two different pipelines.
 
 ### 200-case TCGA cohort
 
@@ -116,15 +157,33 @@ Artifact: [real_patient_benchmark_100.json](../real_patient_benchmark_100.json)
 python scripts/fetch_real_patients.py --n 200 --out-json real_patient_benchmark_200.json
 ```
 
+Measured 2026-08-12. `--n 200` returned 142 cases.
+
 | Tier | Patients | % |
 |------|----------|---|
-| Tier 1 — FDA-approved direct match | 15 | 7.5% |
-| Tier 4 — Custom-design escalation path | 185 | 92.5% |
-| **Total covered** | **200** | **100%** |
+| Tier 1 (FDA-approved direct match) | 30 | 21.1% |
+| Tier 2 (off-label FDA repurposing) | 58 | 40.8% |
+| Tier 3 (clinical trial match) | 16 | 11.3% |
+| No recommendation | 38 | 26.8% |
+| **Total covered** | **104** | **73.2%** |
 
-The 200-patient set is intentionally harder and includes many variants with no direct approved match — useful for evaluating escalation behaviour and safe abstention.
+The 200-patient set is intentionally harder and includes many variants with no
+direct approved match, which makes it useful for evaluating escalation behaviour
+and safe abstention.
 
-Artifact: [real_patient_benchmark_200.json](../real_patient_benchmark_200.json)
+Same correction as the 100-case set above. The earlier table read 7.5% Tier 1,
+92.5% "custom-design escalation path" and 100% covered. The 92.5% was the
+escalation path being counted as coverage. It is now reported as 38 cases with no
+recommendation, still eligible for manual custom-design escalation.
+
+The oncology gate excluded 0 drugs here too, for the same reason given above.
+
+Artifact: [validation_results/real_patient_benchmark_200.json](../validation_results/real_patient_benchmark_200.json)
+
+For comparison, the previous committed artifact recorded `DIRECT_FDA` 15,
+`FDA_REPURPOSING` 0, `INVESTIGATIONAL_REPURPOSING` 0, `CUSTOM_DESIGN` 185 and
+`NONE` 0. Both repurposing tiers were empty, so the whole of that 100% above the
+7.5% Tier 1 figure was the custom-design path being counted as coverage.
 
 ---
 

@@ -52,6 +52,11 @@ Rank = 0.883, and zero false-positive recommendations."* The holdout is stated t
 | 100-patient | 36 (36%) | 64 (64%) | 0 (all stage 1 matched) | 100% (0 empty) |
 | 200-patient | 15 (7.5%) | 0 | 185 (92.5%) | 100% (0 empty) |
 
+> Recorded verbatim as published. This table no longer reproduces: coverage
+> re-measured 2026-08-12 is 72.2% and 73.2% for the two cohorts, because the 100%
+> counted the stage 2 escalation path as covered and custom design is now
+> manual-only. See Section 3.
+
 ### 1.4 Oncologist concordance (Section 2.5 / Section 3.3 "Oncologist Concordance")
 
 Concordance analysis is stated as run against **n = 1,713 label cases** from multi-cohort
@@ -232,6 +237,37 @@ in the preprint text:
   to also hard-fail if `ENVIRONMENT=development` while `SENTRY_DSN` is set — closing a
   gap in the safety net around a dev-mode pipeline shortcut introduced during the Docker
   verification work above.
+
+- **The 100% TCGA coverage figure in Section 1.3 no longer reproduces.** Re-measured
+  2026-08-12: 52/72 = 72.2% covered on the 100-case request (Tier 1 10, Tier 2 31,
+  Tier 3 11, no recommendation 20) and 104/142 = 73.2% on the 200-case request
+  (Tier 1 30, Tier 2 58, Tier 3 16, no recommendation 38). The two agree closely,
+  which is what you would expect if the difference is definitional rather than
+  cohort noise. The cause is a change in what counts as coverage, not a pipeline
+  regression. The
+  published figure counted the Tier 4 custom-design escalation path as covered, and that
+  is how the 200-patient row reached 100% with 185 of 200 cases in "stage 2 escalation".
+  Custom drug design now requires explicit user action, so `tier4_custom_drug()` is never
+  invoked from the benchmark loop and `CUSTOM_DESIGN` is unreachable. Those cases report
+  as "no recommendation" instead. The paper's number answered "did the system produce any
+  output, including an offer to design something"; the current number answers "did the
+  system find a drug". See [BENCHMARK.md](BENCHMARK.md).
+
+- **The benchmark cohort is not pinned.** Patients are drawn live from cBioPortal, so the
+  set differs between runs: on 2026-08-12, `--n 100` returned 72 cases and `--n 200`
+  returned 142. Any exact
+  coverage percentage quoted from this benchmark, including the paper's, is a reading
+  taken on a date rather than a fixed score, and two runs differ in cohort as well as in
+  pipeline.
+
+- **Tier 2 oncology-relevance gate** (`api/services/oncology_atc.py`, merged in PR #81).
+  Filters repurposing candidates on WHO ATC class, keeping L01 antineoplastic and L02
+  endocrine therapy and dropping drugs positively classified as something else. It removed
+  0 drugs on the 2026-08-12 benchmark cohort, because that benchmark's Tier 2 already
+  requires a cancer-context match or trial backing and is therefore stricter than
+  production's Tier 2. The drugs it was built to remove, cardiac glycosides and beta
+  blockers seen in the concordance pilot, reach patients through the production path, not
+  this one.
 
 None of the above existed, in any form, when the preprint was posted on May 18, 2026.
 
