@@ -41,7 +41,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload pip-audit SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pip-audit-results
           path: api/pip-audit-results.json
@@ -231,7 +231,7 @@ jobs:
           fail_action: false   # Report only — don't fail CI (review manually)
 
       - name: Upload ZAP report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: zap-report
