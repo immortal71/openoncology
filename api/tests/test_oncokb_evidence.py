@@ -319,6 +319,28 @@ class TestGetAllDrugsForVariant:
                               ("RB1", "A500T"), ("ATM", "L2307F")]:
             assert get_all_drugs_for_variant(gene, variant) == {}, f"{gene} {variant}"
 
+    def test_met_exon14_splice_resolves_to_approved_inhibitors(self):
+        """MET exon-14 skipping is ~3-4% of NSCLC and capmatinib/tepotinib are
+        FDA-approved for it. ("MET","EXON14SKIP") held that evidence but only
+        the literal key reached it, so a real report reading X1010_splice
+        returned nothing."""
+        for variant in ["X1010_splice", "X963_splice", "X1006_splice"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant("MET", variant)}
+            assert {"capmatinib", "tepotinib"} <= drugs, variant
+
+    def test_met_splice_outside_exon14_range_does_not_match(self):
+        for variant in ["X500_splice", "X1200_splice"]:
+            assert get_all_drugs_for_variant("MET", variant) == {}, variant
+
+    def test_splice_variant_on_other_gene_not_treated_as_met_exon14(self):
+        assert get_all_drugs_for_variant("EGFR", "X1010_splice") == {}
+
+    def test_met_missense_at_exon14_residue_not_inferred_as_skipping(self):
+        """D1010 substitutions can drive exon-14 skipping, but which missense
+        changes disrupt splicing is a per-variant curation question. The
+        position-based splice rule must not infer it."""
+        assert get_all_drugs_for_variant("MET", "D1010N") == {}
+
     def test_lof_route_prefers_truncating_over_deletion_bucket(self):
         """DELETION denotes a copy-number event, not a truncating point
         variant, so it is excluded from the preference order. NF1 carries

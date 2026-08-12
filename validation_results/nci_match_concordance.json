@@ -3,11 +3,11 @@
   "source": "ClinicalTrials.gov NCT02465060 (NCI-MATCH / EAY131)",
   "n_arms_parsed": 38,
   "n_scored": 32,
-  "exact_top3": 12,
-  "class_top3": 22,
-  "no_prediction": 4,
-  "exact_top3_pct": 37.5,
-  "class_top3_pct": 68.8,
+  "exact_top3": 13,
+  "class_top3": 23,
+  "no_prediction": 2,
+  "exact_top3_pct": 40.6,
+  "class_top3_pct": 71.9,
   "results": [
     {
       "arm_id": "A",
@@ -349,11 +349,15 @@
       "declared_drugs": [
         "Trametinib"
       ],
-      "variant_used": null,
-      "gene_used": null,
-      "pipeline_top3": [],
-      "exact_hit": false,
-      "class_hit": false
+      "variant_used": "R440*",
+      "gene_used": "NF1",
+      "pipeline_top3": [
+        "selumetinib",
+        "cobimetinib",
+        "trametinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
     },
     {
       "arm_id": "S2",
@@ -406,9 +410,11 @@
         "Defactinib",
         "Defactinib Hydrochloride"
       ],
-      "variant_used": null,
-      "gene_used": null,
-      "pipeline_top3": [],
+      "variant_used": "LOSS",
+      "gene_used": "NF2",
+      "pipeline_top3": [
+        "everolimus"
+      ],
       "exact_hit": false,
       "class_hit": false
     },
@@ -591,10 +597,12 @@
         "Copanlisib",
         "Copanlisib Hydrochloride"
       ],
-      "variant_used": "R130Q",
+      "variant_used": "T319*",
       "gene_used": "PTEN",
       "pipeline_top3": [
-        "alpelisib"
+        "alpelisib",
+        "capivasertib",
+        "idelalisib"
       ],
       "exact_hit": false,
       "class_hit": true

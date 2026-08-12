@@ -2665,6 +2665,36 @@ def _lof_bucket_for_gene(gene_upper: str) -> Optional[str]:
     return None
 
 
+# MET exon 14 skipping.
+#
+# ("MET","EXON14SKIP") already carries LEVEL_1 capmatinib and tepotinib, both
+# FDA-approved specifically for MET exon-14-skipping NSCLC (roughly 3-4% of
+# cases). The bucket was reachable only by that literal key, so a real report
+# reading "MET X1010_splice" returned nothing.
+#
+# Exon 14 encodes the juxtamembrane region around residues 963-1010. A splice
+# variant at either boundary of that exon is what causes the exon to be
+# skipped -- that is the definition of the alteration, so routing splice
+# notation in this window to the bucket is mechanical, not a clinical guess.
+#
+# Deliberately NOT included: D1010 and Y1003 missense substitutions. Several of
+# those are documented drivers of exon-14 skipping, but deciding which missense
+# changes disrupt splicing is a curation question needing real evidence per
+# variant, not something to infer from a residue number. They should be added
+# as explicit curated entries if wanted.
+_MET_EXON14_RANGE = (963, 1010)
+
+
+def _is_met_exon14_splice(alt_norm_upper: str) -> bool:
+    if "SPLICE" not in alt_norm_upper:
+        return False
+    m = re.search(r"(\d+)", alt_norm_upper)
+    if not m:
+        return False
+    lo, hi = _MET_EXON14_RANGE
+    return lo <= int(m.group(1)) <= hi
+
+
 def _normalise_drug(name: str) -> str:
     """Normalise drug name for matching."""
     return re.sub(r"[\s\-.]", "", name.lower())
@@ -2790,6 +2820,8 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
     if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
         result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
+    if not result and gene_upper == "MET" and _is_met_exon14_splice(alt_norm):
+        result = _LEVEL_TABLE.get(("MET", "EXON14SKIP"), {})
     if not result and _is_truncating_variant(alt_norm):
         _lof_key = _lof_bucket_for_gene(gene_upper)
         if _lof_key:
