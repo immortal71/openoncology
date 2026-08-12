@@ -864,16 +864,32 @@ def tier2_repurposing(gene: str, protein_change: str, cancer_type: str) -> dict[
                     "trial_outcome": case.get("outcome"),
                     "evidence_sources": ["ClinicalTrials.gov"],
                 })
+        # Oncology-relevance gate, applied to the approved list exactly where
+        # production applies it (ai_worker._query_repurposing_candidates).
+        # Without this the benchmark measures a code path the product no longer
+        # runs, and reports a coverage number that is not true of the product.
+        excluded: list[dict] = []
+        try:
+            from services.oncology_atc import partition_candidates
+
+            approved, excluded = partition_candidates(approved, allow_network=False)
+        except Exception as exc:  # noqa: BLE001 - mirror production, never fail a case
+            print(f"    [WARN] oncology gate unavailable for {gene}: {exc}", file=sys.stderr)
+
         return {
             "approved": rank_candidates(approved)[:5] if approved else [],
             "investigational": rank_candidates(investigational)[:5] if investigational else [],
+            "excluded_non_oncology": [
+                {"drug_name": d.get("drug_name"), "atc_codes": d.get("atc_codes") or []}
+                for d in excluded
+            ],
         }
 
     try:
         candidates = asyncio.run(_fetch())
     except Exception as e:
         print(f"    [WARN] Repurposing fetch failed for {gene}: {e}", file=sys.stderr)
-        return {"approved": [], "investigational": []}
+        return {"approved": [], "investigational": [], "excluded_non_oncology": []}
     return candidates
 
 
@@ -1105,6 +1121,9 @@ def main():
         variant = pt["protein_change"]
         cancer = pt["cancer_type"]
         live_trials: list[dict[str, Any]] = []
+        # Drugs the oncology gate removed for this patient. Recorded per case so
+        # the benchmark shows what filtering cost, not just the net coverage.
+        excluded_drugs: list[dict] = []
 
         # --- Tier 1: FDA-approved matched therapy ---
         fda_ranked = tier1_fda_evidence(gene, variant)
@@ -1129,6 +1148,7 @@ def main():
                 repurposing_cache[rep_key] = repurposing
             approved_repurposing = repurposing.get("approved") or []
             investigational_repurposing = repurposing.get("investigational") or []
+            excluded_drugs = repurposing.get("excluded_non_oncology") or []
             if approved_repurposing:
                 tier = "FDA_REPURPOSING"
                 top_drug = approved_repurposing[0]["drug_name"]
@@ -1210,6 +1230,7 @@ def main():
             "custom_drug_button_label": "Generate custom drug brief",
             "top_recommendation_is_fda_approved": (tier in {"DIRECT_FDA", "FDA_REPURPOSING"}),
             "patient_next_step": patient_next_step,
+            "excluded_non_oncology": excluded_drugs,
             "custom_design_brief": {
                 "target_gene": custom_brief.get("target_gene"),
                 "mechanism": custom_brief.get("mechanism_hypothesis"),
@@ -1261,6 +1282,19 @@ def main():
                 "covered_cases": covered,
                 "coverage_fraction": round(covered / len(results), 4) if results else 0.0,
             },
+            "oncology_gate_summary": {
+                "cases_with_exclusions": sum(1 for r in results if r.get("excluded_non_oncology")),
+                "drugs_excluded": sum(len(r.get("excluded_non_oncology") or []) for r in results),
+                "distinct_drugs_excluded": sorted({
+                    (d.get("drug_name") or "").lower()
+                    for r in results for d in (r.get("excluded_non_oncology") or [])
+                    if d.get("drug_name")
+                }),
+                "note": (
+                    "Drugs removed by the WHO ATC oncology gate (L01/L02). Coverage "
+                    "above is measured after this filter, matching production."
+                ),
+            },
             "patients": results,
         }, f, indent=2)
 
@@ -1274,6 +1308,11 @@ def main():
     print(f"  Tier 4 — Custom drug design    : {tier_counts['CUSTOM_DESIGN']} patients")
     print(f"  No recommendation found        : {tier_counts['NONE']} patients")
     print(f"  Overall coverage               : {covered}/{len(results)} ({covered/len(results)*100:.0f}%)")
+    _gated_cases = sum(1 for r in results if r.get("excluded_non_oncology"))
+    _gated_drugs = sum(len(r.get("excluded_non_oncology") or []) for r in results)
+    print(f"\nOncology gate (WHO ATC L01/L02):")
+    print(f"  Cases with a drug removed        : {_gated_cases}")
+    print(f"  Drugs removed in total           : {_gated_drugs}")
     print(f"\nApproval summary:")
     print(f"  Top recommendations FDA-approved : {approved_recommendations}")
     print(f"  Top recommendations not approved : {nonapproved_recommendations}")

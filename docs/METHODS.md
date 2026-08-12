@@ -283,21 +283,32 @@ In addition to the curated gold-standard benchmark, the pipeline was validated a
 
 #### Tier distribution
 
+Measured 2026-08-12 on a live cBioPortal draw. `--n 100` returned 72 cases.
+
 | Tier | Count | Fraction |
 |------|-------|---------|
-| Tier 1 — FDA-approved drug matched | 36 | 36% |
-| Tier 2 — Repurposing candidate | 64 | 64% |
-| Tier 3 — Custom drug design | 0 | 0% |
-| No recommendation | 0 | 0% |
-| **Total covered** | **100** | **100%** |
+| Tier 1 (FDA-approved drug matched) | 10 | 13.9% |
+| Tier 2 (off-label FDA repurposing) | 31 | 43.1% |
+| Tier 3 (clinical trial match) | 11 | 15.3% |
+| No recommendation | 20 | 27.8% |
+| **Total covered** | **52** | **72.2%** |
+
+The previous table reported 100% coverage. That counted the Tier 4
+custom-design escalation path as covered; custom design is now manual-only and
+`CUSTOM_DESIGN` is unreachable from the benchmark loop, so those cases report as
+"no recommendation". See [BENCHMARK.md](BENCHMARK.md) for the full explanation
+and the reproducibility caveat.
 
 #### Approval status of top recommendations
 
 | Metric | Value |
 |--------|-------|
-| Top recommendation FDA-approved | 100 / 100 (100%) |
-| Top-3 total FDA-approved entries | 284 |
-| Top-3 non-FDA-approved entries | 0 |
+| Top recommendation FDA-approved | 41 / 72 (56.9%) |
+| Top recommendation not FDA-approved | 31 / 72 (43.1%) |
+
+The non-approved top recommendations are Tier 3 clinical-trial matches and
+investigational repurposing candidates, which are labelled as such rather than
+presented as approved therapy.
 
 #### Running the real-world benchmark
 

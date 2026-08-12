@@ -250,21 +250,35 @@ Full methodology, metric definitions, and change log: [docs/BENCHMARK.md](docs/B
 
 ### 100-case TCGA real-patient benchmark
 
+Measured 2026-08-12. The cohort is drawn live from cBioPortal, so `--n 100`
+returned 72 cases on this run.
+
 | Tier | Patients | % |
 |:-----|:---------|:--|
-| Tier 1 — FDA-approved direct match | 36 | 36% |
-| Tier 2 — Repurposing candidate | 64 | 64% |
-| **Total covered** | **100** | **100%** |
+| Tier 1 (FDA-approved direct match) | 10 | 13.9% |
+| Tier 2 (off-label FDA repurposing) | 31 | 43.1% |
+| Tier 3 (clinical trial match) | 11 | 15.3% |
+| No recommendation | 20 | 27.8% |
+| **Total covered** | **52** | **72.2%** |
+
+This previously read 100%. That figure counted the Tier 4 custom-design
+escalation path as covered, and custom design is now manual-only, so those
+cases report as no recommendation instead. Full explanation in
+[docs/BENCHMARK.md](docs/BENCHMARK.md).
 
 ### 200-case TCGA real-patient benchmark
 
+Measured 2026-08-12. `--n 200` returned 142 cases.
+
 | Tier | Patients | % |
 |:-----|:---------|:--|
-| Tier 1 — FDA-approved direct match | 15 | 7.5% |
-| Tier 4 — custom-design escalation path | 185 | 92.5% |
-| **Total covered** | **200** | **100%** |
+| Tier 1 (FDA-approved direct match) | 30 | 21.1% |
+| Tier 2 (off-label FDA repurposing) | 58 | 40.8% |
+| Tier 3 (clinical trial match) | 16 | 11.3% |
+| No recommendation | 38 | 26.8% |
+| **Total covered** | **104** | **73.2%** |
 
-The 200-patient set is intentionally harder and includes many variants with no direct approved match — useful for evaluating escalation behaviour and failure safety.
+The 200-patient set is intentionally harder and includes many variants with no direct approved match, which makes it useful for evaluating escalation behaviour and failure safety. This previously read 100% for the same reason as the 100-case set: the custom-design escalation path was counted as coverage.
 
 **Benchmark artifacts** (download directly):
 
