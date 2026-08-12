@@ -116,7 +116,7 @@ def _mock_ct_response(n_studies: int = 5):
                     ],
                 },
                 "descriptionModule": {
-                    "briefSummary": f"A study involving BRAF gene in NSCLC patients.",
+                    "briefSummary": "A study involving BRAF gene in NSCLC patients.",
                 },
             }
         })

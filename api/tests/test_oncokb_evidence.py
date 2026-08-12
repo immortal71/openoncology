@@ -115,6 +115,125 @@ class TestGetAllDrugsForVariant:
             "Osimertinib should appear for EGFR T790M"
         )
 
+    def test_egfr_real_world_exon19_range_deletion_matches(self):
+        """T751_E758del is a real deletion found in TCGA patient data
+        (docs/REAL_PATIENT_CONCORDANCE_PILOT_2026-07-28.md) that doesn't match
+        any exact alias but falls entirely within the EGFR exon 19 span
+        (729-761) and should resolve to the same drugs as the canonical
+        E746_A750del / Exon19del entries."""
+        drugs = get_all_drugs_for_variant("EGFR", "T751_E758del")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert "osimertinib" in drug_levels
+        assert drug_levels["osimertinib"] == "LEVEL_1"
+
+    def test_kit_real_world_exon11_range_deletion_matches(self):
+        """W557_K558del is a real, well-documented KIT exon 11 GIST deletion
+        (codons 550-592, the classic juxtamembrane driver region) that isn't
+        one of the table's named endpoint pairs but should resolve to the
+        same drugs as the generic EXON11DEL bucket."""
+        drugs = get_all_drugs_for_variant("KIT", "W557_K558del")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert "imatinib" in drug_levels
+        assert drug_levels["imatinib"] == "LEVEL_1"
+
+    def test_kit_point_mutation_in_exon11_range_not_treated_as_deletion(self):
+        """V559D is a real KIT exon 11 point mutation (not a deletion) inside
+        the same residue range -- the range-del heuristic must only match
+        actual deletions, never point substitutions, since a point mutation's
+        drug sensitivity profile isn't necessarily the same as EXON11DEL's."""
+        drugs = get_all_drugs_for_variant("KIT", "V559D")
+        assert drugs == {}
+
+    def test_kit_existing_hotspot_entries_unaffected_by_range_del_fallback(self):
+        """D816V and V654A are existing named KIT entries outside/unrelated to
+        the exon 11 deletion range -- confirms the new fallback doesn't
+        interfere with entries that already resolve correctly."""
+        d816v = get_all_drugs_for_variant("KIT", "D816V")
+        assert "avapritinib" in {k.lower() for k in d816v}
+        v654a = get_all_drugs_for_variant("KIT", "V654A")
+        assert "sunitinib" in {k.lower() for k in v654a}
+
+    def test_egfr_real_world_exon20_range_insertion_matches(self):
+        """H773_V774insH is a real, documented EGFR exon 20 insertion (codons
+        762-823) that isn't one of the table's 2 named insertion examples but
+        should resolve to the same drugs as the generic EXON20INS bucket --
+        including the LEVEL_R1 resistance flags on classical TKIs, since
+        exon 20 insertions are a clinically distinct, TKI-resistant class."""
+        drugs = get_all_drugs_for_variant("EGFR", "H773_V774insH")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("amivantamab") == "LEVEL_1"
+        assert drug_levels.get("osimertinib") == "LEVEL_R1"
+
+    def test_erbb2_real_world_exon20_range_insertion_matches(self):
+        """P780_Y781insGSP is a real HER2/ERBB2 exon 20 insertion outside the
+        table's single named example (A775_G776insYVMA) but within the same
+        documented exon 20 span; should resolve to the generic EXON20INS
+        bucket."""
+        drugs = get_all_drugs_for_variant("ERBB2", "P780_Y781insGSP")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert len(drug_levels) > 0
+
+    def test_point_mutations_are_never_treated_as_range_insertions(self):
+        """L858R and T790M are real EGFR point mutations, not insertions --
+        the range-insertion heuristic must never fire for them, since a bare
+        point-mutation string has no ins-range token to match."""
+        l858r = get_all_drugs_for_variant("EGFR", "L858R")
+        assert {k.lower() for k in l858r} == {
+            "osimertinib", "erlotinib", "gefitinib", "afatinib", "dacomitinib",
+        }
+        t790m = get_all_drugs_for_variant("EGFR", "T790M")
+        drug_levels = {k.lower(): v for k, v in t790m.items()}
+        assert drug_levels.get("osimertinib") == "LEVEL_1"
+
+    def test_named_exon20_insertion_entries_unaffected_by_range_fallback(self):
+        """A763_Y764insFQEA is an existing named entry -- confirms the new
+        range-insertion fallback doesn't interfere with entries that already
+        resolve correctly via exact match."""
+        drugs = get_all_drugs_for_variant("EGFR", "A763_Y764insFQEA")
+        assert {k.lower() for k in drugs} == {"amivantamab"}
+
+    def test_calr_type1_real_world_exon9_frameshift_matches(self):
+        """L367fs*46 is the canonical CALR Type 1 (52bp deletion) MPN driver
+        mutation -- real-world HGVS notation that never matches the table's
+        literal 'EXON9DEL' or 'TYPE2' keys without range-based fallback."""
+        drugs = get_all_drugs_for_variant("CALR", "L367fs*46")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+
+    def test_calr_type2_real_world_exon9_frameshift_matches(self):
+        """K385fs*47 is the canonical CALR Type 2 (5bp insertion) MPN driver
+        mutation, reported in HGVS frameshift notation rather than the
+        table's named 'TYPE2' key."""
+        drugs = get_all_drugs_for_variant("CALR", "K385fs*47")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+
+    def test_calr_frameshift_outside_exon9_range_does_not_match(self):
+        drugs = get_all_drugs_for_variant("CALR", "E230fs*32")
+        assert drugs == {}
+
+    def test_frameshift_on_other_gene_not_treated_as_calr_exon9(self):
+        drugs = get_all_drugs_for_variant("TP53", "R213fs*10")
+        assert drugs == {}
+
+    def test_calr_point_mutation_in_exon9_range_not_treated_as_frameshift(self):
+        drugs = get_all_drugs_for_variant("CALR", "D374N")
+        assert drugs == {}
+
+    def test_calr_named_type2_entry_unaffected_by_range_fs_fallback(self):
+        drugs = get_all_drugs_for_variant("CALR", "TYPE2")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("ruxolitinib") == "LEVEL_1"
+        assert drug_levels.get("fedratinib") == "LEVEL_2"
+
+    def test_egfr_deletion_outside_exon19_range_does_not_match(self):
+        """A deletion with residue numbers outside the exon 19 span (e.g. in
+        the kinase domain near T790M/exon 20) must NOT be treated as an
+        exon 19 deletion just because it matches the DEL pattern shape."""
+        drugs = get_all_drugs_for_variant("EGFR", "D770_N771del")
+        # Should not silently inherit the exon19del drug set.
+        assert "E746A750DEL" not in [k.upper() for k in drugs]
+
 
 # ── annotate_candidates ────────────────────────────────────────────────────────
 
