@@ -219,7 +219,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build API image
-        run: docker build -t openoncology-api:ci ./api
+        run: docker build -t openoncology-api:ci -f api/Dockerfile .
 
       - name: Build web image
         run: docker build -t openoncology-web:ci ./web
