@@ -140,9 +140,23 @@ class TestGetAllDrugsForVariant:
         """V559D is a real KIT exon 11 point mutation (not a deletion) inside
         the same residue range -- the range-del heuristic must only match
         actual deletions, never point substitutions, since a point mutation's
-        drug sensitivity profile isn't necessarily the same as EXON11DEL's."""
+        drug sensitivity profile isn't necessarily the same as EXON11DEL's.
+
+        This originally asserted V559D returned nothing at all, which enforced
+        that property by returning no evidence for a real imatinib-sensitive
+        GIST driver. V559D now resolves through the EXON11MUT bucket instead,
+        so the original requirement is asserted directly: it must not pick up
+        the deletion bucket's profile. EXON11DEL carries imatinib, regorafenib,
+        ripretinib and sunitinib; EXON11MUT carries imatinib and sunitinib only.
+        """
         drugs = get_all_drugs_for_variant("KIT", "V559D")
-        assert drugs == {}
+        deletion_profile = get_all_drugs_for_variant("KIT", "EXON11DEL") or {}
+        assert drugs, "V559D is an exon 11 driver and should reach evidence"
+        assert drugs != deletion_profile, (
+            "a point mutation must not inherit the deletion bucket's drug profile"
+        )
+        assert drugs == (get_all_drugs_for_variant("KIT", "EXON11MUT") or {})
+        assert "regorafenib" not in {k.lower() for k in drugs}
 
     def test_kit_existing_hotspot_entries_unaffected_by_range_del_fallback(self):
         """D816V and V654A are existing named KIT entries outside/unrelated to
@@ -563,3 +577,73 @@ class TestCopyNumberNotation:
         gap rather than a routing bug, pinned here so it stays visible."""
         for gene in ["PTCH1", "VHL"]:
             assert get_all_drugs_for_variant(gene, "loss"), f"{gene} loss regressed"
+
+
+# ── Notation classes found by the reachability sweep ─────────────────────────
+
+class TestExon20DuplicationNotation:
+    """Exon 20 insertions are reported as duplications about as often as they
+    are reported as insertions. Only the INS form resolved, so A767_V769dup,
+    one of the more common EGFR exon 20 insertions, returned nothing.
+    """
+
+    def test_dup_notation_matches_ins_notation(self):
+        canonical = get_all_drugs_for_variant("EGFR", "D770_N771insSVD") or {}
+        assert canonical
+        for alteration in ["A767_V769dup", "H773dup", "p.Ala767_Val769dup"]:
+            assert (get_all_drugs_for_variant("EGFR", alteration) or {}) == canonical, alteration
+
+    def test_resistance_mutations_in_range_are_not_swept_in(self):
+        """The safety property. T790M and C797S sit inside the exon 20 codon
+        span but are EGFR TKI resistance mutations, not insertions. Requiring
+        the DUP or INS token is what keeps them out."""
+        exon20 = get_all_drugs_for_variant("EGFR", "D770_N771insSVD") or {}
+        for alteration in ["T790M", "C797S", "V774M", "R776H"]:
+            assert (get_all_drugs_for_variant("EGFR", alteration) or {}) != exon20, alteration
+
+    def test_t790m_keeps_its_resistance_annotation(self):
+        levels = {str(v) for v in (get_all_drugs_for_variant("EGFR", "T790M") or {}).values()}
+        assert any(level.startswith("LEVEL_R") for level in levels)
+
+
+class TestKitExon11Missense:
+    """Only deletions in KIT exon 11 resolved, so W557_K558del found evidence
+    while V559D found nothing. Both are juxtamembrane exon 11 mutations and
+    both are the imatinib-sensitive GIST genotype.
+    """
+
+    def test_exon11_point_mutations_resolve(self):
+        canonical = get_all_drugs_for_variant("KIT", "EXON11MUT") or {}
+        assert canonical
+        for alteration in ["V559D", "V559A", "L576P", "W557R"]:
+            assert (get_all_drugs_for_variant("KIT", alteration) or {}) == canonical, alteration
+
+    def test_exon17_resistance_mutations_stay_out(self):
+        """D816V is imatinib-resistant and lives in exon 17, outside the 550-592
+        span. It must not be routed into the imatinib-sensitive bucket."""
+        exon11 = get_all_drugs_for_variant("KIT", "EXON11MUT") or {}
+        for alteration in ["D816V", "D820Y", "N822K"]:
+            assert (get_all_drugs_for_variant("KIT", alteration) or {}) != exon11, alteration
+
+    def test_d816v_keeps_its_resistance_annotation(self):
+        levels = {str(v) for v in (get_all_drugs_for_variant("KIT", "D816V") or {}).values()}
+        assert any(level.startswith("LEVEL_R") for level in levels)
+
+
+class TestExpressionLossNotation:
+    """Pathology reports say "absent" or "mismatch repair deficient" far more
+    often than "loss of expression", and only the last of those resolved. dMMR
+    is a tumour-agnostic pembrolizumab indication.
+    """
+
+    def test_ihc_phrasings_resolve(self):
+        canonical = get_all_drugs_for_variant("MLH1", "loss of expression") or {}
+        assert canonical
+        for alteration in ["absent", "deficient", "IHC loss", "loss by IHC"]:
+            assert (get_all_drugs_for_variant("MLH1", alteration) or {}) == canonical, alteration
+
+    def test_expression_phrasings_do_not_invent_evidence_elsewhere(self):
+        """These map to the expression bucket, so they resolve only for genes
+        that carry one and return nothing for genes that do not."""
+        assert not (get_all_drugs_for_variant("KRAS", "deficient") or {})
+        assert not (get_all_drugs_for_variant("TTN", "absent") or {})

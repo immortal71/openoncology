@@ -1589,6 +1589,16 @@ _ALTERATION_ALIASES: dict[str, str] = {
     # carrying deletion evidence (scripts/audit_cnv_reachability.py).
     "amplified": "amplification",
     "deleted": "deletion",
+    # Immunohistochemistry phrasing for loss of protein expression. Reports say
+    # "MLH1 absent" or "mismatch repair deficient" far more often than "loss of
+    # expression", and only the last of those resolved. Matters because dMMR is
+    # a tumour-agnostic pembrolizumab indication. These map to the expression
+    # bucket, so they resolve only for genes that carry one and return nothing
+    # elsewhere, exactly as before.
+    "absent": "lossofexpression",
+    "deficient": "lossofexpression",
+    "ihcloss": "lossofexpression",
+    "lossbyihc": "lossofexpression",
     "homdel": "homozygousdeletion",
     "deepdeletion": "homozygousdeletion",
     # Deliberately NOT aliased to amplification: "gain", "copy number gain".
@@ -2597,6 +2607,42 @@ def _is_range_ins_within(alt_norm_upper: str, residue_range: tuple[int, int]) ->
     return lo <= start <= hi and lo <= end <= hi
 
 
+# In-frame duplication: "A767_V769dup" -> "A767V769DUP", "H773dup" -> "H773DUP".
+# Exon 20 insertions are reported both as insertions and as duplications, and a
+# tandem duplication of residues is an in-frame insertion at the protein level.
+# A767_V769dup is one of the more common EGFR exon 20 insertions and returned
+# nothing, because _RANGE_INS_RE requires a literal INS token.
+#
+# Requiring the DUP token is what keeps this safe. T790M sits inside the same
+# codon span but is an EGFR TKI resistance mutation, not an exon 20 insertion,
+# and it carries no DUP token so it cannot reach this bucket.
+_RANGE_DUP_RE = re.compile(r"^([A-Z])(\d+)(?:([A-Z])(\d+))?DUP$")
+
+# Plain missense: "V559D" -> "V559D".
+_RANGE_MISSENSE_RE = re.compile(r"^[A-Z](\d+)[A-Z]$")
+
+
+def _is_range_dup_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
+    """True if alt_norm_upper is an in-frame duplication, single residue or a
+    span, falling entirely within the given (lo, hi) range."""
+    m = _RANGE_DUP_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    start = int(m.group(2))
+    end = int(m.group(4)) if m.group(4) else start
+    lo, hi = residue_range
+    return lo <= start <= hi and lo <= end <= hi
+
+
+def _is_missense_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
+    """True if alt_norm_upper is a single-residue substitution inside the range."""
+    m = _RANGE_MISSENSE_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    lo, hi = residue_range
+    return lo <= int(m.group(1)) <= hi
+
+
 def _is_egfr_exon19_range_del(alt_norm_upper: str) -> bool:
     return _is_range_del_within(alt_norm_upper, _EGFR_EXON19_DEL_RANGE)
 
@@ -2605,12 +2651,33 @@ def _is_kit_exon11_range_del(alt_norm_upper: str) -> bool:
     return _is_range_del_within(alt_norm_upper, _KIT_EXON11_DEL_RANGE)
 
 
+def _is_kit_exon11_range_missense(alt_norm_upper: str) -> bool:
+    """KIT exon 11 point mutations, the imatinib-sensitive GIST genotype.
+
+    Only deletions in this span resolved before, so W557_K558del found evidence
+    while V559D found nothing, even though both are exon 11 juxtamembrane
+    mutations and both are the classic imatinib-responsive class. That is what
+    the EXON11MUT bucket is for.
+
+    Scoped to codons 550-592 exactly as the deletion rule is. KIT's resistance
+    mutations live elsewhere: D816V is exon 17 and stays outside this span, so
+    it cannot be routed into an imatinib-sensitive bucket by this rule.
+    """
+    return _is_missense_within(alt_norm_upper, _KIT_EXON11_DEL_RANGE)
+
+
 def _is_egfr_exon20_range_ins(alt_norm_upper: str) -> bool:
-    return _is_range_ins_within(alt_norm_upper, _EGFR_EXON20_INS_RANGE)
+    return (
+        _is_range_ins_within(alt_norm_upper, _EGFR_EXON20_INS_RANGE)
+        or _is_range_dup_within(alt_norm_upper, _EGFR_EXON20_INS_RANGE)
+    )
 
 
 def _is_erbb2_exon20_range_ins(alt_norm_upper: str) -> bool:
-    return _is_range_ins_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
+    return (
+        _is_range_ins_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
+        or _is_range_dup_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
+    )
 
 
 # CALR exon 9 (UniProt P27797) spans roughly codons 359-417; essentially all
@@ -2711,6 +2778,14 @@ def _lof_bucket_for_gene(gene_upper: str) -> Optional[str]:
 _MET_EXON14_RANGE = (963, 1010)
 
 
+# NOT handled here: bare D1010H/N/Y missense. Those substitutions sit at the
+# exon 14 splice donor and are reported in the literature as causing exon 14
+# skipping, so routing them to EXON14SKIP is tempting and would make three more
+# real variants reachable. It is deliberately not done, because whether a given
+# missense change disrupts splicing is a per-variant curation question and this
+# module does not author curation. It belongs in the evidence table as explicit
+# entries, sourced, not inferred by a matching rule. See the negative test in
+# test_oncokb_evidence.py.
 def _is_met_exon14_splice(alt_norm_upper: str) -> bool:
     if "SPLICE" not in alt_norm_upper:
         return False
@@ -2840,6 +2915,8 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("EGFR", "EXON19DEL"), {})
     if not result and gene_upper == "KIT" and _is_kit_exon11_range_del(alt_norm):
         result = _LEVEL_TABLE.get(("KIT", "EXON11DEL"), {})
+    if not result and gene_upper == "KIT" and _is_kit_exon11_range_missense(alt_norm):
+        result = _LEVEL_TABLE.get(("KIT", "EXON11MUT"), {})
     if not result and gene_upper == "EGFR" and _is_egfr_exon20_range_ins(alt_norm):
         result = _LEVEL_TABLE.get(("EGFR", "EXON20INS"), {})
     if not result and gene_upper == "ERBB2" and _is_erbb2_exon20_range_ins(alt_norm):
