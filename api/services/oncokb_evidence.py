@@ -2609,35 +2609,60 @@ def _is_calr_exon9_range_fs(alt_norm_upper: str) -> bool:
     return lo <= pos <= hi
 
 
-# BRCA1/2 truncating-variant detector.
+# Truncating-variant detector for tumour-suppressor loss-of-function evidence.
 #
-# The ("BRCA1"/"BRCA2", "TRUNCATING") entries already carry the intended
-# evidence (LEVEL_1 olaparib/niraparib/rucaparib/talazoparib) and the table
-# comment above them states the clinical rule outright: any pathogenic BRCA1/2
-# variant is equivalent for PARP-inhibitor prescribing. Those entries were only
-# reachable by an exact literal key, so real-world truncating variants -- which
-# are reported in HGVS frameshift/nonsense/splice notation -- silently returned
-# nothing. BRCA2 S1982fs, one of the most frequently reported pathogenic BRCA2
-# variants, resolved to no recommendation at all.
+# Tumour suppressors are inactivated by frameshift, nonsense and splice
+# variants, and the table curates that evidence under bucket keys like
+# ("VHL", "TRUNCATING") or ("RB1", "LOSSOFFUNCTION"). Those buckets were only
+# reachable by an exact literal key, so a variant written the way a real
+# clinical report writes it returned nothing at all.
 #
-# Same conservative shape as the EGFR exon-19, KIT exon-11, exon-20 and CALR
-# exon-9 detectors: scoped to two genes, and only to variant classes that are
-# pathogenic by mechanism (a premature stop truncates the protein). Missense is
-# deliberately NOT matched -- deciding whether a given BRCA missense is
-# pathogenic needs AlphaMissense/ClinVar evidence, which is what the existing
-# gene-level fallback is for, not a notation pattern.
-_BRCA_NONSENSE_RE = re.compile(r"^[A-Z]\d+(\*|X)$")
-_BRCA_SPLICE_RE = re.compile(r"^(X\d+_SPLICE|\d+(\+|-)\d+[ACGT]>[ACGT]|IVS\d+.*)$")
+# A reachability audit over the whole table found this affecting 24 genes --
+# every gene carrying loss-of-function evidence. Concrete cases: VHL W117fs
+# returned nothing despite ("VHL","TRUNCATING") holding belzutifan; NF1
+# truncating variants returned nothing despite selumetinib being FDA-approved
+# for NF1; ATM/PALB2/RAD51C/RAD51D/BRIP1/NBN all returned nothing despite
+# holding PARP-inhibitor evidence.
+#
+# Two deliberate limits keep this conservative:
+#
+#   1. Missense is NOT matched. Whether a given missense change is inactivating
+#      cannot be read off the notation -- that is what the AlphaMissense
+#      gene-level fallback exists for.
+#   2. It only fires for genes that already carry a curated LOF bucket. A
+#      truncating variant in an oncogene (EGFR, KRAS, BRAF) finds no bucket and
+#      is unaffected, so this cannot invent activating-drug evidence.
+_NONSENSE_RE = re.compile(r"^[A-Z]\d+(\*|X)$")
+_SPLICE_RE = re.compile(r"^(X\d+_SPLICE|\d+(\+|-)\d+[ACGT]>[ACGT]|IVS\d+.*)$")
+
+# Bucket names that mean "this gene has lost function", in preference order.
+# DELETION is deliberately excluded: it denotes a copy-number event (whole-gene
+# loss), which is not the same finding as a truncating point variant. Every
+# gene in the audit that uses DELETION also carries LOSS or TRUNCATING, so
+# excluding it loses no coverage while keeping the semantics honest.
+_LOF_BUCKET_PREFERENCE = ("TRUNCATING", "LOSSOFFUNCTION", "INACTIVATING",
+                          "PATHOGENIC", "LOSS")
 
 
-def _is_brca_truncating(alt_norm_upper: str) -> bool:
-    if _FS_RE.match(alt_norm_upper):          # frameshift, e.g. S1982FS
+def _is_truncating_variant(alt_norm_upper: str) -> bool:
+    if _FS_RE.match(alt_norm_upper):        # frameshift, e.g. W117FS / S1982FS
         return True
-    if _BRCA_NONSENSE_RE.match(alt_norm_upper):  # nonsense, e.g. Q1395* / R1443X
+    if _NONSENSE_RE.match(alt_norm_upper):  # nonsense, e.g. R161* / K3326X
         return True
-    if _BRCA_SPLICE_RE.match(alt_norm_upper):    # splice, e.g. IVS7+1G>A
+    if _SPLICE_RE.match(alt_norm_upper):    # splice, e.g. IVS7+1G>A
         return True
     return "SPLICE" in alt_norm_upper or "TRUNCAT" in alt_norm_upper
+
+
+def _lof_bucket_for_gene(gene_upper: str) -> Optional[str]:
+    """The curated LOF bucket for this gene, or None if it has none.
+
+    Returning None is the guard that keeps oncogenes out: no bucket, no route.
+    """
+    for key in _LOF_BUCKET_PREFERENCE:
+        if (gene_upper, key) in _LEVEL_TABLE:
+            return key
+    return None
 
 
 def _normalise_drug(name: str) -> str:
@@ -2765,8 +2790,10 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
     if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
         result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
-    if not result and gene_upper in ("BRCA1", "BRCA2") and _is_brca_truncating(alt_norm):
-        result = _LEVEL_TABLE.get((gene_upper, "TRUNCATING"), {})
+    if not result and _is_truncating_variant(alt_norm):
+        _lof_key = _lof_bucket_for_gene(gene_upper)
+        if _lof_key:
+            result = _LEVEL_TABLE.get((gene_upper, _lof_key), {})
     if result:
         return dict(result), set()
 

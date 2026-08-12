@@ -272,6 +272,61 @@ class TestGetAllDrugsForVariant:
         drugs = get_all_drugs_for_variant("BRCA1", "185delAG")
         assert "olaparib" in {k.lower() for k in drugs}
 
+    # ── Tumour-suppressor loss-of-function reachability ─────────────────────
+    # A table-wide audit found 24 genes carrying curated LOF evidence that no
+    # real-world truncating variant could reach, because the bucket was only
+    # addressable by its exact literal key. These lock in the generalised fix.
+
+    def test_vhl_real_world_truncating_variants_resolve(self):
+        """These four are real variants from actual TCGA-KIRC patients in the
+        2026-07-28 concordance pilot. Every one returned no recommendation
+        before the fix, despite ("VHL","TRUNCATING") holding belzutifan."""
+        for variant in ["W117Gfs*42", "D179Afs*22", "R161*", "T124Hfs*35"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant("VHL", variant)}
+            assert "belzutifan" in drugs, f"VHL {variant}"
+
+    def test_nf1_truncating_resolves_to_mek_inhibitors(self):
+        """Selumetinib is FDA-approved for NF1-driven disease; NF1 is
+        inactivated by truncating variants."""
+        drugs = {k.lower() for k in get_all_drugs_for_variant("NF1", "R1276*")}
+        assert "selumetinib" in drugs
+
+    def test_rb1_truncating_resolves_to_cdk46_inhibitors(self):
+        drugs = {k.lower() for k in get_all_drugs_for_variant("RB1", "R320fs")}
+        assert drugs & {"palbociclib", "ribociclib", "abemaciclib"}
+
+    def test_hrd_genes_truncating_resolve_to_parp_inhibitors(self):
+        """The homologous-recombination genes all carry PARP evidence that was
+        equally unreachable."""
+        for gene in ["ATM", "PALB2", "RAD51C", "RAD51D", "BRIP1", "NBN"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant(gene, "Q500*")}
+            assert drugs & {"olaparib", "niraparib", "rucaparib", "talazoparib"}, gene
+
+    def test_oncogene_truncating_variant_gets_no_lof_evidence(self):
+        """The guard that makes this safe: the LOF route only fires for genes
+        that already carry a curated LOF bucket. Oncogenes have none, so a
+        truncating variant in one must resolve to nothing rather than picking
+        up activating-therapy evidence."""
+        for gene in ["EGFR", "KRAS", "BRAF", "ALK", "MET", "ERBB2"]:
+            for variant in ["Q500*", "R500fs", "W500X"]:
+                assert get_all_drugs_for_variant(gene, variant) == {}, f"{gene} {variant}"
+
+    def test_tumour_suppressor_missense_not_matched_by_lof_route(self):
+        """Whether a missense change inactivates a tumour suppressor cannot be
+        read off its notation -- that needs AlphaMissense/ClinVar. Only
+        truncating classes route to the LOF bucket."""
+        for gene, variant in [("VHL", "L158V"), ("NF1", "R1276Q"),
+                              ("RB1", "A500T"), ("ATM", "L2307F")]:
+            assert get_all_drugs_for_variant(gene, variant) == {}, f"{gene} {variant}"
+
+    def test_lof_route_prefers_truncating_over_deletion_bucket(self):
+        """DELETION denotes a copy-number event, not a truncating point
+        variant, so it is excluded from the preference order. NF1 carries
+        DELETION, LOSS and TRUNCATING -- a frameshift must land on TRUNCATING."""
+        from services.oncokb_evidence import _lof_bucket_for_gene
+        assert _lof_bucket_for_gene("NF1") == "TRUNCATING"
+        assert _lof_bucket_for_gene("EGFR") is None
+
     def test_egfr_deletion_outside_exon19_range_does_not_match(self):
         """A deletion with residue numbers outside the exon 19 span (e.g. in
         the kinase domain near T790M/exon 20) must NOT be treated as an
