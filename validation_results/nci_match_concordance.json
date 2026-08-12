@@ -1,0 +1,752 @@
+{
+  "benchmark": "nci_match_arm_concordance",
+  "source": "ClinicalTrials.gov NCT02465060 (NCI-MATCH / EAY131)",
+  "n_arms_parsed": 38,
+  "n_scored": 32,
+  "exact_top3": 13,
+  "class_top3": 23,
+  "no_prediction": 2,
+  "exact_top3_pct": 40.6,
+  "class_top3_pct": 71.9,
+  "results": [
+    {
+      "arm_id": "A",
+      "label": "Subprotocol A (EGFR activating mutation)",
+      "biomarker_text": "EGFR activating mutation",
+      "gene": "EGFR",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "afatinib",
+      "declared_drugs": [
+        "Afatinib",
+        "Afatinib Dimaleate"
+      ],
+      "variant_used": "L858R",
+      "gene_used": "EGFR",
+      "pipeline_top3": [
+        "afatinib",
+        "dacomitinib",
+        "erlotinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "B",
+      "label": "Subprotocol B (HER2 activating mutation)",
+      "biomarker_text": "HER2 activating mutation",
+      "gene": "ERBB2",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "afatinib",
+      "declared_drugs": [
+        "Afatinib",
+        "Afatinib Dimaleate"
+      ],
+      "variant_used": "S310F",
+      "gene_used": "ERBB2",
+      "pipeline_top3": [
+        "trastuzumab deruxtecan",
+        "zongertinib"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "C1",
+      "label": "Subprotocol C1 (MET amplification)",
+      "biomarker_text": "MET amplification",
+      "gene": "MET",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "crizotinib",
+      "declared_drugs": [
+        "Crizotinib"
+      ],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "MET",
+      "pipeline_top3": [
+        "capmatinib",
+        "tepotinib",
+        "crizotinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "C2",
+      "label": "Subprotocol C2 (MET exon 14 deletion/mutation)",
+      "biomarker_text": "MET exon 14 deletion/mutation",
+      "gene": "MET",
+      "alteration_class": "loss",
+      "specific_variants": [],
+      "assigned_drug": "crizotinib",
+      "declared_drugs": [
+        "Crizotinib"
+      ],
+      "variant_used": null,
+      "gene_used": null,
+      "pipeline_top3": [],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "E",
+      "label": "Subprotocol E (EGFR T790M or rare activating mutation)",
+      "biomarker_text": "EGFR T790M or rare activating mutation",
+      "gene": "EGFR",
+      "alteration_class": "mutation",
+      "specific_variants": [
+        "T790M"
+      ],
+      "assigned_drug": "osimertinib",
+      "declared_drugs": [
+        "Osimertinib"
+      ],
+      "variant_used": "T790M",
+      "gene_used": "EGFR",
+      "pipeline_top3": [
+        "osimertinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "F",
+      "label": "Subprotocol F (ALK translocation)",
+      "biomarker_text": "ALK translocation",
+      "gene": "ALK",
+      "alteration_class": "fusion",
+      "specific_variants": [],
+      "assigned_drug": "crizotinib",
+      "declared_drugs": [
+        "Crizotinib"
+      ],
+      "variant_used": "FUSION",
+      "gene_used": "ALK",
+      "pipeline_top3": [
+        "alectinib",
+        "brigatinib",
+        "ceritinib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "G",
+      "label": "Subprotocol G (ROS1 translocation or inversion)",
+      "biomarker_text": "ROS1 translocation or inversion",
+      "gene": "ROS1",
+      "alteration_class": "fusion",
+      "specific_variants": [],
+      "assigned_drug": "crizotinib",
+      "declared_drugs": [
+        "Crizotinib"
+      ],
+      "variant_used": "FUSION",
+      "gene_used": "ROS1",
+      "pipeline_top3": [
+        "crizotinib",
+        "entrectinib",
+        "lorlatinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "H",
+      "label": "Subprotocol H (BRAF V600E/R/K/D mutation)",
+      "biomarker_text": "BRAF V600E/R/K/D mutation",
+      "gene": "BRAF",
+      "alteration_class": "mutation",
+      "specific_variants": [
+        "V600E"
+      ],
+      "assigned_drug": "dabrafenib",
+      "declared_drugs": [
+        "Dabrafenib",
+        "Dabrafenib Mesylate",
+        "Trametinib"
+      ],
+      "variant_used": "V600E",
+      "gene_used": "BRAF",
+      "pipeline_top3": [
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "I",
+      "label": "Subprotocol I (PIK3CA mutation)",
+      "biomarker_text": "PIK3CA mutation",
+      "gene": "PIK3CA",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "taselisib",
+      "declared_drugs": [
+        "Taselisib"
+      ],
+      "variant_used": "E545K",
+      "gene_used": "PIK3CA",
+      "pipeline_top3": [
+        "alpelisib",
+        "capivasertib",
+        "inavolisib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "J",
+      "label": "Subprotocol J (HER2 amplification >= 7 copy numbers)",
+      "biomarker_text": "HER2 amplification >= 7 copy numbers",
+      "gene": "ERBB2",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "pertuzumab",
+      "declared_drugs": [],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "ERBB2",
+      "pipeline_top3": [
+        "ado-trastuzumab emtansine",
+        "lapatinib",
+        "neratinib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "K1",
+      "label": "Subprotocol K1 (FGFR amplification)",
+      "biomarker_text": "FGFR amplification",
+      "gene": "FGFR",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "erdafitinib",
+      "declared_drugs": [
+        "Erdafitinib"
+      ],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "FGFR1",
+      "pipeline_top3": [
+        "erdafitinib",
+        "infigratinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "K2",
+      "label": "Subprotocol K2 (FGFR mutation or fusion)",
+      "biomarker_text": "FGFR mutation or fusion",
+      "gene": "FGFR",
+      "alteration_class": "fusion",
+      "specific_variants": [],
+      "assigned_drug": "erdafitinib",
+      "declared_drugs": [
+        "Erdafitinib"
+      ],
+      "variant_used": "FUSION",
+      "gene_used": "FGFR1",
+      "pipeline_top3": [
+        "pemigatinib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "M",
+      "label": "Subprotocol M (TSC1 or TSC2 mutation)",
+      "biomarker_text": "TSC1 or TSC2 mutation",
+      "gene": "TSC1",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "sapanisertib",
+      "declared_drugs": [
+        "Sapanisertib"
+      ],
+      "variant_used": "N891Kfs*13",
+      "gene_used": "TSC1",
+      "pipeline_top3": [
+        "everolimus",
+        "temsirolimus"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "P",
+      "label": "Subprotocol P (PTEN loss)",
+      "biomarker_text": "PTEN loss",
+      "gene": "PTEN",
+      "alteration_class": "loss",
+      "specific_variants": [],
+      "assigned_drug": "PI3K-beta inhibitor GSK2636771",
+      "declared_drugs": [
+        "PI3K-beta Inhibitor GSK2636771"
+      ],
+      "variant_used": "DELETION",
+      "gene_used": "PTEN",
+      "pipeline_top3": [
+        "everolimus"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "Q",
+      "label": "Subprotocol Q (HER2 amplification)",
+      "biomarker_text": "HER2 amplification",
+      "gene": "ERBB2",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "trastuzumab emtansine",
+      "declared_drugs": [],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "ERBB2",
+      "pipeline_top3": [
+        "ado-trastuzumab emtansine",
+        "lapatinib",
+        "neratinib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "R",
+      "label": "Subprotocol R (BRAF fusion or BRAF non-V600 mutation)",
+      "biomarker_text": "BRAF fusion or BRAF non-V600 mutation",
+      "gene": "BRAF",
+      "alteration_class": "fusion",
+      "specific_variants": [
+        "V600"
+      ],
+      "assigned_drug": "trametinib",
+      "declared_drugs": [
+        "Trametinib"
+      ],
+      "variant_used": "V600",
+      "gene_used": "BRAF",
+      "pipeline_top3": [
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "S1",
+      "label": "Subprotocol S1 (NF1 mutation)",
+      "biomarker_text": "NF1 mutation",
+      "gene": "NF1",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "trametinib",
+      "declared_drugs": [
+        "Trametinib"
+      ],
+      "variant_used": "R440*",
+      "gene_used": "NF1",
+      "pipeline_top3": [
+        "selumetinib",
+        "cobimetinib",
+        "trametinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "S2",
+      "label": "Subprotocol S2 (GNAQ or GNA11 mutation)",
+      "biomarker_text": "GNAQ or GNA11 mutation",
+      "gene": "GNAQ",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "trametinib",
+      "declared_drugs": [
+        "Trametinib"
+      ],
+      "variant_used": "Q209P",
+      "gene_used": "GNAQ",
+      "pipeline_top3": [
+        "tebentafusp"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "T",
+      "label": "Subprotocol T (SMO or PTCH1 mutation)",
+      "biomarker_text": "SMO or PTCH1 mutation",
+      "gene": "SMO",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "vismodegib",
+      "declared_drugs": [
+        "Vismodegib"
+      ],
+      "variant_used": "P694Lfs*82",
+      "gene_used": "SMO",
+      "pipeline_top3": [
+        "sonidegib",
+        "vismodegib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "U",
+      "label": "Subprotocol U (NF2 inactivating mutation)",
+      "biomarker_text": "NF2 inactivating mutation",
+      "gene": "NF2",
+      "alteration_class": "loss",
+      "specific_variants": [],
+      "assigned_drug": "defactinib",
+      "declared_drugs": [
+        "Defactinib",
+        "Defactinib Hydrochloride"
+      ],
+      "variant_used": "LOSS",
+      "gene_used": "NF2",
+      "pipeline_top3": [
+        "everolimus"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "W",
+      "label": "Subprotocol W (FGFR pathway aberrations)",
+      "biomarker_text": "FGFR pathway aberrations",
+      "gene": "FGFR",
+      "alteration_class": "other",
+      "specific_variants": [],
+      "assigned_drug": "FGFR Inhibitor AZD4547",
+      "declared_drugs": [
+        "Fexagratinib"
+      ],
+      "variant_used": "S249C",
+      "gene_used": "FGFR3",
+      "pipeline_top3": [
+        "erdafitinib"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "X",
+      "label": "Subprotocol X (DDR2 S768R, I638F, or L239R mutation)",
+      "biomarker_text": "DDR2 S768R, I638F, or L239R mutation",
+      "gene": "DDR2",
+      "alteration_class": "mutation",
+      "specific_variants": [
+        "S768R",
+        "I638F",
+        "L239R"
+      ],
+      "assigned_drug": "dasatinib",
+      "declared_drugs": [
+        "Dasatinib"
+      ],
+      "variant_used": null,
+      "gene_used": null,
+      "pipeline_top3": [],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "Z1A",
+      "label": "Subprotocol Z1A (NRAS mutation in codon 12, 13, or 61)",
+      "biomarker_text": "NRAS mutation in codon 12, 13, or 61",
+      "gene": "NRAS",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "binimetinib",
+      "declared_drugs": [
+        "Binimetinib"
+      ],
+      "variant_used": "Q61R",
+      "gene_used": "NRAS",
+      "pipeline_top3": [
+        "binimetinib",
+        "cobimetinib",
+        "trametinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1B",
+      "label": "Subprotocol Z1B (CCND1, 2, or 3 amplification with Rb by IHC)",
+      "biomarker_text": "CCND1, 2, or 3 amplification with Rb by IHC",
+      "gene": "CCND1",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "palbociclib",
+      "declared_drugs": [
+        "Palbociclib"
+      ],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "CCND1",
+      "pipeline_top3": [
+        "abemaciclib",
+        "palbociclib",
+        "ribociclib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1C",
+      "label": "Subprotocol Z1C (CDK4 or CDK6 amplification and Rb protein)",
+      "biomarker_text": "CDK4 or CDK6 amplification and Rb protein",
+      "gene": "CDK4",
+      "alteration_class": "amplification",
+      "specific_variants": [],
+      "assigned_drug": "palbociclib",
+      "declared_drugs": [
+        "Palbociclib"
+      ],
+      "variant_used": "AMPLIFICATION",
+      "gene_used": "CDK4",
+      "pipeline_top3": [
+        "abemaciclib",
+        "palbociclib",
+        "ribociclib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1E",
+      "label": "Subprotocol Z1E (NTRK1, NTRK2 or NTRK3 gene fusion)",
+      "biomarker_text": "NTRK1, NTRK2 or NTRK3 gene fusion",
+      "gene": "NTRK1",
+      "alteration_class": "fusion",
+      "specific_variants": [],
+      "assigned_drug": "larotrectinib",
+      "declared_drugs": [
+        "Larotrectinib",
+        "Larotrectinib Sulfate"
+      ],
+      "variant_used": "FUSION",
+      "gene_used": "NTRK1",
+      "pipeline_top3": [
+        "entrectinib",
+        "larotrectinib",
+        "repotrectinib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1F",
+      "label": "Subprotocol Z1F (PIK3CA mutation)",
+      "biomarker_text": "PIK3CA mutation",
+      "gene": "PIK3CA",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "copanlisib",
+      "declared_drugs": [
+        "Copanlisib",
+        "Copanlisib Hydrochloride"
+      ],
+      "variant_used": "E545K",
+      "gene_used": "PIK3CA",
+      "pipeline_top3": [
+        "alpelisib",
+        "capivasertib",
+        "inavolisib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1G",
+      "label": "Subprotocol Z1G (PTEN loss)",
+      "biomarker_text": "PTEN loss",
+      "gene": "PTEN",
+      "alteration_class": "loss",
+      "specific_variants": [],
+      "assigned_drug": "copanlisib",
+      "declared_drugs": [
+        "Copanlisib",
+        "Copanlisib Hydrochloride"
+      ],
+      "variant_used": "DELETION",
+      "gene_used": "PTEN",
+      "pipeline_top3": [
+        "everolimus"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1H",
+      "label": "Subprotocol Z1H (PTEN mutation)",
+      "biomarker_text": "PTEN mutation",
+      "gene": "PTEN",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "copanlisib",
+      "declared_drugs": [
+        "Copanlisib",
+        "Copanlisib Hydrochloride"
+      ],
+      "variant_used": "T319*",
+      "gene_used": "PTEN",
+      "pipeline_top3": [
+        "alpelisib",
+        "capivasertib",
+        "idelalisib"
+      ],
+      "exact_hit": false,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1I",
+      "label": "Subprotocol Z1I (BRCA1 or BRCA2 gene mutation)",
+      "biomarker_text": "BRCA1 or BRCA2 gene mutation",
+      "gene": "BRCA1",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "adavosertib",
+      "declared_drugs": [
+        "Adavosertib"
+      ],
+      "variant_used": "K654Sfs*47",
+      "gene_used": "BRCA1",
+      "pipeline_top3": [
+        "niraparib",
+        "olaparib",
+        "rucaparib"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    },
+    {
+      "arm_id": "Z1K",
+      "label": "Subprotocol Z1K (AKT mutation)",
+      "biomarker_text": "AKT mutation",
+      "gene": "AKT1",
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "ipatasertib",
+      "declared_drugs": [
+        "Ipatasertib"
+      ],
+      "variant_used": "E17K",
+      "gene_used": "AKT1",
+      "pipeline_top3": [
+        "capivasertib",
+        "ipatasertib",
+        "alpelisib"
+      ],
+      "exact_hit": true,
+      "class_hit": true
+    },
+    {
+      "arm_id": "Z1L",
+      "label": "Subprotocol Z1L (BRAF fusion, aberration or non-V600 mutation)",
+      "biomarker_text": "BRAF fusion, aberration or non-V600 mutation",
+      "gene": "BRAF",
+      "alteration_class": "fusion",
+      "specific_variants": [
+        "V600"
+      ],
+      "assigned_drug": "ulixertinib",
+      "declared_drugs": [
+        "Ulixertinib"
+      ],
+      "variant_used": "V600",
+      "gene_used": "BRAF",
+      "pipeline_top3": [
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
+      ],
+      "exact_hit": false,
+      "class_hit": false
+    }
+  ],
+  "out_of_scope": [
+    {
+      "arm_id": "L",
+      "label": "Subprotocol L (mTOR mutation)",
+      "biomarker_text": "mTOR mutation",
+      "gene": null,
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "sapanisertib",
+      "declared_drugs": [
+        "Sapanisertib"
+      ],
+      "reason": "no gene or no drug in arm text"
+    },
+    {
+      "arm_id": "N",
+      "label": "Subprotocol N (PTEN mutation or deletion and PTEN expression)",
+      "biomarker_text": "PTEN mutation or deletion and PTEN expression",
+      "gene": "PTEN",
+      "alteration_class": "expression_ihc",
+      "specific_variants": [],
+      "assigned_drug": "PI3K-beta inhibitor GSK2636771",
+      "declared_drugs": [
+        "PI3K-beta Inhibitor GSK2636771"
+      ],
+      "reason": "protein-expression/IHC biomarker, not a DNA variant"
+    },
+    {
+      "arm_id": "V",
+      "label": "Subprotocol V (cKIT exon 9, 11, 13, or 14 mutation)",
+      "biomarker_text": "cKIT exon 9, 11, 13, or 14 mutation",
+      "gene": null,
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "sunitinib",
+      "declared_drugs": [
+        "Sunitinib Malate"
+      ],
+      "reason": "no gene or no drug in arm text"
+    },
+    {
+      "arm_id": "Y",
+      "label": "Subprotocol Y (Akt mutation)",
+      "biomarker_text": "Akt mutation",
+      "gene": null,
+      "alteration_class": "mutation",
+      "specific_variants": [],
+      "assigned_drug": "capivasertib",
+      "declared_drugs": [
+        "Capivasertib"
+      ],
+      "reason": "no gene or no drug in arm text"
+    },
+    {
+      "arm_id": "Z1D",
+      "label": "Subprotocol Z1D (Loss of MLH1 or MSH2 by IHC)",
+      "biomarker_text": "Loss of MLH1 or MSH2 by IHC",
+      "gene": "MLH1",
+      "alteration_class": "expression_ihc",
+      "specific_variants": [],
+      "assigned_drug": "nivolumab",
+      "declared_drugs": [],
+      "reason": "protein-expression/IHC biomarker, not a DNA variant"
+    },
+    {
+      "arm_id": "Z1M",
+      "label": "Subprotocol Z1M (LAG-3 expression >= 1%)",
+      "biomarker_text": "LAG-3 expression >= 1%",
+      "gene": null,
+      "alteration_class": "expression_ihc",
+      "specific_variants": [],
+      "assigned_drug": "nivolumab",
+      "declared_drugs": [],
+      "reason": "no gene or no drug in arm text"
+    }
+  ]
+}

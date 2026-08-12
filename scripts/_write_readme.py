@@ -28,10 +28,6 @@ CONTENT = r"""<div align="center">
 
 ---
 
-> **Full journey demo GIF coming soon** — [`docs/screenshots/`](docs/screenshots/)
-
----
-
 ## What is OpenOncology?
 
 OpenOncology is a free, open-source AI platform that analyses a patient's cancer mutation profile and returns a ranked list of approved drugs, repurposing candidates, and — when no match exists — a custom drug discovery brief generated from live ChEMBL and OpenTargets evidence. Designed for patients and oncologists who cannot access expensive genomic advisory services, everything runs self-hosted under an MIT licence with no API key required for core functionality. Custom drug leads are automatically published to a pharma marketplace where manufacturers bid on synthesis, and an integrated crowdfunding module removes cost as a barrier when needed.
@@ -85,51 +81,6 @@ flowchart TD
 | Produce a blinded, reproducible benchmark score for scientific scrutiny | Claim peer review or regulatory clearance |
 
 > **On custom drug discovery:** When no repurposed drug matches, the platform generates a target-specific discovery brief from ChEMBL and OpenTargets evidence. These are early-stage research leads — not clinical candidates. Any compound emerging from this path requires full preclinical and clinical development before patient use.
-
----
-
-## Platform Screenshots
-
-> Run `npm run screenshot` (in `web/`) to generate — see [scripts/screenshot.ts](scripts/screenshot.ts) and [SETUP.md](SETUP.md)
-
-<table>
-<tr>
-<td align="center" width="50%">
-  <img src="docs/screenshots/submit.png" alt="Submit sample" width="100%"/>
-  <br/><b>1 · Submit your sample</b>
-  <br/><sub>Upload biopsy report + DNA file (VCF/FASTQ/BAM) in under a minute</sub>
-</td>
-<td align="center" width="50%">
-  <img src="docs/screenshots/results.png" alt="AI Results" width="100%"/>
-  <br/><b>2 · AI analysis results</b>
-  <br/><sub>Ranked mutations, pathogenicity scores, and top-3 drug candidates</sub>
-</td>
-</tr>
-<tr>
-<td align="center" width="50%">
-  <img src="docs/screenshots/repurposing.png" alt="Drug repurposing" width="100%"/>
-  <br/><b>3 · Drug repurposing candidates</b>
-  <br/><sub>Approved drugs scored by DiffDock binding confidence and OncoKB level</sub>
-</td>
-<td align="center" width="50%">
-  <img src="docs/screenshots/custom-drug.png" alt="Custom drug discovery" width="100%"/>
-  <br/><b>4 · Custom drug discovery</b>
-  <br/><sub>Target brief, ChEMBL lead molecules, and oral-exposure scoring</sub>
-</td>
-</tr>
-<tr>
-<td align="center" width="50%">
-  <img src="docs/screenshots/marketplace.png" alt="Pharma marketplace" width="100%"/>
-  <br/><b>5 · Pharma marketplace</b>
-  <br/><sub>Manufacturers receive the discovery brief and submit competitive bids</sub>
-</td>
-<td align="center" width="50%">
-  <img src="docs/screenshots/crowdfund.png" alt="Crowdfunding" width="100%"/>
-  <br/><b>6 · Crowdfunding module</b>
-  <br/><sub>Raise funds when cost is a barrier — milestone webhooks at 25/50/75/100%</sub>
-</td>
-</tr>
-</table>
 
 ---
 

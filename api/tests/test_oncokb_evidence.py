@@ -226,6 +226,129 @@ class TestGetAllDrugsForVariant:
         assert drug_levels.get("ruxolitinib") == "LEVEL_1"
         assert drug_levels.get("fedratinib") == "LEVEL_2"
 
+    # ── BRCA1/2 truncating variants → PARP inhibitors ────────────────────────
+    # The ("BRCA1"/"BRCA2", "TRUNCATING") evidence existed but was only
+    # reachable by exact literal key, and the four frameshift aliases meant to
+    # reach it were spelled "truncation" against a "TRUNCATING" key, so they
+    # resolved to nothing. Real-world truncating BRCA variants returned no
+    # recommendation at all.
+
+    def test_brca2_s1982fs_resolves_to_parp_inhibitors(self):
+        """S1982fs (the 6174delT founder allele) is among the most frequently
+        reported pathogenic BRCA2 variants. Before the fix this returned {}."""
+        drugs = get_all_drugs_for_variant("BRCA2", "S1982fs")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("olaparib") == "LEVEL_1"
+        assert drug_levels.get("talazoparib") == "LEVEL_1"
+
+    def test_brca1_frameshift_resolves_to_parp_inhibitors(self):
+        drugs = get_all_drugs_for_variant("BRCA1", "Q1395fs")
+        assert {k.lower() for k in drugs} >= {"olaparib", "niraparib", "rucaparib"}
+
+    def test_brca_nonsense_variants_resolve_to_parp_inhibitors(self):
+        """A premature stop truncates the protein, so nonsense variants carry
+        the same PARP-inhibitor evidence as frameshifts."""
+        for gene, variant in [("BRCA1", "R1443*"), ("BRCA2", "K3326X")]:
+            drugs = get_all_drugs_for_variant(gene, variant)
+            assert "olaparib" in {k.lower() for k in drugs}, f"{gene} {variant}"
+
+    def test_brca_missense_not_matched_by_truncating_detector(self):
+        """C61G is a real pathogenic BRCA1 RING-domain missense variant, but
+        pathogenicity of a missense change cannot be decided from notation --
+        that is what the AlphaMissense gene-level fallback is for. The
+        truncating detector must not claim it."""
+        assert get_all_drugs_for_variant("BRCA1", "C61G") == {}
+        assert get_all_drugs_for_variant("BRCA2", "N372H") == {}
+
+    def test_truncating_variant_on_unrelated_gene_gets_no_parp(self):
+        """The detector is scoped to BRCA1/2 only -- a frameshift or nonsense
+        variant elsewhere must not pick up PARP-inhibitor evidence."""
+        for gene, variant in [("TP53", "R213*"), ("APC", "Q1367fs")]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant(gene, variant)}
+            assert not (drugs & {"olaparib", "niraparib", "rucaparib", "talazoparib"})
+
+    def test_brca_named_literal_entry_still_resolves(self):
+        """185delAG resolved correctly before the fix and must be unaffected."""
+        drugs = get_all_drugs_for_variant("BRCA1", "185delAG")
+        assert "olaparib" in {k.lower() for k in drugs}
+
+    # ── Tumour-suppressor loss-of-function reachability ─────────────────────
+    # A table-wide audit found 24 genes carrying curated LOF evidence that no
+    # real-world truncating variant could reach, because the bucket was only
+    # addressable by its exact literal key. These lock in the generalised fix.
+
+    def test_vhl_real_world_truncating_variants_resolve(self):
+        """These four are real variants from actual TCGA-KIRC patients in the
+        2026-07-28 concordance pilot. Every one returned no recommendation
+        before the fix, despite ("VHL","TRUNCATING") holding belzutifan."""
+        for variant in ["W117Gfs*42", "D179Afs*22", "R161*", "T124Hfs*35"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant("VHL", variant)}
+            assert "belzutifan" in drugs, f"VHL {variant}"
+
+    def test_nf1_truncating_resolves_to_mek_inhibitors(self):
+        """Selumetinib is FDA-approved for NF1-driven disease; NF1 is
+        inactivated by truncating variants."""
+        drugs = {k.lower() for k in get_all_drugs_for_variant("NF1", "R1276*")}
+        assert "selumetinib" in drugs
+
+    def test_rb1_truncating_resolves_to_cdk46_inhibitors(self):
+        drugs = {k.lower() for k in get_all_drugs_for_variant("RB1", "R320fs")}
+        assert drugs & {"palbociclib", "ribociclib", "abemaciclib"}
+
+    def test_hrd_genes_truncating_resolve_to_parp_inhibitors(self):
+        """The homologous-recombination genes all carry PARP evidence that was
+        equally unreachable."""
+        for gene in ["ATM", "PALB2", "RAD51C", "RAD51D", "BRIP1", "NBN"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant(gene, "Q500*")}
+            assert drugs & {"olaparib", "niraparib", "rucaparib", "talazoparib"}, gene
+
+    def test_oncogene_truncating_variant_gets_no_lof_evidence(self):
+        """The guard that makes this safe: the LOF route only fires for genes
+        that already carry a curated LOF bucket. Oncogenes have none, so a
+        truncating variant in one must resolve to nothing rather than picking
+        up activating-therapy evidence."""
+        for gene in ["EGFR", "KRAS", "BRAF", "ALK", "MET", "ERBB2"]:
+            for variant in ["Q500*", "R500fs", "W500X"]:
+                assert get_all_drugs_for_variant(gene, variant) == {}, f"{gene} {variant}"
+
+    def test_tumour_suppressor_missense_not_matched_by_lof_route(self):
+        """Whether a missense change inactivates a tumour suppressor cannot be
+        read off its notation -- that needs AlphaMissense/ClinVar. Only
+        truncating classes route to the LOF bucket."""
+        for gene, variant in [("VHL", "L158V"), ("NF1", "R1276Q"),
+                              ("RB1", "A500T"), ("ATM", "L2307F")]:
+            assert get_all_drugs_for_variant(gene, variant) == {}, f"{gene} {variant}"
+
+    def test_met_exon14_splice_resolves_to_approved_inhibitors(self):
+        """MET exon-14 skipping is ~3-4% of NSCLC and capmatinib/tepotinib are
+        FDA-approved for it. ("MET","EXON14SKIP") held that evidence but only
+        the literal key reached it, so a real report reading X1010_splice
+        returned nothing."""
+        for variant in ["X1010_splice", "X963_splice", "X1006_splice"]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant("MET", variant)}
+            assert {"capmatinib", "tepotinib"} <= drugs, variant
+
+    def test_met_splice_outside_exon14_range_does_not_match(self):
+        for variant in ["X500_splice", "X1200_splice"]:
+            assert get_all_drugs_for_variant("MET", variant) == {}, variant
+
+    def test_splice_variant_on_other_gene_not_treated_as_met_exon14(self):
+        assert get_all_drugs_for_variant("EGFR", "X1010_splice") == {}
+
+    def test_met_missense_at_exon14_residue_not_inferred_as_skipping(self):
+        """D1010 substitutions can drive exon-14 skipping, but which missense
+        changes disrupt splicing is a per-variant curation question. The
+        position-based splice rule must not infer it."""
+        assert get_all_drugs_for_variant("MET", "D1010N") == {}
+
+    def test_lof_route_prefers_truncating_over_deletion_bucket(self):
+        """DELETION denotes a copy-number event, not a truncating point
+        variant, so it is excluded from the preference order. NF1 carries
+        DELETION, LOSS and TRUNCATING -- a frameshift must land on TRUNCATING."""
+        from services.oncokb_evidence import _lof_bucket_for_gene
+        assert _lof_bucket_for_gene("NF1") == "TRUNCATING"
+        assert _lof_bucket_for_gene("EGFR") is None
+
     def test_egfr_deletion_outside_exon19_range_does_not_match(self):
         """A deletion with residue numbers outside the exon 19 span (e.g. in
         the kinase domain near T790M/exon 20) must NOT be treated as an

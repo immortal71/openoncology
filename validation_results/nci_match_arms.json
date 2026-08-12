@@ -1,0 +1,443 @@
+{
+  "nct_id": "NCT02465060",
+  "arm_groups": [
+    {
+      "label": "Subprotocol A (EGFR activating mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with EGFR activating mutation receive afatinib orally (PO) once daily (QD) on days 1-28 of each cycle. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Additionally, patients undergo CT or MRI during screening and on study, as well as during follow-up as clinically necessary. Patients may also undergo ECHO or nuclear study throughout the trial as clinically necessary. Patients undergo biopsies and blood sample collection on study.",
+      "interventionNames": [
+        "Drug: Afatinib",
+        "Drug: Afatinib Dimaleate",
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Procedure: Echocardiography Test",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Magnetic Resonance Imaging",
+        "Procedure: Radionuclide Imaging"
+      ]
+    },
+    {
+      "label": "Subprotocol B (HER2 activating mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with HER2 activating mutation receive afatinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Afatinib",
+        "Drug: Afatinib Dimaleate",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol C1 (MET amplification)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with MET amplification receive crizotinib PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients also undergo radiologic evaluation and collection of blood samples throughout the study. Patients may undergo biopsy at screening, on study, and/or at end of treatment.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Drug: Crizotinib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Radiologic Examination"
+      ]
+    },
+    {
+      "label": "Subprotocol C2 (MET exon 14 deletion/mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with MET exon 14 deletion or other mutations that disrupt exon 14 receive crizotinib PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients undergo tumor biopsy on study and undergo radiologic evaluation and blood sample collection throughout the study.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Drug: Crizotinib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Radiologic Examination"
+      ]
+    },
+    {
+      "label": "Subprotocol E (EGFR T790M or rare activating mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with EGFR T790M or rare activating mutation receive osimertinib (AZD9291) PO QD on days 1-28 of each cycle. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients also undergo radiologic evaluation throughout the trial, ECHO or multigated acquisition scan (MUGA) during screening, and biopsy and collection of blood samples on trial and at end of treatment.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Other: Cytology Specimen Collection Procedure",
+        "Procedure: Echocardiography Test",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Multigated Acquisition Scan",
+        "Drug: Osimertinib",
+        "Procedure: Radiologic Examination"
+      ]
+    },
+    {
+      "label": "Subprotocol F (ALK translocation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with ALK translocation receive crizotinib PO twice daily (BID) on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Crizotinib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol G (ROS1 translocation or inversion)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with ROS1 translocation or inversion receive crizotinib PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Crizotinib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol H (BRAF V600E/R/K/D mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with BRAF V600E/R/K/D mutation receive dabrafenib PO BID and trametinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Dabrafenib",
+        "Drug: Dabrafenib Mesylate",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Trametinib"
+      ]
+    },
+    {
+      "label": "Subprotocol I (PIK3CA mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with PIK3CA mutation without RAS mutation or PTEN loss receive taselisib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Taselisib"
+      ]
+    },
+    {
+      "label": "Subprotocol J (HER2 amplification >= 7 copy numbers)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients receive pertuzumab IV over 30-60 minutes and trastuzumab IV over 30 minutes on day 1 of each cycle. Cycles repeat every 3 weeks in the absence of disease progression or unacceptable toxicity. Patients also undergo radiologic evaluation throughout the trial, ECHO at screening and end of treatment, and biopsy and collection of blood samples on trial and at end of treatment.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Echocardiography Test",
+        "Other: Laboratory Biomarker Analysis",
+        "Biological: Pertuzumab",
+        "Procedure: Radiologic Examination",
+        "Biological: Trastuzumab"
+      ]
+    },
+    {
+      "label": "Subprotocol K1 (FGFR amplification)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with FGFR amplification receive erdafitinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients also undergo CT and MRI throughout study. Patients may also undergo blood sample collection and tumor biopsy throughout the trial.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Erdafitinib",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Magnetic Resonance Imaging"
+      ]
+    },
+    {
+      "label": "Subprotocol K2 (FGFR mutation or fusion)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with FGFR mutation or fusion receive erdafitinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Additionally, patients undergo blood sample collection, CT or MRI, and tumor biopsy throughout the study.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Erdafitinib",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Magnetic Resonance Imaging"
+      ]
+    },
+    {
+      "label": "Subprotocol L (mTOR mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with mTOR mutation receive sapanisertib PO daily on days 1-28. Cycles repeat every 3 weeks in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Sapanisertib"
+      ]
+    },
+    {
+      "label": "Subprotocol M (TSC1 or TSC2 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with TSC1 or TSC2 mutation receive sapanisertib PO daily on days 1-28. Cycles repeat every 3 weeks in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Sapanisertib"
+      ]
+    },
+    {
+      "label": "Subprotocol N (PTEN mutation or deletion and PTEN expression)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with PTEN mutation or deletion and PTEN expression receive PI3K-beta inhibitor GSK2636771 PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: PI3K-beta Inhibitor GSK2636771"
+      ]
+    },
+    {
+      "label": "Subprotocol P (PTEN loss)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with PTEN loss receive PI3K-beta inhibitor GSK2636771 PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: PI3K-beta Inhibitor GSK2636771"
+      ]
+    },
+    {
+      "label": "Subprotocol Q (HER2 amplification)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with HER2 amplification receive trastuzumab emtansine intravenously (IV) over 30-90 minutes on day 1. Cycles repeat every 21 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Biological: Trastuzumab",
+        "Biological: Trastuzumab Emtansine"
+      ]
+    },
+    {
+      "label": "Subprotocol R (BRAF fusion or BRAF non-V600 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with BRAF fusion or BRAF non-V600 mutation receive trametinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Trametinib"
+      ]
+    },
+    {
+      "label": "Subprotocol S1 (NF1 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with NF1 mutation receive trametinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Trametinib"
+      ]
+    },
+    {
+      "label": "Subprotocol S2 (GNAQ or GNA11 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with GNAQ or GNA11 mutation receive trametinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Trametinib"
+      ]
+    },
+    {
+      "label": "Subprotocol T (SMO or PTCH1 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with SMO or PTCH1 mutation receive vismodegib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients undergo ECHO or nuclear study during screening, tumor biopsy on study and CT scan, MRI and blood sample collection throughout the study.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Procedure: Echocardiography Test",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Magnetic Resonance Imaging",
+        "Procedure: Radionuclide Imaging",
+        "Drug: Vismodegib"
+      ]
+    },
+    {
+      "label": "Subprotocol U (NF2 inactivating mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with NF2 inactivating mutation receive defactinib PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Defactinib",
+        "Drug: Defactinib Hydrochloride",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol V (cKIT exon 9, 11, 13, or 14 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with cKIT exon 9, 11, 13, or 14 mutation receive sunitinib PO QD on days 1-28 of each cycle. Cycles repeat every 42 days in the absence of disease progression or unacceptable toxicity. Additionally, patients undergo CT or MRI during screening and on study, as well as during follow-up as clinically necessary. Patients also undergo ECHO or nuclear study throughout the trial as clinically necessary. Patients undergo biopsies and blood sample collection on study.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Procedure: Echocardiography Test",
+        "Other: Laboratory Biomarker Analysis",
+        "Procedure: Magnetic Resonance Imaging",
+        "Procedure: Radionuclide Imaging",
+        "Drug: Sunitinib Malate"
+      ]
+    },
+    {
+      "label": "Subprotocol W (FGFR pathway aberrations)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with FGFR1-3 mutation or translocation receive FGFR Inhibitor AZD4547 PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Fexagratinib",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol X (DDR2 S768R, I638F, or L239R mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with DDR2 S768R, I638F, or L239R mutation receive dasatinib PO QD on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Dasatinib",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Y (Akt mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with Akt mutation receive capivasertib PO BID on days 1-4, 8-11, 15-18, and 22-25. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Capivasertib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1A (NRAS mutation in codon 12, 13, or 61)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with NRAS mutation in codon 12, 13, or 61 receive binimetinib PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Binimetinib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1B (CCND1, 2, or 3 amplification with Rb by IHC)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with CCND1, 2, or 3 amplification that have tumor Rb expression by IHC receive palbociclib PO QD for 21 days. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Palbociclib"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1C (CDK4 or CDK6 amplification and Rb protein)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with CDK4 or CDK6 amplification and tumor Rb protein receive palbociclib PO QD on days 1-21. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Palbociclib"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1D (Loss of MLH1 or MSH2 by IHC)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with mismatch repair deficiency (loss of MLH1 or MSH2 by IHC) receive nivolumab IV over 30 minutes on days 1 and 15 for 4 cycles and then on day 1 every 28 days. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Biological: Nivolumab"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1E (NTRK1, NTRK2 or NTRK3 gene fusion)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with NTRK1, NTRK2, or NTRK3 gene fusion receive larotrectinib (LOXO-101) PO BID on days 1-28 of each cycle. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Additionally, patients undergo CT or MRI during screening and on study, as well as during follow-up as clinically necessary. Patients also undergo biopsies and blood sample collection on study.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Biospecimen Collection",
+        "Procedure: Computed Tomography",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Larotrectinib",
+        "Drug: Larotrectinib Sulfate",
+        "Procedure: Magnetic Resonance Imaging"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1F (PIK3CA mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients receive copanlisib IV over 1 hour on days 1, 8, and 15 of each cycle. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity. Patients also undergo tumor biopsies at screening and end of treatment as well as CT or MRI at baseline and repeated every 2 cycles for the first 26 cycles then every 3 cycles thereafter until progressive disease or start of another MATCH treatment step.",
+      "interventionNames": [
+        "Procedure: Biopsy Procedure",
+        "Procedure: Computed Tomography",
+        "Drug: Copanlisib",
+        "Drug: Copanlisib Hydrochloride",
+        "Other: Cytology Specimen Collection Procedure",
+        "Procedure: Magnetic Resonance Imaging"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1G (PTEN loss)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with PTEN loss receive copanlisib IV over 1 hour on days 1, 8, and 15. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Copanlisib",
+        "Drug: Copanlisib Hydrochloride",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1H (PTEN mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with PTEN mutation receive copanlisib IV over 1 hour on days 1, 8, and 15. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Copanlisib",
+        "Drug: Copanlisib Hydrochloride",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1I (BRCA1 or BRCA2 gene mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with BRCA1 or BRCA2 gene mutation receive adavosertib PO QD for 5 days for 2 weeks. Cycles repeat every 21 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Drug: Adavosertib",
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1K (AKT mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients receive ipatasertib PO QD. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Drug: Ipatasertib",
+        "Other: Laboratory Biomarker Analysis"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1L (BRAF fusion, aberration or non-V600 mutation)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients with a BRAF non-V600 mutation or BRAF fusion, or another BRAF aberration receive ulixertinib (BVD-523FB) PO BID on days 1-28. Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Drug: Ulixertinib"
+      ]
+    },
+    {
+      "label": "Subprotocol Z1M (LAG-3 expression >= 1%)",
+      "type": "EXPERIMENTAL",
+      "description": "Patients receive nivolumab IV over 30 minutes and relatlimab IV over 30 minutes on day 1.Cycles repeat every 28 days in the absence of disease progression or unacceptable toxicity.",
+      "interventionNames": [
+        "Other: Cytology Specimen Collection Procedure",
+        "Other: Laboratory Biomarker Analysis",
+        "Biological: Nivolumab",
+        "Biological: Relatlimab"
+      ]
+    }
+  ]
+}

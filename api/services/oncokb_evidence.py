@@ -1613,11 +1613,15 @@ _ALTERATION_ALIASES: dict[str, str] = {
     "kmt2amllt10": "rearrangement",  # t(10;11)
     "kmt2amllt1": "rearrangement",   # t(11;19)
     "kmt2arearranged": "rearrangement",
-    # BRCA truncating frameshift aliases → resolve to "truncation" for BRCA PARP-i evidence
-    "q1395fs": "truncation",     # BRCA1 Q1395fs — pathogenic truncating frameshift
-    "q1429fs": "truncation",     # BRCA1 Q1429fs
-    "e1143fs": "truncation",     # BRCA2 E1143fs
-    "s1982fs": "truncation",     # BRCA1 S1982fs
+    # BRCA truncating frameshift aliases → resolve to the BRCA PARP-i evidence.
+    # These previously mapped to "truncation", but the table key is "TRUNCATING",
+    # so every one of them resolved to a non-existent key and returned nothing.
+    # The _is_brca_truncating detector now covers these generically; the aliases
+    # are kept (spelled correctly) as explicit documentation of known variants.
+    "q1395fs": "truncating",     # BRCA1 Q1395fs — pathogenic truncating frameshift
+    "q1429fs": "truncating",     # BRCA1 Q1429fs
+    "e1143fs": "truncating",     # BRCA2 E1143fs
+    "s1982fs": "truncating",     # BRCA2 S1982fs (6174delT); comment previously said BRCA1
 }
 
 
@@ -2605,6 +2609,92 @@ def _is_calr_exon9_range_fs(alt_norm_upper: str) -> bool:
     return lo <= pos <= hi
 
 
+# Truncating-variant detector for tumour-suppressor loss-of-function evidence.
+#
+# Tumour suppressors are inactivated by frameshift, nonsense and splice
+# variants, and the table curates that evidence under bucket keys like
+# ("VHL", "TRUNCATING") or ("RB1", "LOSSOFFUNCTION"). Those buckets were only
+# reachable by an exact literal key, so a variant written the way a real
+# clinical report writes it returned nothing at all.
+#
+# A reachability audit over the whole table found this affecting 24 genes --
+# every gene carrying loss-of-function evidence. Concrete cases: VHL W117fs
+# returned nothing despite ("VHL","TRUNCATING") holding belzutifan; NF1
+# truncating variants returned nothing despite selumetinib being FDA-approved
+# for NF1; ATM/PALB2/RAD51C/RAD51D/BRIP1/NBN all returned nothing despite
+# holding PARP-inhibitor evidence.
+#
+# Two deliberate limits keep this conservative:
+#
+#   1. Missense is NOT matched. Whether a given missense change is inactivating
+#      cannot be read off the notation -- that is what the AlphaMissense
+#      gene-level fallback exists for.
+#   2. It only fires for genes that already carry a curated LOF bucket. A
+#      truncating variant in an oncogene (EGFR, KRAS, BRAF) finds no bucket and
+#      is unaffected, so this cannot invent activating-drug evidence.
+_NONSENSE_RE = re.compile(r"^[A-Z]\d+(\*|X)$")
+_SPLICE_RE = re.compile(r"^(X\d+_SPLICE|\d+(\+|-)\d+[ACGT]>[ACGT]|IVS\d+.*)$")
+
+# Bucket names that mean "this gene has lost function", in preference order.
+# DELETION is deliberately excluded: it denotes a copy-number event (whole-gene
+# loss), which is not the same finding as a truncating point variant. Every
+# gene in the audit that uses DELETION also carries LOSS or TRUNCATING, so
+# excluding it loses no coverage while keeping the semantics honest.
+_LOF_BUCKET_PREFERENCE = ("TRUNCATING", "LOSSOFFUNCTION", "INACTIVATING",
+                          "PATHOGENIC", "LOSS")
+
+
+def _is_truncating_variant(alt_norm_upper: str) -> bool:
+    if _FS_RE.match(alt_norm_upper):        # frameshift, e.g. W117FS / S1982FS
+        return True
+    if _NONSENSE_RE.match(alt_norm_upper):  # nonsense, e.g. R161* / K3326X
+        return True
+    if _SPLICE_RE.match(alt_norm_upper):    # splice, e.g. IVS7+1G>A
+        return True
+    return "SPLICE" in alt_norm_upper or "TRUNCAT" in alt_norm_upper
+
+
+def _lof_bucket_for_gene(gene_upper: str) -> Optional[str]:
+    """The curated LOF bucket for this gene, or None if it has none.
+
+    Returning None is the guard that keeps oncogenes out: no bucket, no route.
+    """
+    for key in _LOF_BUCKET_PREFERENCE:
+        if (gene_upper, key) in _LEVEL_TABLE:
+            return key
+    return None
+
+
+# MET exon 14 skipping.
+#
+# ("MET","EXON14SKIP") already carries LEVEL_1 capmatinib and tepotinib, both
+# FDA-approved specifically for MET exon-14-skipping NSCLC (roughly 3-4% of
+# cases). The bucket was reachable only by that literal key, so a real report
+# reading "MET X1010_splice" returned nothing.
+#
+# Exon 14 encodes the juxtamembrane region around residues 963-1010. A splice
+# variant at either boundary of that exon is what causes the exon to be
+# skipped -- that is the definition of the alteration, so routing splice
+# notation in this window to the bucket is mechanical, not a clinical guess.
+#
+# Deliberately NOT included: D1010 and Y1003 missense substitutions. Several of
+# those are documented drivers of exon-14 skipping, but deciding which missense
+# changes disrupt splicing is a curation question needing real evidence per
+# variant, not something to infer from a residue number. They should be added
+# as explicit curated entries if wanted.
+_MET_EXON14_RANGE = (963, 1010)
+
+
+def _is_met_exon14_splice(alt_norm_upper: str) -> bool:
+    if "SPLICE" not in alt_norm_upper:
+        return False
+    m = re.search(r"(\d+)", alt_norm_upper)
+    if not m:
+        return False
+    lo, hi = _MET_EXON14_RANGE
+    return lo <= int(m.group(1)) <= hi
+
+
 def _normalise_drug(name: str) -> str:
     """Normalise drug name for matching."""
     return re.sub(r"[\s\-.]", "", name.lower())
@@ -2730,6 +2820,12 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
     if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
         result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
+    if not result and gene_upper == "MET" and _is_met_exon14_splice(alt_norm):
+        result = _LEVEL_TABLE.get(("MET", "EXON14SKIP"), {})
+    if not result and _is_truncating_variant(alt_norm):
+        _lof_key = _lof_bucket_for_gene(gene_upper)
+        if _lof_key:
+            result = _LEVEL_TABLE.get((gene_upper, _lof_key), {})
     if result:
         return dict(result), set()
 
