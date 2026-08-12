@@ -13,7 +13,7 @@ Both endpoints are authenticated (patient token required) to ensure only
 authorised patients and clinicians can export PHI as FHIR resources.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
