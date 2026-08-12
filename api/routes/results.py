@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 from database import get_db
 from models.submission import Submission
 from models.patient import Patient
+from models.result import Result
 from routes.auth import get_current_patient
 from schemas import ResultsResponse, SubmissionStatusOut
 from utils.http import conflict_error, not_found_error
@@ -46,7 +47,7 @@ async def get_results(
         )
         .options(
             selectinload(Submission.mutations),
-            selectinload(Submission.result),
+            selectinload(Submission.result).selectinload(Result.repurposing_candidates),
         )
     )).scalar_one_or_none()
 
@@ -62,9 +63,29 @@ async def get_results(
 
     result = submission.result
     mutations = submission.mutations
-    custom_drug_possible = bool((result and result.target_gene) or mutations)
+
+    # Which of the three end states this analysis reached. An empty candidate
+    # list used to be indistinguishable from "we never looked", which became a
+    # real possibility once the oncology-relevance gate started removing
+    # non-cancer drugs from Tier 2. Callers need to tell the cases apart.
+    has_target = bool(result and result.target_gene)
+    has_candidates = bool(result and result.repurposing_candidates)
+    if not mutations:
+        recommendation_state = "no_mutations_detected"
+    elif not has_target:
+        recommendation_state = "no_targetable_mutation"
+    elif not has_candidates:
+        recommendation_state = "no_approved_therapy_found"
+    else:
+        recommendation_state = "candidates_available"
+
+    custom_drug_possible = bool(has_target or mutations)
     custom_drug_reason = (
-        "target_gene_available" if (result and result.target_gene) else
+        # A confirmed target with nothing approved against it is exactly the
+        # population custom discovery exists for, so say that rather than the
+        # generic "we have a target".
+        "no_approved_therapy_found" if recommendation_state == "no_approved_therapy_found" else
+        "target_gene_available" if has_target else
         "mutation_profile_available" if mutations else
         "insufficient_genomic_signal"
     )
@@ -156,6 +177,8 @@ async def get_results(
         "immunotherapy_profile": result.immunotherapy_profile if result else None,
         "mutational_signature": result.mutational_signature if result else None,
         "combination_therapy": result.combination_therapy or [] if result else [],
+        "recommendation_state": recommendation_state,
+        "excluded_candidates": (result.excluded_candidates or []) if result else [],
     }
 
 

@@ -102,6 +102,16 @@ class CombinationSuggestionOut(BaseModel):
     trial_ids: list[str] = Field(default_factory=list)
 
 
+class ExcludedCandidateOut(BaseModel):
+    """A drug the oncology-relevance gate withheld from the ranked list.
+
+    Reported rather than dropped silently so a reviewer can audit the filter.
+    """
+    drug_name: str
+    atc_codes: list[str] = Field(default_factory=list)
+    reason: str
+
+
 class ResultsResponse(BaseModel):
     submission_id: str
     cancer_type: Optional[str] = None
@@ -125,3 +135,8 @@ class ResultsResponse(BaseModel):
     immunotherapy_profile: Optional[ImmunotherapyProfileOut] = None
     mutational_signature: Optional[MutationalSignatureOut] = None
     combination_therapy: list[CombinationSuggestionOut] = Field(default_factory=list)
+    # Which end state the analysis reached: no_mutations_detected,
+    # no_targetable_mutation, no_approved_therapy_found, candidates_available.
+    # Distinguishes "we looked and found nothing" from "we never looked".
+    recommendation_state: Optional[str] = None
+    excluded_candidates: list[ExcludedCandidateOut] = Field(default_factory=list)

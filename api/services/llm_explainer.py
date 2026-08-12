@@ -192,18 +192,23 @@ def _template_summary(
             f"this gene and may be repurposed for your case. This could potentially reduce "
             f"the cost and time normally required to develop brand-new treatments."
             if top_drug
-            else "Our AI is searching for existing medicines that could be repurposed for your mutation."
+            # Not "we are still searching". The search has finished by the time
+            # this text is written, so saying otherwise promises a result that is
+            # never coming. See _generate_summary in workers/ai_worker.py.
+            else "We searched for existing medicines that could be repurposed for your "
+                 "mutation and did not find an approved cancer treatment that matches it. "
+                 "Clinical trials and custom drug design may still be options for you."
         )
         cosmic_sentence = (
             f"This type of change in {gene} has been recorded in {cosmic_count:,} tumour samples "
-            f"in the COSMIC database — the world's largest catalogue of cancer mutations — "
+            f"in the COSMIC database, the world's largest catalogue of cancer mutations, "
             f"which means it is a well-studied alteration."
             if cosmic_count > 0
             else ""
         )
         return (
             f"Your DNA test found a change in a gene called {gene}. "
-            f"This is called a 'targetable mutation' — it means there may be medicines "
+            f"This is called a 'targetable mutation', which means there may be medicines "
             f"that could target cancer cells with this specific change.\n\n"
             f"{cosmic_sentence}\n\n"
             f"{drug_sentence}\n\n"
@@ -213,8 +218,8 @@ def _template_summary(
     else:
         return (
             "Your DNA test did not find a mutation that matches a targeted therapy "
-            "in our research database. This does not mean there are no treatment options — "
-            "your oncologist will consider many factors beyond this one test.\n\n"
+            "in our research database. This does not mean there are no treatment options. "
+            "Your oncologist will consider many factors beyond this one test.\n\n"
             "Please share these results with your doctor as soon as possible.\n\n"
             "This report is not medical advice. "
             "Please discuss these results with your oncologist."

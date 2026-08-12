@@ -154,7 +154,58 @@ class TestGetResults:
         )
         body = resp.json()
         assert body["custom_drug_possible"] is True
+        # The fixture has a target gene and no ranked candidates, which is the
+        # specific case custom discovery exists for, so the reason is the more
+        # precise one rather than the generic "we have a target".
+        assert body["custom_drug_reason"] == "no_approved_therapy_found"
+
+    async def test_recommendation_state_reported(
+        self, client: AsyncClient, seeded_submission
+    ):
+        """A target with no ranked drug must not look like a pending analysis."""
+        resp = await client.get(
+            f"/api/results/{seeded_submission.id}",
+            headers={"Authorization": "Bearer test-token"},
+        )
+        body = resp.json()
+        assert body["recommendation_state"] == "no_approved_therapy_found"
+        assert body["excluded_candidates"] == []
+
+    async def test_recommendation_state_candidates_available(
+        self, client: AsyncClient, db_session, seeded_submission
+    ):
+        from models.repurposing import RepurposingCandidate
+        from models.result import Result
+        from sqlalchemy import select
+
+        result = (await db_session.execute(
+            select(Result).where(Result.submission_id == seeded_submission.id)
+        )).scalar_one()
+        result.excluded_candidates = [
+            {
+                "drug_name": "digitoxin",
+                "atc_codes": ["C01AA04"],
+                "reason": "not classified as an oncology therapy (WHO ATC L01/L02)",
+            }
+        ]
+        db_session.add(RepurposingCandidate(
+            result_id=result.id,
+            drug_name="osimertinib",
+            rank_score=0.9,
+        ))
+        await db_session.commit()
+
+        resp = await client.get(
+            f"/api/results/{seeded_submission.id}",
+            headers={"Authorization": "Bearer test-token"},
+        )
+        body = resp.json()
+        assert body["recommendation_state"] == "candidates_available"
         assert body["custom_drug_reason"] == "target_gene_available"
+        # The gate's audit trail survives even when candidates were found, so a
+        # reviewer can always check the filter did not remove a real therapy.
+        assert body["excluded_candidates"][0]["drug_name"] == "digitoxin"
+        assert body["excluded_candidates"][0]["atc_codes"] == ["C01AA04"]
 
 
 # ── /api/submit/ ─────────────────────────────────────────────────────────────
