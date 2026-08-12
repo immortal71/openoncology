@@ -1,0 +1,35 @@
+{
+  "acetyldigitoxin": [
+    "C01AA01"
+  ],
+  "alfuzosin": [
+    "G04CA01"
+  ],
+  "ascorbic acid": [
+    "G01AD03",
+    "A11GA01",
+    "S01XA15"
+  ],
+  "atenolol": [
+    "C07AB03",
+    "C07AB11"
+  ],
+  "belzutifan": [
+    "L01XX74"
+  ],
+  "capmatinib": [
+    "L01EX17"
+  ],
+  "imatinib": [
+    "L01EA01"
+  ],
+  "olaparib": [
+    "L01XK01"
+  ],
+  "pazopanib": [
+    "L01EX03"
+  ],
+  "sorafenib": [
+    "L01EX02"
+  ]
+}
