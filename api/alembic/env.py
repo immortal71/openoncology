@@ -18,6 +18,10 @@ from models import (  # noqa: F401
     pharma,
     order,
     oncologist,
+    bid,
+    cohort,
+    deletion_request,
+    genomics,
 )
 from config import settings
 

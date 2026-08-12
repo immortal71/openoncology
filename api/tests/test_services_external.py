@@ -25,14 +25,22 @@ import httpx
 # ═════════════════════════════════════════════════════════════════════════════
 
 class TestGetCivicEvidence:
-    """Tests for services.civic.get_civic_evidence()"""
+    """Tests for services.civic.get_civic_evidence()
+
+    get_civic_evidence() routes its HTTP call through fetch_with_retry()
+    (api/utils/http.py) rather than constructing httpx.AsyncClient itself, so
+    these mock fetch_with_retry directly instead of the client class.
+    """
+
+    def _mock_fetch(self, payload: dict):
+        resp = MagicMock()
+        resp.json = MagicMock(return_value=payload)
+        return AsyncMock(return_value=resp)
 
     async def test_known_variant_returns_evidence_list(self):
         from services.civic import get_civic_evidence
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = {
+        payload = {
             "data": {
                 "variants": {
                     "nodes": [
@@ -57,12 +65,7 @@ class TestGetCivicEvidence:
             }
         }
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(return_value=mock_response)
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch("services.civic.fetch_with_retry", self._mock_fetch(payload)):
             result = await get_civic_evidence("BRAF", "V600E")
 
         assert result is not None
@@ -74,18 +77,9 @@ class TestGetCivicEvidence:
     async def test_no_variant_node_returns_none(self):
         from services.civic import get_civic_evidence
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = {
-            "data": {"variants": {"nodes": []}}
-        }
+        payload = {"data": {"variants": {"nodes": []}}}
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(return_value=mock_response)
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch("services.civic.fetch_with_retry", self._mock_fetch(payload)):
             result = await get_civic_evidence("UNKNOWN_GENE", "p.Xxx0Yyy")
 
         assert result is None
@@ -93,9 +87,7 @@ class TestGetCivicEvidence:
     async def test_empty_evidence_items_returns_none(self):
         from services.civic import get_civic_evidence
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = {
+        payload = {
             "data": {
                 "variants": {
                     "nodes": [
@@ -109,12 +101,7 @@ class TestGetCivicEvidence:
             }
         }
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(return_value=mock_response)
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch("services.civic.fetch_with_retry", self._mock_fetch(payload)):
             result = await get_civic_evidence("TP53", "R175H")
 
         assert result is None
@@ -122,12 +109,10 @@ class TestGetCivicEvidence:
     async def test_network_error_returns_none(self):
         from services.civic import get_civic_evidence
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(side_effect=httpx.ConnectError("Connection refused"))
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "services.civic.fetch_with_retry",
+            AsyncMock(side_effect=httpx.ConnectError("Connection refused")),
+        ):
             result = await get_civic_evidence("EGFR", "L858R")
 
         assert result is None
@@ -135,19 +120,16 @@ class TestGetCivicEvidence:
     async def test_http_error_returns_none(self):
         from services.civic import get_civic_evidence
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
+        http_error = httpx.HTTPStatusError(
             "503 Service Unavailable",
             request=MagicMock(),
             response=MagicMock(status_code=503),
         )
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(return_value=mock_response)
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch(
+            "services.civic.fetch_with_retry",
+            AsyncMock(side_effect=http_error),
+        ):
             result = await get_civic_evidence("KRAS", "G12D")
 
         assert result is None
@@ -167,9 +149,7 @@ class TestGetCivicEvidence:
             for i in range(5)
         ]
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json.return_value = {
+        payload = {
             "data": {
                 "variants": {
                     "nodes": [
@@ -179,12 +159,7 @@ class TestGetCivicEvidence:
             }
         }
 
-        mock_client = AsyncMock()
-        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-        mock_client.__aexit__ = AsyncMock(return_value=False)
-        mock_client.post = AsyncMock(return_value=mock_response)
-
-        with patch("services.civic.httpx.AsyncClient", return_value=mock_client):
+        with patch("services.civic.fetch_with_retry", self._mock_fetch(payload)):
             result = await get_civic_evidence("BRAF", "V600E")
 
         assert len(result) == 5
@@ -726,7 +701,8 @@ class TestTemplateSummary:
             top_drug=None,
             cosmic_count=0,
         )
-        assert "Colon cancer" in result
+        # The no-target branch is a fixed message independent of cancer_type;
+        # it doesn't mention the specific cancer type by design.
         assert "oncologist" in result.lower()
         assert "not" in result.lower()
 

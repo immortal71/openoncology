@@ -21,7 +21,7 @@ from models.submission import Submission
 from services.drug_discovery import build_custom_discovery_brief
 from routes.auth import get_current_patient
 from workers.custom_drug_worker import build_custom_drug_brief
-from utils.http import api_error, bad_request_error, forbidden_error, not_found_error
+from utils.http import bad_request_error, forbidden_error, not_found_error
 from middleware.rate_limit import limiter, READ_LIMIT, WRITE_LIMIT
 
 router = APIRouter(prefix="/api/marketplace", tags=["marketplace"])

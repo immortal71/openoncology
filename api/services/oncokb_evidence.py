@@ -2504,6 +2504,107 @@ def _normalise_alteration(alt: str) -> str:
     return _ALTERATION_ALIASES.get(s, s)
 
 
+# EGFR exon 19 spans codons ~729-761 (UniProt P00533 domain annotation;
+# COSMIC/OncoKB treat any in-frame deletion within this span as a single
+# actionable class -- 1st/2nd/3rd-gen EGFR TKIs are effective regardless of
+# the exact deletion endpoints). The evidence table only has a handful of
+# named endpoint pairs (E746_A750del, etc.) plus a generic EXON19DEL bucket;
+# real VCF/cBioPortal data reports dozens of other endpoint combinations
+# (e.g. T751_E758del) that are clinically identical but don't match any
+# exact key. Real de-identified TCGA data hit this gap directly (see
+# docs/REAL_PATIENT_CONCORDANCE_PILOT_2026-07-28.md), which is why this
+# exists: exact-alias lookup alone silently drops real, actionable patients.
+_EGFR_EXON19_DEL_RANGE = (729, 761)
+# KIT exon 11 (juxtamembrane domain, the classic GIST driver hotspot region):
+# codons 550-592. Reference: Corless CL et al., Nat Rev Cancer 2011; NCCN GIST
+# guidelines. Deliberately scoped to ONLY this one well-documented range --
+# not extended to KIT's other exon buckets (9/13/14/17/18) or other genes,
+# because getting a domain boundary wrong would silently misclassify a real
+# variant into the wrong drug bucket, which is worse than the honest "no
+# match" this replaces.
+_KIT_EXON11_DEL_RANGE = (550, 592)
+# NOTE: _normalise_alteration() strips underscores before this is checked, so
+# "T751_E758del" arrives here as "T751E758DEL" -- no separator between the
+# two residue tokens. The (?:DEL)? groups aren't ambiguous in practice because
+# a lone amino-acid letter can't be immediately followed by another
+# letter+digit run except at the second residue boundary.
+_RANGE_DEL_RE = re.compile(r"^([A-Z])(\d+)([A-Z])(\d+)DEL(INS[A-Z*]+)?$")
+
+# EGFR/ERBB2 exon 20 span codons ~762-823 (UniProt P00533 / P04626 kinase
+# domain annotation). Real exon 20 insertions (a distinct, well-studied class
+# from exon 19 deletions -- they confer resistance to classical EGFR TKIs,
+# per the EXON20INS table entry's own R1 resistance flags) occur at dozens of
+# documented insertion points within this span; the table only has 2-3 named
+# examples plus the generic bucket. Same rationale and same conservative,
+# gene-specific scoping as the exon 19 / KIT exon 11 fixes above.
+_EGFR_EXON20_INS_RANGE = (762, 823)
+_ERBB2_EXON20_INS_RANGE = (762, 823)  # ERBB2 (HER2) kinase domain is
+# structurally homologous to EGFR's; same codon numbering convention is used
+# in the clinical literature for HER2 exon 20 (e.g. A775_G776insYVMA).
+# Pure insertion, no deletion: "H773_V774insH" -> normalised "H773V774INSH".
+_RANGE_INS_RE = re.compile(r"^([A-Z])(\d+)([A-Z])(\d+)INS[A-Z*]+$")
+
+
+def _is_range_del_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
+    """True if alt_norm_upper is an in-frame deletion (optionally delins)
+    whose residue range falls entirely within the given (lo, hi) span."""
+    m = _RANGE_DEL_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    start, end = int(m.group(2)), int(m.group(4))
+    lo, hi = residue_range
+    return lo <= start <= hi and lo <= end <= hi
+
+
+def _is_range_ins_within(alt_norm_upper: str, residue_range: tuple[int, int]) -> bool:
+    """True if alt_norm_upper is a pure in-frame insertion whose residue
+    range falls entirely within the given (lo, hi) span."""
+    m = _RANGE_INS_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    start, end = int(m.group(2)), int(m.group(4))
+    lo, hi = residue_range
+    return lo <= start <= hi and lo <= end <= hi
+
+
+def _is_egfr_exon19_range_del(alt_norm_upper: str) -> bool:
+    return _is_range_del_within(alt_norm_upper, _EGFR_EXON19_DEL_RANGE)
+
+
+def _is_kit_exon11_range_del(alt_norm_upper: str) -> bool:
+    return _is_range_del_within(alt_norm_upper, _KIT_EXON11_DEL_RANGE)
+
+
+def _is_egfr_exon20_range_ins(alt_norm_upper: str) -> bool:
+    return _is_range_ins_within(alt_norm_upper, _EGFR_EXON20_INS_RANGE)
+
+
+def _is_erbb2_exon20_range_ins(alt_norm_upper: str) -> bool:
+    return _is_range_ins_within(alt_norm_upper, _ERBB2_EXON20_INS_RANGE)
+
+
+# CALR exon 9 (UniProt P27797) spans roughly codons 359-417; essentially all
+# clinically reported MPN-driver CALR mutations are frameshifts starting in
+# this span (Type 1: 52bp del, canonical L367fs*46; Type 2: 5bp ins,
+# canonical K385fs*47; plus dozens of less common indels reported the same
+# way). The table has only the Type 2-named entry plus a generic EXON9DEL
+# bucket -- real variants are reported as HGVS frameshift notation
+# (L367fs*46, K385Nfs*47, ...), which never matches either literal key.
+# Scoped to CALR only and to the documented exon 9 span, same conservative
+# rationale as the EGFR/KIT/ERBB2 range fixes above.
+_CALR_EXON9_FS_RANGE = (359, 417)
+_FS_RE = re.compile(r"^([A-Z])(\d+)[A-Z]?FS\*?\d*$")
+
+
+def _is_calr_exon9_range_fs(alt_norm_upper: str) -> bool:
+    m = _FS_RE.match(alt_norm_upper)
+    if not m:
+        return False
+    pos = int(m.group(2))
+    lo, hi = _CALR_EXON9_FS_RANGE
+    return lo <= pos <= hi
+
+
 def _normalise_drug(name: str) -> str:
     """Normalise drug name for matching."""
     return re.sub(r"[\s\-.]", "", name.lower())
@@ -2619,6 +2720,16 @@ def _get_all_drugs_for_variant_internal(
             if g == gene_upper and "+" not in a and (alt_norm in a or a in alt_norm):
                 result = drugs
                 break
+    if not result and gene_upper == "EGFR" and _is_egfr_exon19_range_del(alt_norm):
+        result = _LEVEL_TABLE.get(("EGFR", "EXON19DEL"), {})
+    if not result and gene_upper == "KIT" and _is_kit_exon11_range_del(alt_norm):
+        result = _LEVEL_TABLE.get(("KIT", "EXON11DEL"), {})
+    if not result and gene_upper == "EGFR" and _is_egfr_exon20_range_ins(alt_norm):
+        result = _LEVEL_TABLE.get(("EGFR", "EXON20INS"), {})
+    if not result and gene_upper == "ERBB2" and _is_erbb2_exon20_range_ins(alt_norm):
+        result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
+    if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
+        result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
     if result:
         return dict(result), set()
 
