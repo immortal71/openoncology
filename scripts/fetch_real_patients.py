@@ -981,7 +981,64 @@ def _parse_args() -> argparse.Namespace:
         default="real_patient_benchmark_200.json",
         help="Output JSON benchmark filename (written at project root)",
     )
+    parser.add_argument(
+        "--manifest",
+        type=str,
+        default=None,
+        help=(
+            "Run against a pinned cohort instead of drawing one live from "
+            "cBioPortal. Without this the patient set differs between runs, so "
+            "two results are not comparable and a real regression is "
+            "indistinguishable from a different draw. Pinned cohorts live in "
+            "validation_results/."
+        ),
+    )
+    parser.add_argument(
+        "--write-manifest",
+        type=str,
+        default=None,
+        help="Write the cohort selected by this run to PATH so it can be replayed",
+    )
     return parser.parse_args()
+
+
+# Fields that define a case. Everything the benchmark needs to rebuild the VCF
+# and biopsy files is already carried on the patient record, so a manifest is
+# self-contained and replaying one needs no cBioPortal call at all.
+_MANIFEST_FIELDS = (
+    "sample_id", "patient_id", "study_id", "cancer_type", "gene",
+    "protein_change", "mutation_type", "chr", "start", "end", "ref", "alt",
+    "genome_build", "source_url", "actionability_score", "patient_num",
+)
+
+
+def _write_manifest(path: str, patients: list[dict]) -> None:
+    payload = {
+        "description": (
+            "Pinned benchmark cohort. Replay with "
+            "scripts/fetch_real_patients.py --manifest <this file>."
+        ),
+        "n_patients": len(patients),
+        "data_source": "https://www.cbioportal.org",
+        "patients": [
+            {k: p.get(k) for k in _MANIFEST_FIELDS if k in p} for p in patients
+        ],
+    }
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(payload, fh, indent=2)
+    print(f"Wrote cohort manifest: {path} ({len(patients)} cases)")
+
+
+def _load_manifest(path: str) -> list[dict]:
+    with open(path, encoding="utf-8") as fh:
+        payload = json.load(fh)
+    patients = payload.get("patients") or []
+    if not patients:
+        raise SystemExit(f"Manifest {path} contains no patients")
+    for i, p in enumerate(patients, start=1):
+        p.setdefault("patient_num", i)
+    return patients
 
 
 def _load_local_dry_run_cases(target_n: int) -> list[dict[str, Any]]:
@@ -1080,15 +1137,30 @@ def main():
     outdir = os.path.join(os.path.dirname(__file__), "..", "samples", "real")
     os.makedirs(outdir, exist_ok=True)
 
-    print("Fetching real patient data from cBioPortal (TCGA open-access, real de-identified human cases)...")
-    print("=" * 70)
-    patients = select_patients(STUDIES, max_patients=target_n)
+    if args.manifest:
+        patients = _load_manifest(args.manifest)
+        print(f"Replaying pinned cohort from {args.manifest} ({len(patients)} cases)")
+        print("=" * 70)
+    else:
+        print("Fetching real patient data from cBioPortal (TCGA open-access, real de-identified human cases)...")
+        print("=" * 70)
+        patients = select_patients(STUDIES, max_patients=target_n)
 
-    if len(patients) < target_n:
-        print(f"[WARN] Requested {target_n} cases but found {len(patients)} real actionable mutation cases")
+        if len(patients) < target_n:
+            print(f"[WARN] Requested {target_n} cases but found {len(patients)} real actionable mutation cases")
+        # The cohort is drawn live, so this run is not comparable with any
+        # other. Say so rather than letting the percentage look like a score.
+        print(
+            f"[NOTE] Cohort drawn live from cBioPortal, so it differs between "
+            f"runs. Pass --manifest to replay a pinned cohort, or "
+            f"--write-manifest to pin this one."
+        )
     if not patients:
         print("[ERROR] Could not retrieve any patients. Check network connectivity.")
         sys.exit(1)
+
+    if args.write_manifest:
+        _write_manifest(args.write_manifest, patients)
 
     results = []
     tier_counts = {
