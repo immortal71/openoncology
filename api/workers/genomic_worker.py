@@ -275,7 +275,7 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
 def sweep_stale_submissions(self):
     """Re-queue or fail submissions that have been stuck in 'processing' > 6 hours."""
     from datetime import datetime, timedelta, UTC
-    from sqlalchemy import select, update
+    from sqlalchemy import select
     from workers._db_sync import get_sync_session
     from models.submission import Submission, SubmissionStatus
 

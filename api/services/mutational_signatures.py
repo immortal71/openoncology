@@ -39,8 +39,7 @@ from __future__ import annotations
 
 import logging
 import os
-import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -396,5 +395,4 @@ def _parse_vcf_snvs(vcf_path: str | Path) -> list[dict]:
 
 def _run_sigprofiler(mutations: list[dict]) -> SignatureResult:
     """Use SigProfilerAssignment for full COSMIC decomposition (optional)."""
-    from SigProfilerAssignment import Analyzer  # type: ignore[import]
     raise NotImplementedError("SigProfiler integration not yet wired — falls back to heuristic")

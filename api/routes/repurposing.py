@@ -183,8 +183,10 @@ async def get_clinical_trial_matches(
         v = hgvs.lstrip("p.")
         m3 = _re.match(r"^([A-Z][a-z]{2})(\d+)([A-Z][a-z]{2}|\*)$", v)
         if m3:
-            ref = _AA3.get(m3.group(1)); alt = _AA3.get(m3.group(3), m3.group(3))
-            if ref: top_variant = f"{ref}{m3.group(2)}{alt}"
+            ref = _AA3.get(m3.group(1))
+            alt = _AA3.get(m3.group(3), m3.group(3))
+            if ref:
+                top_variant = f"{ref}{m3.group(2)}{alt}"
         elif _re.match(r"^[A-Z\*]\d+[A-Z\*]$", v):
             top_variant = v
 
