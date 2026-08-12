@@ -42,6 +42,12 @@ class Result(Base):
     # Combination therapy suggestions (list of drug-pair recommendations)
     combination_therapy: Mapped[Any] = mapped_column(JSON, nullable=True)
 
+    # Candidates the oncology-relevance gate withheld, as
+    # [{drug_name, atc_codes, reason}]. Kept so a reviewer can audit what the
+    # filter removed rather than having to trust it silently. See
+    # services/oncology_atc.py.
+    excluded_candidates: Mapped[Any] = mapped_column(JSON, nullable=True)
+
     # S3 key for the generated PDF report
     report_pdf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
 
