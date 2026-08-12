@@ -1,5 +1,6 @@
 from .responses import (
     DrugCandidateOut,
+    ExcludedCandidateOut,
     MutationOut,
     OncologistReportOut,
     ResultsResponse,
@@ -9,6 +10,7 @@ from .responses import (
 
 __all__ = [
     "DrugCandidateOut",
+    "ExcludedCandidateOut",
     "MutationOut",
     "OncologistReportOut",
     "ResultsResponse",

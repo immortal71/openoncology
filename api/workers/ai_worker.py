@@ -114,6 +114,7 @@ def run_ai_analysis(
         target_gene = None
         alphafold_pdb_path: str | None = None
         combination_therapy_data: list[dict] = []
+        excluded_candidates: list[dict] = []
 
         if targetable_mutations:
             top_mutation = targetable_mutations[0]
@@ -124,7 +125,7 @@ def run_ai_analysis(
 
             # Aggregate candidate drugs from multiple evidence sources, then
             # score them against the mutation-specific structure when possible.
-            drugs, alphafold_pdb_path = _query_repurposing_candidates(
+            drugs, alphafold_pdb_path, excluded_candidates = _query_repurposing_candidates(
                 target_gene,
                 protein_variant=top_variant,
                 hgvs=top_mutation.hgvs_notation,
@@ -270,7 +271,23 @@ def run_ai_analysis(
         # Step 5: Build result with LLM plain-language summary
         with get_sync_session() as db:
             has_target = len(targetable_mutations) > 0
-            summary = _generate_summary(mutations, targetable_mutations, repurposing_candidates)
+            summary = _generate_summary(
+                mutations, targetable_mutations, repurposing_candidates, excluded_candidates
+            )
+
+            # Audit trail for the oncology-relevance gate. Recorded even when
+            # ranked candidates were still found, so a reviewer can always tell
+            # what the filter withheld and check it did not remove a genuine
+            # cancer therapy. Empty list is stored as NULL.
+            excluded_data = [
+                {
+                    "drug_name": d.get("drug_name"),
+                    "atc_codes": d.get("atc_codes") or [],
+                    "reason": "not classified as an oncology therapy (WHO ATC L01/L02)",
+                }
+                for d in excluded_candidates
+                if d.get("drug_name")
+            ]
 
             # Generate patient-friendly plain-language summary (LLM or template fallback)
             top_drug = (
@@ -309,6 +326,7 @@ def run_ai_analysis(
                 immunotherapy_profile=imm_profile_data if targetable_mutations else None,
                 mutational_signature=sig_data if targetable_mutations else None,
                 combination_therapy=combination_therapy_data or None,
+                excluded_candidates=excluded_data or None,
             )
             db.add(result)
             db.flush()
@@ -712,7 +730,7 @@ def _query_repurposing_candidates(
     hgvs: str | None = None,
     cancer_type: str | None = None,
     submission_id: str = "unknown",
-) -> tuple[list[dict], str | None]:
+) -> tuple[list[dict], str | None, list[dict]]:
     """Query multiple evidence sources for FDA-approved repurposing candidates.
 
     Sources queried (in priority order):
@@ -728,7 +746,11 @@ def _query_repurposing_candidates(
     mutated protein structure is folded first and passed to DiffDock for
     mutation-specific binding scores.
 
-    Returns (drugs, alphafold_pdb_path) — pdb_path is None if AlphaFold failed.
+    Returns (drugs, alphafold_pdb_path, excluded). pdb_path is None if AlphaFold
+    failed. `excluded` holds the candidates the oncology-relevance gate removed,
+    returned rather than dropped so the caller can record what was withheld and
+    why. A filter that stands between a patient and a treatment option should
+    leave an audit trail, not just a log line.
     """
     from services.opentargets import get_target_id, get_drugs_for_target
     from services.chembl import get_molecule, search_molecule_by_name
@@ -736,7 +758,7 @@ def _query_repurposing_candidates(
     from services.dgidb import get_interactions as get_dgidb_interactions
     from ai.diffdock.score import score_binding
 
-    async def _fetch() -> tuple[list[dict], str | None]:
+    async def _fetch() -> tuple[list[dict], str | None, list[dict]]:
         # ── Source 1: OpenTargets (expanded to 50 drugs) ─────────────────────
         ensg_id = await get_target_id(gene)
         ot_drugs = await get_drugs_for_target(ensg_id, max_drugs=50) if ensg_id else []
@@ -915,6 +937,7 @@ def _query_repurposing_candidates(
         # ascorbic acid and BPH drugs to cancer patients as ranked candidates.
         # Drops only on positive WHO ATC evidence of a non-oncology class;
         # an unknown or unclassified drug is kept. See services/oncology_atc.py.
+        non_oncology: list[dict] = []
         try:
             from services.oncology_atc import partition_candidates
 
@@ -930,10 +953,10 @@ def _query_repurposing_candidates(
         except Exception as exc:  # noqa: BLE001 - never fail a case on the gate
             logger.warning("[repurpose] oncology gate unavailable (%s); unfiltered", exc)
 
-        return fda_approved_candidates, pre_folded_pdb_key
+        return fda_approved_candidates, pre_folded_pdb_key, non_oncology
 
-    drugs, pdb_path = asyncio.run(_fetch())
-    return drugs, pdb_path
+    drugs, pdb_path, excluded = asyncio.run(_fetch())
+    return drugs, pdb_path, excluded
 
 
 def _run_diffdock(chembl_id: str | None, gene: str, hgvs: str | None) -> float | None:
@@ -942,27 +965,66 @@ def _run_diffdock(chembl_id: str | None, gene: str, hgvs: str | None) -> float |
     return None
 
 
-def _generate_summary(mutations, targetable, repurposing) -> str:
-    """Generate a technical summary for oncologist review."""
+def _generate_summary(mutations, targetable, repurposing, excluded=None) -> str:
+    """Generate a technical summary for oncologist review.
+
+    Three outcomes are reported separately, because they call for different
+    next steps and used to collapse into the same optimistic wording:
+
+      1. no targetable mutation was found
+      2. a targetable mutation was found, but no approved cancer therapy
+         matched it
+      3. a targetable mutation was found and candidate drugs were ranked
+
+    Case 2 previously rendered as "Top candidate drugs: currently being
+    analyzed", which reads as work still in progress. The search had in fact
+    finished and returned nothing. That case became more common once the
+    oncology-relevance gate started removing non-cancer drugs from Tier 2
+    (see services/oncology_atc.py), so it has to say plainly that we looked
+    and came up empty. An empty result is only an improvement over
+    recommending digitoxin if it is labelled as an empty result.
+    """
     total = len(mutations)
     n_target = len(targetable)
+    excluded = excluded or []
 
     if n_target == 0:
         return (
             f"We analyzed your DNA sample and found {total} genetic variation(s). "
             "None of these mutations currently have known targeted treatment options. "
-            "This does not mean treatment is unavailable — your oncologist can advise on other options."
+            "This does not mean treatment is unavailable. Your oncologist can advise "
+            "on other options."
         )
 
+    genes = ", ".join(m.gene for m in targetable)
     drug_names = [r["drug_name"] for r in repurposing[:3] if r.get("drug_name")]
-    drug_str = ", ".join(drug_names) if drug_names else "currently being analyzed"
+
+    if not drug_names:
+        parts = [
+            f"We found {n_target} targetable mutation(s) in genes: {genes}.",
+            "We completed the drug search and did not find an approved cancer "
+            "therapy matching these mutations.",
+        ]
+        if excluded:
+            names = ", ".join(
+                d.get("drug_name") for d in excluded[:3] if d.get("drug_name")
+            )
+            parts.append(
+                f"{len(excluded)} drug(s) that interact with these genes were set "
+                f"aside because they are not cancer treatments ({names})."
+            )
+        parts.append(
+            "Clinical trials and custom drug discovery may still apply. "
+            "Please review this report with a qualified oncologist."
+        )
+        return " ".join(parts)
 
     return (
-        f"We found {n_target} targetable mutation(s) in genes: "
-        f"{', '.join(m.gene for m in targetable)}. "
-        f"These mutations may be treatable with existing or repurposed drugs. "
-        f"Top candidate drugs: {drug_str}. "
-        "Please review this report with a qualified oncologist before making any treatment decisions."
+        f"We found {n_target} targetable mutation(s) in genes: {genes}. "
+        "These mutations may be treatable with existing or repurposed drugs. "
+        f"Top candidate drugs: {', '.join(drug_names)}. "
+        "Please review this report with a qualified oncologist before making any "
+        "treatment decisions."
     )
 
 
