@@ -87,7 +87,14 @@ DRUG_CLASSES: dict[str, set[str]] = {
     "CDK46_INHIBITOR": {"palbociclib", "ribociclib", "abemaciclib"},
     "CHECKPOINT": {"nivolumab", "pembrolizumab", "atezolizumab", "durvalumab",
                    "ipilimumab", "dostarlimab"},
-    "PARP_WEE1": {"adavosertib", "olaparib", "niraparib", "talazoparib", "rucaparib"},
+    # PARP and WEE1 are NOT grouped together. Both act on the DNA-damage
+    # response, but they are mechanistically distinct targets and a PARP
+    # inhibitor is not a clinical substitute for a WEE1 inhibitor. They were
+    # briefly grouped here, which silently converted the adavosertib arm (Z1I)
+    # from a miss into a class hit once BRCA started resolving -- exactly the
+    # "expand a class group to manufacture a hit" failure the doc warns about.
+    "PARP_INHIBITOR": {"olaparib", "niraparib", "talazoparib", "rucaparib"},
+    "WEE1_INHIBITOR": {"adavosertib"},
     "FAK_INHIBITOR": {"defactinib"},
 }
 

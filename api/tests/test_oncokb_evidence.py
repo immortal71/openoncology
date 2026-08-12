@@ -226,6 +226,52 @@ class TestGetAllDrugsForVariant:
         assert drug_levels.get("ruxolitinib") == "LEVEL_1"
         assert drug_levels.get("fedratinib") == "LEVEL_2"
 
+    # ── BRCA1/2 truncating variants → PARP inhibitors ────────────────────────
+    # The ("BRCA1"/"BRCA2", "TRUNCATING") evidence existed but was only
+    # reachable by exact literal key, and the four frameshift aliases meant to
+    # reach it were spelled "truncation" against a "TRUNCATING" key, so they
+    # resolved to nothing. Real-world truncating BRCA variants returned no
+    # recommendation at all.
+
+    def test_brca2_s1982fs_resolves_to_parp_inhibitors(self):
+        """S1982fs (the 6174delT founder allele) is among the most frequently
+        reported pathogenic BRCA2 variants. Before the fix this returned {}."""
+        drugs = get_all_drugs_for_variant("BRCA2", "S1982fs")
+        drug_levels = {k.lower(): v for k, v in drugs.items()}
+        assert drug_levels.get("olaparib") == "LEVEL_1"
+        assert drug_levels.get("talazoparib") == "LEVEL_1"
+
+    def test_brca1_frameshift_resolves_to_parp_inhibitors(self):
+        drugs = get_all_drugs_for_variant("BRCA1", "Q1395fs")
+        assert {k.lower() for k in drugs} >= {"olaparib", "niraparib", "rucaparib"}
+
+    def test_brca_nonsense_variants_resolve_to_parp_inhibitors(self):
+        """A premature stop truncates the protein, so nonsense variants carry
+        the same PARP-inhibitor evidence as frameshifts."""
+        for gene, variant in [("BRCA1", "R1443*"), ("BRCA2", "K3326X")]:
+            drugs = get_all_drugs_for_variant(gene, variant)
+            assert "olaparib" in {k.lower() for k in drugs}, f"{gene} {variant}"
+
+    def test_brca_missense_not_matched_by_truncating_detector(self):
+        """C61G is a real pathogenic BRCA1 RING-domain missense variant, but
+        pathogenicity of a missense change cannot be decided from notation --
+        that is what the AlphaMissense gene-level fallback is for. The
+        truncating detector must not claim it."""
+        assert get_all_drugs_for_variant("BRCA1", "C61G") == {}
+        assert get_all_drugs_for_variant("BRCA2", "N372H") == {}
+
+    def test_truncating_variant_on_unrelated_gene_gets_no_parp(self):
+        """The detector is scoped to BRCA1/2 only -- a frameshift or nonsense
+        variant elsewhere must not pick up PARP-inhibitor evidence."""
+        for gene, variant in [("TP53", "R213*"), ("APC", "Q1367fs")]:
+            drugs = {k.lower() for k in get_all_drugs_for_variant(gene, variant)}
+            assert not (drugs & {"olaparib", "niraparib", "rucaparib", "talazoparib"})
+
+    def test_brca_named_literal_entry_still_resolves(self):
+        """185delAG resolved correctly before the fix and must be unaffected."""
+        drugs = get_all_drugs_for_variant("BRCA1", "185delAG")
+        assert "olaparib" in {k.lower() for k in drugs}
+
     def test_egfr_deletion_outside_exon19_range_does_not_match(self):
         """A deletion with residue numbers outside the exon 19 span (e.g. in
         the kinase domain near T790M/exon 20) must NOT be treated as an

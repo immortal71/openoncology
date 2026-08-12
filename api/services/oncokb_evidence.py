@@ -1613,11 +1613,15 @@ _ALTERATION_ALIASES: dict[str, str] = {
     "kmt2amllt10": "rearrangement",  # t(10;11)
     "kmt2amllt1": "rearrangement",   # t(11;19)
     "kmt2arearranged": "rearrangement",
-    # BRCA truncating frameshift aliases → resolve to "truncation" for BRCA PARP-i evidence
-    "q1395fs": "truncation",     # BRCA1 Q1395fs — pathogenic truncating frameshift
-    "q1429fs": "truncation",     # BRCA1 Q1429fs
-    "e1143fs": "truncation",     # BRCA2 E1143fs
-    "s1982fs": "truncation",     # BRCA1 S1982fs
+    # BRCA truncating frameshift aliases → resolve to the BRCA PARP-i evidence.
+    # These previously mapped to "truncation", but the table key is "TRUNCATING",
+    # so every one of them resolved to a non-existent key and returned nothing.
+    # The _is_brca_truncating detector now covers these generically; the aliases
+    # are kept (spelled correctly) as explicit documentation of known variants.
+    "q1395fs": "truncating",     # BRCA1 Q1395fs — pathogenic truncating frameshift
+    "q1429fs": "truncating",     # BRCA1 Q1429fs
+    "e1143fs": "truncating",     # BRCA2 E1143fs
+    "s1982fs": "truncating",     # BRCA2 S1982fs (6174delT); comment previously said BRCA1
 }
 
 
@@ -2605,6 +2609,37 @@ def _is_calr_exon9_range_fs(alt_norm_upper: str) -> bool:
     return lo <= pos <= hi
 
 
+# BRCA1/2 truncating-variant detector.
+#
+# The ("BRCA1"/"BRCA2", "TRUNCATING") entries already carry the intended
+# evidence (LEVEL_1 olaparib/niraparib/rucaparib/talazoparib) and the table
+# comment above them states the clinical rule outright: any pathogenic BRCA1/2
+# variant is equivalent for PARP-inhibitor prescribing. Those entries were only
+# reachable by an exact literal key, so real-world truncating variants -- which
+# are reported in HGVS frameshift/nonsense/splice notation -- silently returned
+# nothing. BRCA2 S1982fs, one of the most frequently reported pathogenic BRCA2
+# variants, resolved to no recommendation at all.
+#
+# Same conservative shape as the EGFR exon-19, KIT exon-11, exon-20 and CALR
+# exon-9 detectors: scoped to two genes, and only to variant classes that are
+# pathogenic by mechanism (a premature stop truncates the protein). Missense is
+# deliberately NOT matched -- deciding whether a given BRCA missense is
+# pathogenic needs AlphaMissense/ClinVar evidence, which is what the existing
+# gene-level fallback is for, not a notation pattern.
+_BRCA_NONSENSE_RE = re.compile(r"^[A-Z]\d+(\*|X)$")
+_BRCA_SPLICE_RE = re.compile(r"^(X\d+_SPLICE|\d+(\+|-)\d+[ACGT]>[ACGT]|IVS\d+.*)$")
+
+
+def _is_brca_truncating(alt_norm_upper: str) -> bool:
+    if _FS_RE.match(alt_norm_upper):          # frameshift, e.g. S1982FS
+        return True
+    if _BRCA_NONSENSE_RE.match(alt_norm_upper):  # nonsense, e.g. Q1395* / R1443X
+        return True
+    if _BRCA_SPLICE_RE.match(alt_norm_upper):    # splice, e.g. IVS7+1G>A
+        return True
+    return "SPLICE" in alt_norm_upper or "TRUNCAT" in alt_norm_upper
+
+
 def _normalise_drug(name: str) -> str:
     """Normalise drug name for matching."""
     return re.sub(r"[\s\-.]", "", name.lower())
@@ -2730,6 +2765,8 @@ def _get_all_drugs_for_variant_internal(
         result = _LEVEL_TABLE.get(("ERBB2", "EXON20INS"), {})
     if not result and gene_upper == "CALR" and _is_calr_exon9_range_fs(alt_norm):
         result = _LEVEL_TABLE.get(("CALR", "EXON9DEL"), {})
+    if not result and gene_upper in ("BRCA1", "BRCA2") and _is_brca_truncating(alt_norm):
+        result = _LEVEL_TABLE.get((gene_upper, "TRUNCATING"), {})
     if result:
         return dict(result), set()
 

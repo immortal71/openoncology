@@ -83,7 +83,13 @@ That prevalence rule is not uniformly favourable, which is the point: it moved a
 | Out of scope | 6 |
 | **Exact Top-3 concordance** | **12/32 = 37.5%** |
 | **Class Top-3 concordance** | **22/32 = 68.8%** |
-| No recommendation returned | 5/32 = 15.6% |
+| No recommendation returned | 4/32 = 12.5% |
+
+> No-prediction fell from 5/32 to 4/32 when the BRCA1/2 truncating-variant fix
+> landed (BRCA1 now returns PARP inhibitors instead of nothing). Concordance did
+> **not** move: arm Z1I assigns adavosertib, a WEE1 inhibitor, so recommending a
+> PARP inhibitor is correctly still scored a miss. A real coverage improvement
+> that does not flatter this benchmark is the expected shape of an honest fix.
 
 Out of scope: 2 arms keyed on protein expression/IHC rather than a DNA variant
 (`PTEN expression`, `MLH1/MSH2 loss by IHC`, `LAG-3 expression`), and 4 whose arm
@@ -150,7 +156,13 @@ replacement for another.
 - **Class-equivalence groups are hand-authored** (`DRUG_CLASSES` in the script),
   using the same grouping rationale as
   `docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md`. Exact and class figures are always
-  reported separately and never merged.
+  reported separately and never merged. This is the most gameable part of the
+  benchmark and it has already caught one real instance: PARP and WEE1 inhibitors
+  were briefly grouped together, which silently turned the adavosertib arm from a
+  miss into a hit as soon as BRCA started resolving. They are now separate groups
+  (different targets; a PARP inhibitor is not a substitute for a WEE1 inhibitor)
+  and the arm scores as a miss again. Treat any future edit to `DRUG_CLASSES` that
+  raises the score as suspect until justified by shared mechanism alone.
 - Arm W scores `miss` partly on a string-formatting artifact: the assigned agent is
   recorded as `"FGFR Inhibitor AZD4547"`, which does not normalise onto the
   `azd4547` class member. Left uncorrected rather than special-cased.

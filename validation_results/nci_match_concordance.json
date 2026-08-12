@@ -5,7 +5,7 @@
   "n_scored": 32,
   "exact_top3": 12,
   "class_top3": 22,
-  "no_prediction": 5,
+  "no_prediction": 4,
   "exact_top3_pct": 37.5,
   "class_top3_pct": 68.8,
   "results": [
@@ -610,9 +610,13 @@
       "declared_drugs": [
         "Adavosertib"
       ],
-      "variant_used": null,
-      "gene_used": null,
-      "pipeline_top3": [],
+      "variant_used": "K654Sfs*47",
+      "gene_used": "BRCA1",
+      "pipeline_top3": [
+        "niraparib",
+        "olaparib",
+        "rucaparib"
+      ],
       "exact_hit": false,
       "class_hit": false
     },
