@@ -907,6 +907,29 @@ def _query_repurposing_candidates(
             gene,
             len(merged_drugs),
         )
+
+        # Oncology-relevance gate. "FDA-approved" alone is not a therapeutic
+        # rationale: DGIdb/OpenTargets will happily return any approved drug
+        # with a recorded gene interaction, which previously surfaced cardiac
+        # glycosides (digitoxin, deslanoside), a beta blocker (atenolol),
+        # ascorbic acid and BPH drugs to cancer patients as ranked candidates.
+        # Drops only on positive WHO ATC evidence of a non-oncology class;
+        # an unknown or unclassified drug is kept. See services/oncology_atc.py.
+        try:
+            from services.oncology_atc import partition_candidates
+
+            fda_approved_candidates, non_oncology = partition_candidates(
+                fda_approved_candidates, allow_network=False
+            )
+            if non_oncology:
+                logger.info(
+                    "[repurpose] excluded %d non-oncology candidate(s) for %s: %s",
+                    len(non_oncology), gene,
+                    ", ".join(d.get("drug_name", "?") for d in non_oncology[:5]),
+                )
+        except Exception as exc:  # noqa: BLE001 - never fail a case on the gate
+            logger.warning("[repurpose] oncology gate unavailable (%s); unfiltered", exc)
+
         return fda_approved_candidates, pre_folded_pdb_key
 
     drugs, pdb_path = asyncio.run(_fetch())

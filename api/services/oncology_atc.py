@@ -216,26 +216,16 @@ def partition_candidates(
     return keep, dropped
 
 
-# ── STATUS: NOT WIRED IN ─────────────────────────────────────────────────────
-# Nothing calls this module yet, and it must not be wired into
-# _query_repurposing_candidates until the ATC source is reliable.
+# ── STATUS: WIRED IN ─────────────────────────────────────────────────────────
+# Called from api/workers/ai_worker.py::_query_repurposing_candidates with
+# allow_network=False, so it reads only the committed offline cache
+# (validation_results/atc_cache.json -- 4,841 drugs from ChEMBL's bulk
+# atc_class endpoint, 374 of them L01/L02). No live lookup on the request path,
+# and the gate is wrapped so it can never fail a case.
 #
-# The decision logic above is correct and safe: verified to keep 12/12 real
-# oncology drugs (imatinib, olaparib, tamoxifen, sunitinib, pazopanib,
-# capmatinib, sorafenib, bevacizumab, trastuzumab, everolimus, belzutifan,
-# larotrectinib) while dropping acetyldigitoxin, atenolol, ascorbic acid and
-# alfuzosin.
+# The cache is committed rather than fetched at runtime because ChEMBL's
+# per-drug /molecule/search endpoint is unreliable: digitoxin resolved to
+# C01AA04 on one attempt and returned nothing on later ones. The bulk
+# atc_class endpoint is stable, so it is fetched once and stored.
 #
-# The blocker is the data source, not the logic. ChEMBL's /molecule/search
-# endpoint answers inconsistently: digitoxin returned C01AA04 early in testing
-# and UNKNOWN on later attempts, including across three retries with backoff.
-# Because unknown means keep, a degraded ChEMBL makes this filter inert rather
-# than dangerous -- it stops removing noise, it never removes a real therapy.
-#
-# To finish this, replace the per-drug live search with a bulk, offline ATC
-# source and commit the resulting cache so lookups are deterministic:
-#   - ChEMBL bulk download (chembl_*_atc_classification.txt), or
-#   - the WHO ATC/DDD index, or
-#   - DrugBank/RxNorm ATC mappings
-# Then populate validation_results/atc_cache.json once, verify no oncology drug
-# is dropped, and only then wire partition_candidates() into Tier 2.
+# Rebuild with: python scripts/build_atc_cache.py
