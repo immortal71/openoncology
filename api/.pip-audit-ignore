@@ -1,9 +1,32 @@
-# Accepted / unfixable dependency advisories, one id per line (GHSA-... or CVE-...).
+# Accepted / deferred dependency advisories, one id per line (GHSA-... or CVE-... or PYSEC-...).
 # The Security Scan workflow's blocking pip-audit step passes each as
-# --ignore-vuln. Add an entry only with a short justification comment and a
-# link to the advisory, and remove it once a fixed version is available.
+# --ignore-vuln. Add an entry only with a short justification and remove it once
+# a fixed version is pinned. Triaged 2026-07-27.
 #
-# Example:
-#   # GHSA-xxxx-yyyy-zzzz: transitive dep, not reachable from our code paths;
-#   # tracked upstream at <url>. Re-check 2026-Q4.
-#   GHSA-xxxx-yyyy-zzzz
+# Everything with an available drop-in fix has already been bumped in
+# requirements.txt (python-jose, python-multipart, python-dotenv, biopython,
+# requests via a resend bump). The entries below are the ones that cannot be
+# fixed by a safe, isolated version bump right now.
+
+# ── ecdsa 0.19.2 — no fix version published ────────────────────────────────────
+# Minerva timing side-channel; upstream has no released fix. Transitive via
+# python-jose[cryptography]. Re-check upstream each quarter.
+PYSEC-2026-1325
+
+# ── pytest 8.2.0 — dev/test-only, fix is a breaking major (9.0.3) ──────────────
+# Not shipped in the runtime image; only used in CI. Deferred until the suite is
+# validated against pytest 9.x. Tracked as follow-up.
+PYSEC-2026-1845
+
+# ── starlette 0.37.2 — transitive via fastapi==0.111.0 ─────────────────────────
+# Fixing requires a coordinated FastAPI upgrade (0.111 pins this Starlette
+# range); the fixed Starlette lines (0.40 / 0.47 / 1.x) need FastAPI >= 0.116+,
+# which is a larger change that must be validated end-to-end before shipping a
+# clinical pipeline. Tracked as a dedicated follow-up PR.
+PYSEC-2026-161
+PYSEC-2026-248
+PYSEC-2026-249
+PYSEC-2026-1941
+PYSEC-2026-1943
+PYSEC-2026-2280
+PYSEC-2026-2281

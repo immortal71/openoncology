@@ -146,8 +146,12 @@ _PAINS_SMARTS: list[tuple[str, str, str]] = [
     ("Oc1ccccc1O", "Catechol", "HIGH"),
     # Quinones
     ("O=C1C=CC(=O)C=C1", "Quinone PAINS", "HIGH"),
-    # Salicylaldehyde
-    ("O=Cc1ccccc1O", "Salicylaldehyde", "HIGH"),
+    # Salicylaldehyde: aromatic aldehyde (exactly 1 H on the carbonyl carbon,
+    # so an ester/acid carbonyl doesn't match) with a genuine phenolic -OH
+    # ([OX2H1], not any oxygen) on the ring. The looser "O=Cc1ccccc1O" pattern
+    # false-positived on aspirin (ester + separate carboxylic-acid oxygen on
+    # the ring happens to satisfy the unconstrained atom sequence).
+    ("[#6;H1](=O)c1ccccc1[OX2H1]", "Salicylaldehyde", "HIGH"),
     # Frequent hitter aryl sulfonamide
     ("NS(=O)(=O)c1ccccc1", "Aryl sulfonamide", "MEDIUM"),
     # Triazinone

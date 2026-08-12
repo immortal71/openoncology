@@ -228,10 +228,18 @@ class TestAuditMiddlewareIntegration:
         assert len(audit_records) == 0
 
     @pytest.mark.asyncio
-    async def test_non_phi_route_no_x_request_id(self, audit_client):
-        """Non-PHI routes must NOT set X-Request-Id (middleware bypassed)."""
+    async def test_non_phi_route_bypasses_audit_middleware(self, audit_client):
+        """Non-PHI routes must skip AuditMiddleware's dispatch body entirely.
+
+        X-Request-ID itself is still present on every response -- it's set by
+        main.py's app-wide add_request_context_and_log middleware for general
+        request tracing, independent of AuditMiddleware's HIPAA audit logging
+        (which only runs for _PHI_PREFIXES routes; see
+        test_non_phi_route_does_not_emit_audit_log for that guarantee).
+        """
         resp = await audit_client.get("/openapi.json")
-        assert "X-Request-Id" not in resp.headers
+        assert resp.status_code == 200
+        assert "X-Request-ID" in resp.headers
 
     @pytest.mark.asyncio
     async def test_audit_log_duration_ms_positive(self, audit_client, caplog):

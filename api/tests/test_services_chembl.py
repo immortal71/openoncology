@@ -1,4 +1,4 @@
-"""Tests for api/services/chembl.py — all HTTP calls are mocked via respx.
+"""Tests for api/services/chembl.py — all HTTP calls are mocked.
 
 Covers:
   - get_molecule: happy path with full properties
@@ -11,6 +11,11 @@ Covers:
   - search_molecule_by_name: network error returns empty list
   - get_mechanisms_for_target: returns mechanism list
   - get_mechanisms_for_target: network error returns empty list
+
+`get_molecule` / `search_molecule_by_name` / `get_mechanisms_for_target` all
+route their HTTP call through a shared `_get()` -> `fetch_with_retry()` helper
+(api/utils/http.py) rather than constructing `httpx.AsyncClient` themselves, so
+tests mock `fetch_with_retry` directly instead of the client class.
 """
 
 import sys
@@ -61,21 +66,26 @@ def _make_molecule_response(
     }
 
 
+def _mock_fetch(json_payload):
+    """Build a fetch_with_retry replacement returning a response-like mock."""
+    mock_response = MagicMock()
+    mock_response.json = MagicMock(return_value=json_payload)
+    mock_response.raise_for_status = MagicMock()
+    return AsyncMock(return_value=mock_response)
+
+
+def _mock_fetch_raising(exc: Exception):
+    return AsyncMock(side_effect=exc)
+
+
 # ── get_molecule ──────────────────────────────────────────────────────────────
 
 class TestGetMolecule:
     async def test_happy_path_returns_dict(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(return_value=_make_molecule_response())
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response()),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result is not None
@@ -85,19 +95,10 @@ class TestGetMolecule:
 
     async def test_molecular_formula_from_full_mf_not_inchi_key(self):
         """Bug fix: molecular_formula must be full_mf, not standard_inchi_key."""
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(
-            return_value=_make_molecule_response(mf="C9H8O4")
-        )
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response(mf="C9H8O4")),
+        ):
             result = await get_molecule("CHEMBL25")
 
         # Should be formula string like "C9H8O4", NOT an InChI key
@@ -105,73 +106,37 @@ class TestGetMolecule:
         assert not result["molecular_formula"].startswith("BSYNR")  # not InChI key
 
     async def test_ro5_pass_when_no_violations(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(
-            return_value=_make_molecule_response(ro5_violations=0)
-        )
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response(ro5_violations=0)),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result["ro5_pass"] is True
 
     async def test_ro5_fail_when_violations(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(
-            return_value=_make_molecule_response(ro5_violations=2)
-        )
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response(ro5_violations=2)),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result["ro5_pass"] is False
 
     async def test_is_approved_when_max_phase_4(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(
-            return_value=_make_molecule_response(max_phase=4)
-        )
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response(max_phase=4)),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result["is_approved"] is True
 
     async def test_not_approved_when_max_phase_less_than_4(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(
-            return_value=_make_molecule_response(max_phase=2)
-        )
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch(_make_molecule_response(max_phase=2)),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result["is_approved"] is False
@@ -181,28 +146,19 @@ class TestGetMolecule:
         error_response.status_code = 404
         http_error = httpx.HTTPStatusError("Not Found", request=MagicMock(), response=error_response)
 
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock(side_effect=http_error)
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch_raising(http_error),
+        ):
             result = await get_molecule("CHEMBL99999")
 
         assert result is None
 
     async def test_network_error_returns_none(self):
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(side_effect=httpx.ConnectError("Network unreachable"))
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch_raising(httpx.ConnectError("Network unreachable")),
+        ):
             result = await get_molecule("CHEMBL25")
 
         assert result is None
@@ -212,22 +168,13 @@ class TestGetMolecule:
 
 class TestSearchMoleculeByName:
     async def test_returns_list_of_hits(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(return_value={
+        payload = {
             "molecules": [
                 {"molecule_chembl_id": "CHEMBL11", "pref_name": "Erlotinib", "max_phase": 4},
                 {"molecule_chembl_id": "CHEMBL12", "pref_name": "Gefitinib", "max_phase": 4},
             ]
-        })
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        }
+        with patch("api.services.chembl.fetch_with_retry", _mock_fetch(payload)):
             results = await search_molecule_by_name("erlotinib")
 
         assert len(results) == 2
@@ -235,29 +182,16 @@ class TestSearchMoleculeByName:
         assert results[0]["preferred_name"] == "Erlotinib"
 
     async def test_empty_result_returns_empty_list(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(return_value={"molecules": []})
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        with patch("api.services.chembl.fetch_with_retry", _mock_fetch({"molecules": []})):
             results = await search_molecule_by_name("xyzzy_not_real")
 
         assert results == []
 
     async def test_network_error_returns_empty_list(self):
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(side_effect=Exception("timeout"))
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch_raising(Exception("timeout")),
+        ):
             results = await search_molecule_by_name("erlotinib")
 
         assert results == []
@@ -267,9 +201,7 @@ class TestSearchMoleculeByName:
 
 class TestGetMechanismsForTarget:
     async def test_returns_mechanism_list(self):
-        mock_response = MagicMock()
-        mock_response.raise_for_status = MagicMock()
-        mock_response.json = MagicMock(return_value={
+        payload = {
             "mechanisms": [
                 {
                     "molecule_chembl_id": "CHEMBL553",
@@ -278,15 +210,8 @@ class TestGetMechanismsForTarget:
                     "direct_interaction": True,
                 }
             ]
-        })
-
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(return_value=mock_response)
-            mock_client_cls.return_value = mock_client
-
+        }
+        with patch("api.services.chembl.fetch_with_retry", _mock_fetch(payload)):
             results = await get_mechanisms_for_target("CHEMBL203")
 
         assert len(results) == 1
@@ -295,13 +220,10 @@ class TestGetMechanismsForTarget:
         assert results[0]["direct_interaction"] is True
 
     async def test_network_error_returns_empty_list(self):
-        with patch("api.services.chembl.httpx.AsyncClient") as mock_client_cls:
-            mock_client = AsyncMock()
-            mock_client.__aenter__ = AsyncMock(return_value=mock_client)
-            mock_client.__aexit__ = AsyncMock(return_value=False)
-            mock_client.get = AsyncMock(side_effect=Exception("connection refused"))
-            mock_client_cls.return_value = mock_client
-
+        with patch(
+            "api.services.chembl.fetch_with_retry",
+            _mock_fetch_raising(Exception("connection refused")),
+        ):
             results = await get_mechanisms_for_target("CHEMBL203")
 
         assert results == []
