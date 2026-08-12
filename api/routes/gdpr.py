@@ -8,7 +8,7 @@ import logging
 import uuid
 from datetime import datetime, UTC
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

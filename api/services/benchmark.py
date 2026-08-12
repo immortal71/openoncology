@@ -4088,7 +4088,7 @@ ADDITIONAL_VALIDATION_CASES: list[dict[str, Any]] = [
     # EXPANSION BATCH 54 — Multi-drug L1/L2 cases (ceiling boost)
     # ════════════════════════════════════════════════════════════════════════
     # BRAF V600E – broad cancer types
-    
+
     {"case_id": "EZH2_Y646S_FL_MULTI_01", "gene": "EZH2", "variant": "Y646S",
      "cancer_type": "Follicular Lymphoma",
      "known_drugs": ["Tazemetostat"],

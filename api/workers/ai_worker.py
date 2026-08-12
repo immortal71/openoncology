@@ -353,7 +353,7 @@ def _get_fusion_candidates(submission_id: str) -> list[dict]:
     are found (VCF-only submissions).
     """
     try:
-        from services.rnaseq import parse_star_fusion, parse_arriba_fusions, ACTIONABLE_FUSIONS
+        from services.rnaseq import parse_star_fusion, parse_arriba_fusions
     except ImportError:
         return []
 
