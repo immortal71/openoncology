@@ -452,3 +452,114 @@ class TestHighImpactEvidenceRegressions:
         drugs = {k.lower(): v for k, v in get_all_drugs_for_variant("VHL", "LOSS", alphamissense_score=1.0).items()}
         assert "belzutifan" in drugs, "VHL LOSS should include belzutifan"
         assert str(drugs["belzutifan"]) == "LEVEL_1", "belzutifan should be LEVEL_1 for VHL LOSS"
+
+
+# ── Fusion delimiter notation ────────────────────────────────────────────────
+
+class TestFusionDelimiters:
+    """Fusions must resolve identically whichever delimiter the lab used.
+
+    HGVS/ISCN recommend the double colon (EML4::ALK), which is the notation
+    labs are moving to. Only the hyphen forms were handled, so EML4-ALK
+    returned five drugs while EML4::ALK returned none. The failure was silent:
+    an unrecognised fusion looks exactly like a fusion with no evidence.
+    """
+
+    # (gene, partner-first fusion) covering every fusion family in the table
+    FUSIONS = [
+        ("ALK", "EML4", "ALK"),
+        ("ALK", "NPM1", "ALK"),
+        ("ROS1", "CD74", "ROS1"),
+        ("RET", "KIF5B", "RET"),
+        ("NTRK1", "TPM3", "NTRK1"),
+        ("NTRK3", "ETV6", "NTRK3"),
+        ("RARA", "PML", "RARA"),
+        ("FGFR3", "FGFR3", "TACC3"),
+        ("KMT2A", "KMT2A", "MLLT3"),
+    ]
+
+    def test_double_colon_matches_hyphen(self):
+        for gene, five_prime, three_prime in self.FUSIONS:
+            hyphen = get_all_drugs_for_variant(gene, f"{five_prime}-{three_prime}") or {}
+            colons = get_all_drugs_for_variant(gene, f"{five_prime}::{three_prime}") or {}
+            assert hyphen, f"{five_prime}-{three_prime} should have evidence to compare against"
+            assert colons == hyphen, (
+                f"{five_prime}::{three_prime} resolved differently from "
+                f"{five_prime}-{three_prime}"
+            )
+
+    def test_star_fusion_double_hyphen_matches(self):
+        """STAR-Fusion writes EML4--ALK in its #FusionName column."""
+        for gene, five_prime, three_prime in self.FUSIONS:
+            single = get_all_drugs_for_variant(gene, f"{five_prime}-{three_prime}") or {}
+            double = get_all_drugs_for_variant(gene, f"{five_prime}--{three_prime}") or {}
+            assert double == single, f"{five_prime}--{three_prime} should match the hyphen form"
+
+    def test_colon_stripping_does_not_disturb_other_notation(self):
+        """Point mutations, indels, frameshifts and splice variants are
+        unaffected, since none of them carry a colon."""
+        for gene, alteration in [
+            ("EGFR", "L858R"),
+            ("EGFR", "p.Leu858Arg"),
+            ("BRAF", "V600E"),
+            ("EGFR", "T751_E758del"),
+            ("BRCA1", "S1982fs"),
+            ("MET", "X1010_splice"),
+        ]:
+            assert get_all_drugs_for_variant(gene, alteration), f"{gene} {alteration} regressed"
+
+
+# ── Copy-number notation ─────────────────────────────────────────────────────
+
+class TestCopyNumberNotation:
+    """Copy-number calls arrive in more spellings than point mutations, because
+    there is no HGVS equivalent everyone follows. See
+    scripts/audit_cnv_reachability.py for the full sweep.
+    """
+
+    # Genes whose amplification bucket actually holds evidence. AXL, CCNE1,
+    # FGFR4 and MDM2 carry the bucket but nothing in it, which is a curation
+    # gap rather than a notation one, so they are not asserted on here.
+    AMP_GENES = ["ERBB2", "MET", "EGFR", "CCND1", "CDK4", "FGFR1", "AR"]
+
+    def test_amplified_matches_amplification(self):
+        """Pathology reports say "HER2 amplified", not "ERBB2 Amplification".
+        This returned nothing for all 26 amplification genes."""
+        for gene in self.AMP_GENES:
+            canonical = get_all_drugs_for_variant(gene, "Amplification") or {}
+            assert canonical, f"{gene} Amplification should have evidence"
+            assert (get_all_drugs_for_variant(gene, "amplified") or {}) == canonical
+            assert (get_all_drugs_for_variant(gene, "Amplified") or {}) == canonical
+
+    def test_copy_gain_is_not_treated_as_amplification(self):
+        """The safety property. A low-level gain of 3 to 4 copies is a
+        different call from a high-level amplification and does not carry the
+        same evidence. ERBB2 gain must not qualify a patient for trastuzumab
+        the way ERBB2 amplification does."""
+        for gene in self.AMP_GENES:
+            assert not (get_all_drugs_for_variant(gene, "gain") or {}), (
+                f"{gene} gain must not resolve to amplification evidence"
+            )
+            assert not (get_all_drugs_for_variant(gene, "copy number gain") or {})
+
+    def test_cbioportal_homdel_spelling(self):
+        """HOMDEL is the literal value in cBioPortal's CNA export and "Deep
+        Deletion" is how its UI labels that same value. Both returned nothing."""
+        for gene in ["CDKN2A", "PTEN", "NF1"]:
+            canonical = get_all_drugs_for_variant(gene, "homozygous deletion") or {}
+            assert canonical, f"{gene} homozygous deletion should have evidence"
+            assert (get_all_drugs_for_variant(gene, "HOMDEL") or {}) == canonical
+            assert (get_all_drugs_for_variant(gene, "deep deletion") or {}) == canonical
+
+    def test_deleted_matches_deletion(self):
+        for gene in ["PTEN", "NF1"]:
+            canonical = get_all_drugs_for_variant(gene, "deletion") or {}
+            assert canonical, f"{gene} deletion should have evidence"
+            assert (get_all_drugs_for_variant(gene, "deleted") or {}) == canonical
+
+    def test_loss_only_genes_still_reachable(self):
+        """PTCH1 and VHL carry a LOSS bucket but no DELETION bucket, so the
+        word "deletion" finds nothing for them while "loss" works. Curation
+        gap rather than a routing bug, pinned here so it stays visible."""
+        for gene in ["PTCH1", "VHL"]:
+            assert get_all_drugs_for_variant(gene, "loss"), f"{gene} loss regressed"

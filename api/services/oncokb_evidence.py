@@ -1581,6 +1581,23 @@ _ALTERATION_ALIASES: dict[str, str] = {
     "loss": "truncation",
     "trunc": "truncation",
     "truncated": "truncation",
+    # Copy-number word forms. These are spellings of the same call, not
+    # different calls. cBioPortal's CNA export writes HOMDEL and its UI labels
+    # that same value "Deep Deletion"; pathology reports say "HER2 amplified"
+    # rather than "ERBB2 Amplification". Every one of these resolved to nothing
+    # before, across all 26 genes carrying amplification evidence and all 5
+    # carrying deletion evidence (scripts/audit_cnv_reachability.py).
+    "amplified": "amplification",
+    "deleted": "deletion",
+    "homdel": "homozygousdeletion",
+    "deepdeletion": "homozygousdeletion",
+    # Deliberately NOT aliased to amplification: "gain", "copy number gain".
+    # A low-level copy gain, typically 3 to 4 copies, is a different call from
+    # a high-level amplification and does not carry the same evidence. ERBB2
+    # gain does not qualify a patient for trastuzumab the way ERBB2
+    # amplification does. Collapsing the two would convert a non-actionable
+    # result into an actionable one, so returning nothing is the correct
+    # answer here rather than a gap to be closed.
     # ALK fusion aliases (hyphen stripped by normalisation)
     "cltcalk": "cltc-alk",
     "npm1alk": "npm1-alk",
@@ -2501,8 +2518,17 @@ def _normalise_alteration(alt: str) -> str:
         aa = m.group(0)
         return _AA3TO1.get(aa, aa)
     s = re.sub(r"[A-Z]{3}", _replace_aa, s)
-    # Strip separators (spaces, dots, hyphens, underscores)
-    s = re.sub(r"[.\-_ ]", "", s)
+    # Strip separators (spaces, dots, hyphens, underscores, colons).
+    #
+    # The colon matters for fusions. HGVS/ISCN recommend "::" as the fusion
+    # delimiter (EML4::ALK), and that is the notation labs are migrating TO,
+    # so it is the form that will arrive more often over time, not less.
+    # Without stripping it the string never reaches _ALTERATION_ALIASES:
+    # EML4-ALK returned 5 drugs while EML4::ALK returned none, likewise for
+    # CD74::ROS1, KIF5B::RET, ETV6::NTRK3, PML::RARA and FGFR3::TACC3.
+    # Hyphen and double-hyphen (STAR-Fusion writes EML4--ALK) already
+    # collapsed to the same key; the colon is simply the case nobody added.
+    s = re.sub(r"[.\-_ :]", "", s)
     # Lowercase the final result (test contract: _normalise_alteration returns lowercase)
     s = s.lower()
     return _ALTERATION_ALIASES.get(s, s)
