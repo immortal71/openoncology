@@ -49,12 +49,14 @@ same question OpenOncology answers, so it is a fair comparison.
 
 ### This is not the circular benchmark
 
-`scripts/build_concordance_labels.py` contains a `DRUG_BIOMARKER_MAP` that infers
-each patient's gene **from the drug they were given** (patient received
+`scripts/build_concordance_labels.py` used to contain a `DRUG_BIOMARKER_MAP` that
+inferred each patient's gene **from the drug they were given** (patient received
 vemurafenib → label records BRAF V600E). Asking the pipeline "which drug for BRAF
-V600E?" then guarantees a match. That is the origin of the **100% class-adjusted
-(36/36)** figure in `docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md`, and it is why
-that figure must not be quoted as evidence of accuracy.
+V600E?" then guarantees a match. That is the origin of the retracted **100%
+class-adjusted (36/36)** figure, and it is why that figure must not be quoted as
+evidence of accuracy. The map has been removed and the builder now joins
+cBioPortal sequencing records to GDC treatment records on patient id;
+`docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md` carries the rebuilt numbers.
 
 This benchmark avoids that in three specific ways:
 

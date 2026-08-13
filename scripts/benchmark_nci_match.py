@@ -24,9 +24,10 @@ NOT CIRCULAR
 The arm definitions are fetched live from ClinicalTrials.gov and parsed
 mechanically. Nothing here is selected by checking what OpenOncology returns
 first, and no variant is hand-picked for being one the evidence table is known
-to handle. Contrast scripts/build_concordance_labels.py, whose DRUG_BIOMARKER_MAP
-infers each patient's gene FROM the drug they received -- which guarantees a
-match and is why its 100% number is not usable as evidence.
+to handle. Contrast the old scripts/build_concordance_labels.py, whose
+DRUG_BIOMARKER_MAP inferred each patient's gene FROM the drug they received --
+which guaranteed a match and is why its 100% number was not usable as evidence.
+That builder now joins sequencing and treatment records on patient id.
 
 KNOWN LIMITATION -- READ BEFORE QUOTING THE NUMBER
 --------------------------------------------------

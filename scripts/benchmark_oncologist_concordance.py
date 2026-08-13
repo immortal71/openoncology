@@ -282,6 +282,73 @@ def _drug_names_from_candidates(candidates: list[dict[str, Any]]) -> list[str]:
     return _unique_preserve_order(names)
 
 
+def _rerank_merged(candidate_lists: list[list[dict[str, Any]]]) -> list[str]:
+    """Pool candidates from several alterations and re-rank them as one list.
+
+    Each alteration produces its own ranked candidates. Simply concatenating
+    them would make the patient's top-3 depend on the order the alterations
+    happen to be listed in, so the pooled set goes back through the pipeline's
+    ranker and the resulting order is what gets scored.
+    """
+    pooled: dict[str, dict[str, Any]] = {}
+    for candidates in candidate_lists:
+        for candidate in candidates:
+            name = str(candidate.get("drug_name") or "").strip()
+            if not name:
+                continue
+            pooled.setdefault(_normalise_drug_name(name), candidate)
+
+    if not pooled:
+        return []
+    if len(pooled) == 1:
+        return [str(next(iter(pooled.values()))["drug_name"]).strip()]
+
+    _setup_api_path()
+    from api.ai.ranking import rank_candidates
+
+    ranked = rank_candidates(list(pooled.values()))
+    return _drug_names_from_candidates(ranked)
+
+
+def _label_biomarkers(label: dict[str, Any], all_biomarkers: bool) -> list[tuple[str, str]]:
+    """The (gene, variant) pairs to submit for one patient.
+
+    Labels built by scripts/build_concordance_labels.py name a single primary
+    alteration for single-gene callers, but carry the patient's whole sequenced
+    alteration list under "biomarkers". Which one is primary is decided by a
+    recurrence rule that has nothing to do with treatment, so it cannot make the
+    benchmark circular -- but it is still an arbitrary choice that moves the
+    score. Passing --all-biomarkers submits the entire report instead, which is
+    both what a tumour board sees and independent of that choice.
+    """
+    pairs: list[tuple[str, str]] = []
+
+    if all_biomarkers:
+        for row in label.get("biomarkers") or []:
+            if not isinstance(row, dict):
+                continue
+            gene = str(row.get("gene") or "").strip()
+            variant = str(row.get("variant") or _extract_variant(row) or "").strip()
+            if gene and variant:
+                pairs.append((gene, variant))
+
+    if not pairs:
+        gene = str(label.get("gene") or "").strip()
+        variant = str(_extract_variant(label) or "").strip()
+        if gene and variant:
+            pairs.append((gene, variant))
+
+    seen: set[tuple[str, str]] = set()
+    unique: list[tuple[str, str]] = []
+    for pair in pairs:
+        key = (pair[0].lower(), pair[1].lower())
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(pair)
+    return unique
+
+
 def _patient_key(patient: dict[str, Any]) -> str:
     for field in ("patient_id", "sample_id", "case_id", "patient_num"):
         value = patient.get(field)
@@ -333,6 +400,8 @@ def run_concordance(
     predictions_json: Path,
     labels_json: Path | None,
     include_custom: bool,
+    all_biomarkers: bool = False,
+    tier1_only: bool = False,
 ) -> dict[str, Any]:
     prediction_payload = _load_json(predictions_json)
     patients = _load_patients(prediction_payload)
@@ -376,10 +445,9 @@ def run_concordance(
                 continue
 
             processed += 1
-            label_gene = _norm_text(label.get("gene"))
-            label_variant = _norm_text(_extract_variant(label))
+            submitted = _label_biomarkers(label, all_biomarkers)
 
-            if not label_gene or not label_variant:
+            if not submitted:
                 no_prediction_cases += 1
                 case_rows.append(
                     {
@@ -410,50 +478,75 @@ def run_concordance(
                 continue
 
             labels_with_gene_variant += 1
-            combo_key = (label_gene, label_variant)
+            cancer_hint = _extract_cancer_hint(label)
 
-            if combo_key not in combo_cache:
-                gene_raw = str(label.get("gene") or "").strip()
-                variant_raw = str(_extract_variant(label) or "").strip()
-                cancer_hint = _extract_cancer_hint(label)
+            for gene_raw, variant_raw in submitted:
+                combo_key = (gene_raw.lower(), variant_raw.lower(), cancer_hint.lower())
+                if combo_key in combo_cache:
+                    continue
 
                 tier1_ranked = tier1_fda_evidence(gene_raw, variant_raw)
-                tier1_drugs = _drug_names_from_candidates(tier1_ranked)[:3]
 
-                tier2 = tier2_repurposing(gene_raw, variant_raw, cancer_hint)
-                tier2_approved = _drug_names_from_candidates(tier2.get("approved") or [])
-                tier2_investigational = _drug_names_from_candidates(tier2.get("investigational") or [])
-
-                if tier1_drugs:
-                    selected_tier = "TIER1"
-                    selected_top3 = tier1_drugs[:3]
-                elif tier2_approved:
-                    selected_tier = "TIER2"
-                    selected_top3 = tier2_approved[:3]
-                elif tier2_investigational:
-                    selected_tier = "TIER2"
-                    selected_top3 = tier2_investigational[:3]
+                if tier1_only:
+                    tier2_approved: list[dict[str, Any]] = []
+                    tier2_investigational: list[dict[str, Any]] = []
                 else:
-                    selected_tier = "NONE"
-                    selected_top3 = []
+                    tier2 = tier2_repurposing(gene_raw, variant_raw, cancer_hint)
+                    tier2_approved = list(tier2.get("approved") or [])
+                    tier2_investigational = list(tier2.get("investigational") or [])
 
                 combo_cache[combo_key] = {
                     "gene": gene_raw,
                     "variant": variant_raw,
                     "cancer_hint": cancer_hint,
-                    "tier1_drugs": tier1_drugs,
-                    "tier2_approved_drugs": tier2_approved,
-                    "tier2_investigational_drugs": tier2_investigational,
-                    "selected_tier": selected_tier,
-                    "selected_top3": selected_top3,
+                    "tier1_candidates": tier1_ranked,
+                    "tier2_approved_candidates": tier2_approved,
+                    "tier2_investigational_candidates": tier2_investigational,
                 }
 
-            pred = combo_cache[combo_key]
-            model_top3 = list(pred["selected_top3"])
+            preds = [
+                combo_cache[(gene_raw.lower(), variant_raw.lower(), cancer_hint.lower())]
+                for gene_raw, variant_raw in submitted
+            ]
 
-            if pred["selected_tier"] == "TIER1":
+            # Merge across the patient's alterations, keeping the tier order the
+            # single-variant path uses: FDA evidence first, then approved
+            # repurposing, then investigational. Only if a whole tier is empty for
+            # every alteration does the next one get a turn.
+            #
+            # The merged pool is re-ranked by the pipeline's own ranker rather
+            # than concatenated. Concatenating would order the top-3 by whichever
+            # gene happened to come first in the label, which is alphabetical and
+            # says nothing about evidence strength.
+            merged_tier1 = _rerank_merged([p["tier1_candidates"] for p in preds])
+            merged_tier2_approved = _rerank_merged([p["tier2_approved_candidates"] for p in preds])
+            merged_tier2_investigational = _rerank_merged(
+                [p["tier2_investigational_candidates"] for p in preds]
+            )
+
+            if merged_tier1:
+                selected_tier = "TIER1"
+                model_top3 = merged_tier1[:3]
+            elif merged_tier2_approved:
+                selected_tier = "TIER2"
+                model_top3 = merged_tier2_approved[:3]
+            elif merged_tier2_investigational:
+                selected_tier = "TIER2"
+                model_top3 = merged_tier2_investigational[:3]
+            else:
+                selected_tier = "NONE"
+                model_top3 = []
+
+            pred = {
+                "selected_tier": selected_tier,
+                "tier1_drugs": merged_tier1[:3],
+                "tier2_approved_drugs": merged_tier2_approved[:3],
+                "tier2_investigational_drugs": merged_tier2_investigational[:3],
+            }
+
+            if selected_tier == "TIER1":
                 tier1_cases += 1
-            elif pred["selected_tier"] == "TIER2":
+            elif selected_tier == "TIER2":
                 tier2_cases += 1
             else:
                 no_prediction_cases += 1
@@ -518,6 +611,7 @@ def run_concordance(
                     "label_gene": label.get("gene"),
                     "label_variant": _extract_variant(label),
                     "cancer_type_hint": _extract_cancer_hint(label),
+                    "alterations_submitted": len(submitted),
                     "prediction_tier": pred["selected_tier"],
                     "tier1_drugs": pred["tier1_drugs"],
                     "tier2_approved_drugs": pred["tier2_approved_drugs"],
@@ -567,6 +661,8 @@ def run_concordance(
             "predictions_json": None,
             "labels_json": str(labels_json),
             "matching_mode": "direct_pipeline_per_label_gene_variant",
+            "biomarker_scope": "all_label_biomarkers" if all_biomarkers else "primary_alteration_only",
+            "evidence_tiers": "tier1_only" if tier1_only else "tier1_then_tier2",
             "vintage_adjustment_note": (
                 "Concordance uses drug equivalence groups so clinically interchangeable agents "
                 "across treatment vintages are counted as hits (e.g., BRAF/MEK class substitutions)."
@@ -747,6 +843,22 @@ def parse_args() -> argparse.Namespace:
         help="Include custom-design lead candidates when comparing model vs oncologist recommendations.",
     )
     parser.add_argument(
+        "--all-biomarkers",
+        action="store_true",
+        help=(
+            "Submit every alteration on the patient's sequencing record rather than only the "
+            "primary one. Removes the dependence on which alteration the label names as primary."
+        ),
+    )
+    parser.add_argument(
+        "--tier1-only",
+        action="store_true",
+        help=(
+            "Restrict recommendations to Tier 1 FDA-approved evidence and skip the Tier 2 "
+            "repurposing search. Stricter, and offline."
+        ),
+    )
+    parser.add_argument(
         "--out-json",
         default="oncologist_concordance_results.json",
         help="Output JSON file path.",
@@ -772,6 +884,8 @@ def main() -> None:
         predictions_json=predictions_json,
         labels_json=labels_json,
         include_custom=bool(args.include_custom),
+        all_biomarkers=bool(args.all_biomarkers),
+        tier1_only=bool(args.tier1_only),
     )
 
     out_json = (root / args.out_json).resolve()
@@ -785,6 +899,8 @@ def main() -> None:
     if report.get("matching_mode") == "direct_pipeline_per_label_gene_variant":
         coverage = report.get("coverage_stats") or {}
         tier_cov = report.get("tier_coverage") or {}
+        print(f"Biomarker scope:         {report.get('biomarker_scope')}")
+        print(f"Evidence tiers:          {report.get('evidence_tiers')}")
         print(f"Total label cases:       {coverage.get('total_label_cases', report.get('total_label_cases_processed', 0))}")
         print(f"Tier 1 prediction cases: {tier_cov.get('tier1_prediction_cases', 0)}")
         print(f"Tier 2 prediction cases: {tier_cov.get('tier2_prediction_cases', 0)}")

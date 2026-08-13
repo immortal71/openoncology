@@ -2,11 +2,15 @@
 
 THE DEFECT THIS MEASURES
 ------------------------
-scripts/build_concordance_labels.py derives the biomarker from the drug via
-DRUG_BIOMARKER_MAP, so every trastuzumab patient is labelled "ERBB2 Amplified"
-whether or not they were ever sequenced. A benchmark scored against labels
-built that way cannot produce any answer except a high one, because the answer
-was written into the question.
+scripts/build_concordance_labels.py used to derive the biomarker from the drug
+via DRUG_BIOMARKER_MAP, so every trastuzumab patient was labelled "ERBB2
+Amplified" whether or not they were ever sequenced. A benchmark scored against
+labels built that way cannot produce any answer except a high one, because the
+answer was written into the question.
+
+That map is gone and the builder now joins two independent sources, so this
+check passes on the current labels. It stays because the defect is easy to
+reintroduce and impossible to see in the reported number.
 
 That is invisible in the reported number. 100% concordance looks like success,
 not like a tautology, which is exactly why it needs a test rather than a

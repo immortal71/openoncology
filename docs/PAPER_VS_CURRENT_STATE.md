@@ -73,6 +73,11 @@ and Top-3 across 36 actionable TCGA cases"*). The paper explains the 97.9% "no-p
 rate on the full 1,713 as expected, reflecting TCGA's unselected population (most patients
 are non-actionable or received cytotoxic chemotherapy).
 
+> Recorded verbatim as published. **This table is retracted, not merely stale.** The
+> answer key derived each patient's gene from the drug they received, so the benchmark
+> could not have returned anything but a high number. Rebuilt against sequencing
+> records on 2026-08-13: class-adjusted Top-3 is 1.95%, not 100%. See Section 3.
+
 ### 1.5 AlphaFold structure generation completion (Section 3.4 "Stage Two: Discovery Brief")
 
 Quoted verbatim: *"AlphaFold structure generation was triggered for all 185 cases and
@@ -237,6 +242,26 @@ in the preprint text:
   to also hard-fail if `ENVIRONMENT=development` while `SENTRY_DSN` is set — closing a
   gap in the safety net around a dev-mode pipeline shortcut introduced during the Docker
   verification work above.
+
+- **The 100% oncologist-concordance figure in Section 1.4 is retracted.** This is a
+  stronger statement than "no longer reproduces": the number was never measurable.
+  `scripts/build_concordance_labels.py` carried a `DRUG_BIOMARKER_MAP` that assigned
+  each patient a gene based on the drug they had been given, with no reference to any
+  sequencing record. Trastuzumab meant ERBB2, vemurafenib meant BRAF V600E. The
+  benchmark then asked which drug fits that gene and scored the answer against the drug
+  the gene had been copied from. The tell was in the labels: zoledronic acid, a
+  bisphosphonate for bone health, mapped to ERBB2 in all 4 of its patients, and
+  cisplatin to EGFR in all 8. Biomarker-agnostic agents cannot perfectly predict a gene
+  in measured data. The map is deleted; biomarkers now come from the patient's
+  cBioPortal mutation and copy-number record, drugs from their GDC clinical record, and
+  the two are joined on patient id only. Of 1,713 patients with a recorded drug, 1,584
+  also have a panel alteration and are scored. Class-adjusted Top-3 on the full
+  sequencing report is 1.95% (24 of 1,232 with a prediction), and exact Top-1 is 0.0%.
+  The near-zero result is a property of the dataset as much as the pipeline: treatment
+  in these TCGA cohorts was cytotoxic and endocrine protocol care chosen by diagnosis,
+  not by sequenced gene, which `scripts/diagnose_concordance_dataset.py` shows
+  independently. `scripts/detect_label_circularity.py` gates against a reintroduction.
+  See [ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).
 
 - **The 100% TCGA coverage figure in Section 1.3 no longer reproduces.** Re-measured
   2026-08-12: 52/72 = 72.2% covered on the 100-case request (Tier 1 10, Tier 2 31,

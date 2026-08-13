@@ -5,7 +5,9 @@ This script answers that using only the answer key itself -- it never looks at
 what OpenOncology recommended. That matters: any diagnostic that consults our
 own output to decide which patients "count" is circular (that is exactly how
 scripts/build_concordance_labels.py produced its 100% number -- it derived each
-patient's gene FROM the drug they were given, so a match was guaranteed).
+patient's gene FROM the drug they were given, so a match was guaranteed; that
+builder has since been rewritten to join sequencing and treatment records on
+patient id instead).
 
 The test here is instead:
 
