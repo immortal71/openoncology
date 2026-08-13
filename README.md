@@ -250,8 +250,10 @@ Full methodology, metric definitions, and change log: [docs/BENCHMARK.md](docs/B
 
 ### 100-case TCGA real-patient benchmark
 
-Measured 2026-08-12. The cohort is drawn live from cBioPortal, so `--n 100`
-returned 72 cases on this run.
+Measured 2026-08-12 on a pinned cohort of 72 cases. Replay it with
+`--manifest validation_results/benchmark_cohort_72.json`. Without a manifest the
+cohort is drawn live and differs between runs, which is why `--n 100` returned
+72 cases here.
 
 | Tier | Patients | % |
 |:-----|:---------|:--|
@@ -268,7 +270,8 @@ cases report as no recommendation instead. Full explanation in
 
 ### 200-case TCGA real-patient benchmark
 
-Measured 2026-08-12. `--n 200` returned 142 cases.
+Measured 2026-08-12 on a pinned cohort of 142 cases. Replay it with
+`--manifest validation_results/benchmark_cohort_142.json`.
 
 | Tier | Patients | % |
 |:-----|:---------|:--|

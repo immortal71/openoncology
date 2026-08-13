@@ -146,10 +146,31 @@ not because this cohort exercises it.
 
 #### Reproducibility
 
-The cohort is drawn live from cBioPortal rather than pinned, so the patient set
-differs between runs and `--n 100` returned 72 cases on this one. Treat the
-percentages as a reading taken on a date, not as a fixed score. Comparing two
-runs compares two different cohorts as well as two different pipelines.
+By default the cohort is drawn live from cBioPortal, so the patient set differs
+between runs: `--n 100` returned 72 cases and `--n 200` returned 142 on the
+2026-08-12 run. A percentage from a live draw is a reading taken on a date, not
+a score, and comparing two of them compares two cohorts as well as two
+pipelines. A real regression is indistinguishable from a different draw.
+
+Pass `--manifest` to replay a pinned cohort instead. The two above are committed,
+so the numbers in this document can be checked rather than taken on trust:
+
+```bash
+python scripts/fetch_real_patients.py \
+    --manifest validation_results/benchmark_cohort_72.json \
+    --out-json real_patient_benchmark_100.json
+
+python scripts/fetch_real_patients.py \
+    --manifest validation_results/benchmark_cohort_142.json \
+    --out-json real_patient_benchmark_200.json
+```
+
+A manifest carries everything a case needs, so replaying one makes no cBioPortal
+call for patient selection at all. Use `--write-manifest PATH` to pin a fresh
+draw for future comparison.
+
+Use a pinned cohort for anything you intend to compare over time, and a live
+draw only when you deliberately want a fresh sample.
 
 ### 200-case TCGA cohort
 
