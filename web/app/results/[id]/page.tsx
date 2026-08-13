@@ -10,6 +10,7 @@ import ResultsSkeleton from "@/components/ResultsSkeleton";
 import ImmunoPanel from "@/components/ImmunoPanel";
 import SignatureCard from "@/components/SignatureCard";
 import CombinationTable from "@/components/CombinationTable";
+import SampleQCCard, { type SampleQC } from "@/components/SampleQCCard";
 import { DEMO_RESULTS, DEMO_REPURPOSING, DEMO_ID } from "@/lib/demo-data";
 
 type MutationRow = {
@@ -145,6 +146,9 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	const trialMatches = (trialQuery.data?.trials || []) as TrialRow[];
 	const repurposingFailed = !repurposingQuery.isLoading && candidates.length === 0;
 	const hasActionable = Boolean(data.has_targetable_mutation || mutations.some((m) => m.is_targetable));
+	// Always rendered. The API always sends this, and an absent verdict must be
+	// stated rather than omitted — silence reads as "no problems found".
+	const sampleQC = (data.sample_qc || { qc_verdict: "NOT_ASSESSED", assessed: false }) as SampleQC;
 
 	const patientSummary = (data as {
 		patient_summary?: {
@@ -232,6 +236,9 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 						</p>
 					</div>
 				</section>
+
+				{/* Sample quality qualifies every finding below it, so it comes first. */}
+				<SampleQCCard qc={sampleQC} />
 
 				<section className="clinical-surface p-6">
 					<h2 className="text-lg font-semibold text-gray-900 mb-3">Mutations</h2>

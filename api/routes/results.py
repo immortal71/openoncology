@@ -142,10 +142,15 @@ async def get_results(
         except Exception:
             pass  # never fail the response due to report generation
 
+    from services.sample_qc import qc_payload_for_api
+
     return {
         "submission_id": submission_id,
         "cancer_type": submission.cancer_type,
         "status": "complete",
+        # The QC verdict stopped at the rendered report until now, so no API
+        # consumer could tell a clean sample from a flagged one.
+        "sample_qc": qc_payload_for_api(submission.sample_qc),
         "has_targetable_mutation": result.has_targetable_mutation if result else False,
         "target_gene": result.target_gene if result else None,
         "summary": result.summary_text if result else None,

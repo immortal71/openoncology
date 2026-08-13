@@ -112,6 +112,36 @@ class ExcludedCandidateOut(BaseModel):
     reason: str
 
 
+class SampleQCOut(BaseModel):
+    """Sample quality verdict for the submitted specimen.
+
+    Mirrors ``services.sample_qc.sample_qc_to_report_dict``. Until now this
+    reached the rendered oncologist report and stopped there, so an API consumer
+    (including ``web/``) could not tell a clean sample from one carrying a
+    high-confidence FFPE deamination signal.
+
+    ``qc_verdict`` is never null. A submission processed before QC existed, or
+    one where QC could not run, reports ``NOT_ASSESSED`` — the hazard this guards
+    is a reader taking silence for a pass, so the field is always present and
+    every unmeasured value stays ``None`` rather than defaulting to zero.
+    """
+    qc_verdict: str = "NOT_ASSESSED"
+    assessed: bool = False
+    tumour_purity_estimate: Optional[float] = None
+    ffpe_artefact_rate: Optional[float] = None
+    ffpe_suspected: Optional[bool] = None
+    ti_tv_ratio: Optional[float] = None
+    median_vaf: Optional[float] = None
+    total_variants: Optional[int] = None
+    pass_variants: Optional[int] = None
+    mean_depth: Optional[float] = None
+    warnings: list[str] = Field(default_factory=list)
+    # Audit fields: the score behind the flag, not just the flag.
+    ffpe_score: Optional[float] = None
+    ffpe_confidence: Optional[str] = None
+    coverage_adequacy: Optional[str] = None
+
+
 class ResultsResponse(BaseModel):
     submission_id: str
     cancer_type: Optional[str] = None
@@ -140,3 +170,6 @@ class ResultsResponse(BaseModel):
     # Distinguishes "we looked and found nothing" from "we never looked".
     recommendation_state: Optional[str] = None
     excluded_candidates: list[ExcludedCandidateOut] = Field(default_factory=list)
+    # Always present. NOT_ASSESSED when the submission carries no verdict, so a
+    # consumer cannot render "no QC problems" for a sample nobody checked.
+    sample_qc: SampleQCOut = Field(default_factory=SampleQCOut)
