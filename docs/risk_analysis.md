@@ -294,6 +294,48 @@ dispatcher at all, and `notify_campaign_milestone`'s only dispatcher is itself
 never called, so milestone emails cannot fire; both are recorded in the wiring
 test rather than left to be rediscovered.
 
+### F12. A replayed Stripe webhook inflated donation totals (H5) — FIXED
+
+`_handle_succeeded` in `api/routes/webhook.py` did
+`campaign.raised_usd = (campaign.raised_usd or 0) + amount_usd` with nothing
+recording which events had already been applied. Stripe documents at-least-once
+delivery and redelivers on any non-2xx response or timeout, so this is ordinary
+traffic rather than an error path, and the total only ever moved upward.
+
+This is H5 outside the benchmark suite: a public figure that overstates what
+happened. It is also the only endpoint in the system that moves money, and it
+had no test of any kind.
+
+Every event id is now claimed in `stripe_webhook_events` (migration `0012`)
+before any handler runs, and a repeat is acknowledged with `duplicate: true`
+without being processed. The id is the primary key rather than a unique column
+so two concurrent redeliveries resolve in the database instead of in a
+check-then-act race. Claiming commits before the handler runs: if a handler then
+fails the event is not retried, which is the right trade here, because a
+redelivery adds money that was never paid and that error is neither visible in
+nor reversible from the campaign total.
+
+The bare `except Exception` around `construct_event` also answered every
+internal parsing bug with "Invalid webhook payload", which Stripe retries
+indefinitely while the real cause went unrecorded. It now logs the traceback.
+
+### F13. An unauthenticated endpoint disclosed Stripe account state (H5) — FIXED
+
+`GET /api/stripe/connect/return/{pharma_id}` returned `stripe_account_id`,
+`charges_enabled` and `payouts_enabled` for whatever id appeared in the path,
+with no credential of any kind. Walking the ids read back the Stripe account and
+payout state of every company on the platform. It also returned 404 for unknown
+ids and 200 for known ones, so it confirmed which ids existed before the body
+was even read.
+
+It cannot require a token: it is the `return_url` given to
+`stripe.AccountLink.create`, so Stripe redirects the pharma's browser here with
+no Authorization header, and adding `_require_admin` would reject every pharma
+the moment they finish KYC. The fix is to stop it answering questions. It now
+returns the same shape for every id and reports only whether onboarding
+finished. Everything it used to disclose remains available from
+`GET /status/{pharma_id}`, which requires the admin role.
+
 ---
 
 ## 5. Open actions, in priority order

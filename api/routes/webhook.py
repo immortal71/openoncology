@@ -3,6 +3,11 @@
 POST /api/webhook/stripe
 
 Verifies Stripe-Signature header with STRIPE_WEBHOOK_SECRET.
+
+Every event id is recorded in stripe_webhook_events before any handler runs, and
+a repeat is acknowledged without being processed again. Stripe redelivers on any
+non-2xx, on a timeout, and at its own discretion, so this is ordinary traffic.
+
 Handles:
   - payment_intent.succeeded  →  update Order.status = "confirmed"
      (if metadata.type == "donation"  →  increment Campaign.raised_usd)
@@ -12,12 +17,14 @@ import logging
 import stripe
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database import get_db
 from models.order import Order, OrderStatus
 from models.campaign import Campaign
+from models.stripe_event import StripeWebhookEvent
 from utils.http import bad_request_error
 
 logger = logging.getLogger(__name__)
@@ -37,10 +44,24 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     except stripe.error.SignatureVerificationError:
         raise bad_request_error(request, "Invalid Stripe signature")
     except Exception:
+        # Logged rather than swallowed. Every failure here answered Stripe with
+        # "Invalid webhook payload", including a bug in our own parsing, and
+        # Stripe retries a non-2xx, so a defect on this path became an
+        # indefinite retry loop with no record of the actual cause.
+        logger.exception("[stripe] webhook payload could not be parsed")
         raise bad_request_error(request, "Invalid webhook payload")
 
+    event_id: str = event["id"]
     event_type: str = event["type"]
     obj = event["data"]["object"]
+
+    # Stripe guarantees at-least-once delivery, so a repeat is normal traffic
+    # rather than an error. Claim the event id before doing any work: the
+    # primary key rejects the second writer, which makes every branch below
+    # replay-safe at once instead of each one having to be individually safe.
+    if not await _claim_event(event_id, event_type, db):
+        logger.info("[stripe] event %s already processed, skipping", event_id)
+        return {"received": True, "duplicate": True}
 
     if event_type == "payment_intent.succeeded":
         await _handle_succeeded(obj, db)
@@ -50,6 +71,24 @@ async def stripe_webhook(request: Request, db: AsyncSession = Depends(get_db)):
         logger.debug("Unhandled Stripe event: %s", event_type)
 
     return {"received": True}
+
+
+async def _claim_event(event_id: str, event_type: str, db: AsyncSession) -> bool:
+    """Record this event id. False if some earlier delivery already did.
+
+    Committed on its own, before the handlers run. If a handler then fails, the
+    event stays claimed and is not retried, which is the correct trade for the
+    donation path: a redelivery there adds money that was never paid, and that
+    error is neither visible nor reversible from the campaign total. A handler
+    failure is at least recorded in the log with its traceback.
+    """
+    db.add(StripeWebhookEvent(event_id=event_id, event_type=event_type))
+    try:
+        await db.commit()
+        return True
+    except IntegrityError:
+        await db.rollback()
+        return False
 
 
 async def _handle_succeeded(pi: dict, db: AsyncSession) -> None:
