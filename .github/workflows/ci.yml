@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main, develop]
+  # No base-branch filter on pull_request. With `branches: [main]` a PR opened
+  # against another topic branch ran nothing at all: not tests, not lint, not the
+  # migration gate. That is the normal shape of a stacked PR, where the second
+  # change is based on the first while it is still in review, and it silently got
+  # zero coverage from every gate in this file.
   pull_request:
-    branches: [main]
 
 jobs:
   # ── Frontend ──────────────────────────────────────────────────────────────
@@ -171,16 +175,26 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: python scripts/check_migration_chain.py
 
-      # Non-blocking, deliberately. `alembic check` reports substantial
-      # pre-existing drift between the migration chain and the current
-      # SQLAlchemy models (repurposing_candidates, campaigns, submissions
-      # columns) that predates this branch and needs a dedicated reconciliation
-      # migration, not a rushed autogenerate. Tracked as open action 8 in
-      # docs/risk_analysis.md. Until that lands this step reports only, which is
-      # why the blocking gate above exists rather than nothing gating migrations.
-      - name: Detect uncommitted model changes (reporting only — see open action 8)
+      # Blocking. This step carried `continue-on-error: true` and a comment
+      # claiming substantial drift in repurposing_candidates, campaigns and
+      # submissions. Every table it named was reconciled by a8bf7eb4833c in July
+      # 2026; the comment predates that migration and was copied forward twice
+      # without being re-read against it. Against a real Postgres this step has
+      # been answering "No new upgrade operations detected." while being told its
+      # answer did not count.
+      #
+      # Two real gaps survive, and neither is visible here, which is why turning
+      # this on does not close them (both tracked as open action 8):
+      #   - 11 columns where 0001 used a bare sa.String and the model specifies a
+      #     length. alembic's DefaultImpl._column_args_match does not flag a
+      #     reflected type for being less specific than the metadata type, so a
+      #     String(128) model field backed by an unbounded VARCHAR reads as a
+      #     match. Fixing it means hand-written alter_column calls.
+      #   - 19 indexes dropped by a8bf7eb4833c because no model declares
+      #     index=True. Chain and models agree, so this step is silent, but the
+      #     database lost every FK join-column index.
+      - name: Detect uncommitted model changes
         run: alembic check
-        continue-on-error: true
 
       # The api/tests and ai/tests suites cannot share one interpreter: both the
       # FastAPI app (api/ai/) and the top-level ai/ package claim the import name
@@ -193,20 +207,25 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
-      # Coverage threshold. Re-measured 2026-08-13 against a real (non-mocked)
-      # run of the full suite: 856/856 api tests + 42/42 ai tests pass with 71%
-      # combined coverage.
+      # Coverage threshold. The number this gate measures changed, so read the
+      # sequence before reading 52 as a regression:
       #
-      # The gate is 69, not 63. A floor four points under the real number cannot
-      # detect a four-point regression, which made the previous gate decorative.
-      # Two points of margin are kept for one specific reason and not as general
-      # slack: the measurement above was taken on Windows, where a few optional
-      # imports (weasyprint, rdkit paths) resolve differently than on the Linux
-      # runner, so the two platforms do not report an identical total. Tighten
-      # this to the measured value once it has been confirmed on Linux.
+      #   63 gate / 67 reported    counted api/tests and ai/tests themselves
+      #   69 gate / 70 reported    same measurement, tightened
+      #   52 gate / 54 reported    production code only
+      #
+      # pyproject.toml now omits */tests/* from coverage. A test module is ~100%
+      # covered by the act of running it, and 34 of them were being averaged into
+      # the headline. On identical coverage data the same suite reads 70% with
+      # tests counted and 53.93% without. Coverage did not fall by 17 points; the
+      # earlier figures were partly measuring the tests.
+      #
+      # 53.93% over 8,353 production statements, 844 api + 42 ai tests passing.
+      # Gate at 52 leaves about a point, which is the spread observed between this
+      # runner and a local Windows run.
       - name: Run backend tests (ai suite)
         working-directory: ${{ github.workspace }}
-        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=69
+        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=52
         env:
           PYTHONPATH: ${{ github.workspace }}
 

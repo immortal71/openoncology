@@ -20,3 +20,21 @@ addopts = "--import-mode=importlib"
 # accidentally pull both `ai` packages into one process. Run the ai suite
 # explicitly: `pytest ai/tests/` (see the Makefile and CONTRIBUTING.md).
 testpaths = ["api/tests"]
+
+[tool.coverage.run]
+# Without this, `--cov=api --cov=ai` measures api/tests/ and ai/tests/ as well as
+# the code under test. A test file is ~100% covered by the act of running it, so
+# the 34 test modules were reporting near-100% and pulling the headline number up
+# with them:
+#
+#     api/tests/test_oncokb_evidence.py    376 stmts    0 miss    100%
+#     api/tests/test_sample_qc.py           75 stmts    0 miss    100%
+#
+# The gap is not small. On the same coverage data, 13,118 statements including
+# tests reads 70%, while the 8,327 statements of production code read 52%. A
+# threshold set against the first number cannot detect a regression in the second,
+# which is the only one that means anything.
+omit = [
+    "*/tests/*",
+    "*/conftest.py",
+]
