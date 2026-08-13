@@ -1,0 +1,120 @@
+{
+  "gate": "ffpe_artefact_detection_sensitivity",
+  "target": {
+    "metric": "sensitivity_pct_at_burden_30_plus",
+    "threshold": 80.0
+  },
+  "result": {
+    "sensitivity_pct": 100.0,
+    "false_positive_pct_on_clean": 0.0,
+    "passed": true
+  },
+  "method": "Spike-in simulation. Backbone SNVs are real coordinates from samples/real/*.vcf assigned clonal-range VAF; artefacts are synthetic C>T and G>A at low VAF, the cytosine-deamination signature cited in api/services/sample_qc.py.",
+  "limitation": "Not validated on paired FFPE and fresh-frozen tissue. This characterises the implemented rule's response to its own defining signature, not performance on real formalin-fixed material.",
+  "why_the_result_is_saturated": "Detection is 100% at every non-zero burden tested, including 10%. That is a property of the simulation as much as the detector: artefact VAF is drawn from a tight low band and somatic VAF from a clonal band, so the two separate more cleanly than they do in real sequencing, where subclonal somatic variants overlap the artefact VAF range. Treat the sensitivity figure as an upper bound. The informative column is the high-confidence threshold, which only saturates above 60% burden and shows the score scale is not degenerate.",
+  "thresholds": {
+    "suspicious": 40.0,
+    "high_confidence": 70.0
+  },
+  "vaf_ranges": {
+    "somatic": [
+      0.18,
+      0.6
+    ],
+    "artefact": [
+      0.01,
+      0.08
+    ]
+  },
+  "backbone_snvs": 314,
+  "by_burden": [
+    {
+      "artefact_burden": 0.0,
+      "n_samples": 50,
+      "flagged_suspicious": 0,
+      "flagged_suspicious_pct": 0.0,
+      "flagged_high_confidence": 0,
+      "flagged_high_confidence_pct": 0.0,
+      "mean_score": 20.7,
+      "min_score": 14.0,
+      "max_score": 29.0
+    },
+    {
+      "artefact_burden": 0.1,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 0,
+      "flagged_high_confidence_pct": 0.0,
+      "mean_score": 55.4,
+      "min_score": 48.0,
+      "max_score": 62.0
+    },
+    {
+      "artefact_burden": 0.2,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 0,
+      "flagged_high_confidence_pct": 0.0,
+      "mean_score": 58.3,
+      "min_score": 52.0,
+      "max_score": 64.0
+    },
+    {
+      "artefact_burden": 0.3,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 0,
+      "flagged_high_confidence_pct": 0.0,
+      "mean_score": 63.3,
+      "min_score": 56.0,
+      "max_score": 69.0
+    },
+    {
+      "artefact_burden": 0.4,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 9,
+      "flagged_high_confidence_pct": 18.0,
+      "mean_score": 66.5,
+      "min_score": 61.0,
+      "max_score": 73.1
+    },
+    {
+      "artefact_burden": 0.5,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 31,
+      "flagged_high_confidence_pct": 62.0,
+      "mean_score": 70.7,
+      "min_score": 65.0,
+      "max_score": 90.0
+    },
+    {
+      "artefact_burden": 0.6,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 49,
+      "flagged_high_confidence_pct": 98.0,
+      "mean_score": 74.5,
+      "min_score": 67.0,
+      "max_score": 90.0
+    },
+    {
+      "artefact_burden": 0.7,
+      "n_samples": 50,
+      "flagged_suspicious": 50,
+      "flagged_suspicious_pct": 100.0,
+      "flagged_high_confidence": 50,
+      "flagged_high_confidence_pct": 100.0,
+      "mean_score": 83.0,
+      "min_score": 73.1,
+      "max_score": 90.0
+    }
+  ]
+}

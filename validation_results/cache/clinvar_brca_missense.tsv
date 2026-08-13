@@ -1,0 +1,1533 @@
+gene	protein_change	label	assertion	review_status	variation_id
+BRCA2	N372H	benign	benign	reviewed by expert panel	9329
+BRCA2	T2722R	pathogenic	pathogenic	reviewed by expert panel	9340
+BRCA2	L2510P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	9345
+BRCA1	C64G	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	17660
+BRCA1	C61G	pathogenic	pathogenic	reviewed by expert panel	17661
+BRCA1	S1040N	benign	benign	reviewed by expert panel	17670
+BRCA1	R1443G	benign	benign	reviewed by expert panel	17676
+BRCA1	R841W	benign	benign	reviewed by expert panel	17681
+BRCA1	R71G	pathogenic	pathogenic	reviewed by expert panel	17693
+BRCA1	M1775R	pathogenic	pathogenic	reviewed by expert panel	17694
+BRCA1	M1775K	pathogenic	pathogenic	reviewed by expert panel	17695
+BRCA1	P346S	benign	benign	reviewed by expert panel	37389
+BRCA1	D369N	benign	benign	reviewed by expert panel	37390
+BRCA1	C39Y	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	37392
+BRCA1	C39F	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37393
+BRCA1	R496C	benign	benign	reviewed by expert panel	37416
+BRCA1	L512F	benign	benign	reviewed by expert panel	37420
+BRCA1	L52F	benign	benign	reviewed by expert panel	37421
+BRCA1	N550H	benign	benign	reviewed by expert panel	37423
+BRCA1	L668F	benign	benign	reviewed by expert panel	37441
+BRCA1	K719E	benign	benign	reviewed by expert panel	37452
+BRCA1	N723D	benign	benign	reviewed by expert panel	37454
+BRCA1	E736A	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37455
+BRCA1	S784L	benign	benign	reviewed by expert panel	37464
+BRCA1	T826K	benign	benign	reviewed by expert panel	37473
+BRCA1	K862E	benign	benign	reviewed by expert panel	37476
+BRCA1	G890V	benign	benign	reviewed by expert panel	37479
+BRCA1	K912R	benign	likely benign	criteria provided, multiple submitters, no conflicts	37487
+BRCA1	V920I	benign	benign	reviewed by expert panel	37488
+BRCA1	I925L	benign	benign	reviewed by expert panel	37489
+BRCA1	A102G	benign	benign	reviewed by expert panel	37505
+BRCA1	R1028C	benign	benign	reviewed by expert panel	37506
+BRCA1	R1028H	benign	benign	reviewed by expert panel	37507
+BRCA1	I1044V	benign	benign	reviewed by expert panel	37510
+BRCA1	K1109N	benign	benign	reviewed by expert panel	37522
+BRCA1	E1219D	benign	benign	reviewed by expert panel	37537
+BRCA1	P1238L	benign	benign	reviewed by expert panel	37543
+BRCA1	I1275V	benign	benign	reviewed by expert panel	37549
+BRCA1	E1346K	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37561
+BRCA1	I1405V	benign	likely benign	criteria provided, multiple submitters, no conflicts	37575
+BRCA1	E143K	benign	benign	reviewed by expert panel	37580
+BRCA1	R1495K	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	37597
+BRCA1	R1495M	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	37598
+BRCA1	S153R	benign	likely benign	criteria provided, multiple submitters, no conflicts	37600
+BRCA1	E1559K	pathogenic	pathogenic	reviewed by expert panel	37604
+BRCA1	E1559Q	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37605
+BRCA1	K1606E	benign	benign	reviewed by expert panel	37612
+BRCA1	S1613C	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37613
+BRCA1	A1623G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37614
+BRCA1	M1652T	benign	benign	reviewed by expert panel	37615
+BRCA1	L1664P	benign	benign	reviewed by expert panel	37621
+BRCA1	M1689R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37625
+BRCA1	T1691K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37627
+BRCA1	T1691I	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37628
+BRCA1	D1692N	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37632
+BRCA1	D1692H	pathogenic	pathogenic	reviewed by expert panel	37633
+BRCA1	C1697Y	pathogenic	likely pathogenic	reviewed by expert panel	37635
+BRCA1	R1699Q	pathogenic	pathogenic	reviewed by expert panel	37636
+BRCA1	L1705P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37637
+BRCA1	G1706E	pathogenic	pathogenic	reviewed by expert panel	37638
+BRCA1	V1736A	pathogenic	pathogenic	reviewed by expert panel	37648
+BRCA1	G1748C	pathogenic	likely pathogenic	reviewed by expert panel	37650
+BRCA1	I1766S	pathogenic	pathogenic	reviewed by expert panel	37656
+BRCA1	G1788V	pathogenic	pathogenic	reviewed by expert panel	37660
+BRCA1	Y179C	benign	benign	reviewed by expert panel	37661
+BRCA1	M18T	pathogenic	pathogenic	reviewed by expert panel	37664
+BRCA1	G1803A	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37668
+BRCA1	P1812A	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37670
+BRCA1	D1818G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37672
+BRCA1	W1837R	pathogenic	pathogenic	reviewed by expert panel	37679
+BRCA1	W1837C	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	37680
+BRCA1	S1841R	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	37681
+BRCA1	V191I	benign	benign	reviewed by expert panel	37684
+BRCA1	D214G	benign	benign	reviewed by expert panel	37689
+BRCA1	T276R	benign	benign	reviewed by expert panel	37706
+BRCA1	S316G	benign	benign	reviewed by expert panel	37709
+BRCA2	T3349A	benign	benign	reviewed by expert panel	37719
+BRCA2	T3371A	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37720
+BRCA2	R3385C	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37721
+BRCA2	Y42C	benign	benign	reviewed by expert panel	37734
+BRCA2	E462G	benign	benign	reviewed by expert panel	37738
+BRCA2	I505V	benign	likely benign	criteria provided, multiple submitters, no conflicts	37744
+BRCA2	N56T	benign	benign	reviewed by expert panel	37751
+BRCA2	T582P	benign	benign	reviewed by expert panel	37753
+BRCA2	K604E	benign	benign	reviewed by expert panel	37760
+BRCA2	A622V	benign	benign	reviewed by expert panel	37767
+BRCA2	T630I	benign	benign	reviewed by expert panel	37768
+BRCA2	P655R	benign	benign	reviewed by expert panel	37770
+BRCA2	D935H	benign	benign	reviewed by expert panel	37801
+BRCA2	L1019V	benign	benign	reviewed by expert panel	37817
+BRCA2	N1102Y	benign	benign	reviewed by expert panel	37833
+BRCA2	N1228D	benign	benign	reviewed by expert panel	37852
+BRCA2	C1290Y	benign	benign	reviewed by expert panel	37863
+BRCA2	V1306I	benign	benign	reviewed by expert panel	37866
+BRCA2	M1I	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	37871
+BRCA2	C1365Y	benign	benign	reviewed by expert panel	37878
+BRCA2	Q1396R	benign	benign	reviewed by expert panel	37886
+BRCA2	G1529R	benign	benign	reviewed by expert panel	37910
+BRCA2	T1557S	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37917
+BRCA2	K1690N	benign	benign	reviewed by expert panel	37942
+BRCA2	D1699N	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37946
+BRCA2	S1733F	benign	benign	reviewed by expert panel	37950
+BRCA2	G1771D	benign	benign	reviewed by expert panel	37958
+BRCA2	A1825V	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	37968
+BRCA2	I1851S	benign	benign	reviewed by expert panel	37972
+BRCA2	N1878K	benign	benign	reviewed by expert panel	37983
+BRCA2	D189G	pathogenic	likely pathogenic	reviewed by expert panel	37986
+BRCA2	L1904V	benign	benign	reviewed by expert panel	37990
+BRCA2	D1923A	benign	benign	reviewed by expert panel	37995
+BRCA2	I1929V	benign	benign	reviewed by expert panel	37997
+BRCA2	C1960Y	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38003
+BRCA2	N2048I	benign	benign	reviewed by expert panel	38022
+BRCA2	H2074N	benign	benign	reviewed by expert panel	38028
+BRCA2	T2097M	benign	benign	reviewed by expert panel	38032
+BRCA2	V211L	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38035
+BRCA2	R2108H	benign	benign	reviewed by expert panel	38037
+BRCA2	N2113S	benign	benign	reviewed by expert panel	38039
+BRCA2	F221L	benign	likely benign	reviewed by expert panel	38058
+BRCA2	T2250A	benign	benign	reviewed by expert panel	38064
+BRCA2	I2285V	benign	benign	reviewed by expert panel	38070
+BRCA2	R2336H	pathogenic	pathogenic	reviewed by expert panel	38077
+BRCA2	A2351G	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38081
+BRCA2	Q2384K	benign	benign	reviewed by expert panel	38086
+BRCA2	T2515I	benign	benign	reviewed by expert panel	38102
+BRCA2	H2623R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38123
+BRCA2	W2626C	pathogenic	pathogenic	reviewed by expert panel	38125
+BRCA2	R2659G	pathogenic	pathogenic	reviewed by expert panel	38130
+BRCA2	R2659K	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	38131
+BRCA2	D2665G	benign	benign	reviewed by expert panel	38134
+BRCA2	I2672V	benign	likely benign	criteria provided, multiple submitters, no conflicts	38135
+BRCA2	M2676T	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38136
+BRCA2	L2688P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38137
+BRCA2	D2723G	pathogenic	pathogenic	reviewed by expert panel	38141
+BRCA2	K2729N	benign	benign	reviewed by expert panel	38142
+BRCA2	N277K	benign	benign	reviewed by expert panel	38152
+BRCA2	R2784W	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38155
+BRCA2	G2793E	pathogenic	likely pathogenic	reviewed by expert panel	38157
+BRCA2	G2793V	pathogenic	likely pathogenic	reviewed by expert panel	38158
+BRCA2	Q2829R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38161
+BRCA2	G2901D	benign	benign	reviewed by expert panel	38180
+BRCA2	S2922G	benign	benign	reviewed by expert panel	38186
+BRCA2	R2973C	benign	benign	reviewed by expert panel	38193
+BRCA2	R2991H	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38200
+BRCA2	E3002K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38201
+BRCA2	Y3006D	pathogenic	pathogenic	reviewed by expert panel	38202
+BRCA2	T3013I	benign	benign	reviewed by expert panel	38205
+BRCA2	V3079I	benign	benign	reviewed by expert panel	38220
+BRCA2	Y3098H	benign	benign	reviewed by expert panel	38227
+BRCA2	L3101R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	38230
+BRCA2	N3124I	pathogenic	pathogenic	reviewed by expert panel	38233
+BRCA2	C315S	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38241
+BRCA2	N3174K	benign	benign	criteria provided, single submitter	38245
+BRCA2	C3198R	benign	benign	reviewed by expert panel	38252
+BRCA2	P3202L	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38254
+BRCA2	G3212R	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38257
+BRCA2	K322Q	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	38258
+BRCA2	I3412V	benign	benign	reviewed by expert panel	41540
+BRCA2	S384F	benign	benign	reviewed by expert panel	41541
+BRCA2	I505T	benign	benign	reviewed by expert panel	41542
+BRCA2	T598A	benign	benign	reviewed by expert panel	41543
+BRCA2	M784V	benign	benign	reviewed by expert panel	41544
+BRCA2	N991D	benign	benign	reviewed by expert panel	41545
+BRCA2	S1172L	benign	benign	reviewed by expert panel	41546
+BRCA2	G1194D	benign	benign	reviewed by expert panel	41548
+BRCA2	D1420Y	benign	benign	reviewed by expert panel	41549
+BRCA2	K1531N	benign	likely benign	criteria provided, single submitter	41550
+BRCA2	E1593D	benign	benign	reviewed by expert panel	41551
+BRCA2	D1911V	benign	likely benign	criteria provided, single submitter	41555
+BRCA2	T1915M	benign	benign	reviewed by expert panel	41556
+BRCA2	R2034C	benign	benign	reviewed by expert panel	41558
+BRCA2	R2108C	benign	benign	reviewed by expert panel	41559
+BRCA2	H2116R	benign	benign	reviewed by expert panel	41561
+BRCA2	H2440R	benign	benign	reviewed by expert panel	41562
+BRCA2	A2717S	benign	benign	reviewed by expert panel	41564
+BRCA2	V2728I	benign	benign	reviewed by expert panel	41565
+BRCA2	N289H	benign	benign	reviewed by expert panel	41567
+BRCA2	I2944F	benign	benign	reviewed by expert panel	41569
+BRCA2	A2951T	benign	benign	reviewed by expert panel	41570
+BRCA2	V3244I	benign	benign	reviewed by expert panel	41572
+BRCA1	Q356R	benign	benign	reviewed by expert panel	41803
+BRCA1	D411E	benign	benign	reviewed by expert panel	41804
+BRCA1	R496H	benign	benign	reviewed by expert panel	41805
+BRCA1	E597K	benign	benign	reviewed by expert panel	41806
+BRCA1	D693N	benign	benign	reviewed by expert panel	41808
+BRCA1	V772A	benign	benign	reviewed by expert panel	41809
+BRCA1	K820E	benign	benign	reviewed by expert panel	41810
+BRCA1	R866C	benign	benign	reviewed by expert panel	41811
+BRCA1	P871L	benign	benign	reviewed by expert panel	41812
+BRCA1	M1008I	benign	benign	reviewed by expert panel	41814
+BRCA1	E1038G	benign	benign	reviewed by expert panel	41815
+BRCA1	P1099L	benign	benign	reviewed by expert panel	41816
+BRCA1	S1140G	benign	benign	reviewed by expert panel	41817
+BRCA1	K1183R	benign	benign	reviewed by expert panel	41818
+BRCA1	L1261F	benign	likely benign	criteria provided, single submitter	41819
+BRCA1	R1347G	benign	benign	reviewed by expert panel	41821
+BRCA1	P142H	benign	benign	reviewed by expert panel	41823
+BRCA1	R1507T	benign	benign	reviewed by expert panel	41825
+BRCA1	S1512I	benign	benign	reviewed by expert panel	41826
+BRCA1	S1613G	benign	benign	reviewed by expert panel	41827
+BRCA1	M1628T	benign	benign	reviewed by expert panel	41828
+BRCA1	M1652I	benign	benign	reviewed by expert panel	41830
+BRCA1	H1860P	benign	benign	no assertion criteria provided	41833
+BRCA1	L246V	benign	benign	reviewed by expert panel	41835
+BRCA2	T3374I	benign	benign	reviewed by expert panel	51047
+BRCA2	Q347R	benign	benign	reviewed by expert panel	51060
+BRCA2	P375S	benign	benign	reviewed by expert panel	51066
+BRCA2	E394A	benign	benign	reviewed by expert panel	51077
+BRCA2	P41S	benign	benign	reviewed by expert panel	51085
+BRCA2	L452I	benign	benign	reviewed by expert panel	51107
+BRCA2	Q499R	benign	likely benign	criteria provided, single submitter	51133
+BRCA2	C554W	benign	benign	reviewed by expert panel	51169
+BRCA2	N560D	benign	likely benign	criteria provided, single submitter	51173
+BRCA2	D596H	benign	benign	reviewed by expert panel	51192
+BRCA2	Y600H	benign	benign	reviewed by expert panel	51197
+BRCA2	G602R	benign	benign	reviewed by expert panel	51200
+BRCA2	A618P	benign	likely benign	criteria provided, single submitter	51214
+BRCA2	D707Y	benign	likely benign	criteria provided, single submitter	51245
+BRCA2	Q713L	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	51249
+BRCA2	A737S	benign	likely benign	criteria provided, single submitter	51255
+BRCA2	V741L	benign	likely benign	criteria provided, single submitter	51256
+BRCA2	A75P	benign	benign	reviewed by expert panel	51258
+BRCA2	L759F	benign	likely benign	criteria provided, single submitter	51264
+BRCA2	D806H	benign	benign	reviewed by expert panel	51278
+BRCA2	Y828C	benign	likely benign	criteria provided, single submitter	51296
+BRCA2	P835S	benign	likely benign	criteria provided, single submitter	51297
+BRCA2	V894I	benign	benign	reviewed by expert panel	51326
+BRCA2	N900D	benign	benign	reviewed by expert panel	51328
+BRCA2	L929S	benign	benign	reviewed by expert panel	51343
+BRCA2	D935N	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	51349
+BRCA2	S958G	benign	likely benign	criteria provided, multiple submitters, no conflicts	51364
+BRCA2	N987I	benign	benign	reviewed by expert panel	51379
+BRCA2	Y989D	benign	likely benign	criteria provided, single submitter	51380
+BRCA2	L996R	benign	benign	reviewed by expert panel	51381
+BRCA2	M1T	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	51384
+BRCA2	M1R	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	51385
+BRCA2	S1041N	benign	likely benign	criteria provided, single submitter	51401
+BRCA2	C1044W	benign	likely benign	criteria provided, single submitter	51402
+BRCA2	N108H	benign	benign	reviewed by expert panel	51428
+BRCA2	Y1135H	benign	likely benign	criteria provided, single submitter	51457
+BRCA2	M1149V	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	51465
+BRCA2	R1190W	benign	benign	reviewed by expert panel	51488
+BRCA2	F1192C	benign	benign	reviewed by expert panel	51490
+BRCA2	D1280V	benign	benign	reviewed by expert panel	51537
+BRCA2	V1283G	benign	likely benign	criteria provided, single submitter	51540
+BRCA2	T1302N	benign	likely benign	criteria provided, single submitter	51558
+BRCA2	R1315K	benign	likely benign	criteria provided, single submitter	51571
+BRCA2	M1I	pathogenic	pathogenic	reviewed by expert panel	51579
+BRCA2	I1349T	benign	benign	reviewed by expert panel	51586
+BRCA2	T1354M	benign	benign	reviewed by expert panel	51588
+BRCA2	I1364L	benign	benign	reviewed by expert panel	51592
+BRCA2	T1388N	benign	likely benign	criteria provided, single submitter	51607
+BRCA2	T1414M	benign	benign	reviewed by expert panel	51616
+BRCA2	S1424C	benign	benign	reviewed by expert panel	51623
+BRCA2	Q147R	benign	benign	reviewed by expert panel	51644
+BRCA2	S1479T	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	51648
+BRCA2	L1522F	benign	likely benign	criteria provided, single submitter	51675
+BRCA2	F1524V	benign	benign	reviewed by expert panel	51676
+BRCA2	C1573Y	benign	likely benign	criteria provided, multiple submitters, no conflicts	51702
+BRCA2	V159M	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	51711
+BRCA2	A1668G	benign	likely benign	criteria provided, single submitter	51754
+BRCA2	P168T	benign	benign	reviewed by expert panel	51757
+BRCA2	R18H	benign	benign	reviewed by expert panel	51855
+BRCA2	P1819S	benign	benign	reviewed by expert panel	51865
+BRCA2	K1823Q	benign	likely benign	criteria provided, single submitter	51867
+BRCA2	N1880K	benign	benign	reviewed by expert panel	51896
+BRCA2	E1895Q	benign	likely benign	criteria provided, single submitter	51909
+BRCA2	H1918Y	benign	benign	reviewed by expert panel	51927
+BRCA2	H1918R	benign	benign	reviewed by expert panel	51928
+BRCA2	S2006R	benign	likely benign	criteria provided, single submitter	51988
+BRCA2	V211I	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	52058
+BRCA2	K2128N	benign	likely benign	criteria provided, single submitter	52078
+BRCA2	S2152Y	benign	benign	reviewed by expert panel	52108
+BRCA2	H2178Y	benign	likely benign	criteria provided, single submitter	52124
+BRCA2	D23Y	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52185
+BRCA2	D2312V	benign	benign	reviewed by expert panel	52220
+BRCA2	I2315L	benign	likely benign	criteria provided, multiple submitters, no conflicts	52223
+BRCA2	R2318Q	benign	benign	reviewed by expert panel	52225
+BRCA2	R2336P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52241
+BRCA2	R2336L	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52242
+BRCA2	K2339N	benign	benign	reviewed by expert panel	52249
+BRCA2	G2353R	benign	benign	reviewed by expert panel	52260
+BRCA2	K2411T	benign	benign	reviewed by expert panel	52294
+BRCA2	N2436I	benign	benign	reviewed by expert panel	52306
+BRCA2	K2472T	benign	benign	reviewed by expert panel	52322
+BRCA2	R2502H	benign	benign	reviewed by expert panel	52345
+BRCA2	L2512F	benign	benign	reviewed by expert panel	52349
+BRCA2	T2542R	benign	benign	criteria provided, single submitter	52371
+BRCA2	G2585R	pathogenic	likely pathogenic	reviewed by expert panel	52400
+BRCA2	R2602T	pathogenic	pathogenic	criteria provided, single submitter	52415
+BRCA2	T2607P	pathogenic	likely pathogenic	reviewed by expert panel	52422
+BRCA2	G2609D	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52423
+BRCA2	I2627F	pathogenic	pathogenic	reviewed by expert panel	52430
+BRCA2	L2647P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52443
+BRCA2	L2653P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52447
+BRCA2	Q2655R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52450
+BRCA2	R2659T	pathogenic	pathogenic	reviewed by expert panel	52455
+BRCA2	Y2660D	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52458
+BRCA2	E2663K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52461
+BRCA2	E2663V	pathogenic	pathogenic	reviewed by expert panel	52462
+BRCA2	S2670L	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52471
+BRCA2	I2675V	pathogenic	pathogenic	reviewed by expert panel	52475
+BRCA2	L2686P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52489
+BRCA2	L2721H	pathogenic	likely pathogenic	reviewed by expert panel	52513
+BRCA2	D2723H	pathogenic	pathogenic	reviewed by expert panel	52515
+BRCA2	D2723A	pathogenic	pathogenic	reviewed by expert panel	52516
+BRCA2	G2724V	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52517
+BRCA2	Y2726C	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52520
+BRCA2	G2748D	pathogenic	pathogenic	reviewed by expert panel	52535
+BRCA2	A2770T	benign	benign	reviewed by expert panel	52542
+BRCA2	W2788R	pathogenic	likely pathogenic	reviewed by expert panel	52563
+BRCA2	L2792P	pathogenic	likely pathogenic	reviewed by expert panel	52568
+BRCA2	G2793R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	52569
+BRCA2	S2835P	benign	benign	reviewed by expert panel	52606
+BRCA2	R2842H	benign	benign	reviewed by expert panel	52611
+BRCA2	S286P	benign	likely benign	criteria provided, multiple submitters, no conflicts	52622
+BRCA2	V2969M	benign	benign	reviewed by expert panel	52697
+BRCA2	R3052W	pathogenic	pathogenic	reviewed by expert panel	52763
+BRCA2	K3059E	benign	benign	reviewed by expert panel	52767
+BRCA2	P3063S	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	52770
+BRCA2	W31R	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	52775
+BRCA2	G3076E	pathogenic	likely pathogenic	reviewed by expert panel	52780
+BRCA2	D3095E	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	52805
+BRCA2	L3125H	pathogenic	likely pathogenic	reviewed by expert panel	52823
+BRCA2	D3170G	benign	benign	reviewed by expert panel	52861
+BRCA2	L3180F	benign	benign	reviewed by expert panel	52865
+BRCA2	S326R	benign	benign	reviewed by expert panel	52898
+BRCA2	P3292L	benign	benign	reviewed by expert panel	52910
+BRCA1	P334L	benign	benign	reviewed by expert panel	54099
+BRCA1	K355R	benign	likely benign	criteria provided, single submitter	54112
+BRCA1	T37K	pathogenic	pathogenic	reviewed by expert panel	54131
+BRCA1	T37R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54132
+BRCA1	N376S	benign	likely benign	criteria provided, single submitter	54139
+BRCA1	S377N	benign	likely benign	criteria provided, single submitter	54142
+BRCA1	I379M	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54143
+BRCA1	C39S	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54151
+BRCA1	C39R	pathogenic	pathogenic	reviewed by expert panel	54152
+BRCA1	C39G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54153
+BRCA1	S403F	benign	likely benign	criteria provided, single submitter	54163
+BRCA1	H41R	pathogenic	pathogenic	reviewed by expert panel	54166
+BRCA1	E421K	benign	likely benign	criteria provided, single submitter	54179
+BRCA1	C44S	pathogenic	pathogenic	reviewed by expert panel	54191
+BRCA1	C44R	pathogenic	pathogenic	criteria provided, single submitter	54192
+BRCA1	C44Y	pathogenic	pathogenic	reviewed by expert panel	54199
+BRCA1	C44F	pathogenic	pathogenic	reviewed by expert panel	54200
+BRCA1	F461L	benign	benign	reviewed by expert panel	54228
+BRCA1	Y465D	benign	likely benign	criteria provided, single submitter	54239
+BRCA1	C47G	pathogenic	likely pathogenic	criteria provided, single submitter	54242
+BRCA1	C47Y	pathogenic	pathogenic	reviewed by expert panel	54246
+BRCA1	C47F	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54247
+BRCA1	N473S	benign	benign	reviewed by expert panel	54248
+BRCA1	N473I	benign	benign	reviewed by expert panel	54249
+BRCA1	H476R	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54251
+BRCA1	F486L	benign	benign	reviewed by expert panel	54258
+BRCA1	F486L	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54259
+BRCA1	F486L	benign	likely benign	criteria provided, single submitter	54260
+BRCA1	R504H	benign	benign	reviewed by expert panel	54278
+BRCA1	D522N	benign	likely benign	criteria provided, single submitter	54293
+BRCA1	T539M	benign	benign	reviewed by expert panel	54310
+BRCA1	G552V	benign	likely benign	criteria provided, single submitter	54319
+BRCA1	P568L	benign	benign	reviewed by expert panel	54329
+BRCA1	I600M	benign	likely benign	criteria provided, single submitter	54354
+BRCA1	C61S	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54359
+BRCA1	C61R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54360
+BRCA1	C61Y	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54364
+BRCA1	R612G	benign	benign	reviewed by expert panel	54367
+BRCA1	A622V	benign	benign	reviewed by expert panel	54371
+BRCA1	P633T	benign	likely benign	criteria provided, single submitter	54386
+BRCA1	P634R	benign	likely benign	criteria provided, single submitter	54392
+BRCA1	C64R	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54394
+BRCA1	C64Y	pathogenic	pathogenic	reviewed by expert panel	54400
+BRCA1	D642H	benign	benign	reviewed by expert panel	54401
+BRCA1	S643G	benign	benign	reviewed by expert panel	54402
+BRCA1	C644W	benign	likely benign	criteria provided, single submitter	54403
+BRCA1	K654E	benign	likely benign	criteria provided, single submitter	54415
+BRCA1	Y655D	benign	likely benign	criteria provided, single submitter	54418
+BRCA1	D67Y	benign	benign	reviewed by expert panel	54431
+BRCA1	M1V	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	54432
+BRCA1	D695Y	benign	benign	reviewed by expert panel	54456
+BRCA1	R71K	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54471
+BRCA1	P727L	benign	benign	reviewed by expert panel	54486
+BRCA1	R762S	benign	benign	reviewed by expert panel	54522
+BRCA1	I783V	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54541
+BRCA1	Q804H	benign	benign	reviewed by expert panel	54561
+BRCA1	C805R	benign	likely benign	criteria provided, single submitter	54562
+BRCA1	N810Y	benign	benign	reviewed by expert panel	54567
+BRCA1	D825V	benign	likely benign	criteria provided, single submitter	54576
+BRCA1	R841Q	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54591
+BRCA1	Y856H	benign	benign	reviewed by expert panel	54604
+BRCA1	R866H	benign	benign	reviewed by expert panel	54613
+BRCA1	L892S	benign	likely benign	criteria provided, single submitter	54638
+BRCA1	D96N	pathogenic	likely pathogenic	reviewed by expert panel	54704
+BRCA1	G960D	benign	likely benign	criteria provided, single submitter	54708
+BRCA1	E962K	benign	benign	reviewed by expert panel	54709
+BRCA1	T967S	benign	likely benign	criteria provided, single submitter	54711
+BRCA1	H971N	benign	likely benign	criteria provided, single submitter	54714
+BRCA1	R979C	benign	likely benign	criteria provided, multiple submitters, no conflicts	54727
+BRCA1	M1T	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54745
+BRCA1	M1R	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	54746
+BRCA1	M1008V	benign	benign	reviewed by expert panel	54755
+BRCA1	S1024R	benign	likely benign	criteria provided, single submitter	54765
+BRCA1	V1047A	benign	likely benign	criteria provided, single submitter	54775
+BRCA1	G1048V	benign	benign	reviewed by expert panel	54777
+BRCA1	Y105C	benign	benign	reviewed by expert panel	54780
+BRCA1	R1076S	benign	likely benign	criteria provided, single submitter	54803
+BRCA1	S1101N	benign	benign	reviewed by expert panel	54830
+BRCA1	S1139I	benign	benign	reviewed by expert panel	54873
+BRCA1	Q1144H	benign	likely benign	criteria provided, single submitter	54884
+BRCA1	P1150S	benign	benign	reviewed by expert panel	54887
+BRCA1	D1155H	benign	benign	reviewed by expert panel	54891
+BRCA1	V1176D	benign	likely benign	criteria provided, single submitter	54908
+BRCA1	V1181I	benign	benign	reviewed by expert panel	54911
+BRCA1	V1181A	benign	likely benign	criteria provided, single submitter	54912
+BRCA1	Q1200H	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54930
+BRCA1	Q1200H	benign	benign	reviewed by expert panel	54931
+BRCA1	G1201S	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	54932
+BRCA1	R1203Q	benign	benign	reviewed by expert panel	54935
+BRCA1	G1205R	benign	likely benign	criteria provided, single submitter	54937
+BRCA1	E1214K	benign	benign	reviewed by expert panel	54948
+BRCA1	S1218C	benign	likely benign	criteria provided, single submitter	54955
+BRCA1	K1233R	benign	likely benign	criteria provided, single submitter	54964
+BRCA1	N1236K	benign	benign	reviewed by expert panel	54970
+BRCA1	I124V	benign	benign	reviewed by expert panel	54971
+BRCA1	S1241C	benign	likely benign	criteria provided, single submitter	54980
+BRCA1	T1242A	benign	benign	reviewed by expert panel	54982
+BRCA1	V1247I	benign	benign	reviewed by expert panel	54985
+BRCA1	E1250K	benign	benign	reviewed by expert panel	54987
+BRCA1	S1253Y	benign	likely benign	criteria provided, single submitter	54990
+BRCA1	S1266T	benign	benign	reviewed by expert panel	55009
+BRCA1	A1277P	benign	likely benign	criteria provided, single submitter	55019
+BRCA1	H1283R	benign	likely benign	criteria provided, multiple submitters, no conflicts	55028
+BRCA1	H1284R	benign	likely benign	criteria provided, single submitter	55029
+BRCA1	N132K	benign	benign	reviewed by expert panel	55064
+BRCA1	R133C	benign	benign	reviewed by expert panel	55067
+BRCA1	M1I	pathogenic	pathogenic	reviewed by expert panel	55072
+BRCA1	D1337E	benign	likely benign	criteria provided, single submitter	55075
+BRCA1	T1349M	benign	benign	reviewed by expert panel	55085
+BRCA1	M1361L	benign	benign	reviewed by expert panel	55099
+BRCA1	V1378I	benign	benign	reviewed by expert panel	55111
+BRCA1	H1402Y	benign	benign	reviewed by expert panel	55140
+BRCA1	M1411T	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	55147
+BRCA1	E1419Q	benign	benign	reviewed by expert panel	55154
+BRCA1	I1432L	benign	likely benign	criteria provided, single submitter	55163
+BRCA1	N1468H	benign	benign	reviewed by expert panel	55193
+BRCA1	V1534M	benign	benign	reviewed by expert panel	55235
+BRCA1	D1546N	benign	benign	reviewed by expert panel	55245
+BRCA1	D1546Y	benign	benign	reviewed by expert panel	55246
+BRCA1	Q155E	benign	benign	reviewed by expert panel	55247
+BRCA1	T1561I	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	55259
+BRCA1	L1564P	benign	benign	reviewed by expert panel	55262
+BRCA1	S1577P	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	55272
+BRCA1	A1584S	benign	likely benign	criteria provided, multiple submitters, no conflicts	55279
+BRCA1	R1589H	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	55284
+BRCA1	I1593L	benign	likely benign	no assertion criteria provided	55286
+BRCA1	P1614S	benign	benign	reviewed by expert panel	55301
+BRCA1	P1637L	benign	benign	reviewed by expert panel	55314
+BRCA1	A1641T	benign	likely benign	criteria provided, single submitter	55316
+BRCA1	S1655F	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55333
+BRCA1	F1662S	benign	benign	reviewed by expert panel	55339
+BRCA1	E1682K	benign	benign	reviewed by expert panel	55361
+BRCA1	E1682V	pathogenic	likely pathogenic	criteria provided, single submitter	55362
+BRCA1	T1685A	pathogenic	pathogenic	reviewed by expert panel	55364
+BRCA1	T1685I	pathogenic	pathogenic	reviewed by expert panel	55365
+BRCA1	H1686Q	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55366
+BRCA1	T1691R	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	55373
+BRCA1	D1692Y	pathogenic	pathogenic	criteria provided, single submitter	55376
+BRCA1	D1692V	pathogenic	likely pathogenic	reviewed by expert panel	55383
+BRCA1	C1697R	pathogenic	pathogenic	reviewed by expert panel	55392
+BRCA1	R170W	benign	benign	reviewed by expert panel	55393
+BRCA1	R1699W	pathogenic	pathogenic	reviewed by expert panel	55396
+BRCA1	R1699L	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	55398
+BRCA1	T1700A	pathogenic	likely pathogenic	reviewed by expert panel	55399
+BRCA1	G1706A	benign	benign	reviewed by expert panel	55406
+BRCA1	A1708E	pathogenic	pathogenic	reviewed by expert panel	55407
+BRCA1	V1713A	pathogenic	likely pathogenic	reviewed by expert panel	55412
+BRCA1	V1714G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55413
+BRCA1	S1715R	pathogenic	pathogenic	reviewed by expert panel	55414
+BRCA1	S1715C	pathogenic	likely pathogenic	reviewed by expert panel	55415
+BRCA1	S1715N	pathogenic	pathogenic	reviewed by expert panel	55416
+BRCA1	S1715R	pathogenic	likely pathogenic	criteria provided, single submitter	55417
+BRCA1	S1715R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55418
+BRCA1	W1718C	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55435
+BRCA1	T1720A	benign	benign	reviewed by expert panel	55438
+BRCA1	D1733G	benign	benign	reviewed by expert panel	55453
+BRCA1	F1734S	pathogenic	pathogenic	criteria provided, single submitter	55454
+BRCA1	V1736G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55456
+BRCA1	G1738R	pathogenic	pathogenic	reviewed by expert panel	55461
+BRCA1	G1738E	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55462
+BRCA1	D1739Y	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55464
+BRCA1	D1739G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55465
+BRCA1	D1739V	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55466
+BRCA1	D1739E	pathogenic	likely pathogenic	criteria provided, single submitter	55467
+BRCA1	G1748D	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55476
+BRCA1	P1749R	pathogenic	pathogenic	criteria provided, single submitter	55479
+BRCA1	R1751Q	benign	benign	reviewed by expert panel	55481
+BRCA1	R1751P	pathogenic	likely pathogenic	reviewed by expert panel	55482
+BRCA1	A1752P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55483
+BRCA1	R1753T	pathogenic	likely pathogenic	reviewed by expert panel	55488
+BRCA1	F1761S	pathogenic	pathogenic	reviewed by expert panel	55505
+BRCA1	L1764P	pathogenic	pathogenic	reviewed by expert panel	55510
+BRCA1	D1778N	pathogenic	pathogenic	reviewed by expert panel	55530
+BRCA1	D1778Y	pathogenic	likely pathogenic	criteria provided, single submitter	55532
+BRCA1	L1780P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55541
+BRCA1	G1788C	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	55550
+BRCA1	A1789T	pathogenic	likely pathogenic	reviewed by expert panel	55552
+BRCA1	M18K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55559
+BRCA1	V1804D	benign	benign	reviewed by expert panel	55568
+BRCA1	V1809F	pathogenic	likely pathogenic	reviewed by expert panel	55573
+BRCA1	Q1811R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55578
+BRCA1	N1819S	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	55585
+BRCA1	A1823T	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55588
+BRCA1	V1833M	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55598
+BRCA1	W1837G	pathogenic	pathogenic	reviewed by expert panel	55607
+BRCA1	V1838E	pathogenic	pathogenic	reviewed by expert panel	55611
+BRCA1	A1843P	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	55614
+BRCA1	L1844R	benign	benign	reviewed by expert panel	55615
+BRCA1	Y1853C	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55627
+BRCA1	L1854P	pathogenic	likely pathogenic	reviewed by expert panel	55631
+BRCA1	P1856S	benign	likely benign	criteria provided, multiple submitters, no conflicts	55632
+BRCA1	P1859R	benign	benign	reviewed by expert panel	55634
+BRCA1	S186Y	benign	benign	reviewed by expert panel	55635
+BRCA1	H1862L	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	55637
+BRCA1	L22S	pathogenic	pathogenic	reviewed by expert panel	55656
+BRCA1	C24R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	55674
+BRCA1	H239R	benign	benign	reviewed by expert panel	55677
+BRCA1	C24Y	pathogenic	likely pathogenic	reviewed by expert panel	55678
+BRCA1	T248N	benign	likely benign	criteria provided, single submitter	55687
+BRCA1	G263C	benign	likely benign	criteria provided, single submitter	55699
+BRCA1	G263A	benign	likely benign	criteria provided, single submitter	55700
+BRCA1	S264C	benign	likely benign	criteria provided, single submitter	55703
+BRCA1	V271M	benign	benign	reviewed by expert panel	55720
+BRCA1	G275S	benign	benign	reviewed by expert panel	55725
+BRCA1	G275D	benign	benign	reviewed by expert panel	55726
+BRCA1	A280G	benign	benign	reviewed by expert panel	55731
+BRCA1	M297I	benign	benign	reviewed by expert panel	55743
+BRCA1	E842G	benign	benign	reviewed by expert panel	91592
+BRCA1	N916Y	benign	likely benign	criteria provided, single submitter	91598
+BRCA1	S1266R	benign	likely benign	criteria provided, single submitter	91615
+BRCA1	G1515E	benign	likely benign	criteria provided, multiple submitters, no conflicts	91632
+BRCA1	L1786P	pathogenic	pathogenic	reviewed by expert panel	91649
+BRCA1	L1839S	pathogenic	pathogenic	reviewed by expert panel	91656
+BRCA2	E2878K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	91730
+BRCA2	R2888C	benign	benign	reviewed by expert panel	91732
+BRCA2	D381N	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	91747
+BRCA2	S1134T	benign	likely benign	criteria provided, multiple submitters, no conflicts	91799
+BRCA2	S3389F	benign	likely benign	criteria provided, multiple submitters, no conflicts	96760
+BRCA2	P389Q	benign	benign	reviewed by expert panel	96762
+BRCA2	E919K	benign	benign	reviewed by expert panel	96782
+BRCA2	I1724V	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	96817
+BRCA2	I2490T	benign	benign	reviewed by expert panel	96852
+BRCA2	R2520Q	benign	likely benign	criteria provided, multiple submitters, no conflicts	96853
+BRCA2	L2604P	pathogenic	likely pathogenic	reviewed by expert panel	96859
+BRCA2	S3018G	pathogenic	pathogenic	reviewed by expert panel	96877
+BRCA1	P334H	benign	likely benign	criteria provided, multiple submitters, no conflicts	96893
+BRCA1	Q1273R	benign	likely benign	criteria provided, multiple submitters, no conflicts	96917
+BRCA1	L1780R	pathogenic	likely pathogenic	reviewed by expert panel	96949
+BRCA1	D693Y	benign	benign	no assertion criteria provided	125534
+BRCA1	D749H	benign	likely benign	criteria provided, single submitter	125550
+BRCA1	S1320P	benign	benign	no assertion criteria provided	125659
+BRCA1	S1722P	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	125791
+BRCA2	Q321H	benign	likely benign	criteria provided, single submitter	125930
+BRCA2	K513R	benign	benign	reviewed by expert panel	125947
+BRCA2	S646R	benign	benign	no assertion criteria provided	125973
+BRCA2	K1132N	benign	benign	no assertion criteria provided	126009
+BRCA2	A2730P	pathogenic	likely pathogenic	reviewed by expert panel	126168
+BRCA2	A3028P	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	126199
+BRCA2	G3076V	pathogenic	pathogenic	reviewed by expert panel	126203
+BRCA2	L824S	benign	likely benign	reviewed by expert panel	133734
+BRCA2	V2466A	benign	benign	criteria provided, multiple submitters, no conflicts	133738
+BRCA2	D2723V	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	140975
+BRCA2	F3057V	benign	likely benign	criteria provided, single submitter	141012
+BRCA2	K3015E	benign	benign	reviewed by expert panel	141104
+BRCA2	L2587F	benign	benign	reviewed by expert panel	141335
+BRCA2	T3030I	benign	likely benign	criteria provided, single submitter	141494
+BRCA2	R2336G	benign	likely benign	criteria provided, single submitter	141563
+BRCA2	L2396F	benign	benign	reviewed by expert panel	141729
+BRCA2	F266L	benign	likely benign	criteria provided, multiple submitters, no conflicts	142396
+BRCA2	N3187K	benign	likely benign	criteria provided, single submitter	142647
+BRCA2	D1911G	benign	likely benign	criteria provided, multiple submitters, no conflicts	142690
+BRCA2	F2562C	pathogenic	likely pathogenic	reviewed by expert panel	142784
+BRCA1	H1805Y	benign	likely benign	criteria provided, single submitter	142988
+BRCA2	A2825S	benign	benign	criteria provided, single submitter	142989
+BRCA1	K556Q	benign	likely benign	criteria provided, single submitter	156488
+BRCA2	Q713P	benign	likely benign	criteria provided, single submitter	156490
+BRCA2	G173R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	182177
+BRCA1	H1686R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	183179
+BRCA2	Y2601C	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	185651
+BRCA2	P2785T	benign	likely benign	criteria provided, single submitter	185579
+BRCA2	P2785L	benign	likely benign	reviewed by expert panel	185253
+BRCA1	I1858L	benign	benign	reviewed by expert panel	183951
+BRCA1	A744T	benign	likely benign	criteria provided, multiple submitters, no conflicts	187051
+BRCA1	T333A	benign	benign	reviewed by expert panel	184709
+BRCA1	R71M	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	185705
+BRCA1	K45Q	benign	benign	reviewed by expert panel	183950
+BRCA1	P34L	pathogenic	likely pathogenic	reviewed by expert panel	186913
+BRCA2	C1265S	benign	benign	reviewed by expert panel	209217
+BRCA2	E1537K	benign	benign	reviewed by expert panel	209218
+BRCA2	M1V	pathogenic	pathogenic	criteria provided, single submitter	216026
+BRCA2	L3101P	pathogenic	likely pathogenic	reviewed by expert panel	216263
+BRCA1	D96G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	220258
+BRCA1	S1387P	benign	likely benign	reviewed by expert panel	224433
+BRCA1	C64W	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	224427
+BRCA1	F1734L	pathogenic	likely pathogenic	reviewed by expert panel	225711
+BRCA2	L2396S	benign	likely benign	criteria provided, single submitter	230839
+BRCA2	G2609V	pathogenic	likely pathogenic	reviewed by expert panel	232537
+BRCA2	I2627N	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	230735
+BRCA2	T2722K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	230821
+BRCA2	A2738T	benign	likely benign	criteria provided, single submitter	230765
+BRCA2	L2776I	benign	likely benign	criteria provided, single submitter	233108
+BRCA2	P2804H	benign	likely benign	criteria provided, single submitter	230680
+BRCA2	K2833N	benign	likely benign	criteria provided, single submitter	231248
+BRCA2	P2886T	benign	benign	criteria provided, single submitter	230631
+BRCA2	Q2957H	benign	benign	criteria provided, single submitter	232467
+BRCA2	Y3035F	benign	benign	criteria provided, single submitter	232526
+BRCA1	P1749T	benign	likely benign	criteria provided, single submitter	232831
+BRCA1	F1734I	pathogenic	likely pathogenic	reviewed by expert panel	232047
+BRCA1	Y1703C	pathogenic	likely pathogenic	reviewed by expert panel	232915
+BRCA1	Q1395H	pathogenic	likely pathogenic	reviewed by expert panel	232793
+BRCA1	G933A	benign	benign	reviewed by expert panel	233288
+BRCA1	S387T	benign	benign	reviewed by expert panel	231852
+BRCA1	N247D	benign	likely benign	criteria provided, multiple submitters, no conflicts	232600
+BRCA1	H41L	pathogenic	likely pathogenic	reviewed by expert panel	230862
+BRCA1	P25L	pathogenic	likely pathogenic	reviewed by expert panel	232955
+BRCA1	G1748R	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	240819
+BRCA1	T1675I	benign	benign	reviewed by expert panel	240811
+BRCA1	R1495T	pathogenic	pathogenic	reviewed by expert panel	245697
+BRCA1	V11G	pathogenic	likely pathogenic	reviewed by expert panel	245973
+BRCA2	D3095E	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	252859
+BRCA1	Y1703D	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	252884
+BRCA1	I26N	pathogenic	pathogenic	no assertion criteria provided	252890
+BRCA1	V1838G	pathogenic	likely pathogenic	criteria provided, single submitter	254643
+BRCA2	N1766K	benign	likely benign	criteria provided, single submitter	267224
+BRCA1	G1706R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	267219
+BRCA1	G1706R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	267221
+BRCA1	I1766N	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	267594
+BRCA1	R71T	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	267512
+BRCA1	C47S	pathogenic	pathogenic	criteria provided, single submitter	267508
+BRCA1	C39W	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	267497
+BRCA1	M1I	pathogenic	pathogenic	criteria provided, single submitter	267523
+BRCA1	S1655P	pathogenic	likely pathogenic	reviewed by expert panel	373826
+BRCA2	I3412S	benign	likely benign	criteria provided, single submitter	392267
+BRCA2	G2181R	benign	likely benign	criteria provided, multiple submitters, no conflicts	387276
+BRCA2	G2724W	pathogenic	likely pathogenic	criteria provided, single submitter	381831
+BRCA2	A2233V	benign	likely benign	criteria provided, multiple submitters, no conflicts	409574
+BRCA2	L2656Q	pathogenic	likely pathogenic	reviewed by expert panel	409564
+BRCA2	Y828H	benign	likely benign	reviewed by expert panel	409559
+BRCA2	W2626R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	409541
+BRCA1	H41N	pathogenic	likely pathogenic	reviewed by expert panel	409353
+BRCA1	R1753S	pathogenic	likely pathogenic	criteria provided, single submitter	409370
+BRCA2	E377Q	benign	likely benign	criteria provided, single submitter	417620
+BRCA1	G1770V	pathogenic	pathogenic	reviewed by expert panel	417832
+BRCA2	G2596E	pathogenic	likely pathogenic	reviewed by expert panel	421439
+BRCA2	R2625I	pathogenic	likely pathogenic	reviewed by expert panel	419217
+BRCA1	W1837C	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	421244
+BRCA1	P34S	pathogenic	likely pathogenic	reviewed by expert panel	418671
+BRCA2	W2626R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	429208
+BRCA2	Q1562R	benign	likely benign	criteria provided, single submitter	431192
+BRCA1	I171V	benign	likely benign	criteria provided, single submitter	431182
+BRCA2	M1K	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	431282
+BRCA2	G1696V	pathogenic	pathogenic	no assertion criteria provided	431311
+BRCA1	A521P	benign	likely benign	criteria provided, single submitter	431216
+BRCA1	M1I	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	431194
+BRCA2	A487S	benign	likely benign	criteria provided, single submitter	433759
+BRCA2	V1497F	benign	likely benign	criteria provided, single submitter	433784
+BRCA2	T1586I	benign	likely benign	criteria provided, single submitter	3825379
+BRCA2	N1805D	benign	likely benign	criteria provided, single submitter	433794
+BRCA2	G2168A	benign	likely benign	criteria provided, single submitter	433806
+BRCA2	L3125F	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	433840
+BRCA2	A3399S	benign	likely benign	criteria provided, single submitter	433844
+BRCA1	Y1853N	pathogenic	likely pathogenic	reviewed by expert panel	433738
+BRCA1	R1751G	pathogenic	likely pathogenic	criteria provided, single submitter	433728
+BRCA1	V1687G	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	433721
+BRCA1	S1125Y	benign	likely benign	criteria provided, single submitter	433706
+BRCA1	E1013K	benign	likely benign	criteria provided, single submitter	433703
+BRCA2	S976T	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	434527
+BRCA2	S976F	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	434528
+BRCA2	W2619C	pathogenic	likely pathogenic	reviewed by expert panel	438744
+BRCA2	A3122P	pathogenic	likely pathogenic	reviewed by expert panel	439019
+BRCA1	F1761C	pathogenic	likely pathogenic	reviewed by expert panel	440481
+BRCA2	K172N	pathogenic	likely pathogenic	criteria provided, single submitter	441345
+BRCA2	D427E	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	441324
+BRCA2	L2732V	benign	likely benign	criteria provided, single submitter	441355
+BRCA2	A2951S	benign	likely benign	criteria provided, single submitter	441405
+BRCA1	D1757Y	benign	likely benign	criteria provided, single submitter	441431
+BRCA1	I90V	benign	likely benign	criteria provided, single submitter	441388
+BRCA2	R3052L	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	462517
+BRCA2	H962Y	benign	likely benign	criteria provided, multiple submitters, no conflicts	462280
+BRCA1	L1780Q	pathogenic	likely pathogenic	criteria provided, single submitter	462670
+BRCA1	L1223F	benign	likely benign	criteria provided, multiple submitters, no conflicts	462619
+BRCA1	C64S	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	462571
+BRCA2	G578R	benign	likely benign	reviewed by expert panel	482997
+BRCA2	S599F	benign	benign	reviewed by expert panel	481597
+BRCA2	N801K	benign	likely benign	criteria provided, multiple submitters, no conflicts	485423
+BRCA2	D156E	benign	likely benign	criteria provided, single submitter	479347
+BRCA2	Y1751S	benign	likely benign	criteria provided, multiple submitters, no conflicts	479319
+BRCA2	Y2567H	benign	likely benign	criteria provided, single submitter	482981
+BRCA2	G2596V	pathogenic	pathogenic	reviewed by expert panel	483092
+BRCA2	E2599G	pathogenic	likely pathogenic	reviewed by expert panel	483130
+BRCA2	Q2749E	benign	likely benign	criteria provided, single submitter	479309
+BRCA2	E2772V	benign	likely benign	criteria provided, single submitter	479321
+BRCA2	A2780D	pathogenic	likely pathogenic	criteria provided, single submitter	483085
+BRCA2	L1384V	benign	likely benign	criteria provided, multiple submitters, no conflicts	481593
+BRCA2	L2862Q	benign	likely benign	criteria provided, single submitter	481572
+BRCA2	N3024D	benign	benign	criteria provided, single submitter	483008
+BRCA2	V358M	benign	likely benign	criteria provided, multiple submitters, no conflicts	480892
+BRCA2	S2546P	benign	likely benign	criteria provided, single submitter	482970
+BRCA2	Y2789F	benign	likely benign	criteria provided, single submitter	483121
+BRCA2	L2792R	pathogenic	likely pathogenic	reviewed by expert panel	481525
+BRCA2	N3337D	benign	likely benign	criteria provided, single submitter	479287
+BRCA2	Y1480H	benign	likely benign	criteria provided, multiple submitters, no conflicts	479343
+BRCA2	K2674N	benign	likely benign	criteria provided, single submitter	483104
+BRCA2	T2722A	pathogenic	likely pathogenic	reviewed by expert panel	479367
+BRCA2	T2880I	benign	likely benign	criteria provided, single submitter	481031
+BRCA1	D1739H	pathogenic	likely pathogenic	criteria provided, single submitter	481487
+BRCA1	V1719G	pathogenic	likely pathogenic	criteria provided, single submitter	482950
+BRCA1	T1684A	benign	likely benign	criteria provided, multiple submitters, no conflicts	485376
+BRCA1	T1312S	benign	likely benign	criteria provided, multiple submitters, no conflicts	479229
+BRCA1	L413V	benign	likely benign	criteria provided, multiple submitters, no conflicts	479198
+BRCA1	E736G	benign	likely benign	criteria provided, multiple submitters, no conflicts	481433
+BRCA1	C27F	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	481469
+BRCA1	T1640A	benign	likely benign	criteria provided, single submitter	481432
+BRCA2	S2670W	pathogenic	pathogenic	reviewed by expert panel	489785
+BRCA2	V2652G	pathogenic	likely pathogenic	reviewed by expert panel	489784
+BRCA2	Y2884F	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	491359
+BRCA1	L1276V	benign	likely benign	criteria provided, multiple submitters, no conflicts	506525
+BRCA2	D559N	benign	likely benign	criteria provided, multiple submitters, no conflicts	518255
+BRCA2	K1944E	benign	likely benign	criteria provided, multiple submitters, no conflicts	531537
+BRCA2	I1258R	benign	likely benign	criteria provided, multiple submitters, no conflicts	531276
+BRCA1	H1686Y	pathogenic	likely pathogenic	reviewed by expert panel	531444
+BRCA1	M18R	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	531241
+BRCA1	H1746D	pathogenic	likely pathogenic	reviewed by expert panel	531399
+BRCA1	G1788A	pathogenic	likely pathogenic	criteria provided, single submitter	531438
+BRCA1	I1723T	benign	likely benign	criteria provided, multiple submitters, no conflicts	531248
+BRCA2	T2722I	pathogenic	likely pathogenic	reviewed by expert panel	545487
+BRCA2	K1286N	benign	likely benign	criteria provided, single submitter	545614
+BRCA2	D1547N	benign	likely benign	criteria provided, single submitter	559989
+BRCA2	V1775L	benign	likely benign	criteria provided, single submitter	559991
+BRCA2	K1025R	benign	likely benign	criteria provided, single submitter	559992
+BRCA2	H2623Y	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	573433
+BRCA1	H41Y	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	580736
+BRCA1	P798A	benign	likely benign	criteria provided, single submitter	599042
+BRCA2	S2616F	pathogenic	pathogenic	reviewed by expert panel	630829
+BRCA2	T3413I	benign	likely benign	criteria provided, multiple submitters, no conflicts	631384
+BRCA1	W1718G	pathogenic	likely pathogenic	reviewed by expert panel	627968
+BRCA1	V1714F	pathogenic	likely pathogenic	reviewed by expert panel	631061
+BRCA1	H971R	benign	benign	reviewed by expert panel	628452
+BRCA1	C1787Y	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	662455
+BRCA1	I492V	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	660456
+BRCA1	C47R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	651975
+BRCA1	C44W	pathogenic	likely pathogenic	criteria provided, single submitter	647970
+BRCA1	C24W	pathogenic	pathogenic	criteria provided, single submitter	652430
+BRCA1	C24G	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	649351
+BRCA1	C24S	pathogenic	likely pathogenic	reviewed by expert panel	638952
+BRCA2	L2929W	benign	likely benign	criteria provided, multiple submitters, no conflicts	669147
+BRCA1	Q1408H	pathogenic	likely pathogenic	criteria provided, single submitter	694279
+BRCA1	R1753G	pathogenic	likely pathogenic	reviewed by expert panel	801086
+BRCA1	M1K	pathogenic	pathogenic	criteria provided, single submitter	801069
+BRCA2	N856K	benign	likely benign	criteria provided, multiple submitters, no conflicts	802928
+BRCA2	G2195S	benign	likely benign	criteria provided, multiple submitters, no conflicts	802940
+BRCA1	L474S	benign	likely benign	criteria provided, single submitter	805950
+BRCA2	A2912T	benign	benign	reviewed by expert panel	812552
+BRCA1	M1361L	benign	benign	reviewed by expert panel	812551
+BRCA1	M297I	benign	benign	reviewed by expert panel	812549
+BRCA2	A1193S	benign	likely benign	criteria provided, multiple submitters, no conflicts	823949
+BRCA2	Y1716C	benign	likely benign	criteria provided, multiple submitters, no conflicts	825477
+BRCA2	P2532A	benign	likely benign	criteria provided, single submitter	827143
+BRCA2	S2616C	benign	likely benign	criteria provided, single submitter	827285
+BRCA2	W2619R	pathogenic	likely pathogenic	reviewed by expert panel	827289
+BRCA2	P2639R	benign	likely benign	criteria provided, single submitter	827329
+BRCA2	R2668S	benign	likely benign	criteria provided, single submitter	827386
+BRCA2	A2698G	benign	likely benign	criteria provided, single submitter	827443
+BRCA2	Q2731H	benign	likely benign	criteria provided, single submitter	827498
+BRCA2	G2743C	benign	likely benign	criteria provided, single submitter	827523
+BRCA2	L2805I	benign	likely benign	criteria provided, single submitter	822395
+BRCA2	S2810C	benign	likely benign	criteria provided, single submitter	822407
+BRCA2	L2865F	benign	likely benign	criteria provided, single submitter	822583
+BRCA2	E2875D	benign	benign	criteria provided, single submitter	822609
+BRCA2	K2950T	benign	likely benign	criteria provided, single submitter	822764
+BRCA2	N3124H	benign	likely benign	criteria provided, single submitter	823194
+BRCA2	P3129T	benign	likely benign	criteria provided, single submitter	823205
+BRCA2	T3137S	benign	likely benign	criteria provided, single submitter	823240
+BRCA1	T1816R	benign	likely benign	criteria provided, single submitter	825739
+BRCA1	V1809D	pathogenic	likely pathogenic	criteria provided, single submitter	825725
+BRCA1	V1665G	benign	likely benign	criteria provided, single submitter	825350
+BRCA1	E1644Q	benign	likely benign	criteria provided, single submitter	825302
+BRCA1	G1332E	benign	likely benign	criteria provided, multiple submitters, no conflicts	824466
+BRCA1	Q94H	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	821868
+BRCA1	C27Y	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	827453
+BRCA1	R7L	benign	likely benign	criteria provided, single submitter	820717
+BRCA2	V875L	benign	likely benign	criteria provided, single submitter	834050
+BRCA2	K2446E	benign	likely benign	criteria provided, multiple submitters, no conflicts	848086
+BRCA1	W1837R	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	853483
+BRCA1	G1738V	pathogenic	pathogenic	criteria provided, single submitter	845528
+BRCA1	Y1853S	pathogenic	likely pathogenic	criteria provided, single submitter	865016
+BRCA1	Y1853H	pathogenic	likely pathogenic	criteria provided, single submitter	865014
+BRCA1	E1849K	benign	likely benign	criteria provided, single submitter	869028
+BRCA1	Q1848R	benign	likely benign	criteria provided, single submitter	869023
+BRCA1	C1847S	benign	likely benign	criteria provided, single submitter	867639
+BRCA1	Q1846H	benign	likely benign	criteria provided, single submitter	867634
+BRCA1	Q1846R	benign	likely benign	criteria provided, single submitter	864986
+BRCA1	V1842L	benign	likely benign	criteria provided, single submitter	869008
+BRCA1	S1841R	pathogenic	pathogenic	criteria provided, single submitter	869006
+BRCA1	S1841I	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	869004
+BRCA1	P1831L	benign	likely benign	criteria provided, single submitter	867597
+BRCA1	P1831S	benign	likely benign	criteria provided, single submitter	867595
+BRCA1	A1830S	pathogenic	likely pathogenic	criteria provided, single submitter	864931
+BRCA1	M1827L	benign	benign	criteria provided, single submitter	864921
+BRCA1	Q1826H	benign	benign	criteria provided, single submitter	864919
+BRCA1	Q1826E	benign	likely benign	criteria provided, single submitter	868968
+BRCA1	G1825R	benign	likely benign	criteria provided, single submitter	868567
+BRCA1	I1824N	benign	likely benign	criteria provided, single submitter	867577
+BRCA1	A1823S	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	868922
+BRCA1	A1823P	pathogenic	likely pathogenic	criteria provided, single submitter	868921
+BRCA1	D1818N	benign	likely benign	criteria provided, single submitter	865532
+BRCA1	T1816A	benign	likely benign	criteria provided, single submitter	868902
+BRCA1	A1814T	benign	likely benign	criteria provided, single submitter	865516
+BRCA1	D1813E	benign	likely benign	criteria provided, single submitter	867392
+BRCA1	Q1811P	pathogenic	likely pathogenic	criteria provided, single submitter	868483
+BRCA1	V1810L	benign	likely benign	criteria provided, single submitter	867387
+BRCA1	L1800I	benign	likely benign	criteria provided, single submitter	868419
+BRCA1	F1798I	benign	likely benign	criteria provided, single submitter	865692
+BRCA1	L1795R	benign	likely benign	criteria provided, single submitter	868042
+BRCA1	K1793N	benign	likely benign	criteria provided, single submitter	865399
+BRCA1	A1789V	pathogenic	likely pathogenic	criteria provided, single submitter	865385
+BRCA1	A1789D	pathogenic	likely pathogenic	criteria provided, single submitter	868380
+BRCA1	G1788S	pathogenic	likely pathogenic	criteria provided, single submitter	868033
+BRCA1	V1784E	pathogenic	likely pathogenic	criteria provided, single submitter	868026
+BRCA1	M1783L	benign	benign	criteria provided, single submitter	865370
+BRCA1	Q1779H	benign	likely benign	criteria provided, single submitter	865637
+BRCA1	M1775V	pathogenic	likely pathogenic	criteria provided, single submitter	868306
+BRCA1	I1766T	pathogenic	likely pathogenic	criteria provided, single submitter	867965
+BRCA1	D1757E	benign	likely benign	criteria provided, single submitter	867299
+BRCA1	R1753S	pathogenic	pathogenic	criteria provided, single submitter	865211
+BRCA1	R1753I	pathogenic	likely pathogenic	criteria provided, single submitter	865210
+BRCA1	A1752E	pathogenic	pathogenic	criteria provided, single submitter	868230
+BRCA1	G1743E	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	867253
+BRCA1	G1738R	pathogenic	pathogenic	criteria provided, multiple submitters, no conflicts	865165
+BRCA1	R1737G	benign	likely benign	criteria provided, single submitter	868184
+BRCA1	V1736F	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	867843
+BRCA1	H1732D	benign	likely benign	criteria provided, single submitter	867501
+BRCA1	N1730K	benign	likely benign	criteria provided, single submitter	867457
+BRCA1	Q1721H	benign	likely benign	criteria provided, single submitter	868763
+BRCA1	W1718C	pathogenic	pathogenic	criteria provided, single submitter	865068
+BRCA1	V1713G	pathogenic	pathogenic	criteria provided, single submitter	868702
+BRCA1	V1713L	pathogenic	likely pathogenic	criteria provided, single submitter	868700
+BRCA1	W1712G	pathogenic	likely pathogenic	criteria provided, single submitter	867686
+BRCA1	K1711N	benign	likely benign	criteria provided, single submitter	864997
+BRCA1	K1711E	pathogenic	likely pathogenic	criteria provided, single submitter	864993
+BRCA1	G1706V	pathogenic	likely pathogenic	criteria provided, single submitter	868673
+BRCA1	K1702N	pathogenic	likely pathogenic	criteria provided, single submitter	868654
+BRCA1	K1702Q	pathogenic	likely pathogenic	criteria provided, single submitter	867649
+BRCA1	C1697F	pathogenic	likely pathogenic	criteria provided, single submitter	867631
+BRCA1	F1695V	pathogenic	pathogenic	no assertion criteria provided	869009
+BRCA1	M1689K	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	864899
+BRCA1	V1688F	pathogenic	likely pathogenic	criteria provided, single submitter	868976
+BRCA1	V1687A	benign	likely benign	criteria provided, single submitter	868577
+BRCA1	V1687I	benign	likely benign	criteria provided, single submitter	868573
+BRCA1	H1686D	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	867583
+BRCA1	T1681A	benign	likely benign	criteria provided, single submitter	868956
+BRCA1	T1677S	benign	likely benign	criteria provided, single submitter	868943
+BRCA1	T1677N	benign	likely benign	criteria provided, single submitter	868942
+BRCA1	I1674V	benign	likely benign	criteria provided, single submitter	867544
+BRCA1	H1673Y	benign	likely benign	criteria provided, single submitter	865537
+BRCA1	H1673D	benign	likely benign	criteria provided, single submitter	865536
+BRCA1	F1668V	benign	likely benign	no assertion criteria provided	868515
+BRCA1	K1667T	benign	likely benign	criteria provided, single submitter	868102
+BRCA1	Y1666N	benign	likely benign	criteria provided, single submitter	865512
+BRCA1	M1663R	pathogenic	likely pathogenic	criteria provided, single submitter	868096
+BRCA1	V1654A	benign	likely benign	criteria provided, single submitter	865466
+BRCA1	V1653A	benign	likely benign	criteria provided, single submitter	868876
+BRCA1	V1653E	pathogenic	likely pathogenic	criteria provided, single submitter	868875
+BRCA1	K1648R	benign	likely benign	criteria provided, single submitter	868434
+BRCA1	K1648T	benign	likely benign	criteria provided, single submitter	868433
+BRCA1	N1647K	benign	benign	criteria provided, single submitter	865710
+BRCA1	N1647D	benign	benign	criteria provided, single submitter	865439
+BRCA1	V1646D	benign	likely benign	criteria provided, single submitter	868862
+BRCA1	V1646F	benign	likely benign	criteria provided, single submitter	868861
+BRCA1	V1646I	benign	likely benign	criteria provided, single submitter	868859
+BRCA1	T1643S	benign	likely benign	criteria provided, single submitter	865426
+BRCA1	S1642L	benign	likely benign	criteria provided, single submitter	868853
+BRCA1	A1641S	benign	likely benign	criteria provided, single submitter	868409
+BRCA1	L1639F	benign	likely benign	criteria provided, single submitter	865414
+BRCA1	E1638V	benign	benign	criteria provided, single submitter	868843
+BRCA1	K1636N	benign	likely benign	criteria provided, single submitter	865673
+BRCA1	R1634S	benign	benign	criteria provided, single submitter	868387
+BRCA1	S1633G	benign	likely benign	criteria provided, multiple submitters, no conflicts	865661
+BRCA1	S1631I	benign	likely benign	criteria provided, single submitter	868836
+BRCA1	S1631R	benign	likely benign	criteria provided, single submitter	868376
+BRCA1	T97S	benign	likely benign	criteria provided, single submitter	865373
+BRCA1	D96V	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	868827
+BRCA1	D96A	pathogenic	likely pathogenic	criteria provided, single submitter	868826
+BRCA1	L95P	pathogenic	likely pathogenic	criteria provided, single submitter	868350
+BRCA1	L95I	benign	likely benign	criteria provided, single submitter	868346
+BRCA1	T77A	benign	likely benign	criteria provided, single submitter	865302
+BRCA1	E75K	benign	likely benign	criteria provided, single submitter	867356
+BRCA1	R71W	pathogenic	likely pathogenic	criteria provided, single submitter	867340
+BRCA1	N66S	benign	likely benign	criteria provided, single submitter	865249
+BRCA1	C64S	pathogenic	likely pathogenic	no assertion criteria provided	867317
+BRCA1	Q60H	benign	likely benign	criteria provided, single submitter	867920
+BRCA1	S59A	benign	likely benign	criteria provided, single submitter	865225
+BRCA1	M48I	benign	likely benign	criteria provided, single submitter	867272
+BRCA1	C44S	pathogenic	pathogenic	criteria provided, single submitter	868170
+BRCA1	H41D	pathogenic	likely pathogenic	criteria provided, single submitter	868161
+BRCA1	D40G	benign	likely benign	criteria provided, single submitter	868157
+BRCA1	T37A	pathogenic	likely pathogenic	no assertion criteria provided	868146
+BRCA1	V35A	pathogenic	likely pathogenic	no assertion criteria provided	867804
+BRCA1	P34R	pathogenic	likely pathogenic	criteria provided, single submitter	867486
+BRCA1	E33D	benign	likely benign	criteria provided, single submitter	865114
+BRCA1	E33K	benign	likely benign	criteria provided, single submitter	868136
+BRCA1	C27W	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	867463
+BRCA1	C27G	pathogenic	likely pathogenic	criteria provided, single submitter	867751
+BRCA1	C27R	pathogenic	likely pathogenic	criteria provided, single submitter	867750
+BRCA1	I26M	benign	likely benign	criteria provided, single submitter	867748
+BRCA1	C24S	pathogenic	likely pathogenic	criteria provided, single submitter	868780
+BRCA1	I21L	benign	likely benign	criteria provided, single submitter	868777
+BRCA1	M18L	benign	likely benign	criteria provided, single submitter	865041
+BRCA1	N16D	benign	likely benign	criteria provided, single submitter	868725
+BRCA1	V14I	benign	likely benign	criteria provided, single submitter	869092
+BRCA1	N13K	benign	likely benign	criteria provided, single submitter	869089
+BRCA1	Q12L	benign	likely benign	criteria provided, single submitter	868716
+BRCA1	V11I	benign	likely benign	criteria provided, single submitter	865020
+BRCA1	L3F	benign	likely benign	criteria provided, single submitter	864988
+BRCA1	D2N	benign	likely benign	criteria provided, single submitter	868680
+BRCA2	M2634I	benign	benign	no assertion criteria provided	873412
+BRCA2	H2623L	pathogenic	likely pathogenic	reviewed by expert panel	922959
+BRCA2	T3411A	benign	likely benign	criteria provided, single submitter	922784
+BRCA1	S945T	benign	likely benign	criteria provided, single submitter	2445711
+BRCA2	V2407E	pathogenic	pathogenic	criteria provided, single submitter	966654
+BRCA2	G2596R	pathogenic	likely pathogenic	criteria provided, single submitter	995946
+BRCA2	A2603P	pathogenic	likely pathogenic	criteria provided, single submitter	995947
+BRCA2	K2630Q	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	995948
+BRCA2	G3076R	pathogenic	likely pathogenic	criteria provided, single submitter	995950
+BRCA2	S231D	pathogenic	pathogenic	no assertion criteria provided	1012165
+BRCA2	H1856C	pathogenic	pathogenic	no assertion criteria provided	1012159
+BRCA2	S303F	benign	likely benign	criteria provided, single submitter	1050114
+BRCA2	D988N	benign	likely benign	criteria provided, single submitter	1050363
+BRCA2	P1039L	benign	likely benign	criteria provided, single submitter	1049505
+BRCA2	S1075N	benign	likely benign	criteria provided, single submitter	1049417
+BRCA2	D1199G	benign	likely benign	criteria provided, single submitter	1050461
+BRCA2	D1267N	benign	likely benign	criteria provided, multiple submitters, no conflicts	1050590
+BRCA2	N1778K	benign	likely benign	criteria provided, single submitter	1050653
+BRCA2	T2097K	benign	likely benign	criteria provided, single submitter	1050331
+BRCA1	R1188M	benign	likely benign	criteria provided, single submitter	1050301
+BRCA1	T617N	benign	likely benign	criteria provided, single submitter	1049469
+BRCA1	D414Y	benign	likely benign	criteria provided, single submitter	1050740
+BRCA1	K301Q	benign	likely benign	criteria provided, single submitter	1049569
+BRCA1	W1837S	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	1065962
+BRCA2	V2466A	benign	likely benign	criteria provided, multiple submitters, no conflicts	2849377
+BRCA2	K2950N	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	1169136
+BRCA1	M658I	benign	benign	criteria provided, single submitter	1168433
+BRCA2	G2748V	pathogenic	likely pathogenic	reviewed by expert panel	1171382
+BRCA2	N1098Y	benign	likely benign	criteria provided, single submitter	1174597
+BRCA2	T1738I	benign	likely benign	criteria provided, multiple submitters, no conflicts	1175141
+BRCA1	D1156A	benign	likely benign	criteria provided, single submitter	1174984
+BRCA1	I548S	benign	likely benign	criteria provided, single submitter	1209888
+BRCA2	P3067S	benign	likely benign	criteria provided, multiple submitters, no conflicts	1582641
+BRCA1	S308R	benign	likely benign	criteria provided, single submitter	4856537
+BRCA1	S1486N	benign	likely benign	no assertion criteria provided	1275856
+BRCA1	L1306F	benign	likely benign	criteria provided, single submitter	1285144
+BRCA2	N1377I	benign	likely benign	criteria provided, single submitter	1285184
+BRCA2	P740L	benign	likely benign	criteria provided, single submitter	1297517
+BRCA1	P1445A	benign	likely benign	criteria provided, single submitter	1325657
+BRCA2	K2577N	benign	likely benign	no assertion criteria provided	1328192
+BRCA2	T3085I	pathogenic	pathogenic	criteria provided, single submitter	1456012
+BRCA2	Y2726N	pathogenic	likely pathogenic	criteria provided, single submitter	1505734
+BRCA2	Q2829P	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	1484629
+BRCA2	G3076R	pathogenic	likely pathogenic	criteria provided, single submitter	1487627
+BRCA2	Q1507H	benign	likely benign	criteria provided, multiple submitters, no conflicts	1671339
+BRCA2	E2947K	benign	likely benign	criteria provided, multiple submitters, no conflicts	1651000
+BRCA1	L218V	benign	benign	criteria provided, single submitter	1684697
+BRCA2	T1915K	benign	benign	criteria provided, single submitter	1684735
+BRCA2	K2577N	benign	benign	criteria provided, single submitter	1684754
+BRCA2	D2983V	benign	likely benign	reviewed by expert panel	1686523
+BRCA2	V1078G	benign	likely benign	criteria provided, single submitter	1687121
+BRCA1	Y179F	benign	likely benign	criteria provided, single submitter	1687140
+BRCA2	D438V	benign	likely benign	criteria provided, single submitter	1687144
+BRCA1	R1243T	benign	likely benign	criteria provided, multiple submitters, no conflicts	1708959
+BRCA2	S3250L	benign	likely benign	criteria provided, single submitter	1708988
+BRCA1	P1020S	benign	likely benign	criteria provided, multiple submitters, no conflicts	1709805
+BRCA2	E1353D	benign	likely benign	criteria provided, multiple submitters, no conflicts	1710049
+BRCA1	A108S	benign	likely benign	criteria provided, single submitter	1729180
+BRCA1	G1184R	benign	likely benign	criteria provided, multiple submitters, no conflicts	1732593
+BRCA2	N1363H	benign	likely benign	criteria provided, multiple submitters, no conflicts	1737670
+BRCA1	Y1202H	benign	likely benign	criteria provided, multiple submitters, no conflicts	1733143
+BRCA1	L138R	benign	likely benign	criteria provided, multiple submitters, no conflicts	1738154
+BRCA2	K1828E	benign	likely benign	criteria provided, multiple submitters, no conflicts	1747811
+BRCA1	V1713G	pathogenic	pathogenic	criteria provided, single submitter	1745580
+BRCA2	L2069S	benign	likely benign	criteria provided, multiple submitters, no conflicts	1752192
+BRCA2	E218A	benign	likely benign	criteria provided, single submitter	1754091
+BRCA2	N1603K	benign	likely benign	criteria provided, multiple submitters, no conflicts	1743239
+BRCA2	P40A	benign	likely benign	criteria provided, single submitter	1744513
+BRCA2	E1928Q	benign	likely benign	criteria provided, multiple submitters, no conflicts	1749615
+BRCA2	M1936I	benign	likely benign	criteria provided, multiple submitters, no conflicts	1749822
+BRCA2	G2529R	benign	likely benign	criteria provided, single submitter	1759631
+BRCA2	R2787L	benign	likely benign	criteria provided, single submitter	1763091
+BRCA2	F2795V	benign	likely benign	criteria provided, single submitter	1763171
+BRCA2	D2797H	benign	likely benign	criteria provided, single submitter	1763177
+BRCA2	Q2945E	benign	benign	criteria provided, single submitter	1764821
+BRCA2	A2951P	benign	likely benign	criteria provided, single submitter	1764884
+BRCA2	V3082L	benign	likely benign	criteria provided, single submitter	1766307
+BRCA2	E3096Q	benign	likely benign	criteria provided, single submitter	1766432
+BRCA2	P2276A	benign	likely benign	criteria provided, multiple submitters, no conflicts	1755661
+BRCA2	N2288S	benign	likely benign	criteria provided, single submitter	1755849
+BRCA2	E3403Q	benign	likely benign	criteria provided, single submitter	1757403
+BRCA2	P2505S	benign	likely benign	criteria provided, single submitter	1759289
+BRCA2	A2632G	benign	likely benign	criteria provided, single submitter	1761059
+BRCA2	A2633V	benign	likely benign	criteria provided, single submitter	1761065
+BRCA2	L2740I	benign	benign	criteria provided, single submitter	1762491
+BRCA2	I2752V	benign	benign	criteria provided, single submitter	1762638
+BRCA2	T2881P	benign	benign	criteria provided, single submitter	1764138
+BRCA2	P2886Q	benign	benign	criteria provided, single submitter	1764198
+BRCA2	L2890P	benign	likely benign	criteria provided, single submitter	1764232
+BRCA2	N2910D	benign	benign	criteria provided, single submitter	1764459
+BRCA2	E3043D	benign	likely benign	criteria provided, single submitter	1765893
+BRCA2	L3055I	benign	likely benign	criteria provided, single submitter	1766015
+BRCA2	H3056P	benign	likely benign	criteria provided, single submitter	1766018
+BRCA2	D2479E	benign	likely benign	criteria provided, single submitter	1758906
+BRCA2	A2487T	benign	likely benign	criteria provided, single submitter	1759001
+BRCA2	R2488T	benign	likely benign	criteria provided, single submitter	1759029
+BRCA2	L2581V	benign	likely benign	criteria provided, single submitter	1760404
+BRCA2	I2588L	benign	likely benign	criteria provided, single submitter	1760509
+BRCA2	T2708S	benign	benign	criteria provided, single submitter	1762096
+BRCA2	E2871D	benign	benign	criteria provided, single submitter	1764043
+BRCA2	L3027I	benign	likely benign	criteria provided, single submitter	1765692
+BRCA2	K2448N	benign	likely benign	criteria provided, single submitter	1758423
+BRCA2	D2451G	benign	likely benign	criteria provided, single submitter	1758457
+BRCA2	F2457L	benign	likely benign	criteria provided, single submitter	1758573
+BRCA2	S2697I	benign	likely benign	criteria provided, single submitter	1761955
+BRCA2	S2701F	benign	likely benign	criteria provided, single submitter	1762009
+BRCA2	R2824K	benign	likely benign	criteria provided, single submitter	1763512
+BRCA2	E2832K	benign	likely benign	criteria provided, single submitter	1763584
+BRCA2	M2952T	benign	likely benign	criteria provided, single submitter	1764893
+BRCA2	Y2977C	benign	benign	criteria provided, single submitter	1765160
+BRCA2	L2987V	benign	likely benign	criteria provided, single submitter	1765242
+BRCA2	S3123R	benign	likely benign	criteria provided, single submitter	1766690
+BRCA2	E3130V	benign	likely benign	criteria provided, single submitter	1766756
+BRCA2	W3106R	benign	likely benign	criteria provided, single submitter	1766554
+BRCA2	F3325L	benign	likely benign	criteria provided, single submitter	1768781
+BRCA2	S5C	benign	likely benign	criteria provided, single submitter	1773975
+BRCA1	P490S	benign	likely benign	criteria provided, multiple submitters, no conflicts	1773294
+BRCA2	Y748C	benign	likely benign	criteria provided, multiple submitters, no conflicts	1788306
+BRCA2	S646N	benign	likely benign	criteria provided, multiple submitters, no conflicts	1782985
+BRCA2	C711F	benign	likely benign	criteria provided, multiple submitters, no conflicts	1786435
+BRCA2	L90V	benign	likely benign	criteria provided, single submitter	1794778
+BRCA2	L901P	benign	likely benign	criteria provided, multiple submitters, no conflicts	1794947
+BRCA1	F901L	benign	likely benign	criteria provided, multiple submitters, no conflicts	1794958
+BRCA1	L358P	benign	likely benign	criteria provided, multiple submitters, no conflicts	1784220
+BRCA2	R841S	benign	likely benign	criteria provided, multiple submitters, no conflicts	1792567
+BRCA1	P968A	benign	likely benign	criteria provided, multiple submitters, no conflicts	1797469
+BRCA1	L954Q	benign	likely benign	criteria provided, multiple submitters, no conflicts	1796968
+BRCA2	I2315L	benign	benign	criteria provided, single submitter	2000815
+BRCA2	T317R	benign	likely benign	criteria provided, multiple submitters, no conflicts	2004176
+BRCA1	E1219D	benign	benign	criteria provided, single submitter	2035518
+BRCA2	G2724R	pathogenic	likely pathogenic	criteria provided, single submitter	2058629
+BRCA2	W31S	pathogenic	likely pathogenic	criteria provided, multiple submitters, no conflicts	2098802
+BRCA1	V1833G	pathogenic	likely pathogenic	criteria provided, single submitter	2135737
+BRCA2	H2623P	pathogenic	likely pathogenic	criteria provided, single submitter	2130148
+BRCA2	G2063K	benign	likely benign	criteria provided, single submitter	2443084
+BRCA1	H839Y	benign	benign	criteria provided, single submitter	2445306
+BRCA1	H318L	pathogenic	likely pathogenic	criteria provided, single submitter	2445397
+BRCA2	K944T	benign	likely benign	criteria provided, single submitter	2451475
+BRCA2	E2903K	benign	likely benign	criteria provided, single submitter	2451481
+BRCA2	V2211I	benign	likely benign	criteria provided, single submitter	2451523
+BRCA2	K2524N	benign	likely benign	criteria provided, single submitter	2451545
+BRCA2	D2692G	benign	likely benign	criteria provided, single submitter	2451547
+BRCA2	F2873S	benign	likely benign	criteria provided, single submitter	2468038
+BRCA2	W2619G	pathogenic	pathogenic	criteria provided, single submitter	2560930
+BRCA2	W2626C	pathogenic	pathogenic	criteria provided, single submitter	2560953
+BRCA2	L2917F	benign	likely benign	criteria provided, single submitter	2565957
+BRCA2	I3075V	benign	benign	criteria provided, single submitter	2565960
+BRCA2	I3048M	benign	benign	criteria provided, single submitter	2565970
+BRCA2	R2799G	benign	likely benign	criteria provided, single submitter	2565978
+BRCA2	V2728F	benign	likely benign	criteria provided, single submitter	2565997
+BRCA2	F3090S	benign	likely benign	criteria provided, single submitter	2566001
+BRCA2	T2703N	benign	likely benign	criteria provided, single submitter	2566024
+BRCA2	E3367D	benign	likely benign	criteria provided, single submitter	2566046
+BRCA2	Y2624D	pathogenic	pathogenic	criteria provided, single submitter	2578326
+BRCA1	Y1113H	benign	likely benign	criteria provided, single submitter	2585842
+BRCA2	R2659S	pathogenic	likely pathogenic	criteria provided, single submitter	2586259
+BRCA2	N289H	benign	benign	criteria provided, single submitter	2586262
+BRCA2	K2979Q	benign	benign	criteria provided, single submitter	2586266
+BRCA2	Y2920H	benign	benign	criteria provided, single submitter	2586281
+BRCA2	F625L	benign	likely benign	criteria provided, single submitter	2586289
+BRCA2	D3064H	benign	likely benign	criteria provided, single submitter	2586292
+BRCA2	K2715R	benign	likely benign	criteria provided, single submitter	2586302
+BRCA2	Q3409P	benign	likely benign	no assertion criteria provided	2683807
+BRCA1	N343C	benign	likely benign	no assertion criteria provided	2683811
+BRCA1	D458E	benign	likely benign	no assertion criteria provided	2683812
+BRCA1	D746V	benign	likely benign	no assertion criteria provided	2683814
+BRCA1	P981A	benign	likely benign	no assertion criteria provided	2683815
+BRCA2	I1173M	benign	likely benign	no assertion criteria provided	2683818
+BRCA2	T1609S	benign	likely benign	criteria provided, single submitter	2683820
+BRCA2	S1848T	benign	likely benign	no assertion criteria provided	2683821
+BRCA2	D1902A	benign	likely benign	no assertion criteria provided	2683822
+BRCA2	D1911H	benign	likely benign	no assertion criteria provided	2683823
+BRCA1	D1441N	pathogenic	likely pathogenic	criteria provided, single submitter	2687847
+BRCA1	T367S	benign	likely benign	criteria provided, single submitter	2691999
+BRCA2	S1205Y	benign	likely benign	criteria provided, single submitter	2692042
+BRCA2	K2017N	benign	likely benign	criteria provided, single submitter	2692059
+BRCA2	F2055Y	benign	likely benign	criteria provided, single submitter	2692060
+BRCA2	A2061V	benign	likely benign	criteria provided, single submitter	2692062
+BRCA2	K1343R	benign	likely benign	criteria provided, single submitter	2920722
+BRCA2	S2012P	benign	likely benign	criteria provided, single submitter	2920723
+BRCA2	I614M	benign	likely benign	criteria provided, single submitter	3225537
+BRCA2	N1718D	benign	likely benign	criteria provided, single submitter	3227222
+BRCA2	E254D	benign	likely benign	criteria provided, single submitter	3228790
+BRCA2	E2558A	benign	likely benign	criteria provided, single submitter	3228853
+BRCA2	T2607P	pathogenic	likely pathogenic	criteria provided, single submitter	3228950
+BRCA2	E1320G	benign	likely benign	criteria provided, single submitter	3226569
+BRCA2	N2452Y	benign	likely benign	criteria provided, single submitter	3228404
+BRCA2	I3113S	benign	likely benign	criteria provided, single submitter	3230019
+BRCA1	N1043S	benign	likely benign	criteria provided, single submitter	3226132
+BRCA1	D1162N	benign	likely benign	criteria provided, single submitter	3226138
+BRCA2	K1082E	benign	likely benign	criteria provided, single submitter	3226173
+BRCA2	I1275V	benign	likely benign	criteria provided, single submitter	3226456
+BRCA2	T3085R	benign	likely benign	criteria provided, single submitter	3229883
+BRCA2	L3093F	benign	likely benign	criteria provided, single submitter	3229931
+BRCA2	E2757V	benign	likely benign	criteria provided, single submitter	3229226
+BRCA2	S2782N	benign	likely benign	criteria provided, single submitter	3229257
+BRCA2	D2811N	benign	likely benign	criteria provided, single submitter	3229281
+BRCA2	E2903Q	benign	likely benign	criteria provided, single submitter	3229407
+BRCA2	L3344H	benign	likely benign	criteria provided, single submitter	3248649
+BRCA2	N369S	benign	likely benign	criteria provided, single submitter	3256252
+BRCA2	V2179A	benign	likely benign	criteria provided, single submitter	3256255
+BRCA1	H601Q	benign	likely benign	criteria provided, single submitter	3256351
+BRCA2	N433K	benign	likely benign	criteria provided, single submitter	3261604
+BRCA2	N1201S	benign	likely benign	criteria provided, single submitter	3261607
+BRCA2	L2936V	benign	benign	criteria provided, single submitter	3261609
+BRCA2	I921N	benign	likely benign	criteria provided, single submitter	3261616
+BRCA2	I542M	benign	likely benign	criteria provided, single submitter	3261629
+BRCA2	C2605R	benign	likely benign	criteria provided, single submitter	3261630
+BRCA2	H179R	benign	likely benign	criteria provided, single submitter	3261634
+BRCA2	L2987R	pathogenic	likely pathogenic	criteria provided, single submitter	3261636
+BRCA2	N2937T	benign	benign	criteria provided, single submitter	3261637
+BRCA2	R2799S	benign	likely benign	criteria provided, single submitter	3261638
+BRCA2	T87I	benign	likely benign	criteria provided, single submitter	3261646
+BRCA2	V2855M	benign	benign	criteria provided, single submitter	3261503
+BRCA2	I2495V	benign	likely benign	criteria provided, single submitter	3261515
+BRCA2	E3157G	benign	likely benign	criteria provided, single submitter	3261517
+BRCA2	N361D	benign	likely benign	criteria provided, single submitter	3261535
+BRCA2	A3023D	benign	likely benign	criteria provided, single submitter	3261538
+BRCA2	T1609I	benign	likely benign	criteria provided, single submitter	3261547
+BRCA2	L1260S	benign	likely benign	criteria provided, single submitter	3261551
+BRCA2	F354L	benign	likely benign	criteria provided, single submitter	3261554
+BRCA2	S1744N	benign	likely benign	criteria provided, single submitter	3261556
+BRCA2	Q2943E	benign	benign	criteria provided, single submitter	3261570
+BRCA2	Y3225N	benign	likely benign	criteria provided, single submitter	3261573
+BRCA2	Q2960E	benign	likely benign	criteria provided, single submitter	3261595
+BRCA2	K1314N	benign	likely benign	criteria provided, single submitter	3336564
+BRCA1	D390G	benign	likely benign	criteria provided, single submitter	3338486
+BRCA2	L3074P	pathogenic	likely pathogenic	criteria provided, single submitter	3376536
+BRCA2	T1684S	benign	likely benign	criteria provided, single submitter	3482194
+BRCA2	Y1894H	benign	likely benign	criteria provided, single submitter	3482212
+BRCA1	G1515R	benign	likely benign	criteria provided, single submitter	3481776
+BRCA1	V1602L	benign	likely benign	criteria provided, single submitter	3481797
+BRCA1	Q804L	benign	likely benign	criteria provided, single submitter	3481827
+BRCA1	N363S	benign	likely benign	criteria provided, single submitter	3481900
+BRCA2	T17A	benign	likely benign	criteria provided, single submitter	3481929
+BRCA2	K2674M	benign	likely benign	criteria provided, single submitter	3481942
+BRCA2	F3060I	benign	benign	criteria provided, single submitter	3481944
+BRCA2	K1691Q	benign	likely benign	criteria provided, single submitter	3481972
+BRCA2	V1283L	benign	likely benign	criteria provided, single submitter	3481988
+BRCA2	E3130K	benign	likely benign	criteria provided, single submitter	3481999
+BRCA2	P2734R	benign	likely benign	criteria provided, single submitter	3482010
+BRCA2	K437T	benign	likely benign	criteria provided, single submitter	3482019
+BRCA2	C3304W	benign	likely benign	criteria provided, single submitter	3482020
+BRCA2	L583M	benign	likely benign	criteria provided, single submitter	3482026
+BRCA2	M1149I	benign	likely benign	criteria provided, single submitter	3482027
+BRCA2	S1770A	benign	likely benign	criteria provided, single submitter	3482033
+BRCA2	K3415E	benign	likely benign	criteria provided, single submitter	3482049
+BRCA2	M3322L	benign	likely benign	criteria provided, single submitter	3482077
+BRCA2	A2902S	benign	likely benign	criteria provided, single submitter	3482095
+BRCA2	T2708S	benign	benign	criteria provided, single submitter	3482112
+BRCA2	K2555T	benign	likely benign	criteria provided, single submitter	3482114
+BRCA2	E1481G	benign	likely benign	criteria provided, single submitter	3482136
+BRCA2	Q1396E	benign	likely benign	criteria provided, single submitter	3482138
+BRCA2	L557S	benign	likely benign	criteria provided, single submitter	3482145
+BRCA2	N213S	benign	likely benign	criteria provided, single submitter	3482150
+BRCA2	N1296H	benign	likely benign	criteria provided, single submitter	3482156
+BRCA2	N818K	benign	likely benign	criteria provided, single submitter	3482183
+BRCA1	C44S	pathogenic	likely pathogenic	criteria provided, single submitter	3572265
+BRCA1	K1037I	benign	likely benign	criteria provided, single submitter	3600337
+BRCA1	P871L	benign	likely benign	criteria provided, single submitter	3729359
+BRCA1	L983V	benign	likely benign	criteria provided, single submitter	3730837
+BRCA1	F1124L	benign	likely benign	criteria provided, single submitter	3765081
+BRCA2	S648P	benign	likely benign	criteria provided, single submitter	3765267
+BRCA2	G1376R	benign	likely benign	criteria provided, single submitter	3765270
+BRCA2	G1376R	benign	likely benign	criteria provided, single submitter	3765271
+BRCA2	G1508V	benign	likely benign	criteria provided, single submitter	3765272
+BRCA2	N2374I	benign	likely benign	criteria provided, single submitter	3774432
+BRCA1	S229Y	benign	likely benign	criteria provided, single submitter	3778920
+BRCA2	F1219L	benign	likely benign	criteria provided, single submitter	3778936
+BRCA2	T1526R	benign	likely benign	criteria provided, single submitter	3778939
+BRCA2	K178T	benign	likely benign	criteria provided, single submitter	3778940
+BRCA2	L2753F	benign	benign	criteria provided, single submitter	3825475
+BRCA1	M751V	benign	likely benign	criteria provided, single submitter	3825318
+BRCA1	L1605F	benign	likely benign	criteria provided, single submitter	3825325
+BRCA2	V3365I	benign	likely benign	criteria provided, single submitter	3825364
+BRCA2	N1288D	benign	likely benign	criteria provided, single submitter	3825377
+BRCA2	N560K	benign	likely benign	criteria provided, single submitter	3825385
+BRCA2	I1945V	benign	likely benign	criteria provided, single submitter	3825442
+BRCA2	V2138I	benign	likely benign	criteria provided, single submitter	3825447
+BRCA2	G2529V	benign	likely benign	criteria provided, single submitter	3825450
+BRCA2	C3173F	benign	likely benign	criteria provided, single submitter	3825453
+BRCA2	A3235D	benign	likely benign	criteria provided, single submitter	3825457
+BRCA2	S496A	benign	likely benign	criteria provided, single submitter	3825458
+BRCA1	A439V	benign	likely benign	criteria provided, single submitter	3903873
+BRCA1	S694R	benign	likely benign	criteria provided, single submitter	3904754
+BRCA1	G1543E	benign	likely benign	criteria provided, single submitter	3992563
+BRCA1	F952L	benign	likely benign	criteria provided, single submitter	3992573
+BRCA1	L1276S	benign	likely benign	criteria provided, single submitter	3992578
+BRCA2	Q2870P	benign	likely benign	criteria provided, single submitter	3992662
+BRCA2	I2664F	benign	likely benign	criteria provided, single submitter	3992665
+BRCA2	D2983G	benign	likely benign	criteria provided, single submitter	3992667
+BRCA2	E984K	benign	likely benign	criteria provided, single submitter	3992681
+BRCA2	D2492N	benign	likely benign	criteria provided, single submitter	3992698
+BRCA2	A1253T	benign	likely benign	criteria provided, single submitter	3992705
+BRCA2	T2542A	benign	likely benign	criteria provided, single submitter	3992707
+BRCA2	K3196N	benign	likely benign	criteria provided, single submitter	3992741
+BRCA2	T1185R	benign	likely benign	criteria provided, single submitter	3992746
+BRCA2	F3060V	benign	likely benign	criteria provided, single submitter	3992748
+BRCA2	Q2539E	benign	likely benign	criteria provided, single submitter	3992753
+BRCA2	D2489H	benign	likely benign	criteria provided, single submitter	3992762
+BRCA2	L3215H	benign	likely benign	criteria provided, single submitter	3992772
+BRCA2	K2551R	benign	benign	criteria provided, single submitter	3992775
+BRCA2	R2888S	benign	likely benign	criteria provided, single submitter	3992776
+BRCA2	P2883L	benign	benign	criteria provided, single submitter	3992784
+BRCA2	I1607N	benign	likely benign	criteria provided, single submitter	3992790
+BRCA2	Q3037L	benign	likely benign	criteria provided, single submitter	3992792
+BRCA2	N3348D	benign	likely benign	criteria provided, single submitter	3992795
+BRCA2	Q548K	benign	likely benign	criteria provided, single submitter	3992799
+BRCA2	N1747S	benign	likely benign	criteria provided, single submitter	3992817
+BRCA2	K3032R	benign	likely benign	criteria provided, single submitter	3992835
+BRCA2	C1081S	benign	likely benign	criteria provided, single submitter	3992836
+BRCA2	L1357I	benign	likely benign	criteria provided, single submitter	3992843
+BRCA2	K410N	benign	likely benign	criteria provided, single submitter	3992851
+BRCA2	P1171A	benign	likely benign	criteria provided, single submitter	3992852
+BRCA2	K1191N	benign	likely benign	criteria provided, single submitter	3992854
+BRCA2	H2548N	benign	benign	criteria provided, single submitter	3992855
+BRCA2	L2890R	benign	likely benign	criteria provided, single submitter	3992856
+BRCA2	V358A	benign	likely benign	criteria provided, single submitter	3992858
+BRCA2	I3208V	benign	likely benign	criteria provided, single submitter	3992866
+BRCA2	N1473S	benign	likely benign	criteria provided, single submitter	3992878
+BRCA1	I429V	benign	likely benign	criteria provided, single submitter	4056259
+BRCA2	E2918D	pathogenic	likely pathogenic	criteria provided, single submitter	4071408
+BRCA2	S2022A	benign	likely benign	criteria provided, single submitter	4082323
+BRCA2	S2219L	benign	likely benign	criteria provided, single submitter	4082324
+BRCA2	S3303R	benign	likely benign	criteria provided, single submitter	4082326
+BRCA2	D1420G	benign	likely benign	criteria provided, single submitter	4215850
+BRCA2	Q3394H	benign	likely benign	criteria provided, single submitter	4215853
+BRCA2	I1556T	benign	likely benign	criteria provided, single submitter	4215863
+BRCA2	T680A	benign	likely benign	criteria provided, single submitter	4215870
+BRCA2	E3258K	benign	likely benign	criteria provided, single submitter	4215874
+BRCA2	K1281N	benign	likely benign	criteria provided, single submitter	4215876
+BRCA2	E2635D	benign	likely benign	criteria provided, single submitter	4215892
+BRCA2	G3141R	benign	likely benign	criteria provided, single submitter	4215896
+BRCA2	I505L	benign	likely benign	criteria provided, single submitter	4215906
+BRCA2	M1272R	benign	likely benign	criteria provided, single submitter	4215907
+BRCA2	E1407Q	benign	likely benign	criteria provided, single submitter	4215910
+BRCA2	E2475K	benign	likely benign	criteria provided, single submitter	4215922
+BRCA2	K3019N	benign	benign	criteria provided, single submitter	4215923
+BRCA2	N2931T	benign	benign	criteria provided, single submitter	4215927
+BRCA2	S2782R	benign	likely benign	criteria provided, single submitter	4215929
+BRCA1	E362D	benign	likely benign	criteria provided, single submitter	4215103
+BRCA2	L574S	benign	likely benign	criteria provided, single submitter	4215151
+BRCA2	S942L	benign	likely benign	criteria provided, single submitter	4215251
+BRCA2	K457T	benign	likely benign	criteria provided, single submitter	4215254
+BRCA2	V494L	benign	likely benign	criteria provided, single submitter	4215272
+BRCA2	E2981V	benign	likely benign	criteria provided, single submitter	4215273
+BRCA2	N1935I	benign	likely benign	criteria provided, single submitter	4215287
+BRCA2	N289K	benign	likely benign	criteria provided, single submitter	4215289
+BRCA2	Q1089E	benign	likely benign	criteria provided, single submitter	4215290
+BRCA2	D362H	benign	likely benign	criteria provided, single submitter	4539145
+BRCA1	A1611T	benign	likely benign	criteria provided, single submitter	4539182
+BRCA1	N1519S	benign	likely benign	criteria provided, single submitter	4539184
+BRCA2	T2713A	benign	likely benign	criteria provided, single submitter	4539216
+BRCA2	S3218A	benign	likely benign	criteria provided, single submitter	4539221
+BRCA2	V2531A	benign	likely benign	criteria provided, single submitter	4628767
+BRCA2	E1780G	benign	likely benign	criteria provided, single submitter	4628997
+BRCA2	I383V	benign	likely benign	criteria provided, single submitter	4629013
+BRCA2	A3140S	benign	likely benign	criteria provided, single submitter	4629057
+BRCA2	A3186E	benign	likely benign	criteria provided, single submitter	4629089
+BRCA2	T3413A	benign	likely benign	criteria provided, single submitter	4626636
+BRCA2	W2586C	benign	likely benign	criteria provided, single submitter	4628272
+BRCA2	L2480I	benign	likely benign	criteria provided, single submitter	4628325
+BRCA2	F2794L	benign	likely benign	criteria provided, multiple submitters, no conflicts	4628351
+BRCA2	P2804A	benign	likely benign	criteria provided, single submitter	4628406
+BRCA2	V2820A	benign	likely benign	criteria provided, multiple submitters, no conflicts	4628412
+BRCA2	A573T	benign	likely benign	criteria provided, multiple submitters, no conflicts	4628581
+BRCA2	E2856G	benign	benign	criteria provided, single submitter	4626202
+BRCA2	P814S	benign	likely benign	criteria provided, single submitter	4627937
+BRCA1	H318Q	benign	benign/likely benign	criteria provided, multiple submitters, no conflicts	4625758
+BRCA1	E880K	benign	likely benign	criteria provided, single submitter	4625766
+BRCA2	E2850A	benign	likely benign	criteria provided, single submitter	4629247
+BRCA2	L2996S	benign	likely benign	criteria provided, single submitter	4629264
+BRCA2	L2614H	benign	likely benign	criteria provided, single submitter	4629302
+BRCA2	H1467L	benign	likely benign	criteria provided, single submitter	4629355
+BRCA2	N2910S	benign	benign	criteria provided, single submitter	4629423
+BRCA2	F2921I	benign	likely benign	criteria provided, single submitter	4629576
+BRCA2	N235H	benign	likely benign	criteria provided, single submitter	4683788
+BRCA1	P529A	benign	likely benign	criteria provided, single submitter	4684220
+BRCA2	Q2829H	pathogenic	pathogenic/likely pathogenic	criteria provided, multiple submitters, no conflicts	4687466
+BRCA1	N909D	benign	likely benign	criteria provided, single submitter	4758075
+BRCA2	L2688H	pathogenic	likely pathogenic	criteria provided, single submitter	4819606
+BRCA2	D1728G	benign	likely benign	criteria provided, single submitter	4830575
+BRCA2	K2498R	benign	likely benign	criteria provided, single submitter	4830657
+BRCA2	A3121V	benign	likely benign	criteria provided, single submitter	4830948
+BRCA2	M784L	benign	likely benign	criteria provided, single submitter	4826877
+BRCA2	Q1934K	benign	likely benign	criteria provided, single submitter	4826878
+BRCA2	G2584V	pathogenic	likely pathogenic	criteria provided, single submitter	4826880
+BRCA2	I3120V	benign	likely benign	criteria provided, single submitter	4826883
+BRCA2	Q2530P	benign	benign	criteria provided, single submitter	4826889
+BRCA2	S3016Y	benign	likely benign	criteria provided, multiple submitters, no conflicts	4826890
+BRCA2	L1260F	benign	likely benign	criteria provided, single submitter	4830502
+BRCA2	I1047T	benign	likely benign	criteria provided, single submitter	4824516
+BRCA2	V2503L	benign	benign	criteria provided, single submitter	4824519
+BRCA2	D3261E	benign	likely benign	criteria provided, single submitter	4824521
+BRCA2	S1558T	benign	likely benign	criteria provided, single submitter	4824525
+BRCA2	S2697R	benign	likely benign	criteria provided, single submitter	4824527
+BRCA2	Q1408E	benign	likely benign	criteria provided, single submitter	4824539
+BRCA2	K1406R	benign	likely benign	criteria provided, single submitter	4824540
+BRCA2	M524L	benign	likely benign	criteria provided, single submitter	4824541
+BRCA2	S3397C	benign	likely benign	criteria provided, single submitter	4824543
+BRCA2	L2885V	benign	benign	criteria provided, single submitter	4824556
+BRCA1	G834R	benign	likely benign	criteria provided, multiple submitters, no conflicts	4828051
+BRCA2	P2886L	benign	benign	criteria provided, single submitter	4842959
+BRCA2	S3241P	benign	likely benign	criteria provided, single submitter	4842964
+BRCA2	L639S	benign	likely benign	criteria provided, single submitter	4842973
+BRCA2	V545I	benign	likely benign	criteria provided, single submitter	4842983
+BRCA2	E954D	benign	likely benign	criteria provided, single submitter	4842985
+BRCA1	P832L	benign	likely benign	criteria provided, single submitter	4842659
+BRCA2	N56Y	benign	likely benign	criteria provided, single submitter	4850686
+BRCA2	Q258K	benign	likely benign	criteria provided, single submitter	4850687
+BRCA2	C1290W	benign	likely benign	criteria provided, single submitter	4852795
+BRCA1	S1064N	benign	likely benign	criteria provided, single submitter	4856428
+BRCA1	I1318M	benign	likely benign	criteria provided, single submitter	4856429
+BRCA2	Q1379R	benign	likely benign	criteria provided, single submitter	4856430
+BRCA2	N2699S	benign	likely benign	criteria provided, single submitter	4856431
+BRCA2	E881K	benign	likely benign	criteria provided, single submitter	4856432
+BRCA2	G1338C	benign	likely benign	criteria provided, single submitter	4856433
+BRCA2	E837Q	benign	likely benign	criteria provided, single submitter	4856434
+BRCA2	D1699H	benign	likely benign	criteria provided, single submitter	4856435
+BRCA2	C1081F	benign	likely benign	criteria provided, single submitter	4856436
+BRCA2	Q2042K	benign	likely benign	criteria provided, single submitter	4856437
+BRCA2	A1843S	benign	likely benign	criteria provided, single submitter	4856438
+BRCA2	A3270V	benign	likely benign	criteria provided, single submitter	4856439
+BRCA1	L269F	benign	likely benign	criteria provided, single submitter	4856440
+BRCA2	M2262I	benign	likely benign	criteria provided, single submitter	4856441
+BRCA2	E1644A	benign	likely benign	criteria provided, single submitter	4856442
+BRCA2	E2391G	benign	likely benign	criteria provided, single submitter	4856443
+BRCA2	G1963W	benign	likely benign	criteria provided, single submitter	4856444
+BRCA2	K2411E	benign	likely benign	criteria provided, single submitter	4856445
+BRCA2	A2582P	benign	likely benign	criteria provided, single submitter	4856446
+BRCA2	P375H	benign	likely benign	criteria provided, single submitter	4856447
+BRCA2	S2998T	benign	likely benign	criteria provided, single submitter	4856448
+BRCA1	S886P	benign	likely benign	criteria provided, single submitter	4856449
+BRCA2	N678S	benign	likely benign	criteria provided, single submitter	4856450
+BRCA2	V1238G	benign	likely benign	criteria provided, single submitter	4856451
+BRCA2	Q2065P	benign	likely benign	criteria provided, single submitter	4856453
+BRCA2	S1764L	benign	likely benign	criteria provided, single submitter	4856454
+BRCA2	L3215P	benign	likely benign	criteria provided, single submitter	4856455
+BRCA2	F2795I	benign	likely benign	criteria provided, single submitter	4856456
+BRCA2	P721Q	benign	likely benign	criteria provided, single submitter	4856457
+BRCA2	I449V	benign	likely benign	criteria provided, single submitter	4856458
+BRCA2	F922L	benign	likely benign	criteria provided, single submitter	4856459
+BRCA2	D420Y	benign	likely benign	criteria provided, single submitter	4856460
+BRCA2	L779V	benign	likely benign	criteria provided, single submitter	4856461
+BRCA2	R2268G	benign	likely benign	criteria provided, single submitter	4856462
+BRCA2	K3315R	benign	likely benign	criteria provided, single submitter	4856463
+BRCA2	D720E	benign	likely benign	criteria provided, single submitter	4856464
+BRCA2	Q1056K	benign	likely benign	criteria provided, single submitter	4856465
+BRCA2	A3270T	benign	likely benign	criteria provided, single submitter	4856466
+BRCA2	A1162G	benign	likely benign	criteria provided, single submitter	4856467
+BRCA2	K1274Q	benign	likely benign	criteria provided, single submitter	4856468
+BRCA2	K1964N	benign	likely benign	criteria provided, single submitter	4856469
+BRCA1	F1296L	benign	likely benign	criteria provided, single submitter	4856470
+BRCA2	E1571G	benign	likely benign	criteria provided, single submitter	4856471
+BRCA2	C717S	benign	likely benign	criteria provided, single submitter	4856472
+BRCA2	E2239G	benign	likely benign	criteria provided, single submitter	4856473
+BRCA2	D1161E	benign	likely benign	criteria provided, single submitter	4856474
+BRCA2	L117F	benign	likely benign	criteria provided, single submitter	4856475
+BRCA2	K1984N	benign	benign	criteria provided, single submitter	4856476
+BRCA2	R316S	benign	likely benign	criteria provided, single submitter	4856477
+BRCA2	K1821N	benign	likely benign	criteria provided, single submitter	4856478
+BRCA2	I3113N	benign	likely benign	criteria provided, single submitter	4856479
+BRCA2	V2050G	benign	likely benign	criteria provided, single submitter	4856480
+BRCA2	C480G	benign	likely benign	criteria provided, single submitter	4856481
+BRCA2	I1065N	benign	likely benign	criteria provided, single submitter	4856482
+BRCA2	F506Y	benign	likely benign	criteria provided, single submitter	4856483
+BRCA2	N2113K	benign	likely benign	criteria provided, single submitter	4856484
+BRCA2	S417C	benign	likely benign	criteria provided, single submitter	4856485
+BRCA2	K2411N	benign	likely benign	criteria provided, single submitter	4856486
+BRCA2	Q1886K	benign	likely benign	criteria provided, single submitter	4856487
+BRCA2	H282P	benign	likely benign	criteria provided, single submitter	4856488
+BRCA2	S3303R	benign	likely benign	criteria provided, single submitter	4856489
+BRCA1	Q169H	benign	likely benign	criteria provided, single submitter	4856490
+BRCA2	T1609P	benign	likely benign	criteria provided, single submitter	4856491
+BRCA2	P773S	benign	likely benign	criteria provided, single submitter	4856492
+BRCA2	V1306L	benign	likely benign	criteria provided, single submitter	4856493
+BRCA2	V1347A	benign	likely benign	criteria provided, single submitter	4856494
+BRCA2	R113T	benign	likely benign	criteria provided, single submitter	4856495
+BRCA2	N2208I	benign	likely benign	criteria provided, single submitter	4856496
+BRCA2	L1457F	benign	likely benign	criteria provided, single submitter	4856497
+BRCA2	N1784D	benign	likely benign	criteria provided, single submitter	4856499
+BRCA2	S2143A	benign	likely benign	criteria provided, single submitter	4856500
+BRCA1	P897A	benign	likely benign	criteria provided, single submitter	4856501
+BRCA2	Q2456H	benign	likely benign	criteria provided, single submitter	4856502
+BRCA2	I2481F	benign	likely benign	criteria provided, single submitter	4856503
+BRCA2	V2820I	benign	likely benign	criteria provided, single submitter	4856504
+BRCA2	D913Y	benign	likely benign	criteria provided, single submitter	4856505
+BRCA2	C3386Y	benign	likely benign	criteria provided, single submitter	4856506
+BRCA2	P2H	benign	likely benign	criteria provided, single submitter	4856507
+BRCA2	K1419R	benign	likely benign	criteria provided, single submitter	4856508
+BRCA2	C1948F	benign	likely benign	criteria provided, single submitter	4856509
+BRCA1	T1246S	benign	likely benign	criteria provided, single submitter	4856510
+BRCA2	D526H	benign	likely benign	criteria provided, single submitter	4856511
+BRCA2	M2262V	benign	likely benign	criteria provided, single submitter	4856512
+BRCA2	K1139R	benign	likely benign	criteria provided, single submitter	4856513
+BRCA2	P3051A	benign	likely benign	criteria provided, single submitter	4856514
+BRCA2	E2328D	benign	likely benign	criteria provided, single submitter	4856516
+BRCA2	S1632G	benign	likely benign	criteria provided, single submitter	4856518
+BRCA2	T2746I	benign	likely benign	criteria provided, single submitter	4856519
+BRCA1	L1351S	benign	likely benign	criteria provided, single submitter	4856520
+BRCA2	N3318D	benign	likely benign	criteria provided, single submitter	4856521
+BRCA1	L1098V	benign	likely benign	criteria provided, single submitter	4856522
+BRCA1	L393S	benign	likely benign	criteria provided, single submitter	4856523
+BRCA1	P1078L	benign	likely benign	criteria provided, single submitter	4856524
+BRCA1	D345E	benign	likely benign	criteria provided, single submitter	4856525
+BRCA1	V299L	benign	benign	criteria provided, single submitter	4856526
+BRCA1	Q858E	benign	likely benign	criteria provided, single submitter	4856527
+BRCA1	N537K	benign	likely benign	criteria provided, single submitter	4856528
+BRCA1	E1005K	benign	likely benign	criteria provided, single submitter	4856529
+BRCA1	S1330N	benign	likely benign	criteria provided, single submitter	4856530
+BRCA1	Q380K	benign	likely benign	criteria provided, single submitter	4856531
+BRCA1	K1606N	benign	likely benign	criteria provided, single submitter	4856532
+BRCA1	E881Q	benign	benign	criteria provided, single submitter	4856533
+BRCA1	I1068F	benign	likely benign	criteria provided, single submitter	4856534
+BRCA1	A1039G	benign	likely benign	criteria provided, single submitter	4856535
+BRCA1	A314T	benign	likely benign	criteria provided, single submitter	4856536
+BRCA1	E797D	benign	likely benign	criteria provided, single submitter	4856538
+BRCA1	A1481G	benign	likely benign	criteria provided, single submitter	4856539
+BRCA1	T336I	benign	likely benign	criteria provided, single submitter	4856540
+BRCA1	Q563H	benign	likely benign	criteria provided, single submitter	4856541
+BRCA1	E368D	benign	likely benign	criteria provided, single submitter	4856543
+BRCA1	A1369V	benign	likely benign	criteria provided, single submitter	4856544
+BRCA1	P1106T	benign	likely benign	criteria provided, single submitter	4856545
+BRCA1	E1000D	benign	likely benign	criteria provided, single submitter	4856546
+BRCA1	N997K	benign	likely benign	criteria provided, single submitter	4856547
+BRCA1	C328S	benign	likely benign	criteria provided, single submitter	4856548
+BRCA1	E391Q	benign	likely benign	criteria provided, single submitter	4856549
+BRCA1	T1022R	benign	likely benign	criteria provided, single submitter	4856550
+BRCA1	R866L	benign	likely benign	criteria provided, single submitter	4856551
+BRCA1	I482T	benign	likely benign	criteria provided, single submitter	4856552
+BRCA1	C1270W	benign	likely benign	criteria provided, single submitter	4856553
+BRCA1	T1256K	benign	likely benign	criteria provided, single submitter	4856554
+BRCA1	D1152Y	benign	likely benign	criteria provided, single submitter	4856555
+BRCA1	N235Y	benign	likely benign	criteria provided, single submitter	4856556
+BRCA1	S1174Y	benign	likely benign	criteria provided, single submitter	4856557
+BRCA1	S288R	benign	likely benign	criteria provided, single submitter	4856558
+BRCA1	C882S	benign	likely benign	criteria provided, single submitter	4856559
+BRCA1	K987M	benign	likely benign	criteria provided, single submitter	4856560
+BRCA1	R823G	benign	likely benign	criteria provided, single submitter	4856561
+BRCA1	W372C	benign	likely benign	criteria provided, single submitter	4856562
+BRCA1	D330G	benign	likely benign	criteria provided, single submitter	4856563
+BRCA1	E1222A	benign	likely benign	criteria provided, single submitter	4856564
+BRCA1	P919T	benign	likely benign	criteria provided, single submitter	4856565
+BRCA1	K503N	benign	likely benign	criteria provided, single submitter	4856566
+BRCA1	P371S	benign	likely benign	criteria provided, single submitter	4856568
+BRCA1	T790I	benign	likely benign	criteria provided, single submitter	4856569
+BRCA1	E565D	benign	likely benign	criteria provided, single submitter	4856570
+BRCA1	S324R	benign	likely benign	criteria provided, single submitter	4856571
+BRCA1	F517L	benign	likely benign	criteria provided, single submitter	4856572
+BRCA1	H1244Q	benign	likely benign	criteria provided, single submitter	4856573
+BRCA1	T327I	benign	likely benign	criteria provided, single submitter	4856574
+BRCA1	E880D	benign	likely benign	criteria provided, single submitter	4856575
+BRCA1	Q538R	benign	likely benign	criteria provided, single submitter	4856576
+BRCA1	S850G	benign	likely benign	criteria provided, single submitter	4856577
+BRCA1	T1289K	benign	likely benign	criteria provided, single submitter	4856578
+BRCA1	S423C	benign	likely benign	criteria provided, single submitter	4856579
+BRCA1	D1390Y	benign	likely benign	criteria provided, single submitter	4856580
+BRCA1	T231K	benign	likely benign	criteria provided, single submitter	4856581
+BRCA1	E1373D	benign	likely benign	criteria provided, single submitter	4856582
+BRCA1	K795N	benign	likely benign	criteria provided, single submitter	4856583
+BRCA1	K1264T	benign	likely benign	criteria provided, single submitter	4856584
+BRCA1	I1058T	benign	likely benign	criteria provided, single submitter	4856585
+BRCA1	T499K	benign	likely benign	criteria provided, single submitter	4856586
+BRCA1	S1007P	benign	likely benign	criteria provided, single submitter	4856587
+BRCA1	R496P	benign	likely benign	criteria provided, single submitter	4856588
+BRCA1	K734N	benign	likely benign	criteria provided, single submitter	4856589
+BRCA1	H1197Y	benign	likely benign	criteria provided, single submitter	4856590
+BRCA1	T1249I	benign	likely benign	criteria provided, single submitter	4856591
+BRCA2	I1258K	benign	likely benign	criteria provided, single submitter	4856592
+BRCA2	S1203I	benign	likely benign	criteria provided, single submitter	4856593
+BRCA2	H2417Q	benign	likely benign	criteria provided, single submitter	4856594
+BRCA2	E432K	benign	likely benign	criteria provided, single submitter	4856595
+BRCA2	D2084Y	benign	likely benign	criteria provided, single submitter	4856596
+BRCA2	K1888E	benign	likely benign	criteria provided, single submitter	4856597
+BRCA2	D1769Y	benign	likely benign	criteria provided, single submitter	4856599
+BRCA2	S2148P	benign	likely benign	criteria provided, single submitter	4856600
+BRCA2	F3105V	benign	likely benign	criteria provided, single submitter	4867764
+BRCA2	D2680A	benign	likely benign	criteria provided, single submitter	4867768
+BRCA2	E13D	benign	likely benign	criteria provided, single submitter	4867770
+BRCA2	D2492E	benign	likely benign	criteria provided, single submitter	4867772
+BRCA2	K2853T	benign	benign	criteria provided, single submitter	4867778
+BRCA2	L2774I	benign	likely benign	criteria provided, single submitter	4867779
+BRCA2	W2990C	benign	likely benign	criteria provided, single submitter	4867781
+BRCA2	A632T	benign	likely benign	criteria provided, single submitter	4867782
+BRCA2	E1254D	benign	likely benign	criteria provided, single submitter	4867800
+BRCA2	N30T	benign	likely benign	criteria provided, single submitter	4867801
+BRCA2	K6E	benign	likely benign	criteria provided, single submitter	4867802
+BRCA2	I605M	benign	likely benign	criteria provided, single submitter	4867805
+BRCA2	Y2920C	benign	benign	criteria provided, single submitter	4867809
+BRCA2	L1072F	benign	likely benign	criteria provided, single submitter	4867812
+BRCA2	L1763F	benign	likely benign	criteria provided, single submitter	4867816
+BRCA2	H1085Q	benign	likely benign	criteria provided, single submitter	4867817
+BRCA2	P2608S	benign	likely benign	criteria provided, single submitter	4867824
+BRCA2	S1252C	benign	likely benign	criteria provided, single submitter	4867826
+BRCA2	Q716R	benign	likely benign	criteria provided, single submitter	4867830
+BRCA2	A483V	benign	likely benign	criteria provided, single submitter	4867831
+BRCA2	E51V	benign	likely benign	criteria provided, single submitter	4867840
+BRCA2	S1248R	benign	likely benign	criteria provided, single submitter	4867841
+BRCA2	T3030K	benign	likely benign	criteria provided, single submitter	4867842
+BRCA2	E34D	benign	likely benign	criteria provided, single submitter	4867847
+BRCA2	N1083T	benign	likely benign	criteria provided, single submitter	4867851
+BRCA2	V1756L	benign	likely benign	criteria provided, single submitter	4867855
+BRCA2	V2545L	benign	likely benign	criteria provided, single submitter	4867869
+BRCA2	N1288H	benign	likely benign	criteria provided, single submitter	4867875
+BRCA2	M3181I	benign	likely benign	criteria provided, single submitter	4867882
+BRCA2	N1322K	benign	likely benign	criteria provided, single submitter	4867884
+BRCA2	T491I	benign	likely benign	criteria provided, single submitter	4867885
+BRCA2	A1972T	benign	likely benign	criteria provided, single submitter	4867886
+BRCA2	E3367K	benign	likely benign	criteria provided, single submitter	4867893
+BRCA1	A221T	benign	likely benign	criteria provided, single submitter	4876134
