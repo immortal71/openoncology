@@ -266,6 +266,7 @@ Verified present, not merely intended:
 | 5 | Formal risk register with likelihood and severity scoring | all | Yes |
 | 6 | Human-factors review of how the ranked list is read | all | Yes |
 | 7 | Analyse LLM summary failure modes | H5 | Yes |
+| 8 | Reconcile the Alembic/model drift so `alembic check` can gate rather than warn | — | No |
 
 ---
 
