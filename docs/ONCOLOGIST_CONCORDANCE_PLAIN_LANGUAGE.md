@@ -60,26 +60,57 @@ By cohort: BRCA 738, GBM 410, LUAD 166, SKCM 148, COAD 122.
 
 ## Results
 
-Two configurations, both against the same 1,584 patients. Tier 1 is the
-FDA-approved evidence table; Tier 2 repurposing is excluded here, so these are
-the strict numbers.
+Three configurations, all against the same 1,584 patients. Tier 1 is the
+FDA-approved evidence table; Tier 2 is the OpenTargets and DGIdb repurposing
+search.
 
 | Configuration | Cases with a prediction | Exact Top-1 | Exact Top-3 | Class Top-1 | Class Top-3 |
 |---|---|---|---|---|---|
-| Primary alteration only | 745 / 1,584 | 0.0% (0/745) | 0.81% (6/745) | 0.27% (2/745) | 1.34% (10/745) |
-| Full sequencing report | 1,232 / 1,584 | 0.0% (0/1232) | 1.38% (17/1232) | 0.32% (4/1232) | 1.95% (24/1232) |
+| Primary alteration, Tier 1 | 745 / 1,584 | 0.0% (0/745) | 0.81% (6/745) | 0.27% (2/745) | 1.34% (10/745) |
+| Primary alteration, Tier 1 + Tier 2 | 803 / 1,584 | 0.0% (0/803) | 0.75% (6/803) | 0.37% (3/803) | 1.37% (11/803) |
+| Full sequencing report, Tier 1 | 1,232 / 1,584 | 0.0% (0/1232) | 1.38% (17/1232) | 0.32% (4/1232) | 1.95% (24/1232) |
 
-"Primary alteration only" submits one alteration per patient. "Full sequencing
+"Primary alteration" submits one alteration per patient. "Full sequencing
 report" submits every alteration the patient carries and re-ranks the pooled
 candidates, which is closer to what a tumour board sees and removes any
-dependence on which alteration the label happens to name first. Reproduce with:
+dependence on which alteration the label happens to name first.
+
+Adding Tier 2 changes nothing worth the wall time: it produced 58 extra cases
+with a recommendation and exactly one extra class hit. Its candidates for these
+patients are alpelisib, copanlisib, entrectinib and similar targeted agents,
+which miss the chemotherapy the patients actually received for the same reason
+Tier 1 does. It is also slow, roughly four seconds of live OpenTargets and DGIdb
+traffic per gene-variant pair, so the Tier 1 configurations are the practical
+ones to rerun.
+
+Exact Top-1 is 0.0% in all three. That is not an artifact: the pipeline's most
+frequent first-ranked drugs are abemaciclib (274 patients), cetuximab (188) and
+alpelisib (176), none of which appear in TCGA-era prescribing.
+
+Reproduce with:
 
 ```
 python scripts/benchmark_oncologist_concordance.py \
   --labels-json scripts/concordance_labels.json --tier1-only
 python scripts/benchmark_oncologist_concordance.py \
   --labels-json scripts/concordance_labels.json --all-biomarkers --tier1-only
+python scripts/benchmark_oncologist_concordance.py \
+  --labels-json scripts/concordance_labels.json          # adds Tier 2, ~45 min
 ```
+
+### The hits are real
+
+Two of the class hits are worth naming, because they show the measurement works
+when the biology genuinely drove the prescription:
+
+| Patient | Sequenced biomarker | Oncologist gave | Pipeline top-3 |
+|---|---|---|---|
+| TCGA-GM-A2DA (BRCA) | ERBB2 amplification | lapatinib | ado-trastuzumab emtansine, lapatinib, neratinib |
+| TCGA-EE-A29T (SKCM) | BRAF V600E | vemurafenib | binimetinib, dabrafenib, encorafenib |
+
+Both biomarkers came from cBioPortal sequencing and both drugs from the GDC
+clinical record, independently. These are the cases the old circular labels
+could not distinguish from the other 1,582.
 
 ## What the low number means
 
