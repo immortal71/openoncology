@@ -48,6 +48,14 @@ class Result(Base):
     # services/oncology_atc.py.
     excluded_candidates: Mapped[Any] = mapped_column(JSON, nullable=True)
 
+    # Which actionability table answered, and how old it was, at the moment this
+    # result was produced. Stamped by the AI worker rather than read at request
+    # time, because the table can change between the two and the question a
+    # reader is asking is "what produced this recommendation". NULL means the
+    # result predates provenance capture — not that the evidence was current.
+    # See risk_analysis.md F4.
+    evidence_provenance: Mapped[Any] = mapped_column(JSON, nullable=True)
+
     # S3 key for the generated PDF report
     report_pdf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
 
