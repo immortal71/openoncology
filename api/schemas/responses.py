@@ -142,6 +142,25 @@ class SampleQCOut(BaseModel):
     coverage_adequacy: Optional[str] = None
 
 
+class EvidenceProvenanceOut(BaseModel):
+    """Where the actionability evidence behind this result came from.
+
+    ``is_current`` is False when the answer came from the built-in static table,
+    which carries no version and no release date. A reader must be able to tell
+    "current evidence says nothing actionable" from "we could not reach current
+    evidence" — those are clinically opposite statements. See risk_analysis.md F4.
+    """
+    path: str = "not_recorded"
+    is_current: bool = False
+    snapshot_date: Optional[str] = None
+    age_days: Optional[float] = None
+    resolved_at: Optional[str] = None
+    max_cache_age_days: Optional[int] = None
+    caveat: str = ""
+    # Present when the live per-variant API answered: the table's own provenance.
+    table_path: Optional[str] = None
+
+
 class ResultsResponse(BaseModel):
     submission_id: str
     cancer_type: Optional[str] = None
@@ -178,3 +197,6 @@ class ResultsResponse(BaseModel):
     # fail into a bare `pass`, so the response carried a null section that read
     # exactly like a section with nothing in it (hazard H3).
     generation_errors: list[str] = Field(default_factory=list)
+    # Always present. Defaults to not_recorded/is_current=False so a result that
+    # predates provenance capture cannot be read as having used current evidence.
+    evidence_provenance: EvidenceProvenanceOut = Field(default_factory=EvidenceProvenanceOut)

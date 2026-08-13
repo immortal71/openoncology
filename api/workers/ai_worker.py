@@ -365,6 +365,10 @@ def run_ai_analysis(
                 mutational_signature=sig_data if targetable_mutations else None,
                 combination_therapy=combination_therapy_data or None,
                 excluded_candidates=excluded_data or None,
+                # Which evidence table answered, captured now rather than at read
+                # time — the table can be refreshed in between, and the reader is
+                # asking what produced *this* result. See risk_analysis.md F4.
+                evidence_provenance=_capture_evidence_provenance(),
             )
             db.add(result)
             db.flush()
@@ -399,6 +403,31 @@ def run_ai_analysis(
     except Exception as exc:
         logger.error(f"[ai] Analysis failed for {submission_id}: {exc}")
         raise self.retry(exc=exc)
+
+
+def _capture_evidence_provenance() -> dict | None:
+    """Snapshot which actionability table is answering right now.
+
+    Returns None only if the evidence module cannot be reached at all. It never
+    raises: provenance is metadata about a result, and failing to record it must
+    not discard the result itself. A None here reads downstream as "provenance
+    not recorded", which is deliberately not the same as "evidence was current".
+    """
+    try:
+        from services.oncokb_evidence import get_evidence_provenance
+
+        provenance = get_evidence_provenance()
+    except Exception as exc:
+        logger.warning("[ai] could not capture evidence provenance: %s", exc)
+        return None
+
+    if not provenance.get("is_current"):
+        logger.warning(
+            "[ai] recommendations produced from %s evidence: %s",
+            provenance.get("path"),
+            provenance.get("caveat"),
+        )
+    return provenance
 
 
 def _get_fusion_candidates(submission_id: str) -> list[dict]:
