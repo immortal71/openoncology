@@ -542,3 +542,27 @@ def sample_qc_to_report_dict(report: SampleQCReport) -> dict:
         "ffpe_confidence": report.ffpe.confidence,
         "coverage_adequacy": report.coverage.coverage_adequacy,
     }
+
+
+# Verdict reported when a submission carries no stored QC at all. Distinct from
+# every real verdict so no consumer can map it onto "PASS" by accident.
+QC_NOT_ASSESSED = "NOT_ASSESSED"
+
+
+def qc_payload_for_api(stored: dict | None) -> dict:
+    """Shape a stored ``submissions.sample_qc`` value for the results API.
+
+    The stored dict already has the right keys; this adds the two things an API
+    consumer needs that the report renderer did not. ``assessed`` says whether
+    anybody actually ran QC, and a missing verdict becomes ``NOT_ASSESSED``
+    rather than absent, so a client that renders "no warnings" for an empty
+    payload cannot present an unchecked sample as a clean one.
+    """
+    if not stored:
+        return {"qc_verdict": QC_NOT_ASSESSED, "assessed": False, "warnings": []}
+
+    payload = dict(stored)
+    payload["assessed"] = True
+    payload.setdefault("qc_verdict", QC_NOT_ASSESSED)
+    payload["warnings"] = list(payload.get("warnings") or [])
+    return payload
