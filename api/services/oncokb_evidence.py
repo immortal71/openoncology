@@ -1351,8 +1351,13 @@ def _pick_field(row: dict[str, str], candidates: tuple[str, ...]) -> str:
 
 
 def _normalise_public_alteration(alt: str) -> str:
+    # Strips the colon for the same reason _normalise_alteration does: HGVS and
+    # ISCN write fusions as EML4::ALK. This is the sibling normaliser used when
+    # loading the public OncoKB dump, and it carried the identical gap, so a
+    # fusion arriving from the flat file keyed differently from the same fusion
+    # arriving from a submission. Found by a mutation test on the other one.
     s = re.sub(r"^p\.", "", str(alt or ""), flags=re.IGNORECASE).strip().upper()
-    s = re.sub(r"[.\-_ ]", "", s)
+    s = re.sub(r"[.\-_ :]", "", s)
     return s
 
 
