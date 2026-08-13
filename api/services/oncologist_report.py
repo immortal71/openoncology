@@ -1651,7 +1651,7 @@ def _render_plain_text(r: OncologistReport) -> str:
             lines.extend(textwrap.wrap(f"  ⚠ {w}", width=70, subsequent_indent="    "))
         lines.append(f"  Note: {qc['notes']}")
     else:
-        lines.append("  QC report not provided. Run sample_qc.run_qc_pipeline() for metrics.")
+        lines.append("  QC report not provided. Run sample_qc.run_sample_qc() for metrics.")
     lines.append("")
 
     # ── Section 3: Genomic Alterations ──────────────────────────────────────
