@@ -776,3 +776,53 @@ class TestDrugBrandAliases:
         from services.oncokb_evidence import _normalise_drug
         assert _normalise_drug("NotADrug") == "notadrug"
         assert lookup_oncokb_level("EGFR", "T790M", "NotADrug") is None
+
+
+# ── Cancer type context ──────────────────────────────────────────────────────
+
+class TestCancerContextNormalisation:
+    """Registries name the histology, not the umbrella term.
+
+    The NSCLC rule matched only "non-small cell lung" and "nsclc", so TCGA's
+    own strings, "Lung adenocarcinoma" (LUAD) and "Lung squamous cell
+    carcinoma" (LUSC), resolved to nothing. Every EGFR, ALK and KRAS context
+    override therefore failed to fire for the whole lung cohort.
+    """
+
+    def test_registry_histology_strings_resolve(self):
+        from services.oncokb_evidence import _normalise_cancer_context as ctx
+        for text, expected in [
+            ("Lung adenocarcinoma", "NSCLC"),
+            ("Lung squamous cell carcinoma", "NSCLC"),
+            ("LUAD", "NSCLC"),
+            ("LUSC", "NSCLC"),
+            ("Stomach adenocarcinoma", "GASTRIC"),
+            ("TNBC", "BREAST"),
+        ]:
+            assert ctx(text) == expected, text
+
+    def test_small_cell_is_never_routed_to_nsclc(self):
+        """The safety property. SCLC is a separate context with different
+        treatment, so mapping it to NSCLC would be an actively wrong answer
+        rather than a missing one. Word order varies between registries, which
+        is how "Lung small cell carcinoma" slipped through a narrower guard
+        matching only "small cell lung"."""
+        from services.oncokb_evidence import _normalise_cancer_context as ctx
+        for text in [
+            "Small cell lung cancer",
+            "Small cell lung carcinoma",
+            "Lung small cell carcinoma",
+            "SCLC",
+        ]:
+            assert ctx(text) == "SCLC", text
+
+    def test_established_contexts_unaffected(self):
+        from services.oncokb_evidence import _normalise_cancer_context as ctx
+        for text, expected in [
+            ("Non-small cell lung cancer", "NSCLC"),
+            ("Colorectal adenocarcinoma", "COLORECTAL"),
+            ("Skin cutaneous melanoma", "MELANOMA"),
+            ("Glioblastoma multiforme", "GLIOMA"),
+            ("Breast invasive carcinoma", "BREAST"),
+        ]:
+            assert ctx(text) == expected, text

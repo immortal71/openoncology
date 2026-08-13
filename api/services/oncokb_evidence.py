@@ -2469,9 +2469,28 @@ def _normalise_cancer_context(cancer_type: Optional[str]) -> Optional[str]:
     s = str(cancer_type).strip().lower()
     if ("non-small cell lung" in s) or ("nsclc" in s):
         return "NSCLC"
+    # Registries name the histology, not the NSCLC umbrella. TCGA's own strings
+    # are "Lung adenocarcinoma" (LUAD) and "Lung squamous cell carcinoma"
+    # (LUSC), and neither matched, so every EGFR, ALK and KRAS context override
+    # silently failed to fire for the entire lung cohort.
+    #
+    # Small cell is deliberately excluded: SCLC is a separate context with
+    # different treatment, so routing it here would be an actively wrong answer
+    # rather than a missing one. The non-small-cell case has already returned
+    # above, so any "small cell" reaching this line is genuinely SCLC. The test
+    # matches on "small cell" rather than "small cell lung" because word order
+    # varies: "Lung small cell carcinoma" slipped through the narrower guard.
+    if "lung" in s and "small cell" not in s:
+        return "NSCLC"
+    if s in ("luad", "lusc"):
+        return "NSCLC"
     if "breast" in s:
         return "BREAST"
-    if "gastric" in s:
+    # Triple-negative is a receptor subtype of breast cancer, and the string
+    # often arrives without the word "breast" at all.
+    if "tnbc" in s:
+        return "BREAST"
+    if "gastric" in s or "stomach" in s:
         return "GASTRIC"
     if "gastroesophageal" in s or "gastro-esophageal" in s or " gej" in s or s.startswith("gej"):
         return "GEJ"
@@ -2529,7 +2548,9 @@ def _normalise_cancer_context(cancer_type: Optional[str]) -> Optional[str]:
         return "BLADDER"
     if "hepatocellular" in s or (" hcc" in s) or s.startswith("hcc"):
         return "HCC"
-    if "small cell lung" in s or "sclc" in s:
+    # Word order varies between registries: "Small cell lung carcinoma" and
+    # "Lung small cell carcinoma" are the same disease.
+    if "sclc" in s or ("small cell" in s and "lung" in s):
         return "SCLC"
     if "cervical" in s:
         return "CERVICAL"
