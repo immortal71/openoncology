@@ -22,6 +22,7 @@ from models import (  # noqa: F401
     cohort,
     deletion_request,
     genomics,
+    stripe_event,
 )
 from config import settings
 

@@ -89,20 +89,47 @@ async def onboarding_return(
     request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    """Stripe redirects the pharma here after completing (or leaving) onboarding."""
+    """Stripe redirects the pharma's browser here after onboarding.
+
+    Deliberately unauthenticated, and it has to stay that way: this is the
+    `return_url` handed to `stripe.AccountLink.create`, so Stripe sends the
+    browser here directly and there is no Authorization header to check. Adding
+    `_require_admin` would 403 every pharma the moment they finish KYC.
+
+    What it must not do is answer questions. It previously returned
+    `stripe_account_id`, `charges_enabled` and `payouts_enabled` for whatever
+    id appeared in the path, with no credential of any kind, which made it an
+    oracle: walk the ids and read back the Stripe account and payout state of
+    every company on the platform. It also 404'd on unknown ids and 200'd on
+    known ones, so it confirmed which ids existed even before the body was read.
+
+    It now returns the same shape either way and says only whether onboarding
+    finished. Everything it used to disclose is available from
+    `GET /status/{pharma_id}`, which requires the admin role.
+    """
     company = await db.get(PharmaCompany, pharma_id)
-    if not company or not company.stripe_account_id:
-        raise not_found_error(request, "Company not found")
 
-    account = stripe.Account.retrieve(company.stripe_account_id)
-    details_submitted = account.get("details_submitted", False)
+    details_submitted = False
+    if company and company.stripe_account_id:
+        try:
+            account = stripe.Account.retrieve(company.stripe_account_id)
+            details_submitted = bool(account.get("details_submitted", False))
+        except Exception:
+            # A Stripe outage must not turn this into an error oracle either:
+            # the response shape stays identical.
+            logger.exception(
+                "[stripe] account retrieve failed during onboarding return"
+            )
 
+    # Uniform response. No account id, no capability flags, and no distinction
+    # between "unknown company" and "known company that has not finished".
     return {
-        "pharma_id": pharma_id,
-        "stripe_account_id": company.stripe_account_id,
-        "details_submitted": details_submitted,
-        "charges_enabled": account.get("charges_enabled", False),
-        "payouts_enabled": account.get("payouts_enabled", False),
+        "onboarding_complete": details_submitted,
+        "detail": (
+            "Onboarding complete."
+            if details_submitted
+            else "Onboarding is not complete. Return to the dashboard to continue."
+        ),
     }
 
 
