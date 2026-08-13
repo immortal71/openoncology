@@ -58,6 +58,20 @@ Validation against a blinded 50-case oncologist holdout yielded Hit@3 = 0.900, S
 > Square, the same way the project's prior dedup-bug erratum was handled, rather than a
 > quiet edit to this file.
 
+> 🛑 **Retracted figure, flagged 2026-08-13. Do not silently edit, this text mirrors
+> the published DOI abstract.** The sentence "Equivalence-adjusted oncologist
+> concordance reached 100% at both Top-1 and Top-3 across 36 actionable TCGA cases"
+> does not stand. The answer key it was measured against derived each patient's gene
+> FROM the drug they received, via a `DRUG_BIOMARKER_MAP` in
+> `scripts/build_concordance_labels.py`. No sequencing record took part, so the
+> benchmark asked and answered the same question and 100% was structurally guaranteed.
+> The map has been removed and the labels are now built by joining cBioPortal
+> sequencing records to GDC treatment records on patient id. Rebuilt on 1,584 patients
+> who have both, class-adjusted Top-3 is **1.95% (24/1232 with a prediction)**, not
+> 100%. See docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md for the full rebuild and
+> `scripts/detect_label_circularity.py` for the test that catches this class of defect.
+> This needs an explicit erratum on Research Square rather than a quiet edit here.
+
 **Conclusions**
 
 OpenOncology is the first open-source precision oncology platform to provide a complete, safe escalation pathway from approved drug matching through to de novo custom drug discovery for patients with no existing therapeutic option. All code, benchmark scripts, and validation artifacts are publicly available at github.com/immortal71/openoncology under the MIT licence.
