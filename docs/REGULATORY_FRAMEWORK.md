@@ -74,12 +74,67 @@ outputs to inform real patient treatment decisions:
 
 ### 3.1 Analytical Validation
 
-| Test | Target | Status |
-|---|---|---|
-| Variant calling accuracy (SNV/indel) vs. orthogonal WGS | Sensitivity ≥ 99%, PPV ≥ 95% | ⬜ Not completed |
-| AlphaMissense score concordance with ClinVar pathogenicity | Concordance ≥ 90% on BRCA1/2 benchmarks | ⬜ Not completed |
-| Drug ranking Precision@3 vs. OncoKB L1/L2 | ≥ 0.60 | ⬜ In progress (see `api/services/benchmark.py`) |
-| FFPE artefact detection sensitivity | ≥ 80% on FFPE-spiked samples | ⬜ Not completed |
+Measured 2026-08-13. Every figure below is reproducible from a script in
+`scripts/`, and each script prints what its number cannot support alongside what
+it can. Read the "what it does not establish" column before quoting any of them.
+
+| Test | Target | Status | Measured | What it does not establish |
+|---|---|---|---|---|
+| Variant calling accuracy (SNV/indel) vs. orthogonal WGS | Sensitivity ≥ 99%, PPV ≥ 95% | ⬜ Not completed | not run | Everything downstream is conditioned on this and it is unmeasured |
+| AlphaMissense score concordance with ClinVar pathogenicity | Concordance ≥ 90% on BRCA1/2 benchmarks | ✅ Pass | **92.13% balanced accuracy** (n=1,471) | Missense only; BRCA1/2 only |
+| Drug ranking Precision@3 vs. OncoKB L1/L2 | ≥ 0.60 | ⚠️ Pass, with leakage | **0.7247** (n=431) | 94.5% of gold cases are self-graded; this measures ranking, not evidence correctness |
+| FFPE artefact detection sensitivity | ≥ 80% on FFPE-spiked samples | ⚠️ Pass, simulated | **100%** sensitivity, 0% false positive | Spike-in simulation, not paired FFPE/fresh-frozen tissue |
+
+**AlphaMissense vs ClinVar** (`scripts/validate_alphamissense_clinvar.py`,
+result in `validation_results/alphamissense_clinvar_concordance.json`).
+1,471 BRCA1/BRCA2 missense variants with a ClinVar assertion at "criteria
+provided" or better, 325 pathogenic and 1,146 benign, every one of them matched
+to an AlphaMissense score. Sensitivity 88.78%, specificity 95.47%, balanced
+accuracy 92.13%. BRCA1 92.6%, BRCA2 91.38%. Restricted to expert-panel and
+practice-guideline assertions (n=396) balanced accuracy is 95.56%.
+
+The gate text says "concordance ≥ 90%" without specifying the metric, and the
+choice matters, so all three readings are reported: raw agreement counting
+AlphaMissense's `ambiguous` class as wrong is **89.06%**, which fails;
+excluding ambiguous it is **93.97%**; balanced accuracy is **92.13%**. Balanced
+accuracy is gated on because the set is 3.5:1 benign, so a raw figure is
+dominated by the majority class. The failing reading is recorded here rather
+than dropped.
+
+The two sources are genuinely independent: AlphaMissense is a published
+predictor (Cheng et al., Science 2023) and ClinVar assertions are submitted by
+clinical laboratories.
+
+**Drug ranking Precision@3** (`scripts/validate_ranking_precision.py`, result in
+`validation_results/ranking_precision.json`). Precision@1 0.868, Precision@3
+0.7247, MRR 0.917 over 431 gold cases that produce a ranking.
+
+This number is weaker than it looks and the script says so. 94.5% of judgeable
+gold cases have their expected drugs already contained in the evidence table
+being graded, so for those the metric asks whether the ranker can order its own
+table, not whether the table is right. Split out: 0.7288 on the contained subset
+(n=415), 0.6296 on the independent subset (n=24). The independent subset also
+clears the threshold, but 24 cases is not a robust estimate.
+
+**FFPE artefact detection** (`scripts/validate_ffpe_detection.py`, result in
+`validation_results/ffpe_detection_sensitivity.json`). 100% detection at every
+artefact burden from 10% upward, 0% false positives on clean samples, across 50
+simulated samples per burden level built on 314 real variant coordinates from
+`samples/real/`.
+
+Saturated, and that is a property of the simulation as much as the detector:
+artefact and somatic VAF are drawn from non-overlapping bands, while real
+subclonal somatic variants sit inside the artefact VAF range. Read it as an
+upper bound. The high-confidence threshold, which only saturates above 60%
+burden, is what shows the score scale is not degenerate.
+
+**Variant calling accuracy** remains unmeasured, and it is the most consequential
+gap in this table. Every recommendation the system makes is conditioned on the
+variant call being correct, so an unbounded error rate here bounds nothing
+downstream. It cannot be measured on a developer workstation: it needs the
+Nextflow pipeline in `pipeline/main.nf` with `bwa-mem2`, `gatk`, `samtools` and
+`fastqc` available, a reference genome, and a truth-set sample such as a Genome
+in a Bottle reference material with its high-confidence call regions.
 
 ### 3.2 Clinical Validation (Prospective)
 

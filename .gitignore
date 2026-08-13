@@ -88,3 +88,9 @@ web/coverage/
 web/playwright-report/
 web/test-results/
 web/.playwright/
+
+# Bulk source archives pulled by the validation gate scripts (ClinVar
+# variant_summary is 442 MB, AlphaMissense substitutions is 1.2 GB). The small
+# filtered extracts next to them ARE committed, so --offline reruns need no
+# network. Re-fetch with scripts/validate_alphamissense_clinvar.py.
+validation_results/cache/*.gz
