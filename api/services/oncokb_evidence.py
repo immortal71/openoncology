@@ -2879,9 +2879,162 @@ def _is_met_exon14_splice(alt_norm_upper: str) -> bool:
     return lo <= int(m.group(1)) <= hi
 
 
+# Trade name to INN, so a record naming a drug the way it was prescribed
+# matches evidence keyed on the generic name.
+#
+# WHY: nothing mapped trade names, so lookup_oncokb_level("ERBB2",
+# "Amplification", "Herceptin") returned None while the same call with
+# "trastuzumab" returned LEVEL_1. A sweep of 20 common oncology trade names
+# found all 20 unreachable (scripts/audit_drug_names.py).
+#
+# This matters twice over. Clinical records and prescriptions carry trade
+# names, and so do TCGA's treatment fields, which is what the concordance
+# benchmark scores our recommendations against. An unmapped trade name there
+# scores a miss on a case we actually got right, understating accuracy rather
+# than overstating it.
+#
+# FDA-approved trade names are a naming fact, not a clinical claim, which is
+# what makes this safe to write here. Keys are stored already normalised:
+# lowercase with whitespace, hyphens and dots removed.
+_DRUG_BRAND_ALIASES: dict[str, str] = {
+    # EGFR
+    "tagrisso": "osimertinib",
+    "iressa": "gefitinib",
+    "tarceva": "erlotinib",
+    "gilotrif": "afatinib", "giotrif": "afatinib",
+    "vizimpro": "dacomitinib",
+    "rybrevant": "amivantamab",
+    "exkivity": "mobocertinib",
+    # HER2
+    "herceptin": "trastuzumab",
+    "enhertu": "trastuzumab deruxtecan",
+    "kadcyla": "ado-trastuzumab emtansine",
+    "perjeta": "pertuzumab",
+    "tykerb": "lapatinib", "tyverb": "lapatinib",
+    "nerlynx": "neratinib",
+    "tukysa": "tucatinib",
+    # BRAF and MEK
+    "zelboraf": "vemurafenib",
+    "tafinlar": "dabrafenib",
+    "mekinist": "trametinib",
+    "braftovi": "encorafenib",
+    "mektovi": "binimetinib",
+    "cotellic": "cobimetinib",
+    # ALK and ROS1
+    "xalkori": "crizotinib",
+    "alecensa": "alectinib",
+    "zykadia": "ceritinib",
+    "alunbrig": "brigatinib",
+    "lorbrena": "lorlatinib",
+    "rozlytrek": "entrectinib",
+    "augtyro": "repotrectinib",
+    # RET, NTRK, MET
+    "retevmo": "selpercatinib", "gavreto": "pralsetinib",
+    "vitrakvi": "larotrectinib",
+    "tabrecta": "capmatinib", "tepmetko": "tepotinib",
+    # KRAS
+    "lumakras": "sotorasib", "lumykras": "sotorasib",
+    "krazati": "adagrasib",
+    # PARP
+    "lynparza": "olaparib",
+    "zejula": "niraparib",
+    "talzenna": "talazoparib",
+    "rubraca": "rucaparib",
+    # PI3K/AKT/mTOR
+    "piqray": "alpelisib",
+    "truqap": "capivasertib",
+    "afinitor": "everolimus",
+    # Multikinase and BCR-ABL
+    "gleevec": "imatinib", "glivec": "imatinib",
+    "sprycel": "dasatinib",
+    "tasigna": "nilotinib",
+    "iclusig": "ponatinib",
+    "sutent": "sunitinib",
+    "nexavar": "sorafenib",
+    "stivarga": "regorafenib",
+    "votrient": "pazopanib",
+    "qinlock": "ripretinib",
+    "ayvakit": "avapritinib",
+    # FLT3 and IDH
+    "rydapt": "midostaurin",
+    "xospata": "gilteritinib",
+    "vanflyta": "quizartinib",
+    "tibsovo": "ivosidenib",
+    "idhifa": "enasidenib",
+    # CDK4/6
+    "ibrance": "palbociclib",
+    "kisqali": "ribociclib",
+    "verzenio": "abemaciclib", "verzenios": "abemaciclib",
+    # Immunotherapy
+    "keytruda": "pembrolizumab",
+    "opdivo": "nivolumab",
+    "tecentriq": "atezolizumab",
+    "imfinzi": "durvalumab",
+    "bavencio": "avelumab",
+    "yervoy": "ipilimumab",
+    "libtayo": "cemiplimab",
+    "jemperli": "dostarlimab",
+    # Antiangiogenics and endocrine
+    "avastin": "bevacizumab",
+    "cyramza": "ramucirumab",
+    "lenvima": "lenvatinib",
+    "cabometyx": "cabozantinib", "cometriq": "cabozantinib",
+    "nolvadex": "tamoxifen",
+    "faslodex": "fulvestrant",
+    "arimidex": "anastrozole",
+    "femara": "letrozole",
+    "aromasin": "exemestane",
+    "xtandi": "enzalutamide",
+    "zytiga": "abiraterone",
+    "erleada": "apalutamide",
+    "nubeqa": "darolutamide",
+    # Other targeted
+    "welireg": "belzutifan",
+    "balversa": "erdafitinib",
+    "pemazyre": "pemigatinib",
+    "truseltiq": "infigratinib",
+    "revuforj": "revumenib",
+    "elrexfio": "elranatamab",
+    "imbruvica": "ibrutinib",
+    "calquence": "acalabrutinib",
+    "brukinsa": "zanubrutinib",
+    "venclexta": "venetoclax", "venclyxto": "venetoclax",
+    "erivedge": "vismodegib",
+    "odomzo": "sonidegib",
+    "mektavi": "binimetinib",
+}
+
+_table_drugs_cache: tuple[int, frozenset[str]] = (-1, frozenset())
+
+
+def _known_table_drugs() -> frozenset[str]:
+    """Normalised drug names the evidence table actually carries."""
+    global _table_drugs_cache
+    size = len(_LEVEL_TABLE)
+    if _table_drugs_cache[0] != size:
+        names: set[str] = set()
+        for drugs in _LEVEL_TABLE.values():
+            for drug in drugs:
+                names.add(re.sub(r"[\s\-.]", "", str(drug).lower()))
+        _table_drugs_cache = (size, frozenset(names))
+    return _table_drugs_cache[1]
+
+
 def _normalise_drug(name: str) -> str:
-    """Normalise drug name for matching."""
-    return re.sub(r"[\s\-.]", "", name.lower())
+    """Normalise a drug name for matching, resolving trade names to the INN.
+
+    A name the table already carries is returned before any alias is applied,
+    so a trade name can never shadow a real generic. This is the same guard
+    the gene normaliser uses, added after an unconditional rewrite there
+    silently broke H3-3A.
+    """
+    key = re.sub(r"[\s\-.]", "", (name or "").lower())
+    if key in _known_table_drugs():
+        return key
+    alias = _DRUG_BRAND_ALIASES.get(key)
+    if alias:
+        return re.sub(r"[\s\-.]", "", alias.lower())
+    return key
 
 
 def lookup_oncokb_level(gene: str, alteration: str, drug_name: str) -> Optional[str]:

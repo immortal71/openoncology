@@ -718,3 +718,61 @@ class TestGeneSymbolAliases:
         is asserted on the normaliser rather than on drug output."""
         from services.oncokb_evidence import _normalise_gene
         assert _normalise_gene("LKB1") == "STK11"
+
+
+# ── Drug trade names ─────────────────────────────────────────────────────────
+
+class TestDrugBrandAliases:
+    """Records name drugs the way they were prescribed, not by INN.
+
+    lookup_oncokb_level("ERBB2", "Amplification", "Herceptin") returned None
+    while the same call with "trastuzumab" returned LEVEL_1. All 20 trade
+    names probed were unreachable.
+
+    This understates accuracy rather than overstating it: TCGA's treatment
+    fields carry trade names, and the concordance benchmark scores our
+    recommendations against them, so an unmapped trade name scores a miss on
+    a case we actually got right.
+    """
+
+    BRANDS = [
+        ("Herceptin", "trastuzumab", "ERBB2", "Amplification"),
+        ("Tagrisso", "osimertinib", "EGFR", "T790M"),
+        ("Gleevec", "imatinib", "KIT", "EXON11MUT"),
+        ("Glivec", "imatinib", "KIT", "EXON11MUT"),
+        ("Zelboraf", "vemurafenib", "BRAF", "V600E"),
+        ("Xalkori", "crizotinib", "ALK", "EML4-ALK"),
+        ("Lumakras", "sotorasib", "KRAS", "G12C"),
+        ("Lynparza", "olaparib", "BRCA1", "S1982fs"),
+        ("Piqray", "alpelisib", "PIK3CA", "H1047R"),
+        ("Tabrecta", "capmatinib", "MET", "EXON14SKIP"),
+    ]
+
+    def test_trade_names_resolve_to_inn_evidence(self):
+        for brand, inn, gene, alteration in self.BRANDS:
+            canonical = lookup_oncokb_level(gene, alteration, inn)
+            assert canonical is not None, f"{inn} should have a level to compare against"
+            assert lookup_oncokb_level(gene, alteration, brand) == canonical, (
+                f"{brand} should resolve as {inn}"
+            )
+
+    def test_case_and_punctuation_insensitive(self):
+        for written in ["HERCEPTIN", "herceptin", "Herceptin "]:
+            assert lookup_oncokb_level("ERBB2", "Amplification", written) == "LEVEL_1"
+
+    def test_trade_name_never_shadows_a_real_generic(self):
+        """A generic the table carries must resolve to itself before any alias
+        is applied. This is the guard that was missing when the gene
+        normaliser silently broke H3-3A."""
+        from services.oncokb_evidence import (
+            _DRUG_BRAND_ALIASES, _known_table_drugs, _normalise_drug,
+        )
+        table_drugs = _known_table_drugs()
+        assert not [k for k in _DRUG_BRAND_ALIASES if k in table_drugs]
+        for drug in table_drugs:
+            assert _normalise_drug(drug) == drug, f"{drug} no longer resolves to itself"
+
+    def test_unknown_drug_is_passed_through_not_guessed(self):
+        from services.oncokb_evidence import _normalise_drug
+        assert _normalise_drug("NotADrug") == "notadrug"
+        assert lookup_oncokb_level("EGFR", "T790M", "NotADrug") is None
