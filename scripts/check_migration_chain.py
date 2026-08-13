@@ -3,16 +3,20 @@
 Purpose:
 - Enforce the migration-chain properties that CAN be checked today, blocking.
 
-`alembic check` (model-vs-migration drift) is a different, stronger check, and
-it currently reports substantial pre-existing drift that needs a dedicated
-reconciliation migration rather than a rushed autogenerate. It therefore runs
-non-blocking in CI and is tracked as open action 8 in docs/risk_analysis.md.
+`alembic check` covers a different question, model-vs-migration drift, and now
+gates in CI on its own. It needs a live database, so it cannot run here.
 
-That left nothing at all gating migrations. This is the part that can gate now:
-a divergent chain, a duplicate revision id, or a dangling down_revision breaks
-`alembic upgrade head` for every deployment, and none of those need a database
-or a resolved drift to detect. Two developers adding a migration on parallel
-branches is the common way it happens, and the merge that causes it looks clean.
+This script covers what `alembic check` does not look at: the shape of the
+revision graph itself. A divergent chain, a duplicate revision id, or a dangling
+down_revision breaks `alembic upgrade head` for every deployment, and none of it
+needs a database to detect. Two branches each adding a migration is the ordinary
+way a fork appears, and the merge that creates it looks clean in review.
+
+Also outside both checks, and tracked as open action 8 in docs/risk_analysis.md:
+11 columns where 0001 used a bare `sa.String` against a model that specifies a
+length (alembic treats a reflected type that is less specific than the metadata
+type as a match, so it reports nothing), and 19 indexes that a8bf7eb4833c dropped
+because no model declares `index=True`.
 
 Usage:
     .venv\\Scripts\\python.exe scripts\\check_migration_chain.py
