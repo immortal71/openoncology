@@ -21,9 +21,15 @@ import logging
 import asyncio
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 # Allow importing from the ai/ package at repo root
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+if TYPE_CHECKING:
+    # Runtime imports of the DB models stay inside the task body, so the Celery
+    # module can be imported without pulling in SQLAlchemy.
+    from models.mutation import OncoKBLevel
 
 from workers import celery_app
 
