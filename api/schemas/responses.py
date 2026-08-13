@@ -173,3 +173,8 @@ class ResultsResponse(BaseModel):
     # Always present. NOT_ASSESSED when the submission carries no verdict, so a
     # consumer cannot render "no QC problems" for a sample nobody checked.
     sample_qc: SampleQCOut = Field(default_factory=SampleQCOut)
+    # Sections that were requested and could not be generated, e.g.
+    # ["oncologist_report"]. Empty on the normal path. Both generators used to
+    # fail into a bare `pass`, so the response carried a null section that read
+    # exactly like a section with nothing in it (hazard H3).
+    generation_errors: list[str] = Field(default_factory=list)

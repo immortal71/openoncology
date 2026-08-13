@@ -259,6 +259,40 @@ Verified present, not merely intended:
   `run_genomic_pipeline` and asserts on the persisted row
   (`api/tests/test_genomic_worker_qc_persistence.py`), so a control that stops
   being invoked fails a test rather than going quiet.
+- A failed report or summary generation is named in the response
+  (`ResultsResponse.generation_errors`) and logged with its traceback, rather
+  than returning a null section that reads like an empty one.
+- Every PHI route the app mounts is covered by the audit middleware's prefix
+  list, asserted by walking the app's own route table
+  (`api/tests/test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`).
+- Every Celery notification task either has a dispatcher or is listed as a known
+  gap with a reason (`api/tests/test_notify_worker_wiring.py`).
+
+### F11. Controls that were mounted but not reached (H3) — FIXED
+
+Three instances of F10's pattern, found by asking which controls run rather than
+which exist.
+
+`/api/fhir` was absent from `_PHI_PREFIXES` in `api/middleware/audit.py`.
+`DiagnosticReport` and `Observation` export a patient's full variant profile,
+and neither produced a `phi_access` record or an `X-Request-Id`: the richest PHI
+export in the API was the one path with no audit trail. Every existing prefix
+test asserted a positive about a prefix already in the tuple, so the suite could
+not see an omission. It now walks the mounted routes instead.
+
+`api/routes/results.py` swallowed any exception from the patient summary and the
+oncologist report into a bare `pass`. The response returned 200 with a null
+section, which is indistinguishable from a section with nothing to say. Both now
+log the traceback and name the failure in `generation_errors`. The generators
+still cannot fail the request, which remains correct.
+
+`notify_review_complete` looked its `Result` up with `db.get(Result, submission_id)`.
+`Result.id` is its own UUID and `submission_id` is a separate unique FK, so the
+lookup never matched and the task returned success having sent nothing. Fixed to
+query on `submission_id`. Three of the five notification tasks still have no
+dispatcher at all, and `notify_campaign_milestone`'s only dispatcher is itself
+never called, so milestone emails cannot fire; both are recorded in the wiring
+test rather than left to be rediscovered.
 
 ---
 

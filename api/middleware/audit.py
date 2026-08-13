@@ -23,7 +23,17 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-# Routes that handle PHI — all others are ignored
+# Routes that handle PHI — all others are ignored.
+#
+# Keep this in step with the routers mounted in main.py. `/api/fhir` was missing,
+# and it is the single richest PHI export in the API: DiagnosticReport and
+# Observation return a patient's full variant profile as FHIR resources. Those
+# reads produced no phi_access record and no X-Request-Id, so the export that
+# most needs an audit trail was the one path without one.
+#
+# test_middleware_audit.py walks the mounted routes and fails if a router listed
+# in _PHI_ROUTER_PREFIXES there is not covered here, so the next router to be
+# added cannot repeat this silently.
 _PHI_PREFIXES = (
     "/api/submit",
     "/api/results",
@@ -34,6 +44,7 @@ _PHI_PREFIXES = (
     "/api/pharma",
     "/api/marketplace",
     "/api/stripe",
+    "/api/fhir",
 )
 
 audit_logger = logging.getLogger("openoncology.audit")

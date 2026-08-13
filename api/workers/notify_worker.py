@@ -257,8 +257,20 @@ def notify_review_complete(self, submission_id: str):
 
     try:
         with get_sync_session() as db:
-            result = db.get(Result, submission_id)
+            # db.get() looks up by primary key. Result.id is its own UUID and
+            # submission_id is a separate unique FK, so passing a submission id
+            # to db.get(Result, ...) never matched a row: the task returned at
+            # the guard below and reported success having sent nothing.
+            from sqlalchemy import select
+
+            result = db.execute(
+                select(Result).where(Result.submission_id == submission_id)
+            ).scalar_one_or_none()
             if not result:
+                logger.warning(
+                    "[notify] no Result for submission %s; review email not sent",
+                    submission_id,
+                )
                 return
             submission = db.get(Submission, submission_id)
             if not submission:
