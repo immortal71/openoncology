@@ -176,6 +176,38 @@ while being unreachable from the path that matters. VAF is now derived from
 
 Regression tests for F7, F8 and F9: `api/tests/test_vcf_ingestion_safety.py`.
 
+### F10. Sample QC was implemented, validated, and never invoked (H1, H3) — PARTIALLY FIXED
+
+`api/services/sample_qc.py` implements FFPE artefact detection, tumour purity
+estimation and coverage summary, with unit tests, and
+`scripts/validate_ffpe_detection.py` measures its sensitivity. None of that
+mattered, because **no worker or route ever called it**. A grep for
+`run_sample_qc` and `detect_ffpe_artefacts` outside the tests returns only the
+definitions themselves.
+
+So a sample with a high-confidence FFPE deamination signal produced drug
+recommendations exactly like a clean one, and the patient-facing report printed
+"QC report not provided" as its normal state.
+
+That message also named a function that does not exist,
+`sample_qc.run_qc_pipeline()`. The real entry point is `run_sample_qc()`. Anyone
+following the report's own instruction got an `AttributeError`. Corrected.
+
+`_run_sample_qc_checkpoint` now runs QC in the genomic worker and logs at the
+severity the verdict warrants, `ERROR` on FAIL. QC is advisory and never fails
+the submission, because discarding a real analysis over a quality signal is the
+wrong trade.
+
+**Still open:** the verdict does not reach the patient-facing report. There is
+no field on `Result` or `Submission` to persist it and no adapter from
+`SampleQCReport` to the dict `oncologist_report` expects. Closing it needs a
+schema migration, which is a deliberate decision rather than an incidental one.
+Until then the signal exists only in worker logs.
+
+This is the general lesson from F9 as well: a control that is implemented,
+tested and benchmarked can still be doing nothing. Validation shows a control
+works; only tracing the call path shows it runs.
+
 ---
 
 ## 3. What is not yet analysed

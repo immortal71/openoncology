@@ -65,6 +65,15 @@ def run_genomic_pipeline(
             # 3. Parse VCF and annotate mutations
             mutations_data = _parse_and_annotate_vcf(vcf_path)
 
+            # 3b. Sample QC. services/sample_qc.py implements FFPE artefact
+            # detection, tumour purity and coverage, and nothing in the pipeline
+            # had ever called it, so the control was inert: a sample with a
+            # high-confidence FFPE signal produced recommendations exactly like
+            # a clean one. This runs it and records the verdict. It does not yet
+            # reach the patient-facing report, which needs somewhere to persist
+            # it; tracked as F10 in docs/risk_analysis.md.
+            _run_sample_qc_checkpoint(vcf_path, submission_id)
+
             # 4. Upload annotated VCF back to MinIO
             vcf_s3_key = _upload_vcf_to_minio(vcf_path, patient_id, submission_id)
 
@@ -194,6 +203,43 @@ def _run_nextflow_pipeline(dna_file: str, workdir: str, cancer_type: str) -> str
             return os.path.join(output_dir, fname)
 
     raise FileNotFoundError("Annotated VCF not found after pipeline run")
+
+
+def _run_sample_qc_checkpoint(vcf_path: str, submission_id: str) -> "object | None":
+    """Run sample QC and record the verdict. Never fails the submission.
+
+    QC is advisory here. A FAIL verdict means the sample looks unreliable, most
+    often a high-confidence FFPE deamination signal, and that has to be visible
+    to whoever reads the result. Raising instead would discard a real analysis
+    over a quality signal, so this logs at the severity the verdict warrants and
+    returns the report for callers that want it.
+    """
+    try:
+        from services.sample_qc import run_sample_qc
+
+        report = run_sample_qc(vcf_path)
+    except Exception as exc:  # QC must never take down the analysis
+        logger.warning("[genomic] sample QC did not run for %s: %s", submission_id, exc)
+        return None
+
+    detail = (
+        f"verdict={report.verdict} ffpe_score={report.ffpe.ffpe_score} "
+        f"ffpe_flagged={report.ffpe.is_flagged} variants={report.total_variants}"
+    )
+    if report.verdict == "FAIL":
+        logger.error(
+            "[genomic] sample QC FAILED for submission %s (%s); reasons: %s",
+            submission_id, detail, "; ".join(report.verdict_reasons) or "none recorded",
+        )
+    elif report.verdict == "WARN":
+        logger.warning(
+            "[genomic] sample QC warning for submission %s (%s); reasons: %s",
+            submission_id, detail, "; ".join(report.verdict_reasons) or "none recorded",
+        )
+    else:
+        logger.info("[genomic] sample QC passed for submission %s (%s)", submission_id, detail)
+
+    return report
 
 
 # FILTER values that mean "the caller did not reject this call". Anything else

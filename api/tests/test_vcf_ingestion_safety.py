@@ -206,3 +206,45 @@ class TestExistingBehaviourIsPreserved:
     def test_truncated_lines_are_skipped(self, tmp_path):
         vcf = _write(tmp_path, "1\t100\t.\tA\n", header=_HEADER_NO_SAMPLE)
         assert _parse_and_annotate_vcf(vcf) == []
+
+
+class TestSampleQCCheckpoint:
+    """Sample QC was implemented, validated, and never invoked. See F10.
+
+    It is advisory: it must record the verdict without ever failing the
+    submission, because discarding a real analysis over a quality signal is the
+    wrong trade.
+    """
+
+    def test_qc_runs_and_returns_a_verdict(self, tmp_path, caplog):
+        from api.workers.genomic_worker import _run_sample_qc_checkpoint
+
+        body = "".join(
+            f"1\t{1000 + i * 100}\t.\tA\tG\t99\tPASS\t.\tGT:DP:AD\t0/1:200:100,100\n"
+            for i in range(20)
+        )
+        vcf = _write(tmp_path, body)
+
+        report = _run_sample_qc_checkpoint(vcf, "submission-1")
+        assert report is not None
+        assert report.verdict in {"PASS", "WARN", "FAIL"}
+
+    def test_a_missing_file_does_not_raise(self, tmp_path):
+        """QC failure must never take down a completed analysis."""
+        from api.workers.genomic_worker import _run_sample_qc_checkpoint
+
+        assert _run_sample_qc_checkpoint(str(tmp_path / "nope.vcf"), "submission-2") is None
+
+    def test_ffpe_signal_is_surfaced_in_the_verdict_path(self, tmp_path):
+        from api.workers.genomic_worker import _run_sample_qc_checkpoint
+
+        # Low-VAF C>T everywhere: the deamination signature.
+        body = "".join(
+            f"1\t{2000 + i * 100}\t.\tC\tT\t99\tPASS\t.\tGT:DP:AD\t0/1:500:490,10\n"
+            for i in range(30)
+        )
+        vcf = _write(tmp_path, body)
+
+        report = _run_sample_qc_checkpoint(vcf, "submission-3")
+        assert report is not None
+        assert report.ffpe.ffpe_score > 0
