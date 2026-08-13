@@ -163,13 +163,22 @@ jobs:
       - name: Run Alembic migrations
         run: alembic upgrade head
 
-      # Non-blocking for now: `alembic check` reports substantial pre-existing
-      # drift between the migration chain and the current SQLAlchemy models
-      # (e.g. repurposing_candidates, campaigns, submissions columns) that
-      # predates this branch and needs a dedicated reconciliation migration,
-      # not a rushed autogenerate. Tracked as follow-up work. This step still
-      # runs and logs its output for visibility.
-      - name: Detect uncommitted model changes
+      # Blocking. Checks the chain properties that do not depend on the drift
+      # below: exactly one head, exactly one root, no duplicate revision ids, no
+      # dangling down_revision. A fork breaks `alembic upgrade head` for every
+      # deployment, and the merge that causes it looks clean in review.
+      - name: Migration chain gate
+        working-directory: ${{ github.workspace }}
+        run: python scripts/check_migration_chain.py
+
+      # Non-blocking, deliberately. `alembic check` reports substantial
+      # pre-existing drift between the migration chain and the current
+      # SQLAlchemy models (repurposing_candidates, campaigns, submissions
+      # columns) that predates this branch and needs a dedicated reconciliation
+      # migration, not a rushed autogenerate. Tracked as open action 8 in
+      # docs/risk_analysis.md. Until that lands this step reports only, which is
+      # why the blocking gate above exists rather than nothing gating migrations.
+      - name: Detect uncommitted model changes (reporting only — see open action 8)
         run: alembic check
         continue-on-error: true
 
@@ -184,15 +193,20 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
-      # Coverage threshold note: the previous combined `pytest api/tests/ ai/tests/`
-      # invocation always failed at *collection* (the ai-package name clash), so
-      # this gate was never actually reached on a green run. Verified locally
-      # against a real (non-mocked) run of the full suite: 640/640 api tests +
-      # 42/42 ai tests pass with 67% combined coverage. Gate set a few points
-      # below that measured total so routine coverage drift doesn't trip CI.
+      # Coverage threshold. Re-measured 2026-08-13 against a real (non-mocked)
+      # run of the full suite: 856/856 api tests + 42/42 ai tests pass with 71%
+      # combined coverage.
+      #
+      # The gate is 69, not 63. A floor four points under the real number cannot
+      # detect a four-point regression, which made the previous gate decorative.
+      # Two points of margin are kept for one specific reason and not as general
+      # slack: the measurement above was taken on Windows, where a few optional
+      # imports (weasyprint, rdkit paths) resolve differently than on the Linux
+      # runner, so the two platforms do not report an identical total. Tighten
+      # this to the measured value once it has been confirmed on Linux.
       - name: Run backend tests (ai suite)
         working-directory: ${{ github.workspace }}
-        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=63
+        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=69
         env:
           PYTHONPATH: ${{ github.workspace }}
 
