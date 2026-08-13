@@ -2,6 +2,8 @@
 Results route — return mutation analysis report for a submission.
 """
 
+import logging
+
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +20,8 @@ from utils.http import conflict_error, not_found_error
 from middleware.rate_limit import limiter, READ_LIMIT
 
 router = APIRouter(prefix="/api/results", tags=["results"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.get("/{submission_id}", response_model=ResultsResponse)
@@ -104,6 +108,11 @@ async def get_results(
         for m in mutations
     ]
 
+    # Sections that were requested but could not be built. Empty on the normal
+    # path. A reader must be able to tell "this section has nothing to say" from
+    # "this section could not be produced".
+    generation_errors: list[str] = []
+
     # ── Patient-facing summary (template-only, always generated) ──────────
     patient_summary_sections: dict = {}
     patient_summary_text: str = ""
@@ -121,7 +130,16 @@ async def get_results(
         patient_summary_sections = ps.sections
         patient_summary_text = ps.plain_text
     except Exception:
-        pass  # never fail the response due to summary generation
+        # Still never fails the response, but no longer disappears. A bare
+        # `pass` here returned 200 with patient_summary: null, which reads
+        # identically to "we generated a summary and it was empty". That is
+        # hazard H3, a failure presented as a negative result, inside the
+        # response the patient actually reads.
+        logger.exception(
+            "[results] patient summary generation failed for submission %s",
+            submission_id,
+        )
+        generation_errors.append("patient_summary")
 
     # ── Oncologist report (generated on demand via query param) ────────────
     oncologist_report_data: dict = {}
@@ -140,7 +158,14 @@ async def get_results(
             oncologist_report_data = onc_report.sections
             oncologist_report_data["plain_text"] = onc_report.plain_text
         except Exception:
-            pass  # never fail the response due to report generation
+            # As above. A clinician who asked for the report and received
+            # oncologist_report: null could not tell an empty report from a
+            # crashed one.
+            logger.exception(
+                "[results] oncologist report generation failed for submission %s",
+                submission_id,
+            )
+            generation_errors.append("oncologist_report")
 
     from services.sample_qc import qc_payload_for_api
 
@@ -165,6 +190,9 @@ async def get_results(
         "oncologist_notes": result.oncologist_notes if result else None,
         "custom_drug_possible": custom_drug_possible,
         "custom_drug_reason": custom_drug_reason,
+        # Empty on the normal path. Names any section that was requested and
+        # could not be generated, so a null section is not read as an empty one.
+        "generation_errors": generation_errors,
         # oncologist_report: only populated when include_oncologist_report=true
         "oncologist_report": oncologist_report_data or None,
         "mutations": [

@@ -107,6 +107,84 @@ class TestPhiPrefixes:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# The prefix list vs the routes actually mounted
+# ─────────────────────────────────────────────────────────────────────────────
+
+class TestEveryMountedPhiRouteIsAudited:
+    """Catch a PHI router that was added without extending _PHI_PREFIXES.
+
+    Every test in TestPhiPrefixes asserts a positive about a prefix already in
+    the tuple, so the whole class passes just as happily when a prefix is
+    missing. That is how `/api/fhir` went unaudited: DiagnosticReport and
+    Observation export a patient's full variant profile, and neither produced a
+    phi_access record, because no test was looking at what was absent.
+
+    This walks the app's own route table instead of a hand-kept list, so a new
+    router under one of these prefixes is covered the moment it is mounted.
+    """
+
+    # Prefixes whose routes read or write patient data. Adding a router under
+    # one of these without adding it to _PHI_PREFIXES fails the test below.
+    _PHI_ROUTER_PREFIXES = (
+        "/api/submit",
+        "/api/results",
+        "/api/repurposing",
+        "/api/oncologist",
+        "/api/me",
+        "/api/marketplace",
+        "/api/fhir",
+    )
+
+    def _mounted_paths(self):
+        """Every /api/ path the app actually serves.
+
+        `app.routes` is not enough on its own: this FastAPI version wraps each
+        included router in an `_IncludedRouter` that exposes no `.path`, so a
+        flat walk of `app.routes` finds zero `/api/` entries and every assertion
+        built on it passes without testing anything. The OpenAPI schema is the
+        flattened view. Routes marked `include_in_schema=False` are absent from
+        it, so the router walk below picks those up as well.
+        """
+        from main import app
+
+        paths = set(app.openapi().get("paths", {}))
+
+        def walk(routes):
+            for route in routes:
+                path = getattr(route, "path", None)
+                if isinstance(path, str):
+                    paths.add(path)
+                inner = getattr(route, "original_router", None) or route
+                nested = getattr(inner, "routes", None)
+                if nested and inner is not route:
+                    walk(nested)
+
+        walk(app.routes)
+        return sorted(p for p in paths if p.startswith("/api/"))
+
+    def test_the_app_actually_mounts_phi_routes(self):
+        """Guard the guard: an empty walk would make the next test vacuous."""
+        assert self._mounted_paths(), "no /api/ routes found; the walk is broken"
+
+    def test_every_mounted_phi_route_is_covered_by_a_prefix(self):
+        unaudited = sorted(
+            path
+            for path in self._mounted_paths()
+            if path.startswith(self._PHI_ROUTER_PREFIXES)
+            and not any(path.startswith(p) for p in _PHI_PREFIXES)
+        )
+        assert not unaudited, (
+            "these PHI routes are mounted but produce no audit record: "
+            f"{unaudited}. Add the prefix to _PHI_PREFIXES in middleware/audit.py."
+        )
+
+    def test_fhir_export_is_audited(self):
+        """The specific gap this class was written for."""
+        assert any("/api/fhir/DiagnosticReport/x".startswith(p) for p in _PHI_PREFIXES)
+        assert any("/api/fhir/Observation/x".startswith(p) for p in _PHI_PREFIXES)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Integration tests — middleware behaviour over HTTP
 # ─────────────────────────────────────────────────────────────────────────────
 
