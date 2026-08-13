@@ -6,6 +6,17 @@ on:
     - cron: "0 2 * * 1"
   push:
     branches: [main]
+  # Until now this workflow had no pull_request trigger, so none of it ran before a
+  # merge. A dependency CVE or a new Bandit finding was caught after it had already
+  # landed on main, or up to a week later on the cron above. docs/risk_analysis.md
+  # section 7 lists dependency, SAST and image scanning as a mitigation in place,
+  # which was true of the repository and not of the review path.
+  #
+  # Only the fast jobs run on PRs. zap-scan and trivy each build a Docker image and
+  # zap-scan additionally boots Postgres, Redis and the API; both stay on push/cron
+  # so PR feedback stays quick.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -140,6 +151,10 @@ jobs:
     name: OWASP ZAP API baseline scan
     runs-on: ubuntu-latest
     needs: []   # Run independently — API starts in Docker
+    # Builds an image and boots Postgres, Redis and the API, so it is too slow for
+    # PR feedback. Stays on push to main, the weekly cron, and manual dispatch.
+    # (trivy skips on PRs already via its `github.ref` check.)
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
       issues: write          # ZAP action creates/updates a GitHub Issue with scan results

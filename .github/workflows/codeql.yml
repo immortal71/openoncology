@@ -3,8 +3,10 @@ name: CodeQL
 on:
   push:
     branches: [main]
+  # Unfiltered, so a PR based on another topic branch is analysed too. With
+  # `branches: [main]` a stacked PR got no CodeQL run, which mattered more here
+  # than elsewhere: CodeQL was the only SAST that ran before a merge at all.
   pull_request:
-    branches: [main]
   schedule:
     # Weekly, Monday 03:00 UTC (offset from the Security Scan cron at 02:00)
     - cron: "0 3 * * 1"

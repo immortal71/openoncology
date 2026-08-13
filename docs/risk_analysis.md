@@ -266,7 +266,7 @@ Verified present, not merely intended:
 | 5 | Formal risk register with likelihood and severity scoring | all | Yes |
 | 6 | Human-factors review of how the ranked list is read | all | Yes |
 | 7 | Analyse LLM summary failure modes | H5 | Yes |
-| 8 | Reconcile the Alembic/model drift so `alembic check` can gate rather than warn | — | No |
+| 8 | Restore the 19 indexes `a8bf7eb4833c` dropped, and bound the 11 unbounded VARCHAR columns | — | No |
 
 ---
 
@@ -297,12 +297,30 @@ specifically, dependency failure is **not** primarily an availability risk, it
 is the wrong-answer risk described in F4.
 
 Mitigations in place: structured PHI access logging middleware; Keycloak JWT
-auth and role extraction; Redis-backed rate limiter infrastructure; dependency,
-SAST, DAST and image scanning in CI.
+auth and role extraction; Redis-backed rate limiter infrastructure; migration
+drift gating in CI (`alembic check`, plus a revision-graph gate in
+`scripts/check_migration_chain.py`).
+
+Scanning deserves a more exact statement than "in CI", because the earlier
+wording claimed more than ran. Dependency, SAST, DAST and image scanning all
+exist in `.github/workflows/security.yml`, but until now that workflow had no
+`pull_request` trigger, so none of it ran before a merge: findings surfaced after
+the change was already on `main`, or up to a week later on the weekly cron. The
+fast jobs now run on pull requests. What each one can actually do:
+
+| Scan | Runs on PR | Can fail the build |
+|---|---|---|
+| pip-audit (Python deps) | yes | yes |
+| npm audit (frontend deps) | yes | only at `critical`; 6 HIGH advisories in a transitive `postcss` are unfixable without a breaking Next.js major |
+| Bandit (Python SAST) | yes | no, reports to the Security tab |
+| Semgrep (SAST) | yes | no, reports to the Security tab |
+| CodeQL (SAST) | yes | yes |
+| ZAP (DAST) | no, push/cron only | no, report only |
+| Trivy (image) | no, push/cron only | yes, on `main` |
 
 Open: formal risk register with per-control scoring; audit log retention and
-immutability verification in the deployment environment; migration drift checks
-in CI.
+immutability verification in the deployment environment; promoting Bandit and
+Semgrep from reporting to blocking once their current findings are triaged.
 
 ---
 
