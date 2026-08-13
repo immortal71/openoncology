@@ -196,21 +196,94 @@ def _run_nextflow_pipeline(dna_file: str, workdir: str, cancer_type: str) -> str
     raise FileNotFoundError("Annotated VCF not found after pipeline run")
 
 
-def _parse_and_annotate_vcf(vcf_path: str) -> list[dict]:
+# FILTER values that mean "the caller did not reject this call". Anything else
+# is an explicit rejection and must not reach a treatment recommendation.
+# "." and "" mean no filtering was applied rather than a failure, so they pass.
+_ACCEPTED_FILTERS = {"PASS", ".", ""}
+
+
+def _extract_vaf_and_depth(parts: list[str]) -> tuple[float | None, int | None]:
+    """Pull VAF and depth out of the FORMAT/sample columns, if present.
+
+    Without this the mutation dicts carry no allele fraction, which means the
+    FFPE artefact detector in services/sample_qc.py cannot be applied to
+    anything ingested here: a 2% deamination artefact and a clonal driver look
+    identical downstream.
+    """
+    if len(parts) < 10:
+        return None, None
+    keys = parts[8].split(":")
+    values = parts[9].split(":")
+    if len(keys) != len(values):
+        return None, None
+    field = dict(zip(keys, values))
+
+    depth = None
+    raw_depth = field.get("DP")
+    if raw_depth and raw_depth.isdigit():
+        depth = int(raw_depth)
+
+    # AF directly, when the caller emits it.
+    raw_af = field.get("AF")
+    if raw_af and raw_af not in (".", ""):
+        try:
+            return float(raw_af.split(",")[0]), depth
+        except ValueError:
+            pass
+
+    # Otherwise derive it from allelic depths.
+    raw_ad = field.get("AD")
+    if raw_ad and raw_ad not in (".", ""):
+        try:
+            counts = [int(x) for x in raw_ad.split(",") if x not in (".", "")]
+        except ValueError:
+            return None, depth
+        total = sum(counts)
+        if total > 0 and len(counts) >= 2:
+            return sum(counts[1:]) / total, depth or total
+
+    return None, depth
+
+
+def _parse_and_annotate_vcf(vcf_path: str, include_filtered: bool = False) -> list[dict]:
     """
     Parse the OpenCRAVAT-annotated VCF file.
     Returns a list of mutation dicts with gene, hgvs, clinvar, cosmic etc.
+
+    Three properties this must hold, each of which it previously did not:
+
+    * A multi-allelic site is several variants, not one. ALT "GGTTT,GTTTT" used
+      to be stored verbatim as a single alt string, which matches no evidence
+      record, so if one of the alleles was the actionable one it was lost.
+      Nothing upstream normalises: there is no bcftools norm step in
+      pipeline/. Each ALT allele is now emitted as its own mutation.
+    * A call the variant caller rejected must not silently become a
+      recommendation. FILTER was unpacked and discarded, so Mutect2's
+      weak_evidence, strand_bias and panel_of_normals calls were ingested
+      exactly like PASS calls. They are now dropped by default and the value is
+      retained either way so the decision is visible.
+    * VAF and depth are carried through, so low-allele-fraction artefacts are
+      distinguishable downstream.
     """
     mutations = []
     with open(vcf_path, "r") as f:
         for line in f:
             if line.startswith("#"):
                 continue
-            parts = line.strip().split("\t")
+            parts = line.rstrip("\n").split("\t")
             if len(parts) < 8:
                 continue
 
-            chrom, pos, vid, ref, alt, qual, filt, info = parts[:8]
+            chrom, pos, _vid, ref, alt, _qual, filt, info = parts[:8]
+
+            filter_status = (filt or "").strip()
+            passed = filter_status.upper() in {v.upper() for v in _ACCEPTED_FILTERS}
+            if not passed and not include_filtered:
+                logger.info(
+                    "[vcf] dropping %s:%s %s>%s rejected by the caller (FILTER=%s)",
+                    chrom, pos, ref, alt, filter_status,
+                )
+                continue
 
             # Parse INFO field for OpenCRAVAT annotations
             info_dict = dict(
@@ -218,17 +291,27 @@ def _parse_and_annotate_vcf(vcf_path: str) -> list[dict]:
                 for kv in info.split(";")
             )
 
-            mutations.append({
-                "chrom": chrom,
-                "pos": int(pos) if pos.isdigit() else None,
-                "ref": ref,
-                "alt": alt,
-                "gene": info_dict.get("GENE", "UNKNOWN"),
-                "hgvs": info_dict.get("HGVS_C"),
-                "mutation_type": info_dict.get("SO", "unknown"),
-                "clinvar_id": info_dict.get("CLINVAR_ID"),
-                "cosmic_id": info_dict.get("COSMIC_ID"),
-            })
+            vaf, depth = _extract_vaf_and_depth(parts)
+
+            # A multi-allelic record describes several distinct variants.
+            for allele in (a.strip() for a in alt.split(",")):
+                if not allele:
+                    continue
+                mutations.append({
+                    "chrom": chrom,
+                    "pos": int(pos) if pos.isdigit() else None,
+                    "ref": ref,
+                    "alt": allele,
+                    "gene": info_dict.get("GENE", "UNKNOWN"),
+                    "hgvs": info_dict.get("HGVS_C"),
+                    "mutation_type": info_dict.get("SO", "unknown"),
+                    "clinvar_id": info_dict.get("CLINVAR_ID"),
+                    "cosmic_id": info_dict.get("COSMIC_ID"),
+                    "filter_status": filter_status or "PASS",
+                    "filter_passed": passed,
+                    "vaf": vaf,
+                    "depth": depth,
+                })
 
     return mutations
 

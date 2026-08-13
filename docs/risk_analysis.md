@@ -133,6 +133,49 @@ target at sensitivity ≥ 99% and PPV ≥ 95% against orthogonal WGS, status
 is unbounded, because no amount of correct downstream reasoning survives a wrong
 input variant.
 
+### F7. Rejected variant calls were ingested as if they had passed (H1, H6) — FIXED
+
+`_parse_and_annotate_vcf` in `api/workers/genomic_worker.py` unpacked the VCF
+FILTER column and then discarded it. Calls the variant caller had explicitly
+rejected were ingested identically to passing calls, and nothing downstream could
+tell the difference because the value was not retained.
+
+Mutect2 emits `weak_evidence`, `strand_bias`, `base_qual` and `panel_of_normals`
+for calls it believes are artefacts or germline. Those are precisely the calls
+that must not reach a treatment recommendation. Demonstrated with a three-record
+VCF: two rejected calls and one PASS call all arrived as equal mutations.
+
+Rejected calls are now dropped, `PASS` and `.` are accepted, `include_filtered=True`
+retrieves them when a caller genuinely wants them, and the FILTER value is
+retained either way so the decision is inspectable.
+
+### F8. Multi-allelic sites were collapsed into one unusable variant (H2) — FIXED
+
+A multi-allelic record describes several distinct variants. The parser stored the
+ALT column verbatim, so `GGTTT,GTTTT` became a single mutation whose alt allele
+matches no evidence record. Found by running the parser over the Genome in a
+Bottle HG002 benchmark VCF (NIST v4.2.1, GRCh38): 46 of 8,000 real records were
+affected.
+
+Nothing upstream normalises. There is no `bcftools norm` step anywhere in
+`pipeline/`. If one of the two alleles is the actionable one, it was silently
+lost. Each ALT allele is now emitted as its own mutation.
+
+### F9. Allele fraction never reached the mutation record (H1, H3) — FIXED
+
+The parser read no FORMAT fields, so mutations carried no VAF or depth. A 2%
+cytosine-deamination artefact and a 50% clonal driver were indistinguishable
+downstream.
+
+This also made the FFPE detector inapplicable to anything this parser produced:
+`detect_ffpe_artefacts` in `api/services/sample_qc.py` keys on low-VAF
+enrichment, and the production ingestion path supplied no VAF for it to read. So
+the control existed and was validated (`scripts/validate_ffpe_detection.py`)
+while being unreachable from the path that matters. VAF is now derived from
+`AF` or from `AD` allelic depths, with depth carried alongside.
+
+Regression tests for F7, F8 and F9: `api/tests/test_vcf_ingestion_safety.py`.
+
 ---
 
 ## 3. What is not yet analysed
