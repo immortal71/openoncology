@@ -1,0 +1,2700 @@
+{
+  "description": "Sourced evidence candidates from CIViC for genes whose buckets in _LEVEL_TABLE are empty or missing. Every entry carries a citation.",
+  "warning": "NOT evidence. Nothing here has been reviewed, and CIViC's A-to-E levels are about study design while OncoKB's levels are about clinical actionability, so suggested_oncokb_level is a prompt for a reviewer rather than a conversion. Do not copy into _LEVEL_TABLE without clinical sign-off.",
+  "source": "https://civicdb.org",
+  "generated_by": "scripts/fetch_civic_curation_candidates.py",
+  "genes_targeted": [
+    "ERBB2",
+    "TERT",
+    "MGMT",
+    "STK11",
+    "DDR2",
+    "AXL",
+    "CCNE1",
+    "FGFR4",
+    "MDM2",
+    "PTCH1",
+    "VHL"
+  ],
+  "candidates_by_gene": {
+    "CCNE1": 6,
+    "DDR2": 7,
+    "ERBB2": 146,
+    "MDM2": 1,
+    "MGMT": 9,
+    "PTCH1": 3,
+    "STK11": 9,
+    "VHL": 5
+  },
+  "n_candidates": 186,
+  "candidates": [
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Underexpression",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Palbociclib",
+        "Fulvestrant"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:30807234",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Amplification",
+      "disease": "Ovarian Serous Cystadenocarcinoma",
+      "therapies": [
+        "Dinaciclib",
+        "Akt Inhibitor MK2206"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:27663592",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Amplification",
+      "disease": "Estrogen Receptor-positive Breast Cancer",
+      "therapies": [
+        "Palbociclib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:27020857",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Amplification",
+      "disease": "Ovarian Carcinoma",
+      "therapies": [
+        "Lunresertib",
+        "Camonsertib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40169546",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Amplification",
+      "disease": "Endometrial Carcinoma",
+      "therapies": [
+        "Lunresertib",
+        "Camonsertib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40169546",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "CCNE1",
+      "molecular_profile": "CCNE1 Overexpression",
+      "disease": "Ovarian Cancer",
+      "therapies": [
+        "CDK Inhibitor SNS-032"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26204491",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 S768R",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib",
+        "Erlotinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 G505S",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 G774V",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 I638F",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 L239R",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 L63V",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "DDR2",
+      "molecular_profile": "DDR2 G253C",
+      "disease": "Cancer",
+      "therapies": [
+        "Dasatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22328973",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Margetuximab"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:33480963",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Solid Tumor",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37870536",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Neratinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26874901",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:16236737",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Gastric Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20728210",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G776delinsVC",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Exon 20 Insertion",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Zongertinib"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40293180",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755P OR ERBB2 G776V OR ERBB2 G776delinsVC OR ERBB2 P780_Y781insGSP",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Zongertinib"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40293180",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 A775_G776insYVMA ",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Zongertinib"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40293180",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775dup OR ERBB2 G778_P780dup OR ERBB2 G776delinsVC OR ERBB2 V659E OR ERBB2 S310F OR ERBB2 G776delinsLC",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Sevabertinib"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:41104928",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 S310F",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755A",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_P780dup",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755M",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755P",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 A775_G776insTVMA",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 A775_G776insV",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 A775_G776insVVMA",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G776_V777delinsVCD",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G776delinsLC",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_S779insLPS",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Kinase Domain Mutation OR ERBB2 Exon 20 Insertion",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Sevabertinib"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:41104928",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:11248153",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:15911866",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab",
+        "Docetaxel"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25693012",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Exon 20 Insertion",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:34534430",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 SERUM LEVELS",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26811533",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22493419",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26255196",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20124187",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26822398",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Gastric Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20728210",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Lapatinib",
+        "Capecitabine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:17192538",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Capecitabine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19289619",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:24793816",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23020162",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab",
+        "Docetaxel"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22149875",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22257673",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22586653",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22586653",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:27108243",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:21172893",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:28526536",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:28679771",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Pancreatic Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Capecitabine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22374460",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Pancreatic Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Gemcitabine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:15581051",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Pertuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20142587",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22418700",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26596672",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Afatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25370464",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Gastric Adenocarcinoma",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:24868024",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:14967075",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23382472",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dacomitinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25899785",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:28223103",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Bladder Carcinoma",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:30857956",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Stomach Cancer",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:31047804",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:36315917",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation OR ERBB3 Mutation",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:36315917",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Activating Mutation",
+      "disease": "Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:35939768",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Afatinib",
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25537159",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:14679114",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Endometrial Cancer",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19840887",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab",
+        "Panitumumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:23348520",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dacomitinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25899785",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab",
+        "Pertuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Biliary Tract Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Salivary Gland Carcinoma",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Pancreatic Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Uterine Cancer",
+      "therapies": [
+        "Pertuzumab",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G292R",
+      "disease": "Urinary Bladder Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29420467",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab",
+        "Oxaliplatin",
+        "Capecitabine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:24146218",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Childhood Ependymoma",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20713864",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Kinase Domain Mutation",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26598547",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab",
+        "Irinotecan"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25601188",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26559459",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Endometrial Serous Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:18555254",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Kinase Domain Mutation",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22325357",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_P780dup",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Dacomitinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25899785",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25789838",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Mutation",
+      "disease": "Bladder Carcinoma",
+      "therapies": [
+        "Platinum Compound"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25636205",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22325357",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G776L",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22325357",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_P780dup",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22325357",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_P780dup",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dacomitinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25899785",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 M774DELINSWLV",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Dacomitinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25899785",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Colorectal Adenocarcinoma",
+      "therapies": [
+        "Trastuzumab",
+        "Leucovorin",
+        "Fluorouracil"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:27626067",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Salivary Gland Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Zoledronic Acid",
+        "Capecitabine"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20504363",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Cholangiocarcinoma",
+      "therapies": [
+        "Trastuzumab",
+        "Pertuzumab"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:31453370",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 D769Y",
+      "disease": "Extramammary Paget Disease",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:35939768",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Scrotum Paget's Disease",
+      "therapies": [
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25692060",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Head And Neck Squamous Cell Carcinoma",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:28061634",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Overexpression",
+      "disease": "Salivary Gland Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Paclitaxel"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23826550",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 S310F",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:35939768",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G776delinsCV",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Deruxtecan"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:37694347",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Gefitinib",
+        "Erlotinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:23470965",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 D769Y",
+      "disease": "Peritoneal Carcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:35939768",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V777L",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:35939768",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G309A",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755W",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 R678Q",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 R896C",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V777L",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V842I",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 D769H",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 D769Y",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 G778_P780dup",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Carcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19122144",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Trastuzumab Emtansine"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:24898067",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V842I",
+      "disease": "Colon Cancer",
+      "therapies": [
+        "Neratinib",
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Colon Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Neratinib",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V777L",
+      "disease": "Colon Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Neratinib",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L866M",
+      "disease": "Colon Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Lapatinib",
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 S310F/Y",
+      "disease": "Colon Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Neratinib",
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Pilaralisib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23204226",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "AKTi-1/2"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:18725974",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Y772_A775DUP",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Afatinib",
+        "Sirolimus"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19122144",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Lapatinib",
+        "Trastuzumab"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:16091755",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Pictilisib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22802530",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Tgx 221"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22802530",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Pictilisib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:20453058",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V777L",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Cetuximab"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:26243863",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 T798I",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Osimertinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:28274957",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Colorectal Cancer",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26296355",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755_T759del",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "Neratinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23220880",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Uterine Corpus Endometrial Carcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25268372",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Pancreatic Adenocarcinoma",
+      "therapies": [
+        "Afatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26668065",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "A66"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22802530",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "HER2 Positive Breast Cancer",
+      "therapies": [
+        "Trastuzumab",
+        "Palbociclib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19874578",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 Amplification",
+      "disease": "Breast Cancer",
+      "therapies": [
+        "MTOR Kinase Inhibitor PP242"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:21358673",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V773A",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 N857S",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 H878Y",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755S",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 L755P",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 T798M",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 V777L",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "ERBB2",
+      "molecular_profile": "ERBB2 T862A",
+      "disease": "Cancer",
+      "therapies": [
+        "Lapatinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:22046346",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MDM2",
+      "molecular_profile": "MDM2 EXPRESSION",
+      "disease": "Malignant Pleural Mesothelioma",
+      "therapies": [
+        "Pemetrexed",
+        "Cisplatin"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:25668009",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Promoter Methylation",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "A",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:15758010",
+      "suggested_oncokb_level": "LEVEL_1 candidate (validated association)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Promoter Methylation",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "Carmustine"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:11070098",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT RS16906252",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:25910840",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Underexpression",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:17442989",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Underexpression",
+      "disease": "High Grade Glioma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:21365007",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Underexpression",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:21331613",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Underexpression",
+      "disease": "Oligodendroglioma",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:16541434",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Underexpression",
+      "disease": "Neuroendocrine Tumor",
+      "therapies": [
+        "Temozolomide"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19118063",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "MGMT",
+      "molecular_profile": "MGMT Promoter Methylation",
+      "disease": "Glioblastoma",
+      "therapies": [
+        "O6-Benzylguanine"
+      ],
+      "civic_evidence_level": "E",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:11070098",
+      "suggested_oncokb_level": "inferential, likely not actionable",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "PTCH1",
+      "molecular_profile": "PTCH1 Mutation",
+      "disease": "Medulloblastoma",
+      "therapies": [
+        "Sonidegib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:24651015",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "PTCH1",
+      "molecular_profile": "PTCH1 LOH",
+      "disease": "Medulloblastoma",
+      "therapies": [
+        "Vismodegib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26169613",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "PTCH1",
+      "molecular_profile": "PTCH1 Mutation",
+      "disease": "Cancer",
+      "therapies": [
+        "Vismodegib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:29320312",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Mutation",
+      "disease": "Lung Adenocarcinoma",
+      "therapies": [
+        "Nivolumab",
+        "Pembrolizumab",
+        "Atezolizumab"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:29773717",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Mutation",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Vistusertib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:40069402",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 D194E",
+      "disease": "Pancreatic Cancer",
+      "therapies": [
+        "Everolimus"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:21189378",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Loss",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Docetaxel",
+        "Selumetinib"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "RESISTANCE",
+      "citation": "PUBMED:22425996",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Loss",
+      "disease": "Lung Non-small Cell Carcinoma",
+      "therapies": [
+        "Everolimus",
+        "Sirolimus"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26027660",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Underexpression",
+      "disease": "Prostate Cancer",
+      "therapies": [
+        "SB202190"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26391455",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Loss",
+      "disease": "Pancreatic Ductal Adenocarcinoma",
+      "therapies": [
+        "Roflumilast"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:38461159",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Loss",
+      "disease": "Peutz-Jeghers Syndrome",
+      "therapies": [
+        "Sirolimus"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:18281551",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "STK11",
+      "molecular_profile": "STK11 Loss",
+      "disease": "Peutz-Jeghers Syndrome",
+      "therapies": [
+        "Sirolimus"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:19541609",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "VHL",
+      "molecular_profile": "VHL Mutation",
+      "disease": "Renal Cell Carcinoma",
+      "therapies": [
+        "Anti-VEGF Monoclonal Antibody"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:28103578",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "VHL",
+      "molecular_profile": "VHL Mutation",
+      "disease": "Renal Cell Carcinoma",
+      "therapies": [
+        "Everolimus"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:26951309",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "VHL",
+      "molecular_profile": "VHL Mutation",
+      "disease": "Renal Cell Carcinoma",
+      "therapies": [
+        "Pazopanib"
+      ],
+      "civic_evidence_level": "B",
+      "evidence_direction": "DOES_NOT_SUPPORT",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:23881929",
+      "suggested_oncokb_level": "LEVEL_2 candidate (clinical evidence)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "VHL",
+      "molecular_profile": "VHL R200W (c.598C>T)",
+      "disease": "Chuvash Polycythemia",
+      "therapies": [
+        "Ruxolitinib"
+      ],
+      "civic_evidence_level": "C",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:27518686",
+      "suggested_oncokb_level": "LEVEL_3B candidate (case study)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    },
+    {
+      "gene": "VHL",
+      "molecular_profile": "VHL Loss",
+      "disease": "Renal Carcinoma",
+      "therapies": [
+        "Temsirolimus"
+      ],
+      "civic_evidence_level": "D",
+      "evidence_direction": "SUPPORTS",
+      "significance": "SENSITIVITYRESPONSE",
+      "citation": "PUBMED:16341243",
+      "suggested_oncokb_level": "LEVEL_4 candidate (preclinical)",
+      "review_status": "PENDING_CLINICAL_REVIEW"
+    }
+  ]
+}
