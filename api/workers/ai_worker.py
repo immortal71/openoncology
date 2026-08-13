@@ -79,16 +79,43 @@ def run_ai_analysis(
                         mutation.classification = MutationClassification.uncertain
 
             # Step 2: OncoKB actionability
+            #
+            # A failed lookup is recorded, not swallowed. Without this, an
+            # unreachable OncoKB (no token, network error, rate limit) produces
+            # a report identical to one where the variant genuinely has no
+            # actionable evidence, and a false negative reads as a true
+            # negative to whoever opens it.
             targetable_mutations = []
+            resistance_by_mutation: dict[int, OncoKBLevel] = {}
+            oncokb_lookup_failures: list[str] = []
             for mutation in mutations:
                 oncokb_data = _query_oncokb(mutation.gene, mutation.hgvs_notation)
-                if oncokb_data:
-                    mutation.oncokb_level = oncokb_data.get("level", OncoKBLevel.unknown)
-                    if mutation.oncokb_level in (
-                        OncoKBLevel.level_1, OncoKBLevel.level_2, OncoKBLevel.level_3a
-                    ):
-                        mutation.is_targetable = True
-                        targetable_mutations.append(mutation)
+                if not oncokb_data:
+                    oncokb_lookup_failures.append(mutation.gene)
+                    continue
+
+                mutation.oncokb_level = oncokb_data.get("level", OncoKBLevel.unknown)
+
+                # Kept separately: a variant can carry a sensitive level for one
+                # drug and a resistance level for another, and oncokb_level only
+                # has room for one of them.
+                resistance = oncokb_data.get("resistance_level")
+                if resistance in (OncoKBLevel.r1, OncoKBLevel.r2):
+                    resistance_by_mutation[id(mutation)] = resistance
+
+                if mutation.oncokb_level in (
+                    OncoKBLevel.level_1, OncoKBLevel.level_2, OncoKBLevel.level_3a
+                ):
+                    mutation.is_targetable = True
+                    targetable_mutations.append(mutation)
+
+            if oncokb_lookup_failures:
+                logger.warning(
+                    "[oncokb] lookup unavailable for %d variant(s): %s; "
+                    "absence of actionable evidence is NOT established for these",
+                    len(oncokb_lookup_failures),
+                    ", ".join(sorted(set(oncokb_lookup_failures))),
+                )
 
             db.commit()
 
@@ -144,15 +171,20 @@ def run_ai_analysis(
                     top_mutation.oncokb_level.value if hasattr(top_mutation, "oncokb_level") else None
                 )
 
+            # Resistance must reach the ranker. Comparing against "LEVEL_R1"
+            # here never matched, because the enum stores "R1", so this was
+            # dead code and rank_candidates was always called with no
+            # resistance context. Compare enum to enum instead.
             resistance_context = None
-            top_level = (
-                top_mutation.oncokb_level.value if getattr(top_mutation, "oncokb_level", None) else None
-            )
-            if top_level in ("LEVEL_R1", "LEVEL_R2"):
+            top_level = getattr(top_mutation, "oncokb_level", None)
+            resistance_level = resistance_by_mutation.get(id(top_mutation))
+            if top_level in (OncoKBLevel.r1, OncoKBLevel.r2):
+                resistance_level = top_level
+            if resistance_level in (OncoKBLevel.r1, OncoKBLevel.r2):
                 resistance_context = {
                     "gene": target_gene,
                     "variant": top_variant,
-                    "level": top_level,
+                    "level": f"LEVEL_{resistance_level.value}",
                 }
 
             # Step 4b: Immunotherapy biomarkers (TMB, MSI-H, HRD, POLE)
@@ -646,13 +678,44 @@ def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
         )
         resp.raise_for_status()
         data = resp.json()
+        sensitive = data.get("highestSensitiveLevel")
+        resistance = data.get("highestResistanceLevel")
         return {
-            "level": data.get("highestSensitiveLevel", "unknown"),
+            "level": _to_oncokb_level(sensitive or resistance),
+            "sensitive_level": _to_oncokb_level(sensitive),
+            "resistance_level": _to_oncokb_level(resistance),
             "treatments": _extract_oncokb_treatment_names(data.get("treatments") or []),
+            "lookup_ok": True,
         }
     except Exception as exc:
         logger.warning(f"[oncokb] Query failed: {exc}")
         return None
+
+
+def _to_oncokb_level(raw: object) -> "OncoKBLevel":
+    """Map OncoKB's wire format onto the OncoKBLevel enum.
+
+    The API answers with "LEVEL_1" / "LEVEL_R1"; the enum stores "1" / "R1".
+    Assigning the wire string straight onto Mutation.oncokb_level fails, and
+    every downstream comparison against an enum member silently evaluates
+    False, which is how targetability and resistance both stopped working on
+    this path. Anything unrecognised becomes `unknown` rather than raising,
+    because a level we cannot parse must not be read as actionable.
+    """
+    from models.mutation import OncoKBLevel
+
+    if isinstance(raw, OncoKBLevel):
+        return raw
+    text = str(raw or "").strip().upper()
+    if not text:
+        return OncoKBLevel.unknown
+    if text.startswith("LEVEL_"):
+        text = text[len("LEVEL_"):]
+    try:
+        return OncoKBLevel(text)
+    except ValueError:
+        logger.warning("[oncokb] unrecognised level %r; treating as unknown", raw)
+        return OncoKBLevel.unknown
 
 
 def _extract_oncokb_treatment_names(treatments: object) -> list[str]:
