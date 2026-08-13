@@ -151,6 +151,14 @@ async def get_results(
         # The QC verdict stopped at the rendered report until now, so no API
         # consumer could tell a clean sample from a flagged one.
         "sample_qc": qc_payload_for_api(submission.sample_qc),
+        # Stamped when the result was produced, not read now — the evidence table
+        # can be refreshed in between. Absent means "not recorded", never "current".
+        "evidence_provenance": (
+            (result.evidence_provenance if result else None)
+            or {"path": "not_recorded", "is_current": False,
+                "caveat": "This result predates evidence provenance capture; "
+                          "the age and source of the evidence behind it are unknown."}
+        ),
         "has_targetable_mutation": result.has_targetable_mutation if result else False,
         "target_gene": result.target_gene if result else None,
         "summary": result.summary_text if result else None,

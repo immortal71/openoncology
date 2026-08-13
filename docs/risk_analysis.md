@@ -88,11 +88,21 @@ actionable evidence"* from *"we could not determine whether it does"*. These are
 clinically opposite statements.
 
 Now logged explicitly with the affected genes and the warning that absence of
-evidence is not established. **Still open:** the distinction is not carried into
-the API response or the report a reader sees. That requires a schema field and
-a UI change, and `web/` is out of scope for this change.
+evidence is not established.
 
-### F4. Evidence-base provenance is not retained or surfaced (H4) — OPEN
+The failure state is now also carried out of the service. When the live lookup
+fails, `get_all_drugs_for_variant_live_with_metadata` returns an
+`evidence_provenance` block whose `is_current` is `False` alongside the drug
+levels, so a caller receives the answer and the reason to distrust it in the
+same object rather than having to infer one from a log line.
+
+**Still open:** the distinction is carried per-result, not per-variant. A report
+can state that the evidence base was degraded when it was produced, but not yet
+that *this specific gene* was the one whose lookup failed. That needs a
+per-mutation field, which is a schema change to `mutations` rather than to the
+response envelope.
+
+### F4. Evidence-base provenance is not retained or surfaced (H4) — FIXED
 
 `api/services/oncokb_evidence.py:1494-1513` resolves the actionability table
 through one of three paths and records which one only as a log line:
@@ -112,9 +122,31 @@ This is live, not theoretical: during benchmark runs on 2026-08-13 every OncoKB
 public dump URL returned `401 Unauthorized` and the service fell back to the
 static table on every invocation. Recommendations were produced normally.
 
-**Recommended fix:** retain the bootstrap path and cache timestamp as module
-state, return them in the evidence metadata, and propagate to the API response
-so a report can state which evidence snapshot produced it.
+**Fixed.** The resolved path and cache timestamp are retained as module state by
+`_record_evidence_provenance`, exposed by `get_evidence_provenance()`, and
+returned in the evidence metadata from every return path of
+`get_all_drugs_for_variant_live_with_metadata`. The static-fallback branch now
+logs at `WARNING` rather than `INFO`, with the reason it matters, so the
+degraded state is visible in ordinary log review instead of being one `INFO`
+line among thousands.
+
+Provenance is stamped onto the result at the moment the recommendation is
+produced (`results.evidence_provenance`, migration `0012`), not read at request
+time. The table can be refreshed between producing a result and reading it, and
+the question a reader is asking is which snapshot produced *this* recommendation.
+
+The API response carries `evidence_provenance` unconditionally. It defaults to
+`path="not_recorded"` with `is_current=False`, so a result predating this reads
+as provenance-unknown rather than being retroactively claimed to have used
+current evidence — the same asymmetry the QC column uses. `is_current` is
+`False` for exactly one path, `static_fallback`, which is the undated built-in
+table.
+
+**Still open:** nothing yet *refuses* to answer from the static table, and
+nothing alerts on a sustained fallback. The state is now reportable, not
+prevented. Whether a degraded evidence base should block recommendation output
+entirely is a policy decision, not a code one, and belongs with the risk
+register in open action 5.
 
 ### F5. Concordance benchmark was circular (H5) — FIXED
 
@@ -252,9 +284,14 @@ Verified present, not merely intended:
   (`scripts/detect_label_circularity.py`, exits non-zero).
 - Unparseable OncoKB levels resolve to `unknown` rather than raising or being
   read as actionable (fail-safe direction).
-- Sample QC verdict returned to API callers as well as to the rendered report
-  (`submissions.sample_qc`, `ResultsResponse.sample_qc`), with "not assessed"
-  rendered distinctly from "passed" in `web/components/SampleQCCard.tsx`.
+- Evidence provenance retained and stamped onto each result
+  (`api/services/oncokb_evidence.py:get_evidence_provenance`,
+  `results.evidence_provenance`), with the degraded static-fallback path logged
+  at `WARNING`.
+- Sample QC verdict returned to API callers as well as to the
+  rendered report (`submissions.sample_qc`, `ResultsResponse.sample_qc`), with
+  "not assessed" rendered distinctly from "passed" in
+  `web/components/SampleQCCard.tsx`.
 - The genomic worker's QC call path is pinned by an integration test that drives
   `run_genomic_pipeline` and asserts on the persisted row
   (`api/tests/test_genomic_worker_qc_persistence.py`), so a control that stops
@@ -267,9 +304,9 @@ Verified present, not merely intended:
 | # | Action | Hazard | Blocking clinical use? |
 |---|---|---|---|
 | 1 | Measure variant calling accuracy against a public truth set | H6 | Yes |
-| 2 | Surface evidence provenance and snapshot age to the caller (F4) | H4 | Yes |
-| 3 | Carry lookup-failure state into the API response and report (F3) | H3 | Yes |
-| 4 | Quantify recommendation error rate against a biomarker-driven answer key | H5 | Yes |
+| 2 | Quantify recommendation error rate against a biomarker-driven answer key | H5 | Yes |
+| 3 | Carry lookup-failure state per *variant*, not only per result (F3 remainder) | H3 | Yes |
+| 4 | Decide whether a degraded evidence base should block output at all (F4 remainder) | H4 | Yes |
 | 5 | Formal risk register with likelihood and severity scoring | all | Yes |
 | 6 | Human-factors review of how the ranked list is read | all | Yes |
 | 7 | Analyse LLM summary failure modes | H5 | Yes |

@@ -57,6 +57,113 @@ _ONCOKB_PUBLIC_DUMP_FALLBACK_URL = "https://www.oncokb.org/dataAccess"
 _ONCOKB_PUBLIC_TIMEOUT = 10.0
 _ONCOKB_CACHE_MAX_AGE_DAYS = 7
 
+# ── Evidence provenance (risk_analysis.md F4) ─────────────────────────────────
+# Which table answered, and how old it is. This used to exist only as a log
+# line, so a recommendation built from the undated hardcoded table was
+# indistinguishable from one built against a current OncoKB dump. That is not
+# hypothetical: on 2026-08-13 every public dump URL returned 401 and the service
+# served static_fallback on every call while producing recommendations normally.
+#
+# "static_fallback" is the degraded state. It carries no version and no date, so
+# anything derived from it must say so rather than being presented as current.
+PROVENANCE_FRESH_CACHE = "fresh_cache"
+PROVENANCE_DOWNLOAD = "download"
+PROVENANCE_STATIC_FALLBACK = "static_fallback"
+# The live per-variant OncoKB API answered for this specific lookup. Recorded
+# per-call rather than in module state, because it says nothing about the table.
+PROVENANCE_LIVE_API = "live_api"
+
+_PROVENANCE_CAVEATS: dict[str, str] = {
+    PROVENANCE_DOWNLOAD: "",
+    PROVENANCE_FRESH_CACHE: "",
+    PROVENANCE_LIVE_API: "",
+    PROVENANCE_STATIC_FALLBACK: (
+        "Evidence served from the built-in static table, which carries no version "
+        "and no release date. The OncoKB public dump could not be reached, so this "
+        "result may not reflect current actionability."
+    ),
+}
+
+# The only paths that may be reported as current evidence. Anything else,
+# including a path added later and not listed here, reads as not current.
+_CURRENT_EVIDENCE_PATHS = frozenset(
+    {PROVENANCE_DOWNLOAD, PROVENANCE_FRESH_CACHE, PROVENANCE_LIVE_API}
+)
+
+_EVIDENCE_PROVENANCE: dict[str, object] = {
+    "path": PROVENANCE_STATIC_FALLBACK,
+    "resolved_at": None,
+    "snapshot_date": None,
+    "age_days": None,
+}
+
+
+def _record_evidence_provenance(path: str, cache_path: Optional[Path] = None) -> None:
+    """Retain which table answered, so callers can report it (F4)."""
+    snapshot: Optional[str] = None
+    age_days: Optional[float] = None
+    if cache_path is not None:
+        try:
+            modified = datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc)
+            snapshot = modified.isoformat()
+            age_days = round((datetime.now(timezone.utc) - modified).total_seconds() / 86400.0, 2)
+        except Exception:
+            pass
+    elif path == PROVENANCE_DOWNLOAD:
+        snapshot = datetime.now(timezone.utc).isoformat()
+        age_days = 0.0
+
+    _EVIDENCE_PROVENANCE.update(
+        {
+            "path": path,
+            "resolved_at": datetime.now(timezone.utc).isoformat(),
+            "snapshot_date": snapshot,
+            "age_days": age_days,
+        }
+    )
+
+
+def get_evidence_provenance() -> dict[str, object]:
+    """Where the actionability table came from, and whether that is a problem.
+
+    ``is_current`` is False whenever the answer came from the undated static
+    table. A caller that shows recommendations should show this alongside them:
+    "we could not check current evidence" and "current evidence says nothing"
+    are clinically opposite statements.
+    """
+    path = str(_EVIDENCE_PROVENANCE.get("path") or PROVENANCE_STATIC_FALLBACK)
+    # Whitelist, not blacklist. A path this function does not recognise must
+    # read as "not current": under-claiming currency is safe, over-claiming it
+    # is the hazard. An `is_current = path != static_fallback` test would have
+    # silently promoted every future path to current.
+    caveat = _PROVENANCE_CAVEATS.get(path, _PROVENANCE_CAVEATS[PROVENANCE_STATIC_FALLBACK])
+    return {
+        "path": path,
+        "is_current": path in _CURRENT_EVIDENCE_PATHS,
+        "snapshot_date": _EVIDENCE_PROVENANCE.get("snapshot_date"),
+        "age_days": _EVIDENCE_PROVENANCE.get("age_days"),
+        "resolved_at": _EVIDENCE_PROVENANCE.get("resolved_at"),
+        "max_cache_age_days": _ONCOKB_CACHE_MAX_AGE_DAYS,
+        "caveat": caveat,
+    }
+
+
+def _live_api_provenance() -> dict[str, object]:
+    """Provenance for a lookup the live OncoKB API answered directly.
+
+    The static table is still merged in as a resistance safety floor, so the
+    table's own provenance is kept alongside under ``table_path``.
+    """
+    table = get_evidence_provenance()
+    return {
+        **table,
+        "path": PROVENANCE_LIVE_API,
+        "is_current": True,
+        "caveat": "",
+        "table_path": table["path"],
+        "resolved_at": datetime.now(timezone.utc).isoformat(),
+    }
+
 
 def get_oncokb_cache_path() -> Path:
     return Path(__file__).resolve().parents[1] / "static" / "oncokb_actionable_variants_cache.txt"
@@ -1501,6 +1608,7 @@ def _bootstrap_oncokb_public_table() -> None:
         if cached:
             logger.info("[OncoKB] bootstrap path=fresh_cache")
             _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return
 
     downloaded, raw_tsv_text = _download_public_oncokb_table()
@@ -1508,9 +1616,17 @@ def _bootstrap_oncokb_public_table() -> None:
         logger.info("[OncoKB] bootstrap path=download")
         _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
         _write_public_table_cache(raw_tsv_text, cache_path)
+        _record_evidence_provenance(PROVENANCE_DOWNLOAD)
         return
 
-    logger.info("[OncoKB] bootstrap path=static_fallback")
+    # Degraded: undated hardcoded table. Warn, not info — this is the state in
+    # which recommendations are produced from evidence of unknown age (F4).
+    logger.warning(
+        "[OncoKB] bootstrap path=static_fallback — the public dump was unreachable, "
+        "so actionability comes from the built-in table, which has no version or date. "
+        "Recommendations produced now must be reported as such."
+    )
+    _record_evidence_provenance(PROVENANCE_STATIC_FALLBACK)
 
 
 def load_oncokb_flat_file() -> None:
@@ -1531,6 +1647,7 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
         cached = _load_public_table_from_cache(cache_path)
         if cached:
             _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return len(_LEVEL_TABLE)
         logger.info("[OncoKB] ensure fresh cache unreadable; will download")
 
@@ -1539,13 +1656,16 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
     if downloaded:
         _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
         _write_public_table_cache(raw_tsv_text, cache_path)
+        _record_evidence_provenance(PROVENANCE_DOWNLOAD)
         return len(_LEVEL_TABLE)
 
-    logger.info(
-        "[OncoKB] ensure path=static_fallback (table_size=%d, min_entries=%d)",
+    logger.warning(
+        "[OncoKB] ensure path=static_fallback (table_size=%d, min_entries=%d) — "
+        "undated built-in table; any result derived from it must say so",
         len(_LEVEL_TABLE),
         int(min_entries),
     )
+    _record_evidence_provenance(PROVENANCE_STATIC_FALLBACK)
     return len(_LEVEL_TABLE)
 
 
@@ -3399,6 +3519,9 @@ def get_all_drugs_for_variant_live_with_metadata(
             "gene_fallback_drugs": sorted(fallback),
             "known_actionable_gene": bool(static_meta.get("known_actionable_gene")),
             "alphamissense_score": static_meta.get("alphamissense_score"),
+            # No token configured: this answer came from the table, whatever the
+            # table currently is. F4 — the caller has to be able to say so.
+            "evidence_provenance": get_evidence_provenance(),
         }
 
     try:
@@ -3437,6 +3560,9 @@ def get_all_drugs_for_variant_live_with_metadata(
             "gene_fallback_drugs": sorted(fallback_drugs),
             "known_actionable_gene": _has_l1_or_l2_actionable_entry(_normalise_gene(gene)),
             "alphamissense_score": _coerce_float(alphamissense_score),
+            # The live lookup failed. This is F3 territory as well as F4: the
+            # answer is the table's, and the caller must not read it as current.
+            "evidence_provenance": get_evidence_provenance(),
         }
 
     merged_levels, fallback_drugs = _merge_live_with_static_safety_and_meta(live_drugs)
@@ -3445,6 +3571,7 @@ def get_all_drugs_for_variant_live_with_metadata(
         "gene_fallback_drugs": sorted(fallback_drugs),
         "known_actionable_gene": _has_l1_or_l2_actionable_entry(_normalise_gene(gene)),
         "alphamissense_score": _coerce_float(alphamissense_score),
+        "evidence_provenance": _live_api_provenance(),
     }
 
 
