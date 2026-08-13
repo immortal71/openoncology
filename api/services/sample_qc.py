@@ -503,3 +503,42 @@ def enrich_qc_with_tmb_msi(report: SampleQCReport, mutations: list[dict]) -> Sam
         tmb_msi.immunotherapy_relevant,
     )
     return report
+
+
+def sample_qc_to_report_dict(report: SampleQCReport) -> dict:
+    """Flatten a SampleQCReport onto the keys the oncologist report reads.
+
+    ``oncologist_report._format_qc`` expects a flat dict. Nothing produced one,
+    so the report's Sample & Quality section printed "QC report not provided"
+    as its normal state rather than as an exception, even on samples where QC
+    had flagged a problem. This is the adapter between the two halves.
+
+    Keys are exactly those ``_format_qc`` reads. Missing values stay ``None``
+    rather than being defaulted to something reassuring: "not measured" and
+    "measured and fine" must not render identically.
+    """
+    warnings: list[str] = list(report.verdict_reasons or [])
+    if report.ffpe.is_flagged and report.ffpe.recommendation:
+        warnings.append(report.ffpe.recommendation)
+    if report.coverage.coverage_adequacy in ("LOW", "VERY_LOW"):
+        warnings.append(
+            f"Coverage {report.coverage.coverage_adequacy.lower().replace('_', ' ')}: "
+            f"{report.coverage.fraction_below_30x:.0%} of variants below 30x"
+        )
+
+    return {
+        "qc_verdict": report.verdict,
+        "tumour_purity_estimate": report.tumour_purity.purity_pct,
+        "ffpe_artefact_rate": report.ffpe.ct_fraction,
+        "ffpe_suspected": bool(report.ffpe.is_flagged),
+        "ti_tv_ratio": report.ffpe.titv_ratio,
+        "median_vaf": report.tumour_purity.vaf_peak,
+        "total_variants": report.total_variants,
+        "pass_variants": report.pass_variants,
+        "mean_depth": report.coverage.mean_depth,
+        "warnings": warnings,
+        # Kept for auditing: the score behind the flag, not just the flag.
+        "ffpe_score": report.ffpe.ffpe_score,
+        "ffpe_confidence": report.ffpe.confidence,
+        "coverage_adequacy": report.coverage.coverage_adequacy,
+    }

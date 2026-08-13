@@ -176,7 +176,7 @@ while being unreachable from the path that matters. VAF is now derived from
 
 Regression tests for F7, F8 and F9: `api/tests/test_vcf_ingestion_safety.py`.
 
-### F10. Sample QC was implemented, validated, and never invoked (H1, H3) — PARTIALLY FIXED
+### F10. Sample QC was implemented, validated, and never invoked (H1, H3) — FIXED
 
 `api/services/sample_qc.py` implements FFPE artefact detection, tumour purity
 estimation and coverage summary, with unit tests, and
@@ -198,11 +198,14 @@ severity the verdict warrants, `ERROR` on FAIL. QC is advisory and never fails
 the submission, because discarding a real analysis over a quality signal is the
 wrong trade.
 
-**Still open:** the verdict does not reach the patient-facing report. There is
-no field on `Result` or `Submission` to persist it and no adapter from
-`SampleQCReport` to the dict `oncologist_report` expects. Closing it needs a
-schema migration, which is a deliberate decision rather than an incidental one.
-Until then the signal exists only in worker logs.
+The verdict now reaches the report. `submissions.sample_qc` (migration `0011`)
+persists it, `sample_qc_to_report_dict()` maps `SampleQCReport` onto the exact
+keys `oncologist_report._format_qc` reads, and both report call sites in
+`api/routes/results.py` pass it through. The column is nullable, so submissions
+processed before this keep reading as "not assessed" rather than being
+retroactively claimed to have passed: absence of a verdict and a passing verdict
+must not render alike. `_format_qc({})` returns `qc_verdict="UNKNOWN"` with every
+measurement `None`, which is the property the tests pin.
 
 This is the general lesson from F9 as well: a control that is implemented,
 tested and benchmarked can still be doing nothing. Validation shows a control

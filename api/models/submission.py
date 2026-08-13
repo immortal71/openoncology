@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime, UTC
+from typing import Any
 
-from sqlalchemy import String, DateTime, ForeignKey, Enum as SAEnum
+from sqlalchemy import String, DateTime, ForeignKey, JSON, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
@@ -38,6 +39,12 @@ class Submission(Base):
 
     # 0–100 progress percentage updated by workers for live progress bar
     progress_pct: Mapped[int] = mapped_column(default=0)
+
+    # Sample QC verdict from services/sample_qc.py: FFPE artefact signal,
+    # tumour purity, coverage. Written by the genomic worker, read by the
+    # oncologist report. NULL means QC was not assessed, which is deliberately
+    # distinct from a passing verdict.
+    sample_qc: Mapped[Any] = mapped_column(JSON, nullable=True)
 
     submitted_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC).replace(tzinfo=None))
     completed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
