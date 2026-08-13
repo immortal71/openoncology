@@ -43,6 +43,7 @@ def run_genomic_pipeline(
     from workers._db_sync import get_sync_session
     from models.submission import Submission, SubmissionStatus
     from models.mutation import Mutation, MutationClassification, OncoKBLevel
+    from services.sample_qc import sample_qc_to_report_dict
 
     logger.info(f"[genomic] Starting pipeline for submission {submission_id}")
 
@@ -99,8 +100,6 @@ def run_genomic_pipeline(
                 submission.status = SubmissionStatus.awaiting_ai
                 submission.vcf_s3_key = vcf_s3_key
                 if qc_report is not None:
-                    from services.sample_qc import sample_qc_to_report_dict
-
                     submission.sample_qc = sample_qc_to_report_dict(qc_report)
                 db.commit()
 

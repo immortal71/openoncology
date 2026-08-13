@@ -252,6 +252,13 @@ Verified present, not merely intended:
   (`scripts/detect_label_circularity.py`, exits non-zero).
 - Unparseable OncoKB levels resolve to `unknown` rather than raising or being
   read as actionable (fail-safe direction).
+- Sample QC verdict returned to API callers as well as to the rendered report
+  (`submissions.sample_qc`, `ResultsResponse.sample_qc`), with "not assessed"
+  rendered distinctly from "passed" in `web/components/SampleQCCard.tsx`.
+- The genomic worker's QC call path is pinned by an integration test that drives
+  `run_genomic_pipeline` and asserts on the persisted row
+  (`api/tests/test_genomic_worker_qc_persistence.py`), so a control that stops
+  being invoked fails a test rather than going quiet.
 
 ---
 
