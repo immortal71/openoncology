@@ -63,8 +63,43 @@ DRUG_EQUIVALENCE_GROUPS: dict[str, list[str]] = {
 }
 
 
+# Salt and formulation suffixes. TCGA's treatment fields record the dispensed
+# product, so the same drug appears both ways: "doxorubicin" and "doxorubicin
+# hydrochloride", "erlotinib" and "erlotinib hydrochloride". The pipeline emits
+# the INN, so every salted spelling scored as a miss on a case that may well
+# have matched.
+#
+# Measured on the 1,713 label set: 23 of 206 distinct drug strings carry one,
+# covering 419 of 4,664 drug mentions, or 9.0%. For 15 of those 23 the bare
+# form also appears in the same labels, which is what shows this is a recording
+# artifact rather than a real distinction. The salt does not change the
+# OncoKB-level indication.
+#
+# Direction of the bug: it understated concordance. Removing it can only move
+# the score up, so treat any large jump with suspicion and check it against
+# these counts.
+_SALT_SUFFIXES = frozenset({
+    "hydrochloride", "hcl", "disodium", "sodium", "calcium", "sulfate",
+    "sulphate", "tartrate", "mesylate", "maleate", "citrate", "acetate",
+    "phosphate", "succinate", "dihydrate", "monohydrate", "potassium",
+    "besylate", "tosylate", "fumarate", "malate", "lactate", "bromide",
+})
+
+
+def _strip_salt_suffix(value: str) -> str:
+    """Drop a trailing salt or hydrate word, keeping the base drug name.
+
+    Only strips when something is left over, so a drug whose whole name is one
+    of these words is untouched.
+    """
+    words = value.split()
+    while len(words) > 1 and words[-1] in _SALT_SUFFIXES:
+        words = words[:-1]
+    return " ".join(words) if words else value
+
+
 def _normalise_drug_name(name: str) -> str:
-    value = (name or "").strip().lower()
+    value = _strip_salt_suffix((name or "").strip().lower())
     return re.sub(r"[^a-z0-9]+", "", value)
 
 
