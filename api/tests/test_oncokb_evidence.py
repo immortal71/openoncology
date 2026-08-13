@@ -647,3 +647,74 @@ class TestExpressionLossNotation:
         that carry one and return nothing for genes that do not."""
         assert not (get_all_drugs_for_variant("KRAS", "deficient") or {})
         assert not (get_all_drugs_for_variant("TTN", "absent") or {})
+
+
+# ── Gene symbol aliases ──────────────────────────────────────────────────────
+
+class TestGeneSymbolAliases:
+    """Reports name genes the way clinicians name them, not the way HGNC does.
+
+    Nothing normalised the incoming symbol, so "HER2 Amplification" returned
+    nothing while "ERBB2 Amplification" returned 8 drugs including
+    trastuzumab. HER2 is how HER2 status is written in essentially every
+    breast and gastric pathology report. A sweep of 29 common legacy symbols
+    found 26 completely unreachable.
+    """
+
+    ALIASES = [
+        ("HER2", "ERBB2", "Amplification"),
+        ("HER-2", "ERBB2", "Amplification"),
+        ("HER2/neu", "ERBB2", "Amplification"),
+        ("HER1", "EGFR", "L858R"),
+        ("c-KIT", "KIT", "V559D"),
+        ("CD117", "KIT", "V559D"),
+        ("c-MET", "MET", "exon 14 skipping"),
+        ("PD-L1", "CD274", "Amplification"),
+        ("MLL", "KMT2A", "KMT2A-MLLT3"),
+        ("K-RAS", "KRAS", "G12C"),
+        ("B-RAF", "BRAF", "V600E"),
+        ("p16", "CDKN2A", "homozygous deletion"),
+        ("BRG1", "SMARCA4", "Q729fs"),
+        ("TRKA", "NTRK1", "TPM3-NTRK1"),
+    ]
+
+    def test_legacy_symbols_resolve_to_hgnc_evidence(self):
+        for legacy, hgnc, alteration in self.ALIASES:
+            canonical = get_all_drugs_for_variant(hgnc, alteration) or {}
+            assert canonical, f"{hgnc} {alteration} should have evidence to compare against"
+            assert (get_all_drugs_for_variant(legacy, alteration) or {}) == canonical, (
+                f"{legacy} should resolve as {hgnc}"
+            )
+
+    def test_her2_amplification_reaches_trastuzumab(self):
+        """The single case most likely to appear in real reports."""
+        drugs = {k.lower() for k in (get_all_drugs_for_variant("HER2", "Amplification") or {})}
+        assert "trastuzumab" in drugs
+
+    def test_hyphenated_hgnc_symbols_are_not_mangled(self):
+        """Some approved symbols do contain a hyphen: the histone genes were
+        renamed in 2021, so H3F3A is now H3-3A. Stripping punctuation
+        unconditionally turned that into H33A and broke H3-3A K27M, the
+        defining alteration of diffuse midline glioma."""
+        from services.oncokb_evidence import _normalise_gene
+        assert _normalise_gene("H3-3A") == "H3-3A"
+        assert get_all_drugs_for_variant("H3-3A", "K27M")
+
+    def test_every_table_gene_still_normalises_to_itself(self):
+        """Guards the whole table against a future alias hijacking a real
+        symbol, which is how the H3-3A regression happened."""
+        from services.oncokb_evidence import _LEVEL_TABLE, _normalise_gene
+        for gene in {g for (g, _alt) in _LEVEL_TABLE}:
+            assert _normalise_gene(gene) == gene, f"{gene} no longer resolves to itself"
+
+    def test_unknown_symbol_is_passed_through_not_guessed(self):
+        from services.oncokb_evidence import _normalise_gene
+        assert _normalise_gene("NOTAGENE") == "NOTAGENE"
+        assert not (get_all_drugs_for_variant("NOTAGENE", "V600E") or {})
+
+    def test_alias_resolves_even_where_the_gene_has_no_evidence_yet(self):
+        """LKB1 maps to STK11, which currently carries no entries at all. The
+        symbol mapping is still correct and should hold for when it does, so it
+        is asserted on the normaliser rather than on drug output."""
+        from services.oncokb_evidence import _normalise_gene
+        assert _normalise_gene("LKB1") == "STK11"

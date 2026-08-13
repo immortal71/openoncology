@@ -1547,6 +1547,89 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
 _bootstrap_oncokb_public_table()
 
 
+# Gene symbol aliases, so a report naming a gene the way clinicians name it
+# reaches evidence keyed on the HGNC-approved symbol.
+#
+# WHY: the table keys on approved symbols, and nothing normalised the incoming
+# symbol, so "HER2 Amplification" returned nothing while "ERBB2 Amplification"
+# returned 8 drugs including trastuzumab. HER2 is how HER2 status is written in
+# essentially every breast and gastric pathology report, so this is not an edge
+# case. A sweep of 29 common legacy symbols found 26 completely unreachable
+# (scripts/audit_gene_symbols.py).
+#
+# These are HGNC previous and alias symbols, a naming fact, not a clinical
+# claim. Ambiguous ones are deliberately left out: SNF2 maps to more than one
+# gene, and TEP1 is both a PTEN alias and a distinct gene in its own right, so
+# neither is listed. Keys are stored already normalised, meaning uppercase with
+# hyphens, spaces, dots and slashes removed, so "HER-2", "HER2/neu" and "c-KIT"
+# all arrive here as HER2, HER2NEU and CKIT.
+_GENE_ALIASES: dict[str, str] = {
+    # ERBB family
+    "HER1": "EGFR", "ERBB1": "EGFR",
+    "HER2": "ERBB2", "HER2NEU": "ERBB2", "NEU": "ERBB2", "NGL": "ERBB2",
+    "HER3": "ERBB3", "HER4": "ERBB4",
+    # Receptor tyrosine kinases
+    "CKIT": "KIT", "CD117": "KIT", "SCFR": "KIT",
+    "CMET": "MET", "HGFR": "MET",
+    "FLT3": "FLT3", "CD135": "FLT3",
+    "TRKA": "NTRK1", "TRKB": "NTRK2", "TRKC": "NTRK3",
+    "CD246": "ALK",
+    # RAS/RAF
+    "KRAS2": "KRAS", "CMYC": "MYC",
+    # Tumour suppressors
+    "P53": "TP53",
+    "LKB1": "STK11",
+    "P16": "CDKN2A", "INK4A": "CDKN2A", "CDKN2": "CDKN2A", "MTS1": "CDKN2A",
+    "MMAC1": "PTEN",
+    "BRG1": "SMARCA4",
+    "BAF250A": "ARID1A",
+    "RB": "RB1",
+    # Chromatin / fusion partners
+    "MLL": "KMT2A", "HRX": "KMT2A", "ALL1": "KMT2A",
+    # Immune checkpoint
+    "PDL1": "CD274", "B7H1": "CD274",
+    "PD1": "PDCD1",
+    # Kinases written without their numeric suffix. Bare ABL conventionally
+    # means ABL1; ABL2 is always written out, so this is not ambiguous.
+    "ABL": "ABL1",
+}
+
+
+_table_genes_cache: tuple[int, frozenset[str]] = (-1, frozenset())
+
+
+def _known_table_genes() -> frozenset[str]:
+    """Gene symbols the evidence table currently keys on.
+
+    Recomputed when the table changes size, since load_oncokb_flat_file() can
+    extend it at runtime.
+    """
+    global _table_genes_cache
+    size = len(_LEVEL_TABLE)
+    if _table_genes_cache[0] != size:
+        _table_genes_cache = (size, frozenset(g for (g, _alt) in _LEVEL_TABLE))
+    return _table_genes_cache[1]
+
+
+def _normalise_gene(gene: str) -> str:
+    """Uppercase a gene symbol, then resolve HGNC aliases.
+
+    Handles the punctuation clinicians actually type: HER-2, HER2/neu, c-KIT,
+    K-RAS, PD-L1.
+
+    A symbol that already keys the table is returned untouched, before any
+    punctuation is stripped. Some HGNC-approved symbols do contain a hyphen:
+    the histone genes were renamed in 2021, so H3F3A is now H3-3A. Stripping
+    punctuation unconditionally turned that into H33A and silently broke
+    H3-3A K27M, the defining alteration of diffuse midline glioma.
+    """
+    raw = (gene or "").strip().upper()
+    if raw in _known_table_genes():
+        return raw
+    key = re.sub(r"[\-_ ./]", "", raw)
+    return _GENE_ALIASES.get(key, key)
+
+
 # Aliases so variant strings from VCF INFO fields match table keys
 _ALTERATION_ALIASES: dict[str, str] = {
     # exon 19 deletion various representations
@@ -2468,7 +2551,7 @@ def _apply_cancer_context_override(
     if not context:
         return level_map
 
-    gene_upper = gene.upper()
+    gene_upper = _normalise_gene(gene)
     alt_norm = _normalise_alteration(alteration).upper()
     rule = _CANCER_CONTEXT_OVERRIDES.get((gene_upper, alt_norm, context))
     if not rule:
@@ -2807,7 +2890,7 @@ def lookup_oncokb_level(gene: str, alteration: str, drug_name: str) -> Optional[
     Returns None if no entry exists (neither sensitive nor resistant).
     Returns LEVEL_R1/LEVEL_R2 if the drug is a known resistance marker.
     """
-    gene_upper = gene.upper()
+    gene_upper = _normalise_gene(gene)
     alt_norm = _normalise_alteration(alteration).upper()
     drug_norm = _normalise_drug(drug_name)
 
@@ -2880,7 +2963,7 @@ def _get_all_drugs_for_variant_internal(
     alphamissense_score: Optional[float] = None,
 ) -> tuple[dict[str, str], set[str]]:
     """Return all drug→level mappings and fallback provenance for a variant."""
-    gene_upper = gene.upper()
+    gene_upper = _normalise_gene(gene)
     alt_norm = _normalise_alteration(alteration).upper()
 
     # ── Compound variant handling (e.g. "T790M+C797S") ────────────────────
@@ -2974,7 +3057,7 @@ def get_all_drugs_for_variant_with_metadata(
     return {
         "drug_levels": levels,
         "gene_fallback_drugs": sorted(fallback_drugs),
-        "known_actionable_gene": _has_l1_or_l2_actionable_entry(gene.upper()),
+        "known_actionable_gene": _has_l1_or_l2_actionable_entry(_normalise_gene(gene)),
         "alphamissense_score": _coerce_float(alphamissense_score),
     }
 
@@ -3003,7 +3086,7 @@ def get_all_drugs_for_variant_live(
 
     def _merge_live_with_static_safety(live: dict[str, str]) -> dict[str, str]:
         """Merge policy for live mode: resistance always, static gap fill by allowlist."""
-        gene_upper = gene.upper()
+        gene_upper = _normalise_gene(gene)
         alt_norm = _normalise_alteration(alteration)
         allow_gap_fill = (gene_upper, alt_norm) in _STATIC_GAP_FILL_KEYS
 
@@ -3092,7 +3175,7 @@ def get_all_drugs_for_variant_live_with_metadata(
     token = _get_oncokb_token()
 
     def _merge_live_with_static_safety_and_meta(live: dict[str, str]) -> tuple[dict[str, str], set[str]]:
-        gene_upper = gene.upper()
+        gene_upper = _normalise_gene(gene)
         alt_norm = _normalise_alteration(alteration)
         allow_gap_fill = (gene_upper, alt_norm) in _STATIC_GAP_FILL_KEYS
 
@@ -3173,7 +3256,7 @@ def get_all_drugs_for_variant_live_with_metadata(
         return {
             "drug_levels": merged_levels,
             "gene_fallback_drugs": sorted(fallback_drugs),
-            "known_actionable_gene": _has_l1_or_l2_actionable_entry(gene.upper()),
+            "known_actionable_gene": _has_l1_or_l2_actionable_entry(_normalise_gene(gene)),
             "alphamissense_score": _coerce_float(alphamissense_score),
         }
 
@@ -3181,7 +3264,7 @@ def get_all_drugs_for_variant_live_with_metadata(
     return {
         "drug_levels": merged_levels,
         "gene_fallback_drugs": sorted(fallback_drugs),
-        "known_actionable_gene": _has_l1_or_l2_actionable_entry(gene.upper()),
+        "known_actionable_gene": _has_l1_or_l2_actionable_entry(_normalise_gene(gene)),
         "alphamissense_score": _coerce_float(alphamissense_score),
     }
 
@@ -3254,7 +3337,7 @@ def annotate_compound_resistance(
     if len(alterations) < 2:
         return candidates  # Compound resistance requires ≥ 2 alterations
 
-    gene_upper = gene.upper()
+    gene_upper = _normalise_gene(gene)
     alt_norms = frozenset(_normalise_alteration(a).upper() for a in alterations)
 
     compound_drugs: dict[str, str] = {}
