@@ -69,10 +69,9 @@ def run_genomic_pipeline(
             # detection, tumour purity and coverage, and nothing in the pipeline
             # had ever called it, so the control was inert: a sample with a
             # high-confidence FFPE signal produced recommendations exactly like
-            # a clean one. This runs it and records the verdict. It does not yet
-            # reach the patient-facing report, which needs somewhere to persist
-            # it; tracked as F10 in docs/risk_analysis.md.
-            _run_sample_qc_checkpoint(vcf_path, submission_id)
+            # a clean one. The verdict is persisted on the submission so it
+            # reaches the oncologist report rather than living only in logs.
+            qc_report = _run_sample_qc_checkpoint(vcf_path, submission_id)
 
             # 4. Upload annotated VCF back to MinIO
             vcf_s3_key = _upload_vcf_to_minio(vcf_path, patient_id, submission_id)
@@ -99,6 +98,10 @@ def run_genomic_pipeline(
                 submission = db.get(Submission, submission_id)
                 submission.status = SubmissionStatus.awaiting_ai
                 submission.vcf_s3_key = vcf_s3_key
+                if qc_report is not None:
+                    from services.sample_qc import sample_qc_to_report_dict
+
+                    submission.sample_qc = sample_qc_to_report_dict(qc_report)
                 db.commit()
 
         # 6. Queue AI worker

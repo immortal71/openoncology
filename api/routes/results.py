@@ -134,6 +134,7 @@ async def get_results(
                 ranked_candidates=ranked,
                 mutation_summary=mutation_list,
                 cancer_type=submission.cancer_type,
+                qc_report=submission.sample_qc,
                 patient_id=str(submission.id),
             )
             oncologist_report_data = onc_report.sections
@@ -330,6 +331,7 @@ async def download_oncologist_report_pdf(
         ranked_candidates=ranked,
         mutation_summary=mutation_list,
         cancer_type=submission.cancer_type,
+        qc_report=submission.sample_qc,
         patient_id=str(submission.id),
     )
     pdf_bytes, media_type, ext = generate_oncologist_report_document(onc_report)
