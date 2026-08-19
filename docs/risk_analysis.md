@@ -552,7 +552,7 @@ and 2.
 | # | Action | Hazard | Blocking clinical use? |
 |---|---|---|---|
 | 1 | Run `scripts/validate_variant_calling.py` against HG002 calls from `pipeline/main.nf`. Harness and truth set ready; needs a host with the toolchain | H6 | Yes |
-| 2 | Biomarker-driven key measured (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`). **Split 2026-08-19: 66.7% exact Top-3 on pairs already in the evidence table, 7.1% on pairs that are not.** Generalisation is the open half | H5 | Partly |
+| 2 | Biomarker-driven key measured (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`). The benchmark calls only Tier 1, so neither its headline nor the 7.1% independent split measures generalisation. **Next: make `benchmark_nci_match.py` invoke both tiers**, then requantify. 6 of 13 misses are already Tier 2 reachable; 4 are real coverage gaps | H5 | Partly |
 | 3 | ~~Carry lookup-failure state per *variant*~~ **Done 2026-08-19**, migration `0014`, `mutations.evidence_lookup_status` | H3 | Closed |
 | 4 | ~~Decide whether a degraded evidence base should block output~~ **Done 2026-08-19**, `require_current_evidence` policy plus a sustained-fallback alarm | H4 | Closed |
 | 5 | ~~Formal risk register with likelihood and severity scoring~~ **Done 2026-08-19**, [RISK_REGISTER.md](RISK_REGISTER.md) | all | Closed |

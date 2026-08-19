@@ -61,7 +61,9 @@ Splitting the 32 scored arms on exactly that:
 | Combined (the headline) | 32 | 13 (40.6%) | 23 (71.9%) |
 
 **The headline is carried by the contained subset.** On arms whose drug the
-engine did not already hold, exact Top-3 concordance is 1 in 14. The class
+engine did not already hold, exact Top-3 concordance is 1 in 14. *(Retracted:
+see the correction above. The benchmark queries only the evidence table, so this
+subset was defined by exclusion from the one tier being asked.)* The class
 figure holds up better, 42.9%, which says the engine often reaches the right
 drug family without reaching the right drug.
 
@@ -83,6 +85,52 @@ Fourteen arms is an observation, not an estimate. The counts are given because
 the percentages over that n are not worth much on their own.
 
 ---
+
+## Correction: the benchmark never called the tier that generalises
+
+The two sections below were written on 2026-08-19 and their conclusion was
+wrong. It is left in place, with this correction above it, because deleting a
+retracted reading hides the mistake instead of recording it.
+
+`run_pipeline` in `scripts/benchmark_nci_match.py` calls only
+`get_all_drugs_for_variant_live`, which is the OncoKB live API plus the curated
+static table. It never calls the Tier 2 repurposing path, OpenTargets and DGIdb,
+which the TCGA concordance pilot did call explicitly.
+
+So the benchmark asks the evidence table a question, and the independence audit
+below defined "independent" as *not in the evidence table*. A near-zero score on
+that subset is close to circular in the opposite direction from F5: the subset
+was constructed to exclude everything the only tier being queried could answer.
+The engine has a generalisation path and the benchmark never invoked it.
+
+`python scripts/diagnose_nci_match_tier2.py`, artifact
+`validation_results/nci_match_tier2_diagnosis.json`, asks each missed arm
+separately whether Tier 1 holds the drug, whether Tier 2 retrieves it, and
+whether it is approved at all:
+
+| Verdict | n | Arms |
+|---|---|---|
+| Reachable but not ranked. Tier 2 returns it as approved | **6** | ERBB2 afatinib, FGFR1 erdafitinib, TSC1 sapanisertib, DDR2 dasatinib, PTEN copanlisib (Z1G, Z1H) |
+| Not retrieved by any tier. A real coverage gap | 4 | GNAQ trametinib, NF2 defactinib, FGFR3 AZD4547, BRCA1 adavosertib |
+| Out of scope: investigational, deliberately not recommended | 3 | PIK3CA taselisib, PTEN GSK2636771, BRAF ulixertinib |
+
+**Six of thirteen misses are drugs the engine already retrieves.** The benchmark
+understates it. Three more are compounds it declines to recommend on purpose,
+because suggesting an unapproved agent to a patient is not repurposing. The
+genuine coverage gap is four arms, not thirteen.
+
+The actionable defect is therefore in `benchmark_nci_match.py`, not in the
+engine: the benchmark must invoke both tiers, as the TCGA pilot does, before any
+generalisation claim can be made from it either way. Until it does, neither
+40.6% nor 7.1% measures what it was read as measuring.
+
+Two caveats on this correction. `sapanisertib` is reported as approved with a
+phase 4 by OpenTargets, which does not match its regulatory status; approval
+here is the service's opinion, not a regulatory determination, and the
+"reachable" count may be one high. And `erdafitinib` shows as present in Tier 1
+under a variant-free lookup while the independence audit placed it in the
+independent bucket, so the two lookups disagree on containment and the split is
+softer than a table implies.
 
 ## Would a bigger evidence base fix it?
 
