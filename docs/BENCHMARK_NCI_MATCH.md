@@ -45,6 +45,12 @@ Reproduce that diagnosis: `python scripts/diagnose_concordance_dataset.py`
 Added 2026-08-19. `python scripts/audit_nci_match_independence.py`, artifact
 `validation_results/nci_match_independence.json`.
 
+> **Superseded the same day.** The table in this section was produced while the
+> benchmark queried only Tier 1 and the Tier 2 path was dead locally, so its
+> independent subset scored 1/14. The corrected figures are in "The benchmark was
+> querying one tier" below. This section is kept for the reasoning, which still
+> holds, not for its numbers.
+
 The answer key is independent of anything OpenOncology produced, so this is not
 the F5 defect. But independent-of-our-output is not independent-of-our-evidence:
 NCI-MATCH arms and this repository's actionability table are both distillations
@@ -58,6 +64,10 @@ Splitting the 32 scored arms on exactly that:
 |---|---|---|---|
 | Contained — assigned drug already in the evidence table for that gene | 18 | 12 (66.7%) | 17 (94.4%) |
 | Independent — assigned drug not in the table, so a hit came from the repurposing tiers | 14 | **1 (7.1%)** | 6 (42.9%) |
+
+*(Numbers above are the superseded Tier-1-only run. Corrected: contained 17 arms
+at 70.6% exact and 100% class, independent 15 arms at 20.0% exact and 53.3%
+class.)*
 | Combined (the headline) | 32 | 13 (40.6%) | 23 (71.9%) |
 
 **The headline is carried by the contained subset.** On arms whose drug the
@@ -86,90 +96,70 @@ the percentages over that n are not worth much on their own.
 
 ---
 
-## Correction: the benchmark never called the tier that generalises
+## The benchmark was querying one tier, and Tier 2 was dead locally
 
-The two sections below were written on 2026-08-19 and their conclusion was
-wrong. It is left in place, with this correction above it, because deleting a
-retracted reading hides the mistake instead of recording it.
+Resolved 2026-08-19. The figures at the top of this document are the corrected
+ones. What follows is how they moved and why, because the first version of this
+section drew a conclusion that was wrong.
 
-`run_pipeline` in `scripts/benchmark_nci_match.py` calls only
-`get_all_drugs_for_variant_live`, which is the OncoKB live API plus the curated
-static table. It never calls the Tier 2 repurposing path, OpenTargets and DGIdb,
-which the TCGA concordance pilot did call explicitly.
+`run_pipeline` called only `get_all_drugs_for_variant_live`, the OncoKB live API
+plus the curated static table. It never called the Tier 2 repurposing path that
+the TCGA concordance pilot calls. An independence audit then split the arms on
+whether the assigned drug was already in the evidence table and found 7.1% exact
+Top-3 on the ones that were not, which was read as the engine failing to
+generalise. That subset had been constructed to exclude everything the only tier
+being queried could answer.
 
-So the benchmark asks the evidence table a question, and the independence audit
-below defined "independent" as *not in the evidence table*. A near-zero score on
-that subset is close to circular in the opposite direction from F5: the subset
-was constructed to exclude everything the only tier being queried could answer.
-The engine has a generalisation path and the benchmark never invoked it.
+Wiring Tier 2 in as a fallback changed nothing at first, which turned out to be a
+second and larger defect.
 
-`python scripts/diagnose_nci_match_tier2.py`, artifact
-`validation_results/nci_match_tier2_diagnosis.json`, asks each missed arm
-separately whether Tier 1 holds the drug, whether Tier 2 retrieves it, and
-whether it is approved at all:
+**Two `ai` packages, and only one wins.** `api/ai/` holds `ranking.py`.
+Repo-root `ai/` holds `diffdock/`, `alphamissense/` and `services/`. Both carried
+an empty `__init__.py`, so each was a regular package and whichever appeared
+first on `sys.path` shadowed the other entirely. `_query_repurposing_candidates`
+imports `ai.diffdock.score` unguarded, so with `api/` first the entire Tier 2
+path raised `ModuleNotFoundError` before doing any work.
 
-| Verdict | n | Arms |
+The deployed container never hits this. `api/Dockerfile` does
+
+    COPY api/. .
+    COPY ai/. ./ai/
+
+which merges both directories into one `/app/ai` on disk. Nothing outside the
+container reproduces that, so every local script, benchmark and developer run got
+a half-populated `ai` package, and the failure surfaced as a capability quietly
+returning nothing rather than as an error.
+
+Both empty `__init__.py` files are now removed, making `ai` a namespace package
+that merges across `sys.path` the way the container merges it on disk.
+
+### What it moved
+
+| | Tier 1 only | Both tiers |
 |---|---|---|
-| Reachable but not ranked. Tier 2 returns it as approved | **6** | ERBB2 afatinib, FGFR1 erdafitinib, TSC1 sapanisertib, DDR2 dasatinib, PTEN copanlisib (Z1G, Z1H) |
-| Not retrieved by any tier. A real coverage gap | 4 | GNAQ trametinib, NF2 defactinib, FGFR3 AZD4547, BRCA1 adavosertib |
-| Out of scope: investigational, deliberately not recommended | 3 | PIK3CA taselisib, PTEN GSK2636771, BRAF ulixertinib |
+| Exact Top-3 | 13/32 (40.6%) | **15/32 (46.9%)** |
+| Class Top-3 | 23/32 (71.9%) | **25/32 (78.1%)** |
+| No recommendation | 2/32 | **0/32** |
 
-**Six of thirteen misses are drugs the engine already retrieves.** The benchmark
-understates it. Three more are compounds it declines to recommend on purpose,
-because suggesting an unapproved agent to a patient is not repurposing. The
-genuine coverage gap is four arms, not thirteen.
+Splitting the corrected run on whether the drug was already in the evidence
+table:
 
-The actionable defect is therefore in `benchmark_nci_match.py`, not in the
-engine: the benchmark must invoke both tiers, as the TCGA pilot does, before any
-generalisation claim can be made from it either way. Until it does, neither
-40.6% nor 7.1% measures what it was read as measuring.
+| Subset | n | Exact Top-3 | Class Top-3 |
+|---|---|---|---|
+| Contained | 17 | 12 (70.6%) | 17 (100%) |
+| Independent | 15 | 3 (20.0%) | 8 (53.3%) |
 
-Two caveats on this correction. `sapanisertib` is reported as approved with a
-phase 4 by OpenTargets, which does not match its regulatory status; approval
-here is the service's opinion, not a regulatory determination, and the
-"reachable" count may be one high. And `erdafitinib` shows as present in Tier 1
-under a variant-free lookup while the independence audit placed it in the
-independent bucket, so the two lookups disagree on containment and the split is
-softer than a table implies.
+The independent subset moved from 7.1% to 20.0% exact and from 42.9% to 53.3%
+class. The engine does reach past its own table; the benchmark was not letting
+it. `X DDR2 dasatinib` went from no prediction at all to an exact hit.
 
-## Would a bigger evidence base fix it?
+20% exact on fifteen arms is still modest, and the honest reading is that the
+engine finds the right drug family more often than the right drug when it has to
+generalise. That is a real result rather than an artifact, which is more than
+could be said of the 7.1%.
 
-The obvious response to a 7.1% independent subset is that the engine should hold
-more evidence. `data/civic_evidence.tsv` is a 4 MB CIViC bulk export already in
-this repository, used only for live per-variant lookups and never loaded into the
-actionability table. Loading it was measured before it was attempted, because the
-evidence table decides which drugs reach a patient's report and is the
-highest-consequence thing in this codebase to edit on an intuition.
-
-`python scripts/audit_civic_coverage_gain.py`, artifact
-`validation_results/civic_coverage_gain.json`:
-
-| | |
-|---|---|
-| CIViC rows | 4,854 |
-| Predictive, supporting direction | 2,461 |
-| Of those, evidence level A or B | 830 |
-| Distinct gene-drug pairs | 487 across 159 genes |
-| NCI-MATCH arms missed on exact match | 13 |
-| **Arms CIViC A/B would make reachable** | **3** (ERBB2 afatinib, FGFR1 erdafitinib, GNAQ trametinib) |
-| Arms still absent | 10 |
-
-Only level A and B are counted. A is validated association and B is clinical
-evidence; C, D and E are case study, preclinical and inferential, and loading
-those as actionable would inflate what the system claims relative to what it
-knows.
-
-**The conclusion is not the one the premise suggested.** 487 pairs across 159
-genes is a real expansion against a static table of 335 entries, and worth doing
-on coverage grounds. But it closes 3 of the 13 measured misses. The
-generalisation gap is not mostly an evidence-volume problem, so loading CIViC
-would improve the table without fixing the thing that motivated loading it.
-
-Coverage is also not correctness. A reachable pair is not a top-three
-recommendation and not a right one, so the 3 is an upper bound on the gain and
-the real figure can only come from loading the data and rerunning the benchmark.
-
----
+Reproduce the tier split: `python scripts/benchmark_nci_match.py --no-tier2`
+reproduces the old Tier-1-only figures.
 
 ## Why NCI-MATCH
 
@@ -207,16 +197,20 @@ That prevalence rule is not uniformly favourable, which is the point: it moved a
 
 ---
 
-## Results (2026-08-12)
+## Results (2026-08-19, both tiers)
 
 | Metric | Value |
 |---|---|
 | Arms parsed from trial record | 38 |
 | Arms scored | 32 |
 | Out of scope | 6 |
-| **Exact Top-3 concordance** | **12/32 = 37.5%** |
-| **Class Top-3 concordance** | **22/32 = 68.8%** |
-| No recommendation returned | 4/32 = 12.5% |
+| **Exact Top-3 concordance** | **15/32 = 46.9%** |
+| **Class Top-3 concordance** | **25/32 = 78.1%** |
+| No recommendation returned | 0/32 = 0.0% |
+
+Earlier runs of this table read 12/32 and 22/32 on 2026-08-12, then 13/32 and
+23/32, both with Tier 2 unreachable. `--no-tier2` reproduces the Tier-1-only
+figures.
 
 > No-prediction fell from 5/32 to 4/32 when the BRCA1/2 truncating-variant fix
 > landed (BRCA1 now returns PARP inhibitors instead of nothing). Concordance did

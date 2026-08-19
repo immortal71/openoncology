@@ -313,7 +313,28 @@ def variant_tokens(arm: dict) -> list[str]:
     }[arm["alteration_class"]]
 
 
-def run_pipeline(gene: str, variant: str) -> list[str]:
+def run_pipeline(gene: str, variant: str, tier2: bool = True) -> list[str]:
+    """Rank the engine's top three drugs for a gene and variant.
+
+    Both tiers, because one tier is not the engine. This called only
+    get_all_drugs_for_variant_live, the OncoKB live API plus the curated static
+    table, and returned an empty list whenever that table had nothing. The
+    repurposing path that exists precisely to answer the cases the table cannot
+    was never invoked.
+
+    That made the benchmark unable to measure generalisation in either
+    direction. An audit split its arms on whether the assigned drug was already
+    in the evidence table and found near-zero concordance on the ones that were
+    not, which was read as the engine failing to generalise. The subset had been
+    constructed to exclude everything the only tier being queried could answer.
+    Six of those thirteen misses are drugs Tier 2 retrieves as approved.
+
+    Tier 2 runs only when Tier 1 is empty, which is the convention the TCGA
+    concordance pilot documented, and it asks the question that matters here:
+    when the table holds nothing, can the engine still reach the right drug?
+
+    Pass tier2=False to reproduce the old Tier-1-only figures.
+    """
     from services.oncokb_evidence import get_all_drugs_for_variant_live
     from ai.ranking import rank_candidates
 
@@ -331,15 +352,50 @@ def run_pipeline(gene: str, variant: str) -> list[str]:
             "max_phase": 4,
             "opentargets_score": 0.8 if "LEVEL_1" in lv else (0.6 if "LEVEL_2" in lv else 0.4),
         })
+
+    if not candidates and tier2:
+        candidates = _tier2_candidates(gene)
+
     if not candidates:
         return []
     return [d["drug_name"] for d in rank_candidates(candidates)[:3]]
+
+
+def _tier2_candidates(gene: str) -> list[dict]:
+    """The production repurposing path: OpenTargets, DGIdb, CIViC, OncoKB.
+
+    Calls the same function the AI worker calls, rather than a reimplementation,
+    so the benchmark cannot drift from what the app does. protein_variant is
+    left None to skip structure folding, which is irrelevant to drug identity
+    and would make the run hours long.
+    """
+    try:
+        from workers.ai_worker import _query_repurposing_candidates
+    except Exception as exc:  # pragma: no cover - import guard
+        print(f"    [tier2] unavailable: {exc}", file=sys.stderr)
+        return []
+    try:
+        drugs, _pdb, _excluded = _query_repurposing_candidates(
+            gene,
+            protein_variant=None,
+            hgvs=None,
+            cancer_type=None,
+            submission_id="nci-match-benchmark",
+        )
+    except Exception as exc:
+        print(f"    [tier2] failed for {gene}: {exc}", file=sys.stderr)
+        return []
+    return list(drugs or [])
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--offline", action="store_true",
                     help="reuse cached arms instead of refetching")
+    ap.add_argument("--no-tier2", action="store_true",
+                    help="query only the evidence table, reproducing the "
+                         "Tier-1-only figures this benchmark reported before "
+                         "2026-08-19")
     args = ap.parse_args()
 
     raw_arms = load_arms(args.offline)
@@ -360,7 +416,7 @@ def main() -> None:
         for gene in GENE_FAMILIES.get(arm["gene"], [arm["gene"]]):
             probe = {**arm, "gene": gene}
             for tok in variant_tokens(probe):
-                top3 = run_pipeline(gene, tok)
+                top3 = run_pipeline(gene, tok, tier2=not args.no_tier2)
                 if top3:
                     used, used_gene = tok, gene
                     break

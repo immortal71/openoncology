@@ -450,6 +450,52 @@ owning patient plus the companies entitled to bid needs a pharma role, which the
 Keycloak realm does not define, so the narrowing is recorded here rather than
 guessed at.
 
+### F15. Two `ai` packages, so the repurposing tier was dead outside the container (H2) — FIXED
+
+`api/ai/` holds `ranking.py`. Repo-root `ai/` holds `diffdock/`,
+`alphamissense/` and `services/`. Both carried an empty `__init__.py`, which made
+each a regular package, and a regular package terminates the import scan. So
+whichever directory came first on `sys.path` shadowed the other completely, and
+`ai` could never contain both halves at once.
+
+`_query_repurposing_candidates` in `api/workers/ai_worker.py` imports
+`ai.diffdock.score` unguarded at the top of its body. With `api/` first on the
+path, that raised `ModuleNotFoundError` before the function did any work, so the
+entire Tier 2 repurposing path returned nothing. `api/services/drug_discovery.py`
+guards the same import with `try/except ModuleNotFoundError` and records an
+integration issue; the worker did not.
+
+The deployed container never hits this. `api/Dockerfile` runs
+
+    COPY api/. .
+    COPY ai/. ./ai/
+
+which merges both directories into a single `/app/ai` on disk, so every import
+resolves there. Nothing outside the container reproduces that arrangement. Local
+runs, benchmark scripts and developer sessions all got a half-populated `ai`
+package whose missing half depended on `sys.path` order.
+
+**How it surfaced.** The NCI-MATCH benchmark was changed to call Tier 2 when the
+evidence table returns nothing, and the concordance figure did not move at all.
+That was the tell. The Tier 2 call was failing on import every time, and the
+exception was being caught and turned into an empty candidate list, so a dead
+capability looked exactly like a capability with nothing to say. Same shape as
+F10 and F11: implemented, reachable in principle, never actually running.
+
+Both empty `__init__.py` files are removed, making `ai` a PEP 420 namespace
+package that merges across `sys.path` the way the Dockerfile merges it on disk.
+All four import families now resolve in one process.
+
+With Tier 2 reachable, NCI-MATCH concordance moved from 13/32 to 15/32 exact and
+23/32 to 25/32 class, and arms returning no recommendation at all fell from 2 to
+0.
+
+**Residual risk.** The unguarded `ai.diffdock.score` import in the worker is
+still unguarded. It works now because the package merges, but a deployment that
+ships `api/` without repo-root `ai/` would kill Tier 2 again, silently and in the
+same way. The guard in `drug_discovery.py` is the pattern the worker should
+follow, and the two directories would be better as one.
+
 ---
 
 ## 3. What is not yet analysed
@@ -531,7 +577,7 @@ column is asserted, not enforced.
 | Hazard | Findings | Control in place | Test that fails if it stops running |
 |---|---|---|---|
 | H1 resistance ignored | F1, F7, F9 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
-| H2 actionable variant missed | F2, F8 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
+| H2 actionable variant missed | F2, F8, F15 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H3 lookup failure read as a negative | F3, F10, F11, F14 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py` |
 | H4 stale evidence base | F4 | Provenance stamped onto the result at production time; static fallback logged at `WARNING` | `test_evidence_provenance.py` |
 | H5 overstated figures | F5, F12, F13 | Circularity gate on the answer key; webhook event ids claimed before handling; Connect return route no longer varies by id | `scripts/detect_label_circularity.py` in CI, `test_webhook_and_stripe_disclosure.py` |
@@ -552,7 +598,7 @@ and 2.
 | # | Action | Hazard | Blocking clinical use? |
 |---|---|---|---|
 | 1 | Run `scripts/validate_variant_calling.py` against HG002 calls from `pipeline/main.nf`. Harness and truth set ready; needs a host with the toolchain | H6 | Yes |
-| 2 | Biomarker-driven key measured (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`). The benchmark calls only Tier 1, so neither its headline nor the 7.1% independent split measures generalisation. **Next: make `benchmark_nci_match.py` invoke both tiers**, then requantify. 6 of 13 misses are already Tier 2 reachable; 4 are real coverage gaps | H5 | Partly |
+| 2 | Biomarker-driven key measured with both tiers (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`): **46.9% exact Top-3, 78.1% class**. Generalisation split: 70.6% exact on pairs already in the evidence table, **20.0% on pairs that are not**. Remaining: a larger independent arm set, and the 4 genuine coverage gaps | H5 | Partly |
 | 3 | ~~Carry lookup-failure state per *variant*~~ **Done 2026-08-19**, migration `0014`, `mutations.evidence_lookup_status` | H3 | Closed |
 | 4 | ~~Decide whether a degraded evidence base should block output~~ **Done 2026-08-19**, `require_current_evidence` policy plus a sustained-fallback alarm | H4 | Closed |
 | 5 | ~~Formal risk register with likelihood and severity scoring~~ **Done 2026-08-19**, [RISK_REGISTER.md](RISK_REGISTER.md) | all | Closed |
