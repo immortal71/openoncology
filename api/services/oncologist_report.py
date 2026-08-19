@@ -328,6 +328,9 @@ def generate_oncologist_report(
             "cosmic_id": m.get("cosmic_id"),
             "clinvar_id": m.get("clinvar_id"),
             "is_targetable": m.get("is_targetable", False),
+            # Carried so the reader can tell a checked-and-clear variant from
+            # one whose evidence lookup never answered (risk_analysis.md F3).
+            "evidence_lookup_status": m.get("evidence_lookup_status"),
         })
 
     # ── 4. Sample quality ──────────────────────────────────────────────────
@@ -1676,6 +1679,24 @@ def _render_plain_text(r: OncologistReport) -> str:
                 lines.append(
                     f"    AlphaMissense pathogenicity: {am:.3f}  "
                     f"({am_cls or 'unknown class'})"
+                )
+            # An unchecked variant must not read like a checked one that came
+            # back clear. Only the states that undermine the row are printed;
+            # a successful lookup needs no annotation.
+            lookup = alt.get("evidence_lookup_status")
+            if lookup == "unavailable":
+                lines.append(
+                    "    !! Actionability lookup FAILED for this gene. "
+                    "Absence of a targeted therapy above is NOT established."
+                )
+            elif lookup == "not_attempted":
+                lines.append(
+                    "    !! Actionability was never queried for this gene "
+                    "(no evidence source configured). Treat as unassessed."
+                )
+            elif lookup is None:
+                lines.append(
+                    "    -- Actionability lookup state not recorded for this gene."
                 )
     else:
         lines.append("  No genomic alteration data provided.")

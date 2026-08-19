@@ -17,6 +17,25 @@ class MutationClassification(str, enum.Enum):
     benign = "benign"
 
 
+class EvidenceLookupStatus(str, enum.Enum):
+    """Whether actionability evidence was actually consulted for this variant.
+
+    risk_analysis.md F3: a failed OncoKB lookup and a variant with genuinely no
+    actionable evidence produced identical output, and those are clinically
+    opposite statements. Provenance answered this per result; this answers it
+    per variant, which is the granularity a reader actually needs when one gene
+    in a report failed and the others did not.
+
+    NULL means the question was never asked of this row, which is what every
+    mutation stored before this column existed should read as. Absence of a
+    verdict and a successful lookup must not render alike.
+    """
+
+    ok = "ok"                        # evidence source answered
+    not_attempted = "not_attempted"  # no OncoKB token configured
+    unavailable = "unavailable"      # network error, rate limit, API failure
+
+
 class OncoKBLevel(str, enum.Enum):
     level_1 = "1"    # FDA-approved biomarker
     level_2 = "2"    # Standard care biomarker
@@ -43,9 +62,11 @@ class Mutation(Base):
     __tablename__ = "mutations"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    submission_id: Mapped[str] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    submission_id: Mapped[str] = mapped_column(
+        ForeignKey("submissions.id"), nullable=False, index=True
+    )
 
-    gene: Mapped[str] = mapped_column(String(64), nullable=False)
+    gene: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     hgvs_notation: Mapped[str] = mapped_column(String(256), nullable=True)
     mutation_type: Mapped[str] = mapped_column(String(64), nullable=True)  # e.g. missense, frameshift
     chromosome: Mapped[str] = mapped_column(String(8), nullable=True)
@@ -90,6 +111,13 @@ class Mutation(Base):
     cosmic_id: Mapped[str] = mapped_column(String(64), nullable=True)
 
     is_targetable: Mapped[bool] = mapped_column(default=False)
+
+    # Whether the actionability lookup for THIS variant succeeded. Nullable so
+    # rows written before the column existed read as "never assessed" rather
+    # than being retroactively claimed to have been checked (F3).
+    evidence_lookup_status: Mapped[Optional[EvidenceLookupStatus]] = mapped_column(
+        SAEnum(EvidenceLookupStatus), nullable=True
+    )
 
     # AlphaFold Server — path in MinIO after mutation-specific folding
     alphafold_structure_path: Mapped[str] = mapped_column(String(512), nullable=True)

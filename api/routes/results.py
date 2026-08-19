@@ -104,6 +104,11 @@ async def get_results(
             "oncokb_level": str(m.oncokb_level.value) if m.oncokb_level else None,
             "is_targetable": m.is_targetable,
             "alphamissense_score": m.alphamissense_score,
+            # None means this variant's lookup state was never recorded, which
+            # is not the same as a lookup that succeeded and found nothing (F3).
+            "evidence_lookup_status": (
+                m.evidence_lookup_status.value if m.evidence_lookup_status else None
+            ),
         }
         for m in mutations
     ]
@@ -212,6 +217,9 @@ async def get_results(
                 "oncokb_level": str(m.oncokb_level.value) if m.oncokb_level else None,
                 "is_targetable": m.is_targetable,
                 "alphamissense_score": m.alphamissense_score,
+                "evidence_lookup_status": (
+                    m.evidence_lookup_status.value if m.evidence_lookup_status else None
+                ),
             }
             for m in mutations
         ],
@@ -314,6 +322,11 @@ async def download_patient_letter_pdf(
             "oncokb_level": str(m.oncokb_level.value) if m.oncokb_level else None,
             "is_targetable": m.is_targetable,
             "alphamissense_score": m.alphamissense_score,
+            # None means this variant's lookup state was never recorded, which
+            # is not the same as a lookup that succeeded and found nothing (F3).
+            "evidence_lookup_status": (
+                m.evidence_lookup_status.value if m.evidence_lookup_status else None
+            ),
         }
         for m in mutations
     ]
@@ -364,6 +377,11 @@ async def download_oncologist_report_pdf(
             "oncokb_level": str(m.oncokb_level.value) if m.oncokb_level else None,
             "is_targetable": m.is_targetable,
             "alphamissense_score": m.alphamissense_score,
+            # None means this variant's lookup state was never recorded, which
+            # is not the same as a lookup that succeeded and found nothing (F3).
+            "evidence_lookup_status": (
+                m.evidence_lookup_status.value if m.evidence_lookup_status else None
+            ),
         }
         for m in mutations
     ]

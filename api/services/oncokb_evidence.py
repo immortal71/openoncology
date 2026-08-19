@@ -97,9 +97,90 @@ _EVIDENCE_PROVENANCE: dict[str, object] = {
     "age_days": None,
 }
 
+# Consecutive degraded resolutions. One fallback is a blip and is already
+# logged at WARNING; a sustained run means the evidence source has been
+# unreachable for a while and nobody noticed, which is the state that produced
+# the 2026-08-13 benchmark runs (open action 4).
+_CONSECUTIVE_STATIC_FALLBACKS = 0
+
+
+def get_consecutive_static_fallbacks() -> int:
+    return _CONSECUTIVE_STATIC_FALLBACKS
+
+
+class DegradedEvidenceError(RuntimeError):
+    """Raised when policy forbids answering from an evidence base of unknown currency.
+
+    Only raised when settings.require_current_evidence is True. The default is
+    False, because refusing to answer is the correct clinical posture and the
+    wrong research one, and this is research-use software. See config.py.
+    """
+
+    def __init__(self, provenance: dict):
+        self.provenance = provenance
+        super().__init__(
+            "Recommendations withheld: actionability evidence resolved to "
+            f"{provenance.get('path')!r}, which is not current, and "
+            "require_current_evidence is enabled. "
+            f"{provenance.get('caveat') or ''}".strip()
+        )
+
+
+def enforce_evidence_policy() -> dict[str, object]:
+    """Apply the degraded-evidence policy and return the provenance.
+
+    Called at the point recommendations are produced rather than at import, so
+    the answer reflects the table that actually served this request.
+    """
+    provenance = get_evidence_provenance()
+    if provenance.get("is_current"):
+        return provenance
+    try:
+        from config import settings
+
+        required = bool(getattr(settings, "require_current_evidence", False))
+    except Exception:
+        # A missing or unreadable settings object must not silently disable a
+        # safety policy, but it also must not take down a research run. Fail
+        # open with a loud log, matching how the rest of this module degrades.
+        logger.error(
+            "[evidence] could not read require_current_evidence; "
+            "proceeding with a degraded evidence base"
+        )
+        return provenance
+    if required:
+        raise DegradedEvidenceError(provenance)
+    return provenance
+
 
 def _record_evidence_provenance(path: str, cache_path: Optional[Path] = None) -> None:
-    """Retain which table answered, so callers can report it (F4)."""
+    """Retain which table answered, so callers can report it (F4).
+
+    Also tracks how many times in a row the degraded path has answered. A
+    single fallback is already logged at WARNING by its caller; a sustained run
+    escalates to ERROR, because the failure this is guarding against is not one
+    bad resolution, it is weeks of them going unnoticed (open action 4).
+    """
+    global _CONSECUTIVE_STATIC_FALLBACKS
+    if path == PROVENANCE_STATIC_FALLBACK:
+        _CONSECUTIVE_STATIC_FALLBACKS += 1
+        try:
+            from config import settings
+
+            threshold = int(getattr(settings, "degraded_evidence_alert_after", 3))
+        except Exception:
+            threshold = 3
+        if _CONSECUTIVE_STATIC_FALLBACKS >= threshold:
+            logger.error(
+                "[evidence] actionability table has resolved to the undated "
+                "static fallback %d times in a row. The OncoKB public dump has "
+                "been unreachable for this whole run. Every recommendation "
+                "produced meanwhile is built on evidence of unknown currency.",
+                _CONSECUTIVE_STATIC_FALLBACKS,
+            )
+    else:
+        _CONSECUTIVE_STATIC_FALLBACKS = 0
+
     snapshot: Optional[str] = None
     age_days: Optional[float] = None
     if cache_path is not None:

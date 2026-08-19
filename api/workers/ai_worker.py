@@ -95,7 +95,13 @@ def run_ai_analysis(
             resistance_by_mutation: dict[int, OncoKBLevel] = {}
             oncokb_lookup_failures: list[str] = []
             for mutation in mutations:
-                oncokb_data = _query_oncokb(mutation.gene, mutation.hgvs_notation)
+                oncokb_data, lookup_status = _query_oncokb_with_status(
+                    mutation.gene, mutation.hgvs_notation
+                )
+                # Stamped whatever the outcome, so a reader can tell which
+                # specific gene was not checked rather than inferring it from a
+                # log line (risk_analysis.md F3).
+                mutation.evidence_lookup_status = lookup_status
                 if not oncokb_data:
                     oncokb_lookup_failures.append(mutation.gene)
                     continue
@@ -353,6 +359,33 @@ def run_ai_analysis(
                 logger.warning("[ai] LLM explainer failed: %s", llm_exc)
                 plain_summary = None
 
+            # Degraded-evidence policy (risk_analysis.md F4, open action 4).
+            # Applied here, at the moment recommendations would be persisted,
+            # rather than at import: the question is what served *this* run.
+            # Default policy flags and proceeds; a clinical deployment sets
+            # require_current_evidence and gets a refusal instead.
+            evidence_withheld_reason: str | None = None
+            try:
+                from services.oncokb_evidence import (
+                    DegradedEvidenceError,
+                    enforce_evidence_policy,
+                )
+
+                enforce_evidence_policy()
+            except DegradedEvidenceError as degraded:
+                evidence_withheld_reason = str(degraded)
+                logger.error(
+                    "[ai] withholding %d drug recommendation(s) for %s: %s",
+                    len(repurposing_candidates),
+                    submission_id,
+                    evidence_withheld_reason,
+                )
+                repurposing_candidates = []
+            except Exception as policy_exc:
+                # A broken policy check must not discard a real analysis, but it
+                # must be loud. Failing open here matches _capture_evidence_provenance.
+                logger.error("[ai] evidence policy check failed: %s", policy_exc)
+
             result = Result(
                 submission_id=submission_id,
                 has_targetable_mutation=has_target,
@@ -368,7 +401,9 @@ def run_ai_analysis(
                 # Which evidence table answered, captured now rather than at read
                 # time — the table can be refreshed in between, and the reader is
                 # asking what produced *this* result. See risk_analysis.md F4.
-                evidence_provenance=_capture_evidence_provenance(),
+                evidence_provenance=_capture_evidence_provenance(
+                    withheld_reason=evidence_withheld_reason
+                ),
             )
             db.add(result)
             db.flush()
@@ -405,13 +440,18 @@ def run_ai_analysis(
         raise self.retry(exc=exc)
 
 
-def _capture_evidence_provenance() -> dict | None:
+def _capture_evidence_provenance(withheld_reason: str | None = None) -> dict | None:
     """Snapshot which actionability table is answering right now.
 
     Returns None only if the evidence module cannot be reached at all. It never
     raises: provenance is metadata about a result, and failing to record it must
     not discard the result itself. A None here reads downstream as "provenance
     not recorded", which is deliberately not the same as "evidence was current".
+
+    ``withheld_reason`` records that the degraded-evidence policy suppressed the
+    drug recommendations for this result. An empty recommendation list produced
+    by policy and one produced because nothing scored must not read alike, which
+    is the same asymmetry as F3 and F4 themselves.
     """
     try:
         from services.oncokb_evidence import get_evidence_provenance
@@ -419,7 +459,21 @@ def _capture_evidence_provenance() -> dict | None:
         provenance = get_evidence_provenance()
     except Exception as exc:
         logger.warning("[ai] could not capture evidence provenance: %s", exc)
+        if withheld_reason:
+            # The policy decision still has to survive even when provenance
+            # capture fails, or the result silently loses the reason it is empty.
+            return {
+                "path": "not_recorded",
+                "is_current": False,
+                "recommendations_withheld": True,
+                "withheld_reason": withheld_reason,
+            }
         return None
+
+    provenance = dict(provenance)
+    provenance["recommendations_withheld"] = bool(withheld_reason)
+    if withheld_reason:
+        provenance["withheld_reason"] = withheld_reason
 
     if not provenance.get("is_current"):
         logger.warning(
@@ -693,16 +747,34 @@ def _gene_to_uniprot(gene: str) -> str | None:
 
 
 def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
+    """Query OncoKB for a clinical actionability level.
+
+    Kept returning `dict | None` so existing callers are unaffected. Callers
+    that need to tell "no evidence" apart from "could not ask" should use
+    _query_oncokb_with_status instead (risk_analysis.md F3).
     """
-    Query OncoKB API for clinical actionability level.
+    data, _status = _query_oncokb_with_status(gene, hgvs)
+    return data
+
+
+def _query_oncokb_with_status(
+    gene: str, hgvs: str | None
+) -> "tuple[dict | None, EvidenceLookupStatus]":
+    """Query OncoKB and report whether the question could be asked at all.
+
+    Returns the annotation and the lookup status. A missing token and a failed
+    request both yield no data, but they are different facts about the report:
+    the first is a deployment that never configured evidence, the second is a
+    source that was reachable in principle and was not reached this time.
     Requires a free academic API token from oncokb.org.
     """
     import httpx
     from config import settings
+    from models.mutation import EvidenceLookupStatus
 
     if not settings.oncokb_api_token:
         logger.warning("[oncokb] No API token configured — skipping")
-        return None
+        return None, EvidenceLookupStatus.not_attempted
 
     try:
         resp = httpx.get(
@@ -721,10 +793,10 @@ def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
             "resistance_level": _to_oncokb_level(resistance),
             "treatments": _extract_oncokb_treatment_names(data.get("treatments") or []),
             "lookup_ok": True,
-        }
+        }, EvidenceLookupStatus.ok
     except Exception as exc:
         logger.warning(f"[oncokb] Query failed: {exc}")
-        return None
+        return None, EvidenceLookupStatus.unavailable
 
 
 def _to_oncokb_level(raw: object) -> "OncoKBLevel":

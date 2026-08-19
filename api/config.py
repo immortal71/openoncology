@@ -47,6 +47,27 @@ class Settings(BaseSettings):
     # OncoKB
     oncokb_api_token: str = ""
 
+    # Degraded-evidence policy (risk_analysis.md F4, open action 4).
+    #
+    # When the actionability table resolves to the undated built-in static
+    # table, recommendations are still produced, from evidence of unknown
+    # currency. Whether that should be allowed is a policy decision rather than
+    # a code one, so it is a setting rather than a hardcoded branch.
+    #
+    # Default False: this is research-use software, and a hard refusal would
+    # remove a research capability in order to prevent a clinical harm that
+    # research use does not carry. It MUST be True for any clinical deployment.
+    #
+    # False does not mean silent. A degraded evidence base is stamped on the
+    # result and rendered at the top of the report either way. This setting only
+    # decides whether recommendations are withheld as well as flagged.
+    require_current_evidence: bool = False
+
+    # Consecutive static-fallback resolutions before the log escalates from
+    # WARNING to ERROR. One fallback is a blip; a sustained run means the
+    # evidence source has been unreachable for a while and nobody noticed.
+    degraded_evidence_alert_after: int = 3
+
     # OpenAI (for plain-language LLM summaries)
     openai_api_key: str = ""
 
