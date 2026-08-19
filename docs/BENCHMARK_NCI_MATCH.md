@@ -158,8 +158,34 @@ engine finds the right drug family more often than the right drug when it has to
 generalise. That is a real result rather than an artifact, which is more than
 could be said of the 7.1%.
 
-Reproduce the tier split: `python scripts/benchmark_nci_match.py --no-tier2`
-reproduces the old Tier-1-only figures.
+### The candidate pool model changes the answer
+
+The benchmark had production backwards. `run_ai_analysis` builds its entire
+candidate pool from `_query_repurposing_candidates`, which is Tier 2, and uses
+the evidence table to decide targetability and stamp a level onto those
+candidates. The pool is Tier 2; the table annotates it. A Tier-1-only benchmark
+measures the annotation and calls it the engine.
+
+`--mode` now selects the pool model, so the difference is measurable rather
+than assumed:
+
+| Mode | Pool | Exact Top-3 | Class Top-3 | No prediction |
+|---|---|---|---|---|
+| `tier1` | evidence table only | 13/32 (40.6%) | 23/32 (71.9%) | 2/32 |
+| `fallback` | table, then Tier 2 when empty | **15/32 (46.9%)** | **25/32 (78.1%)** | 0/32 |
+| `union` | both merged | 9/32 (28.1%) | 24/32 (75.0%) | 0/32 |
+| `tier2` | Tier 2 only, table annotates | pending | pending | pending |
+
+`union` scores materially worse on exact match than `fallback` while holding
+class concordance, which says the extra candidates displace the right drug from
+the top three without changing the drug family. That is a result about the
+ranking function rather than about coverage, and it connects to F16: a top-three
+cut taken from a large pool of similarly scored candidates is decided by very
+little.
+
+None of these is production. `tier2` is the closest, and until it finishes the
+honest statement is that the published figure depends on a pool model this
+benchmark chose without matching the application.
 
 ## Why NCI-MATCH
 

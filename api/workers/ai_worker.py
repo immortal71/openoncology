@@ -926,7 +926,26 @@ def _query_repurposing_candidates(
     from services.chembl import get_molecule, search_molecule_by_name
     from services.civic import get_civic_evidence
     from services.dgidb import get_interactions as get_dgidb_interactions
-    from ai.diffdock.score import score_binding
+
+    # Guarded, following services/drug_discovery.py. This import was
+    # unguarded, and because api/ai/ and the repo-root ai/ were both regular
+    # packages, whichever landed first on sys.path shadowed the other. With
+    # api/ first this raised ModuleNotFoundError before the function did any
+    # work, so the entire repurposing tier returned nothing outside the
+    # container, where the Dockerfile merges the two directories on disk.
+    # See risk_analysis.md F15.
+    #
+    # The packages are namespace packages now and this resolves, but a docking
+    # score is an enrichment on a candidate, not the reason the candidate
+    # exists. Losing it must degrade a recommendation, never delete it.
+    try:
+        from ai.diffdock.score import score_binding
+    except ModuleNotFoundError:
+        score_binding = None
+        logger.warning(
+            "[repurpose] DiffDock module unavailable; candidates keep their "
+            "evidence but carry no binding score"
+        )
 
     async def _fetch() -> tuple[list[dict], str | None, list[dict]]:
         # ── Source 1: OpenTargets (expanded to 50 drugs) ─────────────────────
@@ -1080,7 +1099,7 @@ def _query_repurposing_candidates(
                 )
                 continue
 
-            if drug.get("smiles") and uniprot_id:
+            if drug.get("smiles") and uniprot_id and score_binding is not None:
                 drug["binding_score"] = score_binding(
                     uniprot_id, drug["smiles"], chembl_id,
                     pre_folded_structure=pre_folded_pdb_key,

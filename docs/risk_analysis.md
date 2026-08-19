@@ -496,6 +496,53 @@ ships `api/` without repo-root `ai/` would kill Tier 2 again, silently and in th
 same way. The guard in `drug_discovery.py` is the pattern the worker should
 follow, and the two directories would be better as one.
 
+### F16. When the evidence ties, spelling decides which drugs an oncologist sees (H5) — OPEN
+
+An absent evidence source has its weight redistributed across the sources that
+are present, so a candidate carrying `LEVEL_1` and nothing else scores exactly
+`1.0000`. Six such candidates tie perfectly. The tie is then broken
+alphabetically by drug name.
+
+For a gene with several level 1 options, which three reach the report is decided
+by spelling:
+
+    afatinib, binimetinib, cabozantinib, trametinib, ulixertinib
+    -> top 3: afatinib, binimetinib, cabozantinib
+
+Trametinib and ulixertinib are excluded for being late in the alphabet. This is
+visible in the NCI-MATCH run: both BRAF arms return "binimetinib, dabrafenib,
+e..." while the arms assign trametinib and ulixertinib.
+
+The ordering is deterministic, which is worth keeping. The same submission
+produces the same report twice, and that matters for a system whose outputs are
+supposed to be auditable. The problem is not instability, it is that a tied set
+is presented as a ranked list. Nothing in the output tells the reader that the
+three drugs shown were interchangeable on the evidence and that others were
+equally supported.
+
+That is H5 aimed at one clinician rather than at an adoption decision: rank
+order carries information it does not have. It connects directly to open action
+6, which asks whether a reader interprets rank as confidence. Here the answer is
+that for tied candidates they would be wrong to.
+
+**Not fixed, deliberately.** What *should* break a tie is a clinical question,
+not an implementation detail. Candidate answers include line of therapy,
+toxicity profile, route of administration, and cost, and choosing among them
+without a clinician is how a ranking function acquires opinions nobody
+sanctioned. `api/tests/test_ranking_ties.py` pins the present behaviour so that
+changing it is deliberate and shows up in a diff.
+
+The minimum honest fix, ahead of any tiebreak change, is for the report to say
+when the drugs it lists were tied. A reader who knows the top three were
+equivalent can ask a different question.
+
+**Also recorded:** adding a corroborating source can slightly lower a score. A
+`LEVEL_1` candidate alone scores 1.0000; the same candidate with an OpenTargets
+score of 0.9 scores 0.9969, because the OncoKB weight is no longer redistributed
+onto itself. The effect is about 0.3% and usually clipped by the 1.0 cap, so it
+is recorded as a known non-monotonicity, marked xfail in the tests, rather than
+presented as urgent.
+
 ---
 
 ## 3. What is not yet analysed
@@ -580,7 +627,7 @@ column is asserted, not enforced.
 | H2 actionable variant missed | F2, F8, F15 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H3 lookup failure read as a negative | F3, F10, F11, F14 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py` |
 | H4 stale evidence base | F4 | Provenance stamped onto the result at production time; static fallback logged at `WARNING` | `test_evidence_provenance.py` |
-| H5 overstated figures | F5, F12, F13 | Circularity gate on the answer key; webhook event ids claimed before handling; Connect return route no longer varies by id | `scripts/detect_label_circularity.py` in CI, `test_webhook_and_stripe_disclosure.py` |
+| H5 overstated figures | F5, F12, F13, F16 | Circularity gate on the answer key; webhook event ids claimed before handling; Connect return route no longer varies by id | `scripts/detect_label_circularity.py` in CI, `test_webhook_and_stripe_disclosure.py` |
 | H6 wrong variant call | F6, F7 | **None for calling accuracy.** F7 removes calls the caller itself rejected, which is not the same thing. The gate's measuring instrument exists but has never been given caller output | `test_vcf_ingestion_safety.py` and `test_variant_calling_validation.py` cover the harness, not the caller |
 
 H6 has no control. The row is here so that absence does not read as coverage by

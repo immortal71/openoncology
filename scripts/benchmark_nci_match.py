@@ -313,7 +313,7 @@ def variant_tokens(arm: dict) -> list[str]:
     }[arm["alteration_class"]]
 
 
-def run_pipeline(gene: str, variant: str, tier2: bool = True) -> list[str]:
+def run_pipeline(gene: str, variant: str, mode: str = "tier2") -> list[str]:
     """Rank the engine's top three drugs for a gene and variant.
 
     Both tiers, because one tier is not the engine. This called only
@@ -333,7 +333,27 @@ def run_pipeline(gene: str, variant: str, tier2: bool = True) -> list[str]:
     concordance pilot documented, and it asks the question that matters here:
     when the table holds nothing, can the engine still reach the right drug?
 
-    Pass tier2=False to reproduce the old Tier-1-only figures.
+    Three candidate-pool models, because they do not agree and the difference
+    is the point:
+
+      tier1     the evidence table only. What this benchmark did until
+                2026-08-19, and what produced its published figures.
+      fallback  Tier 1, then Tier 2 only when Tier 1 is empty.
+      union     both pools merged, Tier 1 levels annotated onto Tier 2 hits.
+      tier2     Tier 2 pool only, annotated with Tier 1 levels. This is what
+                production actually does, and it is the default here for that
+                reason.
+
+    Production is worth stating plainly, because the benchmark had it backwards.
+    run_ai_analysis builds its entire candidate pool from
+    _query_repurposing_candidates, which is Tier 2, and uses the evidence table
+    to decide targetability and to stamp a level onto those candidates. The pool
+    is Tier 2; the table annotates it. A Tier-1-only benchmark measures the
+    annotation and calls it the engine.
+
+    None of the three is exactly production, because production ranks against a
+    specific mutation with structure scoring available. union is the closest
+    without a submission to hang it on.
     """
     from services.oncokb_evidence import get_all_drugs_for_variant_live
     from ai.ranking import rank_candidates
@@ -353,8 +373,30 @@ def run_pipeline(gene: str, variant: str, tier2: bool = True) -> list[str]:
             "opentargets_score": 0.8 if "LEVEL_1" in lv else (0.6 if "LEVEL_2" in lv else 0.4),
         })
 
-    if not candidates and tier2:
+    levels_by_drug = {normalise_drug(k): v for k, v in evidence.items()}
+
+    if mode == "tier2":
+        candidates = []
+        for cand in _tier2_candidates(gene):
+            key = normalise_drug(cand.get("drug_name") or "")
+            if key in levels_by_drug:
+                cand = {**cand, "oncokb_level": levels_by_drug[key]}
+            candidates.append(cand)
+    elif mode == "fallback" and not candidates:
         candidates = _tier2_candidates(gene)
+    elif mode == "union":
+        known = {normalise_drug(c["drug_name"]) for c in candidates}
+        levels = {normalise_drug(k): v for k, v in evidence.items()}
+        for cand in _tier2_candidates(gene):
+            key = normalise_drug(cand.get("drug_name") or "")
+            if not key or key in known:
+                continue
+            # A Tier 2 candidate the table also knows keeps the table's level,
+            # which is how production annotates its pool.
+            if key in levels:
+                cand = {**cand, "oncokb_level": levels[key]}
+            candidates.append(cand)
+            known.add(key)
 
     if not candidates:
         return []
@@ -392,10 +434,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--offline", action="store_true",
                     help="reuse cached arms instead of refetching")
-    ap.add_argument("--no-tier2", action="store_true",
-                    help="query only the evidence table, reproducing the "
-                         "Tier-1-only figures this benchmark reported before "
-                         "2026-08-19")
+    ap.add_argument("--mode", choices=("tier1", "fallback", "union", "tier2"),
+                    default="tier2",
+                    help="candidate pool model. tier1 reproduces the figures "
+                         "this benchmark reported before 2026-08-19; tier2 "
+                         "mirrors what production does and is the default")
     args = ap.parse_args()
 
     raw_arms = load_arms(args.offline)
@@ -416,7 +459,7 @@ def main() -> None:
         for gene in GENE_FAMILIES.get(arm["gene"], [arm["gene"]]):
             probe = {**arm, "gene": gene}
             for tok in variant_tokens(probe):
-                top3 = run_pipeline(gene, tok, tier2=not args.no_tier2)
+                top3 = run_pipeline(gene, tok, mode=args.mode)
                 if top3:
                     used, used_gene = tok, gene
                     break

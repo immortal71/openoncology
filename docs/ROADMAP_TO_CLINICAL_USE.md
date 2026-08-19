@@ -26,12 +26,26 @@ listed open action or removes a hazard in
 | 1.1 | Variant-calling validation harness against GIAB HG002 | H6 | Done, `scripts/validate_variant_calling.py` |
 | 1.2 | Per-variant evidence lookup state, so one failed gene does not read as four negatives | H3 | Done, migration `0014` |
 | 1.3 | Reference measurement of a stock GATK4 pipeline through the harness | H6 | Done, see below |
-| 1.4 | Policy and enforcement for a degraded evidence base | H4 | Open action 4 |
-| 1.5 | Formal risk register with likelihood and severity scoring | all | Open action 5 |
-| 1.6 | LLM patient-summary failure-mode analysis and guardrails | H5 | Open action 7 |
-| 1.7 | Restore the 19 dropped indexes, bound the 11 unbounded VARCHAR columns | — | Open action 8 |
-| 1.8 | Route-level authorisation and rate-limit sweep | S2 | Section 8.1 |
-| 1.9 | Algorithm version locking and change control | — | Required by section 2.3 |
+| 1.4 | Policy and enforcement for a degraded evidence base | H4 | Done, `require_current_evidence` |
+| 1.5 | Formal risk register with likelihood and severity scoring | all | Done, [RISK_REGISTER.md](RISK_REGISTER.md) |
+| 1.6 | LLM patient-summary failure-mode analysis and guardrails | H5 | Done, `services/llm_output_guard.py` |
+| 1.7 | Restore the dropped indexes; bound the unbounded VARCHAR columns | — | Indexes done (17 of 19, migration `0015`). VARCHAR open |
+| 1.8 | Route-level authorisation sweep | S2 | Done, and it found F14 |
+| 1.9 | Merge the two `ai` packages so the repurposing tier runs outside the container | H2 | Done, F15 |
+| 1.10 | Make the benchmark measure the pool production actually uses | H5 | In progress |
+| 1.11 | Algorithm version locking and change control | — | Required by section 2.3 |
+
+**On 1.7's VARCHAR half.** The open action says 11 unbounded VARCHAR columns.
+There are 21, and 19 of them are UUID primary keys carrying
+`str(uuid.uuid4())`, so bounding them means altering a primary key type on
+roughly fifteen tables and every foreign key pointing at one. The two that are
+not primary keys, `drug_requests.accepted_bid_id` and
+`deletion_requests.patient_id`, both hold UUID references to those same keys, so
+narrowing them alone would leave each side of a foreign key a different width.
+This is a storage and validation improvement with no safety consequence, and the
+migration risk is concentrated on every table at once, so it is deliberately
+still open rather than done in passing. Same pattern as the index count: the
+number in the open action was not right either.
 
 **What 1.3 measured, and what it did not.** A published NIST HG002 call set
 made with GATK HaplotypeCaller 4.1.4.1 under GATK Best Practices, scored on
