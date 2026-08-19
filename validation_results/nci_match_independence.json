@@ -1,0 +1,257 @@
+{
+  "audit": "nci_match_arm_independence",
+  "question": "How much of the NCI-MATCH concordance is generalisation rather than reading the engine's own evidence table?",
+  "source_results": "nci_match_concordance.json",
+  "summary": {
+    "total_scored": 32,
+    "contained": {
+      "n": 18,
+      "exact_top3": 12,
+      "class_top3": 17,
+      "exact_top3_pct": 66.7,
+      "class_top3_pct": 94.4
+    },
+    "independent": {
+      "n": 14,
+      "exact_top3": 1,
+      "class_top3": 6,
+      "exact_top3_pct": 7.1,
+      "class_top3_pct": 42.9
+    }
+  },
+  "caveats": [
+    "The independent subset is small; counts matter more than percentages.",
+    "Gene-level fallback counts an arm as contained, which understates the independent subset rather than flattering it.",
+    "NCI-MATCH is independent of this system's output, but both it and the evidence table distil the same clinical literature."
+  ],
+  "arms": {
+    "contained": [
+      {
+        "arm_id": "A",
+        "gene": "EGFR",
+        "assigned_drug": "afatinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "C1",
+        "gene": "MET",
+        "assigned_drug": "crizotinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "C2",
+        "gene": "MET",
+        "assigned_drug": "crizotinib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "E",
+        "gene": "EGFR",
+        "assigned_drug": "osimertinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "F",
+        "gene": "ALK",
+        "assigned_drug": "crizotinib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "G",
+        "gene": "ROS1",
+        "assigned_drug": "crizotinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "H",
+        "gene": "BRAF",
+        "assigned_drug": "dabrafenib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "J",
+        "gene": "ERBB2",
+        "assigned_drug": "pertuzumab",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "K1",
+        "gene": "FGFR1",
+        "assigned_drug": "erdafitinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Q",
+        "gene": "ERBB2",
+        "assigned_drug": "trastuzumab emtansine",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "R",
+        "gene": "BRAF",
+        "assigned_drug": "trametinib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "S1",
+        "gene": "NF1",
+        "assigned_drug": "trametinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1A",
+        "gene": "NRAS",
+        "assigned_drug": "binimetinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1B",
+        "gene": "CCND1",
+        "assigned_drug": "palbociclib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1C",
+        "gene": "CDK4",
+        "assigned_drug": "palbociclib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1E",
+        "gene": "NTRK1",
+        "assigned_drug": "larotrectinib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1F",
+        "gene": "PIK3CA",
+        "assigned_drug": "copanlisib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1K",
+        "gene": "AKT1",
+        "assigned_drug": "ipatasertib",
+        "exact_hit": true,
+        "class_hit": true
+      }
+    ],
+    "independent": [
+      {
+        "arm_id": "B",
+        "gene": "ERBB2",
+        "assigned_drug": "afatinib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "I",
+        "gene": "PIK3CA",
+        "assigned_drug": "taselisib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "K2",
+        "gene": "FGFR1",
+        "assigned_drug": "erdafitinib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "M",
+        "gene": "TSC1",
+        "assigned_drug": "sapanisertib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "P",
+        "gene": "PTEN",
+        "assigned_drug": "PI3K-beta inhibitor GSK2636771",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "S2",
+        "gene": "GNAQ",
+        "assigned_drug": "trametinib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "T",
+        "gene": "SMO",
+        "assigned_drug": "vismodegib",
+        "exact_hit": true,
+        "class_hit": true
+      },
+      {
+        "arm_id": "U",
+        "gene": "NF2",
+        "assigned_drug": "defactinib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "W",
+        "gene": "FGFR3",
+        "assigned_drug": "FGFR Inhibitor AZD4547",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "X",
+        "gene": "DDR2",
+        "assigned_drug": "dasatinib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "Z1G",
+        "gene": "PTEN",
+        "assigned_drug": "copanlisib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1H",
+        "gene": "PTEN",
+        "assigned_drug": "copanlisib",
+        "exact_hit": false,
+        "class_hit": true
+      },
+      {
+        "arm_id": "Z1I",
+        "gene": "BRCA1",
+        "assigned_drug": "adavosertib",
+        "exact_hit": false,
+        "class_hit": false
+      },
+      {
+        "arm_id": "Z1L",
+        "gene": "BRAF",
+        "assigned_drug": "ulixertinib",
+        "exact_hit": false,
+        "class_hit": false
+      }
+    ]
+  }
+}

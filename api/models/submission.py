@@ -21,7 +21,9 @@ class Submission(Base):
     __tablename__ = "submissions"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    patient_id: Mapped[str] = mapped_column(ForeignKey("patients.id"), nullable=False)
+    patient_id: Mapped[str] = mapped_column(
+        ForeignKey("patients.id"), nullable=False, index=True
+    )
 
     cancer_type: Mapped[str] = mapped_column(String(128), nullable=False)
     status: Mapped[SubmissionStatus] = mapped_column(

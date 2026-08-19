@@ -40,6 +40,89 @@ Reproduce that diagnosis: `python scripts/diagnose_concordance_dataset.py`
 
 ---
 
+## How much of this is generalisation, and how much is reading our own table
+
+Added 2026-08-19. `python scripts/audit_nci_match_independence.py`, artifact
+`validation_results/nci_match_independence.json`.
+
+The answer key is independent of anything OpenOncology produced, so this is not
+the F5 defect. But independent-of-our-output is not independent-of-our-evidence:
+NCI-MATCH arms and this repository's actionability table are both distillations
+of the same clinical literature. If every arm the engine gets right is an arm
+whose gene-drug pair was already in the table, the benchmark measures whether
+the engine can read its own table and order the result.
+
+Splitting the 32 scored arms on exactly that:
+
+| Subset | n | Exact Top-3 | Class Top-3 |
+|---|---|---|---|
+| Contained — assigned drug already in the evidence table for that gene | 18 | 12 (66.7%) | 17 (94.4%) |
+| Independent — assigned drug not in the table, so a hit came from the repurposing tiers | 14 | **1 (7.1%)** | 6 (42.9%) |
+| Combined (the headline) | 32 | 13 (40.6%) | 23 (71.9%) |
+
+**The headline is carried by the contained subset.** On arms whose drug the
+engine did not already hold, exact Top-3 concordance is 1 in 14. The class
+figure holds up better, 42.9%, which says the engine often reaches the right
+drug family without reaching the right drug.
+
+So the defensible claim from this benchmark is narrower than the headline:
+*when a biomarker-drug pair is in the evidence base, the ranker surfaces it in
+the top three most of the time.* Whether the engine generalises to pairs it does
+not already hold is answered by the independent subset, and that answer is
+currently close to no for exact matching.
+
+**Two caveats that cut in opposite directions.** An arm reachable only through
+gene-level fallback is counted as contained, which understates the independent
+subset rather than flattering it. Against that, this run served every lookup
+from the undated static table: OncoKB's public dump returned 401 throughout and
+the degraded-evidence alarm fired on all 33 resolutions. With a current dump,
+more arms would fall into the contained bucket, and the independent subset would
+shrink further rather than improve.
+
+Fourteen arms is an observation, not an estimate. The counts are given because
+the percentages over that n are not worth much on their own.
+
+---
+
+## Would a bigger evidence base fix it?
+
+The obvious response to a 7.1% independent subset is that the engine should hold
+more evidence. `data/civic_evidence.tsv` is a 4 MB CIViC bulk export already in
+this repository, used only for live per-variant lookups and never loaded into the
+actionability table. Loading it was measured before it was attempted, because the
+evidence table decides which drugs reach a patient's report and is the
+highest-consequence thing in this codebase to edit on an intuition.
+
+`python scripts/audit_civic_coverage_gain.py`, artifact
+`validation_results/civic_coverage_gain.json`:
+
+| | |
+|---|---|
+| CIViC rows | 4,854 |
+| Predictive, supporting direction | 2,461 |
+| Of those, evidence level A or B | 830 |
+| Distinct gene-drug pairs | 487 across 159 genes |
+| NCI-MATCH arms missed on exact match | 13 |
+| **Arms CIViC A/B would make reachable** | **3** (ERBB2 afatinib, FGFR1 erdafitinib, GNAQ trametinib) |
+| Arms still absent | 10 |
+
+Only level A and B are counted. A is validated association and B is clinical
+evidence; C, D and E are case study, preclinical and inferential, and loading
+those as actionable would inflate what the system claims relative to what it
+knows.
+
+**The conclusion is not the one the premise suggested.** 487 pairs across 159
+genes is a real expansion against a static table of 335 entries, and worth doing
+on coverage grounds. But it closes 3 of the 13 measured misses. The
+generalisation gap is not mostly an evidence-volume problem, so loading CIViC
+would improve the table without fixing the thing that motivated loading it.
+
+Coverage is also not correctness. A reachable pair is not a top-three
+recommendation and not a right one, so the 3 is an upper bound on the gain and
+the real figure can only come from loading the data and rerunning the benchmark.
+
+---
+
 ## Why NCI-MATCH
 
 Each NCI-MATCH subprotocol is an explicit, published, expert-committee decision of
