@@ -1,0 +1,75 @@
+{
+  "gate": "variant_calling_accuracy",
+  "mode": "variant_calling",
+  "measures": "End-to-end variant calling accuracy against GIAB HG002.",
+  "truth_set": {
+    "name": "GIAB HG002 NISTv4.2.1 GRCh38",
+    "vcf": "HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+    "bed": "HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+    "source": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/"
+  },
+  "query": [
+    "validation_results\\cache\\HG002_GRCh38_BGIseq-2x150-100x_NIST_20211126_snp.vcf.gz",
+    "validation_results\\cache\\HG002_GRCh38_BGIseq-2x150-100x_NIST_20211126_indel.vcf.gz"
+  ],
+  "query_label": "NIST BGIseq 2x150 100x HG002, GATK HaplotypeCaller 4.1.4.1, GATK Best Practices (NOT this repository's pipeline)",
+  "query_from_repo_pipeline": false,
+  "scope": {
+    "chrom": "chr20",
+    "confident_regions_only": true,
+    "genotype_compared": false,
+    "caller_rejected_query_calls_counted": false
+  },
+  "targets": {
+    "sensitivity": 0.99,
+    "ppv": 0.95
+  },
+  "results": {
+    "overall": {
+      "truth_total": 83325,
+      "query_total": 80754,
+      "tp": 79843,
+      "fp": 911,
+      "fn": 3482,
+      "sensitivity": 0.9582118211821182,
+      "ppv": 0.9887188250736806,
+      "f1": 0.973226311715698,
+      "meets_sensitivity_target": false,
+      "meets_ppv_target": true
+    },
+    "snv": {
+      "truth_total": 71387,
+      "query_total": 68328,
+      "tp": 68311,
+      "fp": 17,
+      "fn": 3076,
+      "sensitivity": 0.9569109221566952,
+      "ppv": 0.9997512000936658,
+      "f1": 0.9778620763697526,
+      "meets_sensitivity_target": false,
+      "meets_ppv_target": true
+    },
+    "indel": {
+      "truth_total": 11938,
+      "query_total": 12426,
+      "tp": 11532,
+      "fp": 894,
+      "fn": 406,
+      "sensitivity": 0.9659909532585023,
+      "ppv": 0.9280540801545147,
+      "f1": 0.9466425874240683,
+      "meets_sensitivity_target": false,
+      "meets_ppv_target": false
+    },
+    "genotype_mismatches": 0,
+    "query_records_outside_confident_regions": 17849
+  },
+  "elapsed_seconds": 75.1,
+  "caveats": [
+    "Allele-identity comparison after trimming, not haplotype comparison. Indel recall is understated against a real caller; use hap.py or rtg vcfeval once the toolchain exists.",
+    "Only variants inside the NIST high-confidence BED are evaluated.",
+    "Genotype is not compared unless --match-genotype was passed."
+  ],
+  "satisfies_regulatory_gate_3_1": false,
+  "gate_status": "not satisfied: the call set was not asserted to come from this repository's pipeline/main.nf, so it measures some other pipeline however good the numbers are"
+}
