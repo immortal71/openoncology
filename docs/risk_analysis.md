@@ -645,7 +645,7 @@ and 2.
 | # | Action | Hazard | Blocking clinical use? |
 |---|---|---|---|
 | 1 | Run `scripts/validate_variant_calling.py` against HG002 calls from `pipeline/main.nf`. Harness and truth set ready; needs a host with the toolchain | H6 | Yes |
-| 2 | Biomarker-driven key measured against the pool production actually uses (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`): **37.5% exact Top-3, 81.2% class**. Every previously published figure used a pool model the app does not use. Remaining: test whether production should adopt the `fallback` pool (15 exact vs 12 on these arms), and a larger arm set | H5 | Partly |
+| 2 | Biomarker-driven key measured against the pool production actually uses (NCI-MATCH, `BENCHMARK_NCI_MATCH.md`): **37.5% exact Top-3, 81.2% class**. Every previously published figure used a pool model the app does not use. The `fallback` A/B is unresolved: 470 gold cases are 88% leaky in a way that favours `fallback`, and the clean subset is n=8. **Remaining: a biomarker-driven case set not drawn from the evidence table being tested** | H5 | Partly |
 | 3 | ~~Carry lookup-failure state per *variant*~~ **Done 2026-08-19**, migration `0014`, `mutations.evidence_lookup_status` | H3 | Closed |
 | 4 | ~~Decide whether a degraded evidence base should block output~~ **Done 2026-08-19**, `require_current_evidence` policy plus a sustained-fallback alarm | H4 | Closed |
 | 5 | ~~Formal risk register with likelihood and severity scoring~~ **Done 2026-08-19**, [RISK_REGISTER.md](RISK_REGISTER.md) | all | Closed |

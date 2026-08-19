@@ -49,6 +49,7 @@ import json
 import os
 import re
 import sys
+from functools import lru_cache
 
 _REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(_REPO_ROOT, "api"))
@@ -377,17 +378,17 @@ def run_pipeline(gene: str, variant: str, mode: str = "tier2") -> list[str]:
 
     if mode == "tier2":
         candidates = []
-        for cand in _tier2_candidates(gene):
+        for cand in (dict(c) for c in _tier2_candidates_cached(gene)):
             key = normalise_drug(cand.get("drug_name") or "")
             if key in levels_by_drug:
                 cand = {**cand, "oncokb_level": levels_by_drug[key]}
             candidates.append(cand)
     elif mode == "fallback" and not candidates:
-        candidates = _tier2_candidates(gene)
+        candidates = [dict(c) for c in _tier2_candidates_cached(gene)]
     elif mode == "union":
         known = {normalise_drug(c["drug_name"]) for c in candidates}
         levels = {normalise_drug(k): v for k, v in evidence.items()}
-        for cand in _tier2_candidates(gene):
+        for cand in (dict(c) for c in _tier2_candidates_cached(gene)):
             key = normalise_drug(cand.get("drug_name") or "")
             if not key or key in known:
                 continue
@@ -401,6 +402,16 @@ def run_pipeline(gene: str, variant: str, mode: str = "tier2") -> list[str]:
     if not candidates:
         return []
     return [d["drug_name"] for d in rank_candidates(candidates)[:3]]
+
+
+@lru_cache(maxsize=None)
+def _tier2_candidates_cached(gene: str) -> tuple:
+    """Tier 2 depends only on the gene, so one live call per gene per run.
+
+    Without this an A/B over several hundred gold cases makes the same
+    OpenTargets and DGIdb requests dozens of times.
+    """
+    return tuple(_tier2_candidates(gene))
 
 
 def _tier2_candidates(gene: str) -> list[dict]:

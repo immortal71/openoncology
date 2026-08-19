@@ -202,6 +202,45 @@ is three arms, and there are no confidence intervals here. It is enough to
 justify testing the change, not enough to justify making it on this evidence
 alone.
 
+### The A/B, and why it does not settle it
+
+`scripts/ab_candidate_pool.py` ran both models over the ranking gate's 470 gold
+cases with a paired McNemar exact test and a bootstrap interval. Artifact:
+`validation_results/ab_candidate_pool.json`.
+
+| Subset | n | `tier2` hit@3 | `fallback` hit@3 | Difference | 95% CI | McNemar p |
+|---|---|---|---|---|---|---|
+| Overall | 470 | 74.89% | 92.98% | +18.09 | [14.47, 21.91] | ~0 |
+| Contained | 415 | 77.59% | 97.59% | +20.00 | [16.14, 24.10] | ~0 |
+| **Independent** | **8** | **37.50%** | **12.50%** | **-25.00** | [-62.5, 0.0] | 0.5 |
+
+**The overall result is an artifact and must not be quoted.** The harness was
+written on the assumption that leakage inflates both arms equally, so a paired
+difference would survive it. That assumption is wrong here, and this run
+disproved it.
+
+`fallback` reads the evidence table by preference. The contained subset is
+*defined* as the cases whose gold answer is already in the evidence table. So
+scoring `fallback` on contained cases asks whether a model that reads the table
+does well on cases selected for the table holding the answer. It wins by 20
+points, and the number carries almost no information. A leakage bias is neutral
+in a paired comparison only when neither arm correlates with the leak; here one
+arm is defined by it.
+
+Contained cases are 88.3% of the gold set, so they dominate the overall figure
+entirely.
+
+The only subset that can answer the question is the independent one, and there
+`fallback` is **worse**, by 25 points, on 8 cases, with two discordant pairs and
+p = 0.5. That is not evidence for the change and it is not evidence against it.
+It is not evidence.
+
+**So the pool question is still open, and the answer is "we cannot tell yet".**
+The NCI-MATCH arms suggested `fallback`; the only clean subset here leans the
+other way; neither has the power to decide. What is needed is a biomarker-driven
+case set whose answers are not drawn from the evidence table being tested, at a
+scale well beyond eight. `run_ai_analysis` is unchanged.
+
 ## Why NCI-MATCH
 
 Each NCI-MATCH subprotocol is an explicit, published, expert-committee decision of
