@@ -174,18 +174,33 @@ than assumed:
 | `tier1` | evidence table only | 13/32 (40.6%) | 23/32 (71.9%) | 2/32 |
 | `fallback` | table, then Tier 2 when empty | **15/32 (46.9%)** | **25/32 (78.1%)** | 0/32 |
 | `union` | both merged | 9/32 (28.1%) | 24/32 (75.0%) | 0/32 |
-| `tier2` | Tier 2 only, table annotates | pending | pending | pending |
+| `tier2` | Tier 2 only, table annotates. **What production does** | 12/32 (37.5%) | **26/32 (81.2%)** | 0/32 |
 
-`union` scores materially worse on exact match than `fallback` while holding
-class concordance, which says the extra candidates displace the right drug from
-the top three without changing the drug family. That is a result about the
-ranking function rather than about coverage, and it connects to F16: a top-three
-cut taken from a large pool of similarly scored candidates is decided by very
-little.
+Three things follow, and the third is the one worth acting on.
 
-None of these is production. `tier2` is the closest, and until it finishes the
-honest statement is that the published figure depends on a pool model this
-benchmark chose without matching the application.
+**The published figure came from a pool the application does not use.** Every
+number this benchmark has reported was `tier1`. Production is `tier2`, which
+scores 37.5% exact and 81.2% class. The headline in the results table above is
+now the production model for that reason.
+
+**The two pools are good at different things.** `tier2` gives the best class
+concordance of any model, 81.2%: a broad target-derived pool usually reaches the
+right drug family. `fallback` gives the best exact concordance, 46.9%: the
+evidence table names the specific drug when it has an opinion. Neither is better
+outright, and the split is coherent rather than noise. `union` is worst on
+exact, because merging both pools lets similarly scored candidates displace the
+named drug from a three-slot cut, which is F16 showing up in an aggregate.
+
+**So production is probably using the wrong pool model.** `fallback` uses the
+table where it has an answer and Tier 2 where it does not, and on these arms it
+converts 12 exact hits into 15 while giving up one class hit. That suggests
+changing `run_ai_analysis` to prefer evidence-table candidates and fall back to
+the repurposing pool, rather than ranking the repurposing pool and annotating it.
+
+That is a suggestion, not a conclusion. Thirty-two arms is small, the difference
+is three arms, and there are no confidence intervals here. It is enough to
+justify testing the change, not enough to justify making it on this evidence
+alone.
 
 ## Why NCI-MATCH
 
@@ -230,13 +245,14 @@ That prevalence rule is not uniformly favourable, which is the point: it moved a
 | Arms parsed from trial record | 38 |
 | Arms scored | 32 |
 | Out of scope | 6 |
-| **Exact Top-3 concordance** | **15/32 = 46.9%** |
-| **Class Top-3 concordance** | **25/32 = 78.1%** |
+| **Exact Top-3 concordance** | **12/32 = 37.5%** |
+| **Class Top-3 concordance** | **26/32 = 81.2%** |
 | No recommendation returned | 0/32 = 0.0% |
 
-Earlier runs of this table read 12/32 and 22/32 on 2026-08-12, then 13/32 and
-23/32, both with Tier 2 unreachable. `--no-tier2` reproduces the Tier-1-only
-figures.
+These are `--mode tier2`, the pool production actually uses. Earlier runs of this
+table reported 12/32 and 22/32 on 2026-08-12, then 13/32 and 23/32, all under
+`--mode tier1` with the Tier 2 path unreachable. Every mode is reproducible from
+the table above.
 
 > No-prediction fell from 5/32 to 4/32 when the BRCA1/2 truncating-variant fix
 > landed (BRCA1 now returns PARP inhibitors instead of nothing). Concordance did

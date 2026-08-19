@@ -32,8 +32,9 @@ listed open action or removes a hazard in
 | 1.7 | Restore the dropped indexes; bound the unbounded VARCHAR columns | — | Indexes done (17 of 19, migration `0015`). VARCHAR open |
 | 1.8 | Route-level authorisation sweep | S2 | Done, and it found F14 |
 | 1.9 | Merge the two `ai` packages so the repurposing tier runs outside the container | H2 | Done, F15 |
-| 1.10 | Make the benchmark measure the pool production actually uses | H5 | In progress |
-| 1.11 | Algorithm version locking and change control | — | Required by section 2.3 |
+| 1.10 | Make the benchmark measure the pool production actually uses | H5 | Done, `--mode tier2` |
+| 1.11 | Test whether production should use the `fallback` candidate pool | H5 | Open, evidence in `BENCHMARK_NCI_MATCH.md` |
+| 1.12 | Algorithm version locking and change control | — | Required by section 2.3 |
 
 **On 1.7's VARCHAR half.** The open action says 11 unbounded VARCHAR columns.
 There are 21, and 19 of them are UUID primary keys carrying
