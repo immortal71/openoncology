@@ -558,6 +558,60 @@ onto itself. The effect is about 0.3% and usually clipped by the 1.0 cap, so it
 is recorded as a known non-monotonicity, marked xfail in the tests, rather than
 presented as urgent.
 
+### F17. The OncoKB dump parser read nothing, and would have inverted a drug if it had (H1, H4) — FIXED
+
+Two defects in one file, and the second was hidden by the first.
+
+**The dump parsed to zero rows.** `api/static/oncokb_actionable_variants_cache.txt`
+holds 253 rows of real OncoKB data and produced an empty table for as long as it
+has been in the repository. `csv.DictReader(..., delimiter="	")` read the whole
+header as a single column, because the file has no tab characters at all: its
+columns are aligned with runs of eight spaces, which is what a download by hand
+from the dataAccess page produces. That route is the documented workaround for
+the `401` the public dump returns without a token, so the format the workaround
+produces was the one format the parser could not read.
+
+Nothing said so. An unparseable cache and an absent cache both returned an empty
+table, and the service logged only that the dump was unreachable, which was true
+and beside the point. A cache that exists and yields nothing now logs at
+`WARNING` naming the byte count and the expected columns.
+
+**The dump is per cancer type; the table is not.** Fixing the parsing exposed
+the real hazard. The dump carries a Cancer Type column that the parser discards,
+so rows collapse onto a `(gene, alteration)` key that cannot hold them:
+
+    BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+    BRAF V600E  Hairy Cell Leuk.   LEVEL_1   Vemurafenib
+    BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+
+Last write wins, so once the dump parsed, `BRAF V600E` + vemurafenib became
+`LEVEL_R1`. A sensitising drug read as a resistance marker, which would suppress
+a correct melanoma recommendation. Picking the other way is no better: it would
+claim the drug works in colorectal, where the R1 exists precisely because it
+does not. Ten entries in this dump conflict that way.
+
+This was latent rather than new. The same collapse applies to the `fresh_cache`
+and `download` paths, so any deployment that configures a token and reaches a
+real dump was exposed to it. It never fired only because the parser had never
+successfully read a dump.
+
+**Fixed** by refusing to choose. A gene, alteration and drug whose level differs
+across cancer types is dropped from the dump-derived table and logged, leaving
+the curated table to answer, because that table applies cancer context through
+`_apply_cancer_context_override` and the dump-derived one cannot.
+
+**Also changed:** a cache past its freshness window is now preferred over the
+built-in table. A week-old dump carries a date; the built-in table has none, so
+discarding the dated one for the undated one was the wrong way round. Provenance
+reports `stale_cache` and `is_current` stays `False`, because dated is not
+current. The actionability table goes from 335 undated entries to 421 entries
+carrying a real snapshot date.
+
+**Residual risk.** The ten dropped entries are a real coverage loss, taken
+deliberately over a wrong answer. The proper fix is a cancer-type dimension in
+the evidence table, which is a schema change, and until then any dump this
+system ingests is silently narrower than the dump itself.
+
 ---
 
 ## 3. What is not yet analysed
@@ -638,7 +692,7 @@ column is asserted, not enforced.
 
 | Hazard | Findings | Control in place | Test that fails if it stops running |
 |---|---|---|---|
-| H1 resistance ignored | F1, F7, F9 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
+| H1 resistance ignored | F1, F7, F9, F17 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H2 actionable variant missed | F2, F8, F15 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H3 lookup failure read as a negative | F3, F10, F11, F14 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py` |
 | H4 stale evidence base | F4 | Provenance stamped onto the result at production time; static fallback logged at `WARNING` | `test_evidence_provenance.py` |

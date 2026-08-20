@@ -69,6 +69,7 @@ _ONCOKB_CACHE_MAX_AGE_DAYS = 7
 PROVENANCE_FRESH_CACHE = "fresh_cache"
 PROVENANCE_DOWNLOAD = "download"
 PROVENANCE_STATIC_FALLBACK = "static_fallback"
+PROVENANCE_STALE_CACHE = "stale_cache"
 # The live per-variant OncoKB API answered for this specific lookup. Recorded
 # per-call rather than in module state, because it says nothing about the table.
 PROVENANCE_LIVE_API = "live_api"
@@ -77,6 +78,10 @@ _PROVENANCE_CAVEATS: dict[str, str] = {
     PROVENANCE_DOWNLOAD: "",
     PROVENANCE_FRESH_CACHE: "",
     PROVENANCE_LIVE_API: "",
+    PROVENANCE_STALE_CACHE: (
+        "the cached OncoKB dump is older than the freshness window and the live "
+        "dump was unreachable, so actionability is dated but out of date"
+    ),
     PROVENANCE_STATIC_FALLBACK: (
         "Evidence served from the built-in static table, which carries no version "
         "and no release date. The OncoKB public dump could not be reached, so this "
@@ -1561,10 +1566,57 @@ def _split_drug_names(raw_drugs: str) -> list[str]:
     return cleaned
 
 
+def _iter_dump_rows(text: str):
+    r"""Yield dict rows from an OncoKB dump, tab- or whitespace-separated.
+
+    The published dump is tab-separated, but the documented workaround for a
+    401 is to download it from the dataAccess page by hand, and a file that has
+    been through a browser or a copy-paste arrives column-aligned with runs of
+    spaces and no tabs at all.
+
+    That is not hypothetical. The cache file committed to this repository has
+    zero tab characters and eight-space separators, so csv.DictReader with
+    delimiter="\t" read the entire header as ONE column, every field lookup
+    missed, every row was skipped, and 253 real rows of OncoKB data parsed to
+    nothing. Nothing said so: an unparseable cache and an absent cache both
+    produced an empty table.
+
+    Splitting on two-or-more spaces rather than one is what keeps
+    "BCR-ABL1 Fusion" and "Chronic Myelogenous Leukemia" intact.
+    """
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return
+    # Strip a byte-order mark; it survives a browser download and would
+    # otherwise corrupt the first column name.
+    lines[0] = lines[0].lstrip("﻿")
+
+    if "\t" in lines[0]:
+        yield from csv.DictReader(lines, delimiter="\t")
+        return
+
+    header = re.split(r" {2,}", lines[0].strip())
+    if len(header) < 2:
+        return
+    logger.info(
+        "[OncoKB] dump has no tabs; reading %d whitespace-aligned columns",
+        len(header),
+    )
+    for line in lines[1:]:
+        fields = re.split(r" {2,}", line.strip())
+        if len(fields) < 2:
+            continue
+        fields += [""] * (len(header) - len(fields))
+        yield dict(zip(header, fields))
+
+
 def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[str, str]]:
     parsed: dict[tuple[str, str], dict[str, str]] = {}
-    reader = csv.DictReader(tsv_text.splitlines(), delimiter="\t")
-    for row in reader:
+    # Drugs whose level differs between cancer types, and are therefore
+    # unrepresentable in a cancer-agnostic table. See the note below.
+    conflicts: list[tuple[str, str, str, str, str]] = []
+    dropped: set[tuple[tuple[str, str], str]] = set()
+    for row in _iter_dump_rows(tsv_text):
         gene = _pick_field(row, ("HUGO_SYMBOL", "GENE", "GENE_SYMBOL", "SYMBOL")).upper()
         alteration_raw = _pick_field(
             row,
@@ -1593,8 +1645,44 @@ def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[s
             parsed[key] = {}
 
         for drug in _split_drug_names(drugs_raw):
+            previous = parsed[key].get(drug)
+            if previous is not None and previous != level:
+                # The dump is one row per cancer type; this table has no cancer
+                # dimension. The same gene, alteration and drug can therefore
+                # arrive twice with opposite meanings:
+                #
+                #   BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+                #   BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+                #
+                # Last-write-wins turned vemurafenib for BRAF V600E into a
+                # resistance marker, which would suppress a correct melanoma
+                # recommendation. Picking the other way would claim a drug works
+                # in colorectal where it does not.
+                #
+                # Neither is safe without the cancer context, so the conflicted
+                # drug is dropped from the dump-derived table and the curated
+                # entry answers instead. That table applies cancer context via
+                # _apply_cancer_context_override; this one cannot.
+                conflicts.append((gene, alt_norm, drug, previous, level))
+                parsed[key].pop(drug, None)
+                dropped.add((key, drug))
+                continue
+            if (key, drug) in dropped:
+                continue
             parsed[key][drug] = level
 
+    if conflicts:
+        logger.warning(
+            "[OncoKB] %d gene/alteration/drug entries disagree across cancer types "
+            "and were dropped from the dump-derived table, because it has no cancer "
+            "dimension to hold both. Example: %s %s %s is %s and %s. The curated "
+            "table answers for these.",
+            len(conflicts),
+            *conflicts[0][:3],
+            conflicts[0][3],
+            conflicts[0][4],
+        )
+    parsed = {k: v for k, v in parsed.items() if v}
     return parsed
 
 
@@ -1609,6 +1697,19 @@ def _load_public_table_from_cache(cache_path: Path) -> dict[tuple[str, str], dic
                 "[OncoKB] loaded %d entries from local cache: %s",
                 len(table),
                 cache_path,
+            )
+        elif text.strip():
+            # A cache that exists and yields nothing is a broken cache, not an
+            # absent one, and returning an empty table makes those two
+            # indistinguishable. This file sat here parsing to zero rows while
+            # the service reported only that the dump was unreachable.
+            logger.warning(
+                "[OncoKB] cache file %s is %d bytes and parsed to ZERO entries. "
+                "It exists but cannot be read, which is not the same as missing. "
+                "Expected columns Gene / Alteration / Level / Drug(s), separated "
+                "by tabs or by runs of spaces.",
+                cache_path,
+                len(text),
             )
         return table
     except Exception as exc:
@@ -1793,6 +1894,23 @@ def _bootstrap_oncokb_public_table() -> None:
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
         return
 
+    # Before giving up on dated evidence: a cache past its freshness window is
+    # still a real OncoKB dump with a date on it, and the built-in table has no
+    # date at all. Preferring the undated table over a week-old real one is the
+    # wrong way round, so a stale cache is used when the download fails and the
+    # provenance says stale_cache rather than claiming currency.
+    stale = _load_public_table_from_cache(cache_path)
+    if stale:
+        logger.warning(
+            "[OncoKB] bootstrap path=stale_cache — the dump was unreachable and the "
+            "cache is past its %d-day window, so actionability is dated but out of "
+            "date. Preferred over the undated built-in table.",
+            _ONCOKB_CACHE_MAX_AGE_DAYS,
+        )
+        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, stale)
+        _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
+        return
+
     # Degraded: undated hardcoded table. Warn, not info — this is the state in
     # which recommendations are produced from evidence of unknown age (F4).
     logger.warning(
@@ -1861,6 +1979,21 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
         _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
         _write_public_table_cache(raw_tsv_text, cache_path)
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
+        return len(_LEVEL_TABLE)
+
+    # A cache past its freshness window is still a dated OncoKB dump, and the
+    # built-in table has no date at all. See the same branch in
+    # _bootstrap_oncokb_public_table.
+    stale = _load_public_table_from_cache(cache_path)
+    if stale:
+        logger.warning(
+            "[OncoKB] ensure path=stale_cache — the dump was unreachable and the "
+            "cache is past its %d-day window, so actionability is dated but out "
+            "of date. Preferred over the undated built-in table.",
+            _ONCOKB_CACHE_MAX_AGE_DAYS,
+        )
+        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, stale)
+        _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
         return len(_LEVEL_TABLE)
 
     logger.warning(
