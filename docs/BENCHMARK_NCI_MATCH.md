@@ -278,11 +278,24 @@ and falls back to the full repurposing pool when it does not; membership comes
 from the table while any repurposing metadata already gathered for a member drug
 is merged in rather than discarded.
 
-**The default stays `tier2`, the existing behaviour.** Two small answer keys
-agreeing is a reason for a person to decide, not a reason for a benchmark to
-decide by itself, and this setting changes which cancer drugs an oncologist is
-shown. The evidence for flipping it is above. The case against is that n is 21
-and 32, and that neither key measures patient outcome.
+**The default was flipped to `evidence_first` on 2026-08-19**, by the
+maintainer, on the evidence above. The benchmark did not set it; a person did,
+which is the right order for a setting that changes which cancer drugs an
+oncologist is shown.
+
+What improves is drug identity within the top three on approved indications.
+What is not established is any patient outcome, because nothing here measures
+one.
+
+**The residual risk runs opposite to the gain.** `evidence_first` replaces the
+pool rather than reordering it, so wherever the table holds a stale or wrong
+answer, the broader repurposing pool no longer sits underneath it as a
+correction. Every gene measured was an approved indication, exactly where a
+curated table should be right, so the measurement cannot see this failure mode.
+Emerging and off-label biomarkers are the untested regime, and the answer key
+that would cover them does not exist yet.
+
+`candidate_pool_policy = "tier2"` restores the previous behaviour exactly.
 
 ## Why NCI-MATCH
 

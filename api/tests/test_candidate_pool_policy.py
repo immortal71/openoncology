@@ -6,10 +6,15 @@ table's answer when it has one. On the FDA-label answer key, independent of
 every source this engine reads, evidence_first scored 15.1 points higher on
 Precision@3 with 7 wins to 0.
 
-The default stays `tier2`, because changing which cancer drugs an oncologist is
-shown is a clinical decision and two small answer keys agreeing is not a mandate.
-These tests pin both branches so that flipping the setting is a deliberate act
-with predictable behaviour, and so the default cannot drift unnoticed.
+The default was flipped to `evidence_first` on 2026-08-19 as a maintainer
+decision on that evidence. These tests pin both branches, every fallback path,
+and the default itself, so the behaviour is predictable in either setting and the
+default cannot drift unnoticed.
+
+The fallback cases matter most. A policy that can empty the candidate list is
+worse than the imprecision it was introduced to fix, so an empty table, a
+resistance-only table, and a failed lookup all have to return the repurposing
+pool untouched.
 """
 from __future__ import annotations
 
@@ -53,11 +58,12 @@ def table(monkeypatch):
     return _set
 
 
-class TestDefaultIsUnchanged:
-    def test_setting_defaults_to_tier2(self):
+class TestDefault:
+    def test_setting_defaults_to_evidence_first(self):
+        """Flipped 2026-08-19. Pinned so the change stays deliberate."""
         from config import Settings
 
-        assert Settings().candidate_pool_policy == "tier2"
+        assert Settings().candidate_pool_policy == "evidence_first"
 
     def test_tier2_returns_the_pool_untouched(self, policy, table):
         policy("tier2")

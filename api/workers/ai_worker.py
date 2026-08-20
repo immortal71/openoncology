@@ -927,11 +927,17 @@ def _apply_candidate_pool_policy(
     dozens of candidates score similarly, and the specific drug the evidence
     names gets displaced by something merely plausible for the same target.
 
-    Default is `tier2`, the existing behaviour. This changes which cancer drugs
-    an oncologist is shown, so flipping it is a clinical decision for a human,
-    not a default a benchmark gets to set. The evidence for flipping it is in
-    the docs above; the case against is that both answer keys are small and
-    neither measures patient outcome.
+    Default is `evidence_first` as of 2026-08-19, a maintainer decision taken on
+    that evidence. What improves is drug identity within the top three on
+    approved indications. What is not established is any patient outcome, which
+    no benchmark here measures.
+
+    The residual risk runs opposite to the gain. This replaces the pool rather
+    than reordering it, so where the table holds a stale or wrong answer the
+    broader repurposing pool no longer sits underneath it. Every gene measured
+    was an approved indication, where a curated table should be right; emerging
+    and off-label biomarkers are the untested regime. Setting `tier2` restores
+    the previous behaviour exactly.
 
     Enrichment is preserved either way. Under evidence_first the table decides
     membership, and any repurposing metadata already gathered for a member drug

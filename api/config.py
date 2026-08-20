@@ -78,10 +78,20 @@ class Settings(BaseSettings):
     # [5.6, 26.2], 7 wins to 0, sign test p = 0.016; on NCI-MATCH arms it
     # turned 12 exact hits into 15.
     #
-    # Default stays tier2 anyway. This setting changes which cancer drugs an
-    # oncologist is shown, and two small answer keys agreeing is a reason for a
-    # human to decide, not a reason for a benchmark to decide by itself.
-    candidate_pool_policy: str = "tier2"
+    # Default flipped to evidence_first on 2026-08-19, as a maintainer decision
+    # on the evidence above rather than a default a benchmark set for itself.
+    #
+    # What improves is drug identity within the top three on approved
+    # indications. What is NOT established is any patient outcome; no benchmark
+    # in this repository measures one.
+    #
+    # The residual risk runs the other way from the gain. evidence_first replaces
+    # the pool rather than reordering it, so where the table holds a STALE or
+    # WRONG answer the broader repurposing pool no longer appears underneath it.
+    # Every measured gene was an approved indication, where a curated table
+    # should be right; emerging and off-label biomarkers are the untested regime.
+    # Set this back to "tier2" to restore the previous behaviour exactly.
+    candidate_pool_policy: str = "evidence_first"
 
     # Consecutive static-fallback resolutions before the log escalates from
     # WARNING to ERROR. One fallback is a blip; a sustained run means the
