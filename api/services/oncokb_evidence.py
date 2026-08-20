@@ -1610,6 +1610,61 @@ def _iter_dump_rows(text: str):
         yield dict(zip(header, fields))
 
 
+# Sensitising levels, strongest first. Resistance levels are deliberately not
+# on this scale: they mean the opposite thing, not a weaker version of it.
+_SENSITISING_STRENGTH = ("LEVEL_1", "LEVEL_2", "LEVEL_3A", "LEVEL_3B", "LEVEL_4")
+
+
+def _reconcile_cross_cancer_levels(first: str, second: str) -> Optional[str]:
+    """Resolve two levels for one gene, alteration and drug, or refuse to.
+
+    The dump is one row per cancer type and this table has no cancer dimension,
+    so the same drug arrives more than once with different levels. Those splits
+    are not all the same kind of disagreement.
+
+        BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+        BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+
+    is a contradiction: sensitising in one cancer, resistant in another. No
+    single value is right without the cancer context, so this returns None and
+    the caller drops the entry.
+
+        ERBB2 Amplification  Breast Cancer  LEVEL_1  Trastuzumab
+        ERBB2 Amplification  <other>        LEVEL_2  Trastuzumab
+
+    is not a contradiction. Both say the drug works; they differ on how strong
+    the evidence is. Dropping those would discard real actionability to avoid a
+    disagreement that has a safe answer, so the weaker level is kept. The drug
+    still surfaces, and the report does not claim standard-of-care support in a
+    cancer where only lower-tier evidence exists.
+
+    Of the ten conflicts in the shipped dump, two are contradictions and eight
+    are strength differences.
+    """
+    a = _normalise_level_token(first)
+    b = _normalise_level_token(second)
+    if a is None or b is None:
+        return None
+    a_resistant = a.startswith("LEVEL_R")
+    b_resistant = b.startswith("LEVEL_R")
+
+    if a_resistant != b_resistant:
+        return None  # sensitising against resistant: genuinely unrepresentable
+
+    if a_resistant:
+        # Both resistance. Keep the stronger warning; R1 outranks R2.
+        return "LEVEL_R1" if "LEVEL_R1" in (a, b) else a
+
+    ranks = [
+        _SENSITISING_STRENGTH.index(lv)
+        for lv in (a, b)
+        if lv in _SENSITISING_STRENGTH
+    ]
+    if len(ranks) != 2:
+        return None
+    return _SENSITISING_STRENGTH[max(ranks)]
+
+
 def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[str, str]]:
     parsed: dict[tuple[str, str], dict[str, str]] = {}
     # Drugs whose level differs between cancer types, and are therefore
@@ -1647,6 +1702,14 @@ def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[s
         for drug in _split_drug_names(drugs_raw):
             previous = parsed[key].get(drug)
             if previous is not None and previous != level:
+                resolved = _reconcile_cross_cancer_levels(previous, level)
+                if resolved is not None:
+                    # Same direction, different strength. Keeping the weaker
+                    # level is the conservative read: the drug still surfaces,
+                    # and it does not claim standard-of-care support in a cancer
+                    # where only lower-tier evidence exists.
+                    parsed[key][drug] = resolved
+                    continue
                 # The dump is one row per cancer type; this table has no cancer
                 # dimension. The same gene, alteration and drug can therefore
                 # arrive twice with opposite meanings:
@@ -1907,7 +1970,11 @@ def _bootstrap_oncokb_public_table() -> None:
             "date. Preferred over the undated built-in table.",
             _ONCOKB_CACHE_MAX_AGE_DAYS,
         )
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, stale)
+        # Curated first, dump second: the curated table applies cancer context
+        # through _apply_cancer_context_override and this projection of the dump
+        # cannot, so a cancer-blind LEVEL_2 must not overwrite a curated LEVEL_1.
+        # The dump fills keys the curated table does not answer.
+        _LEVEL_TABLE = _merge_level_tables(stale, _LEVEL_TABLE)
         _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
         return
 
@@ -1992,7 +2059,11 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
             "of date. Preferred over the undated built-in table.",
             _ONCOKB_CACHE_MAX_AGE_DAYS,
         )
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, stale)
+        # Curated first, dump second: the curated table applies cancer context
+        # through _apply_cancer_context_override and this projection of the dump
+        # cannot, so a cancer-blind LEVEL_2 must not overwrite a curated LEVEL_1.
+        # The dump fills keys the curated table does not answer.
+        _LEVEL_TABLE = _merge_level_tables(stale, _LEVEL_TABLE)
         _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
         return len(_LEVEL_TABLE)
 

@@ -595,10 +595,26 @@ and `download` paths, so any deployment that configures a token and reaches a
 real dump was exposed to it. It never fired only because the parser had never
 successfully read a dump.
 
-**Fixed** by refusing to choose. A gene, alteration and drug whose level differs
-across cancer types is dropped from the dump-derived table and logged, leaving
-the curated table to answer, because that table applies cancer context through
-`_apply_cancer_context_override` and the dump-derived one cannot.
+**Fixed**, but not by refusing to choose in every case. The first attempt
+dropped all ten conflicts, which was too blunt: they are two different kinds of
+disagreement and only one is a contradiction.
+
+    BRAF V600E  vemurafenib   LEVEL_1 / LEVEL_R1   opposite meaning
+    ERBB2 Amp   trastuzumab   LEVEL_1 / LEVEL_2    same meaning, different strength
+
+Two are contradictions and are dropped, because no value is right without the
+cancer context. The other eight say the same thing at different strengths, and
+dropping those discarded real actionability to avoid a disagreement that has a
+safe answer. Those keep the weaker level: the drug still surfaces, and the
+report does not claim standard-of-care support in a cancer where only
+lower-tier evidence exists. Two resistance levels keep the stronger warning.
+
+**Precedence also had to change.** Merging the dump on top of the curated table
+let a cancer-blind `LEVEL_2` overwrite a curated `LEVEL_1`, which is how
+`ERBB2 Amplification` + trastuzumab briefly read as `LEVEL_2`. The curated table
+resolves cancer context through `_apply_cancer_context_override` and this
+projection of the dump cannot, so the dump is merged underneath: it fills keys
+the curated table does not answer and never overrules one it does.
 
 **Also changed:** a cache past its freshness window is now preferred over the
 built-in table. A week-old dump carries a date; the built-in table has none, so
@@ -607,10 +623,18 @@ reports `stale_cache` and `is_current` stays `False`, because dated is not
 current. The actionability table goes from 335 undated entries to 421 entries
 carrying a real snapshot date.
 
-**Residual risk.** The ten dropped entries are a real coverage loss, taken
-deliberately over a wrong answer. The proper fix is a cancer-type dimension in
-the evidence table, which is a schema change, and until then any dump this
-system ingests is silently narrower than the dump itself.
+**Residual risk.** Two dropped entries are a real coverage loss, taken
+deliberately over a wrong answer, and the eight downgraded ones understate their
+evidence in the cancer where the stronger level applies. Both are consequences
+of a table with no cancer dimension, and the proper fix is that dimension, which
+is a schema change. Until then any dump this system ingests is silently narrower
+and weaker than the dump itself.
+
+The `fresh_cache` and `download` paths still merge on top of the curated table
+rather than underneath it. The conflict guard protects them from the inversion,
+but a token-holding deployment can still see a curated level overwritten by a
+cancer-blind one. That is untested here because no token is available, and it is
+recorded rather than changed blind.
 
 ---
 

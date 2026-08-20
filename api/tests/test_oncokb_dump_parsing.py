@@ -38,6 +38,9 @@ for _p in (str(_API_DIR), str(_REPO_ROOT)):
 
 import services.oncokb_evidence as ev  # noqa: E402
 
+TAB = chr(9)
+NL = chr(10)
+
 _COLS = ["Gene", "Alteration", "Cancer Type", "Level", "Drug(s)", "Drug Abstracts"]
 _ROWS = [
     ["ABL1", "BCR-ABL1 Fusion", "Chronic Myelogenous Leukemia", "LEVEL_1", "Imatinib", ""],
@@ -111,6 +114,90 @@ class TestTheRealCacheFileParses:
         table = ev._load_public_table_from_cache(path)
         assert len(table) >= 50, f"only {len(table)} entries parsed"
         assert len({gene for gene, _alt in table}) >= 25
+
+
+class TestCrossCancerConflicts:
+    """The dump is per cancer type; this table is not. Not all splits are equal.
+
+    Two rows for the same gene, alteration and drug can mean opposite things or
+    merely differ in strength, and treating those the same is wrong in both
+    directions. Dropping every disagreement discards real actionability;
+    resolving every disagreement can turn a sensitising drug into a resistance
+    marker. Of the ten conflicts in the shipped dump, two are contradictions
+    and eight are strength differences.
+    """
+
+    def test_sensitising_against_resistant_is_unresolvable(self):
+        """BRAF V600E vemurafenib: LEVEL_1 in melanoma, LEVEL_R1 in colorectal."""
+        assert ev._reconcile_cross_cancer_levels("LEVEL_1", "LEVEL_R1") is None
+        assert ev._reconcile_cross_cancer_levels("LEVEL_R1", "LEVEL_1") is None
+
+    def test_two_sensitising_levels_keep_the_weaker(self):
+        """Both say the drug works. The weaker claim is the safe one to keep."""
+        assert ev._reconcile_cross_cancer_levels("LEVEL_1", "LEVEL_2") == "LEVEL_2"
+        assert ev._reconcile_cross_cancer_levels("LEVEL_2", "LEVEL_1") == "LEVEL_2"
+        assert ev._reconcile_cross_cancer_levels("LEVEL_1", "LEVEL_3B") == "LEVEL_3B"
+
+    def test_two_resistance_levels_keep_the_stronger_warning(self):
+        assert ev._reconcile_cross_cancer_levels("LEVEL_R1", "LEVEL_R2") == "LEVEL_R1"
+        assert ev._reconcile_cross_cancer_levels("LEVEL_R2", "LEVEL_R1") == "LEVEL_R1"
+
+    def test_unparseable_levels_are_refused(self):
+        assert ev._reconcile_cross_cancer_levels("LEVEL_1", "nonsense") is None
+
+    @staticmethod
+    def _dump(*rows: tuple[str, str, str, str, str]) -> str:
+        header = ("Gene", "Alteration", "Cancer Type", "Level", "Drug(s)")
+        lines = [TAB.join(header)] + [TAB.join(r) for r in rows]
+        return NL.join(lines) + NL
+
+    def test_a_contradiction_drops_the_drug_from_the_dump_table(self):
+        text = self._dump(
+            ("BRAF", "V600E", "Melanoma", "LEVEL_1", "Vemurafenib"),
+            ("BRAF", "V600E", "Colorectal Cancer", "LEVEL_R1", "Vemurafenib"),
+        )
+        table = ev._parse_oncokb_public_dump_tsv(text)
+        assert "vemurafenib" not in table.get(("BRAF", "V600E"), {})
+
+    def test_a_strength_split_keeps_the_weaker_level(self):
+        text = self._dump(
+            ("ERBB2", "Amplification", "Breast Cancer", "LEVEL_1", "Trastuzumab"),
+            ("ERBB2", "Amplification", "Gastric Cancer", "LEVEL_2", "Trastuzumab"),
+        )
+        table = ev._parse_oncokb_public_dump_tsv(text)
+        assert table[("ERBB2", "AMPLIFICATION")]["trastuzumab"] == "LEVEL_2"
+
+    def test_a_key_left_empty_by_conflicts_is_removed(self):
+        text = self._dump(
+            ("BRAF", "V600E", "Melanoma", "LEVEL_1", "Vemurafenib"),
+            ("BRAF", "V600E", "Colorectal Cancer", "LEVEL_R1", "Vemurafenib"),
+        )
+        assert ("BRAF", "V600E") not in ev._parse_oncokb_public_dump_tsv(text)
+
+
+class TestCuratedEvidenceWins:
+    """A cancer-blind dump must not overwrite a cancer-aware curated entry.
+
+    The curated table resolves cancer context through
+    _apply_cancer_context_override. This projection of the dump has no cancer
+    dimension at all, so merging it on top would let a LEVEL_2 drawn from some
+    other cancer replace a curated LEVEL_1. The dump fills gaps; it does not
+    overrule.
+    """
+
+    def test_curated_level_survives_the_merge(self):
+        assert ev.lookup_oncokb_level("ERBB2", "Amplification", "trastuzumab") == "LEVEL_1"
+
+    def test_a_contradicted_drug_still_answers_from_the_curated_table(self):
+        assert ev.lookup_oncokb_level("BRAF", "V600E", "vemurafenib") == "LEVEL_1"
+
+    def test_merge_order_puts_the_dump_underneath(self):
+        curated = {("EGFR", "L858R"): {"osimertinib": "LEVEL_1"}}
+        dump = {("EGFR", "L858R"): {"osimertinib": "LEVEL_2"},
+                ("RARE", "V1M"): {"drugx": "LEVEL_3B"}}
+        merged = ev._merge_level_tables(dump, curated)
+        assert merged[("EGFR", "L858R")]["osimertinib"] == "LEVEL_1"
+        assert merged[("RARE", "V1M")]["drugx"] == "LEVEL_3B"
 
 
 class TestStaleBeatsUndated:
