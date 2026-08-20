@@ -1,0 +1,399 @@
+{
+  "answer_key": "fda_label_biomarker_to_drug",
+  "source": "openFDA drug label, INDICATIONS AND USAGE",
+  "independent_of": [
+    "OncoKB (evidence table and live API)",
+    "OpenTargets",
+    "DGIdb",
+    "CIViC"
+  ],
+  "why_independent": "openFDA is not queried anywhere in the recommendation path. The engine reads OncoKB, OpenTargets, DGIdb and CIViC; it does not read drug labels.",
+  "drugs_queried": 77,
+  "drugs_with_no_label": [
+    "infigratinib",
+    "midostaurin",
+    "mobocertinib"
+  ],
+  "drugs_with_no_recognised_gene": [
+    "abemaciclib",
+    "acalabrutinib",
+    "atezolizumab",
+    "dasatinib",
+    "dostarlimab",
+    "durvalumab",
+    "everolimus",
+    "glasdegib",
+    "ibrutinib",
+    "imatinib",
+    "larotrectinib",
+    "nilotinib",
+    "nivolumab",
+    "olaparib",
+    "palbociclib",
+    "pembrolizumab",
+    "ribociclib",
+    "ripretinib",
+    "rucaparib",
+    "sonidegib",
+    "sunitinib",
+    "talazoparib",
+    "tebentafusp",
+    "temsirolimus",
+    "venetoclax",
+    "vismodegib",
+    "zanubrutinib"
+  ],
+  "genes": 21,
+  "pairs": 50,
+  "key": {
+    "AKT1": [
+      "capivasertib"
+    ],
+    "ALK": [
+      "alectinib",
+      "brigatinib",
+      "ceritinib",
+      "crizotinib",
+      "lorlatinib"
+    ],
+    "BRAF": [
+      "binimetinib",
+      "cobimetinib",
+      "dabrafenib",
+      "encorafenib",
+      "trametinib",
+      "vemurafenib"
+    ],
+    "BRCA2": [
+      "niraparib"
+    ],
+    "EGFR": [
+      "afatinib",
+      "amivantamab",
+      "dacomitinib",
+      "erlotinib",
+      "gefitinib",
+      "osimertinib",
+      "regorafenib"
+    ],
+    "ERBB2": [
+      "lapatinib",
+      "neratinib",
+      "pertuzumab",
+      "trastuzumab",
+      "tucatinib"
+    ],
+    "EZH2": [
+      "tazemetostat"
+    ],
+    "FGFR2": [
+      "futibatinib",
+      "pemigatinib"
+    ],
+    "FGFR3": [
+      "erdafitinib"
+    ],
+    "FLT3": [
+      "gilteritinib",
+      "quizartinib"
+    ],
+    "IDH1": [
+      "ivosidenib",
+      "olutasidenib"
+    ],
+    "IDH2": [
+      "enasidenib"
+    ],
+    "KRAS": [
+      "adagrasib",
+      "sotorasib"
+    ],
+    "MET": [
+      "capmatinib",
+      "tepotinib"
+    ],
+    "NF1": [
+      "selumetinib"
+    ],
+    "PDGFRA": [
+      "avapritinib"
+    ],
+    "PIK3CA": [
+      "alpelisib",
+      "capivasertib",
+      "inavolisib"
+    ],
+    "PTEN": [
+      "capivasertib"
+    ],
+    "RET": [
+      "pralsetinib",
+      "selpercatinib"
+    ],
+    "ROS1": [
+      "crizotinib",
+      "entrectinib",
+      "repotrectinib"
+    ],
+    "VHL": [
+      "belzutifan"
+    ]
+  },
+  "evidence": [
+    {
+      "gene": "KRAS",
+      "drug": "adagrasib",
+      "sentence": "As a single agent, for the treatment of adult patients with KRAS G12C-mutated locally advanced or metastatic NSCLC, as determined by an FDA-approved test, who have received at least one prior systemic therapy."
+    },
+    {
+      "gene": "EGFR",
+      "drug": "afatinib",
+      "sentence": "1 INDICATIONS AND USAGE GILOTRIF is a kinase inhibitor indicated for: First-line treatment of patients with metastatic non-small cell lung cancer (NSCLC) whose tumors have non-resistant epidermal growth factor receptor (EGFR) mutations as detected by an FDA-approved test ( 1."
+    },
+    {
+      "gene": "ALK",
+      "drug": "alectinib",
+      "sentence": "1 INDICATIONS AND USAGE ALECENSA is a kinase inhibitor indicated for: adjuvant treatment in adult patients following tumor resection of anaplastic lymphoma kinase (ALK)-positive non-small cell lung cancer (NSCLC) (tumors \u2265 4 cm or node positive) as detected by an FDA-approved test."
+    },
+    {
+      "gene": "PIK3CA",
+      "drug": "alpelisib",
+      "sentence": "1 INDICATIONS AND USAGE VIJOICE is indicated for the treatment of adult and pediatric patients 2 years of age and older with severe manifestations of PIK3CA-Related Overgrowth Spectrum (PROS) who require systemic therapy."
+    },
+    {
+      "gene": "EGFR",
+      "drug": "amivantamab",
+      "sentence": "1 INDICATIONS AND USAGE RYBREVANT is a bispecific EGF receptor-directed and MET receptor-directed antibody indicated: in combination with lazertinib for the first-line treatment of adult patients with locally advanced or metastatic non-small cell lung cancer (NSCLC) with epidermal growth factor rece"
+    },
+    {
+      "gene": "PDGFRA",
+      "drug": "avapritinib",
+      "sentence": "1 INDICATIONS AND USAGE AYVAKIT is a kinase inhibitor indicated for: Gastrointestinal Stromal Tumor (GIST) the treatment of adults with unresectable or metastatic GIST harboring a platelet-derived growth factor receptor alpha (PDGFRA) exon 18 mutation, including PDGFRA D842V mutations."
+    },
+    {
+      "gene": "VHL",
+      "drug": "belzutifan",
+      "sentence": "1 INDICATIONS AND USAGE WELIREG is a hypoxia-inducible factor inhibitor indicated: von Hippel-Lindau (VHL) disease for treatment of adult patients with von Hippel-Lindau (VHL) disease who require therapy for associated renal cell carcinoma (RCC), central nervous system (CNS) hemangioblastomas, or pa"
+    },
+    {
+      "gene": "BRAF",
+      "drug": "binimetinib",
+      "sentence": "in combination with encorafenib, for the treatment of patients with unresectable or metastatic melanoma with a BRAF V600E or V600K mutation, as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ALK",
+      "drug": "brigatinib",
+      "sentence": "1 INDICATIONS AND USAGE ALUNBRIG is indicated for the treatment of adult patients with anaplastic lymphoma kinase (ALK)-positive metastatic non-small cell lung cancer (NSCLC) as detected by an FDA-approved test [see Dosage and Administration (2."
+    },
+    {
+      "gene": "PTEN",
+      "drug": "capivasertib",
+      "sentence": "in combination with fulvestrant for the treatment of adult patients with hormone receptor (HR)-positive, human epidermal growth factor receptor 2 (HER2)-negative, locally advanced or metastatic breast cancer with one or more PIK3CA/AKT1/PTEN -alterations as dete"
+    },
+    {
+      "gene": "AKT1",
+      "drug": "capivasertib",
+      "sentence": "in combination with fulvestrant for the treatment of adult patients with hormone receptor (HR)-positive, human epidermal growth factor receptor 2 (HER2)-negative, locally advanced or metastatic breast cancer with one or more PIK3CA/AKT1/PTEN -alterations as dete"
+    },
+    {
+      "gene": "PIK3CA",
+      "drug": "capivasertib",
+      "sentence": "in combination with fulvestrant for the treatment of adult patients with hormone receptor (HR)-positive, human epidermal growth factor receptor 2 (HER2)-negative, locally advanced or metastatic breast cancer with one or more PIK3CA/AKT1/PTEN -alterations as dete"
+    },
+    {
+      "gene": "MET",
+      "drug": "capmatinib",
+      "sentence": "1 INDICATIONS AND USAGE TABRECTA is indicated for the treatment of adult patients with metastatic non-small cell lung cancer (NSCLC) whose tumors have a mutation that leads to mesenchymal-epithelial transition (MET) exon 14 skipping as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ALK",
+      "drug": "ceritinib",
+      "sentence": "1 INDICATIONS AND USAGE ZYKADIA \u00ae is indicated for the treatment of adult patients with metastatic non-small cell lung cancer (NSCLC) whose tumors are anaplastic lymphoma kinase (ALK)-positive as detected by an FDA-approved test [see Dosage and Administration (2."
+    },
+    {
+      "gene": "BRAF",
+      "drug": "cobimetinib",
+      "sentence": "1 INDICATIONS AND USAGE COTELLIC \u00ae is a kinase inhibitor indicated: For the treatment of adult patients with unresectable or metastatic melanoma with a BRAF V600E or V600K mutation, in combination with vemurafenib."
+    },
+    {
+      "gene": "ALK",
+      "drug": "crizotinib",
+      "sentence": "adult patients with metastatic non-small cell lung cancer (NSCLC) whose tumors are anaplastic lymphoma kinase (ALK) or ROS1-positive as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ROS1",
+      "drug": "crizotinib",
+      "sentence": "adult patients with metastatic non-small cell lung cancer (NSCLC) whose tumors are anaplastic lymphoma kinase (ALK) or ROS1-positive as detected by an FDA-approved test."
+    },
+    {
+      "gene": "BRAF",
+      "drug": "dabrafenib",
+      "sentence": "1 INDICATIONS AND USAGE TAFINLAR is a kinase inhibitor indicated as a single agent for the treatment of patients with unresectable or metastatic melanoma with BRAF V600E mutation as detected by an FDA-approved test."
+    },
+    {
+      "gene": "EGFR",
+      "drug": "dacomitinib",
+      "sentence": "1 INDICATIONS AND USAGE VIZIMPRO is indicated for the first-line treatment of patients with metastatic non-small cell lung cancer (NSCLC) with epidermal growth factor receptor (EGFR) exon 19 deletion or exon 21 L858R substitution mutations as detected by an FDA-approved test [see Dosage and Administ"
+    },
+    {
+      "gene": "IDH2",
+      "drug": "enasidenib",
+      "sentence": "1 INDICATIONS AND USAGE IDHIFA is an isocitrate dehydrogenase-2 inhibitor indicated for the treatment of adult patients with relapsed or refractory acute myeloid leukemia (AML) with an isocitrate dehydrogenase-2 (IDH2) mutation as detected by an FDA-approved test ( 1."
+    },
+    {
+      "gene": "BRAF",
+      "drug": "encorafenib",
+      "sentence": "in combination with binimetinib, for the treatment of patients with unresectable or metastatic melanoma with a BRAF V600E or V600K mutation, as detected by an FDA-authorized test."
+    },
+    {
+      "gene": "ROS1",
+      "drug": "entrectinib",
+      "sentence": "1 INDICATIONS AND USAGE ROZLYTREK is a kinase inhibitor indicated for the treatment of: Adult patients with ROS1- positive metastatic non-small cell lung cancer (NSCLC) as detected by an FDA-approved test."
+    },
+    {
+      "gene": "FGFR3",
+      "drug": "erdafitinib",
+      "sentence": "1 INDICATIONS AND USAGE BALVERSA is indicated for the treatment of adult patients with locally advanced or metastatic urothelial carcinoma (mUC) with susceptible FGFR3 genetic alterations whose disease has progressed on or after at least one line of prior systemic therapy."
+    },
+    {
+      "gene": "EGFR",
+      "drug": "erlotinib",
+      "sentence": "1 INDICATIONS AND USAGE Erlotinib tablet is a kinase inhibitor indicated for: The treatment of patients with metastatic non-small cell lung cancer (NSCLC) whose tumors have epidermal growth factor receptor (EGFR) exon 19 deletions or exon 21 (L858R) substitution mutations as detected by an FDA-appro"
+    },
+    {
+      "gene": "FGFR2",
+      "drug": "futibatinib",
+      "sentence": "1 INDICATIONS AND USAGE LYTGOBI is indicated for the treatment of adult patients with previously treated, unresectable, locally advanced or metastatic intrahepatic cholangiocarcinoma harboring fibroblast growth factor receptor 2 (FGFR2) gene fusions or other rearrangements [see Dosage and Administra"
+    },
+    {
+      "gene": "EGFR",
+      "drug": "gefitinib",
+      "sentence": "1 INDICATIONS AND USAGE Gefitinib tablets are indicated for the first-line treatment of patients with metastatic non-small cell lung cancer (NSCLC) whose tumors have epidermal growth factor receptor (EGFR) exon 19 deletions or exon 21 (L858R) substitution mutations as detected by an FDA-approved tes"
+    },
+    {
+      "gene": "FLT3",
+      "drug": "gilteritinib",
+      "sentence": "1 INDICATIONS AND USAGE XOSPATA is a kinase inhibitor indicated for the treatment of adult patients who have relapsed or refractory acute myeloid leukemia (AML) with a FLT3 mutation as detected by an FDA-approved test."
+    },
+    {
+      "gene": "PIK3CA",
+      "drug": "inavolisib",
+      "sentence": "1 INDICATIONS AND USAGE ITOVEBI, in combination with palbociclib and fulvestrant, is indicated for the treatment of adults with endocrine-resistant, PIK3CA -mutated, hormone receptor (HR)-positive, human epidermal growth factor receptor 2 (HER2)-negative, locally advanced or metastatic breast cancer"
+    },
+    {
+      "gene": "IDH1",
+      "drug": "ivosidenib",
+      "sentence": "1 INDICATIONS AND USAGE TIBSOVO is an isocitrate dehydrogenase-1 (IDH1) inhibitor indicated for patients with a susceptible IDH1 mutation as detected by an FDA-approved test with: Newly Diagnosed Acute Myeloid Leukemia (AML) In combination with azacitidine or as monotherapy for the treatment of newl"
+    },
+    {
+      "gene": "ERBB2",
+      "drug": "lapatinib",
+      "sentence": "1 INDICATIONS AND USAGE Lapatinib tablets are indicated in combination with: capecitabine for the treatment of patients with advanced or metastatic breast cancer whose tumors overexpress human epidermal growth factor receptor 2 (HER2) and who have received prior therapy, including an anthracycline, "
+    },
+    {
+      "gene": "ALK",
+      "drug": "lorlatinib",
+      "sentence": "1 INDICATIONS AND USAGE LORBRENA \u00ae is indicated for the treatment of adult patients with metastatic non-small cell lung cancer (NSCLC) whose tumors are anaplastic lymphoma kinase (ALK)-positive as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ERBB2",
+      "drug": "neratinib",
+      "sentence": "1 INDICATIONS AND USAGE NERLYNX is a kinase inhibitor indicated: As a single agent, for the extended adjuvant treatment of adult patients with early-stage HER2-positive breast cancer, to follow adjuvant trastuzumab-based therapy."
+    },
+    {
+      "gene": "BRCA2",
+      "drug": "niraparib",
+      "sentence": "1 INDICATIONS AND USAGE AKEEGA with prednisone is indicated for the treatment of adult patients with deleterious or suspected deleterious BRCA2 -mutated ( BRCA2 m) metastatic castration-sensitive prostate cancer (mCSPC)."
+    },
+    {
+      "gene": "IDH1",
+      "drug": "olutasidenib",
+      "sentence": "1 INDICATIONS AND USAGE Relapsed or Refractory Acute Myeloid Leukemia REZLIDHIA is indicated for the treatment of adult patients with relapsed or refractory acute myeloid leukemia (AML) with a susceptible isocitrate dehydrogenase-1 (IDH1) mutation as detected by an FDA-approved test [see Dosage and "
+    },
+    {
+      "gene": "EGFR",
+      "drug": "osimertinib",
+      "sentence": "adjuvant therapy after tumor resection in adult patients with non-small cell lung cancer (NSCLC) whose tumors have epidermal growth factor receptor (EGFR) exon 19 deletions or exon 21 L858R mutations, as detected by an FDA-approved test."
+    },
+    {
+      "gene": "FGFR2",
+      "drug": "pemigatinib",
+      "sentence": "1 INDICATIONS AND USAGE PEMAZYRE is a kinase inhibitor indicated: for the treatment of adults with previously treated, unresectable locally advanced or metastatic cholangiocarcinoma with a fibroblast growth factor receptor 2 (FGFR2) fusion or other rearrangement as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ERBB2",
+      "drug": "pertuzumab",
+      "sentence": "1 INDICATIONS AND USAGE PERJETA is a HER2/neu receptor antagonist indicated for: Use in combination with trastuzumab and docetaxel for treatment of adults with HER2-positive metastatic breast cancer (MBC) who have not received prior anti-HER2 therapy or chemotherapy for metastatic disease."
+    },
+    {
+      "gene": "RET",
+      "drug": "pralsetinib",
+      "sentence": "1 INDICATIONS AND USAGE GAVRETO is a kinase inhibitor indicated for treatment of: Adult patients with metastatic rearranged during transfection (RET ) fusion-positive non-small cell lung cancer as detected by an FDA approved test (NSCLC)."
+    },
+    {
+      "gene": "FLT3",
+      "drug": "quizartinib",
+      "sentence": "1 INDICATIONS AND USAGE VANFLYTA is indicated in combination with standard cytarabine and anthracycline induction and cytarabine consolidation, and as maintenance monotherapy following consolidation chemotherapy, for the treatment of adult patients with newly diagnosed acute myeloid leukemia (AML) t"
+    },
+    {
+      "gene": "EGFR",
+      "drug": "regorafenib",
+      "sentence": "Metastatic colorectal cancer (CRC) who have been previously treated with fluoropyrimidine-, oxaliplatin- and irinotecan-based chemotherapy, an anti-VEGF therapy, and, if RAS wild-type, an anti-EGFR therapy."
+    },
+    {
+      "gene": "ROS1",
+      "drug": "repotrectinib",
+      "sentence": "adult patients with locally advanced or metastatic ROS1- positive non-small cell lung cancer (NSCLC)."
+    },
+    {
+      "gene": "RET",
+      "drug": "selpercatinib",
+      "sentence": "1 INDICATIONS AND USAGE RETEVMO \u00ae is a kinase inhibitor indicated for the treatment of: Adult patients with locally advanced or metastatic non-small cell lung cancer (NSCLC) with a rearranged during transfection (RET) gene fusion, as detected by an FDA-approved test ( 1."
+    },
+    {
+      "gene": "NF1",
+      "drug": "selumetinib",
+      "sentence": "1 INDICATIONS AND USAGE KOSELUGO is indicated for the treatment of adult and pediatric patients 1 year of age and older with neurofibromatosis type 1 (NF1) who have symptomatic, inoperable plexiform neurofibromas (PN) [see Dosage and Administration (2) ]."
+    },
+    {
+      "gene": "KRAS",
+      "drug": "sotorasib",
+      "sentence": "1 INDICATIONS AND USAGE LUMAKRAS is an inhibitor of the RAS GTPase family indicated for: KRAS G12C-mutated Locally Advanced or Metastatic Non-Small Cell Lung Cancer (NSCLC) As a single agent, for the treatment of adult patients with KRAS G12C-mutated locally advanced or metastatic NSCLC, as determin"
+    },
+    {
+      "gene": "EZH2",
+      "drug": "tazemetostat",
+      "sentence": "1 ) Adult patients with relapsed or refractory follicular lymphoma whose tumors are positive for an EZH2 mutation as detected by an FDA-approved test a"
+    },
+    {
+      "gene": "MET",
+      "drug": "tepotinib",
+      "sentence": "1 INDICATIONS AND USAGE TEPMETKO is indicated for the treatment of adult patients with metastatic non-small cell lung cancer (NSCLC) harboring mesenchymal-epithelial transition ( MET ) exon 14 skipping alterations."
+    },
+    {
+      "gene": "BRAF",
+      "drug": "trametinib",
+      "sentence": "1 INDICATIONS AND USAGE MEKINIST is a kinase inhibitor indicated as a single agent for the treatment of BRAF-inhibitor treatment-na\u00efve patients with unresectable or metastatic melanoma with BRAF V600E or V600K mutations as detected by an FDA-approved test."
+    },
+    {
+      "gene": "ERBB2",
+      "drug": "trastuzumab",
+      "sentence": "1 INDICATIONS AND USAGE KADCYLA is a HER2-targeted antibody and microtubule inhibitor conjugate indicated, as a single agent, for: the treatment of patients with HER2-positive, metastatic breast cancer who previously received trastuzumab and a taxane, separately or in combination."
+    },
+    {
+      "gene": "ERBB2",
+      "drug": "tucatinib",
+      "sentence": "in combination with trastuzumab and capecitabine for treatment of adult patients with advanced unresectable or metastatic HER2-positive breast cancer, including patients with brain metastases, who have received one or more prior anti-HER2-based regimens in the metastatic setting."
+    },
+    {
+      "gene": "BRAF",
+      "drug": "vemurafenib",
+      "sentence": "1 INDICATIONS AND USAGE ZELBORAF \u00ae is a kinase inhibitor indicated for the treatment of patients with unresectable or metastatic melanoma with BRAF V600E mutation as detected by an FDA-approved test."
+    }
+  ],
+  "caveats": [
+    "A gene named in an indications section is not always the selecting biomarker; labels also name genes in resistance and exclusion statements. Every pairing carries its source sentence for audit.",
+    "Absence means no recognised gene was named, not that the drug has no biomarker.",
+    "Agreement with an approved indication says nothing about patient outcome."
+  ]
+}

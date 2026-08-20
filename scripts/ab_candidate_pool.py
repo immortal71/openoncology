@@ -122,6 +122,42 @@ def _bootstrap_ci(
     return (round(lo * 100, 2), round(hi * 100, 2))
 
 
+def _bootstrap_ci_continuous(
+    pairs: list[tuple[float, float]], iterations: int = 5000, seed: int = 11
+) -> tuple[float, float]:
+    """Percentile CI on the mean paired difference for a continuous outcome.
+
+    hit@3 saturates on a broad answer key: if a gene's gold set holds five
+    approved drugs, almost any sane ranker puts one of them in the top three, so
+    both arms score near 100% and the binary test has nothing to separate. On
+    the FDA key that is exactly what happened, 95.24% against 100% with a single
+    discordant pair.
+
+    Precision@3 does not saturate, because it asks how many of the three slots
+    were right rather than whether any of them was. It is the outcome with power
+    on a key like this one.
+    """
+    if not pairs:
+        return (0.0, 0.0)
+    rng = random.Random(seed)
+    n = len(pairs)
+    diffs = []
+    for _ in range(iterations):
+        sample = [pairs[rng.randrange(n)] for _ in range(n)]
+        diffs.append(sum(b - a for a, b in sample) / n)
+    diffs.sort()
+    lo = diffs[int(0.025 * len(diffs))]
+    hi = diffs[int(0.975 * len(diffs)) - 1]
+    return (round(lo * 100, 2), round(hi * 100, 2))
+
+
+def _sign_test(pairs: list[tuple[float, float]]) -> tuple[int, int, float]:
+    """Two-sided sign test over cases where the two arms differ."""
+    b_wins = sum(1 for a, b in pairs if b > a)
+    a_wins = sum(1 for a, b in pairs if a > b)
+    return b_wins, a_wins, _binom_two_sided(b_wins, a_wins)
+
+
 def _load_cases(path: Path, limit: int | None) -> list[dict]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     cases = []
@@ -149,9 +185,49 @@ def _filter_independent(cases: list[dict]) -> list[dict]:
     return [c for c in cases if c.get("containment") == "independent"]
 
 
+def _load_fda_cases(path: Path) -> list[dict]:
+    """Cases from the FDA-label answer key.
+
+    One case per gene, gold set being every drug whose approved indication names
+    that gene as a positive selection criterion. Built by
+    scripts/build_fda_label_answer_key.py from openFDA, which no part of the
+    recommendation path reads, so nothing here leaks from the evidence table
+    being scored. Every case is therefore "independent" by construction, which
+    is the whole reason this source exists.
+
+    No variant is supplied. A label names the gene and often a specific
+    alteration, but the pairing under test is gene to drug, and passing an empty
+    variant is the honest expression of that.
+    """
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    cases = []
+    for gene, drugs in (payload.get("key") or {}).items():
+        gold = {_norm(d) for d in drugs if d}
+        if not gold:
+            continue
+        cases.append(
+            {
+                "case_id": f"FDA_{gene}",
+                "gene": gene,
+                "variant": "",
+                "gold": gold,
+                "containment": "independent",
+            }
+        )
+    return cases
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--gold", default=str(_GOLD))
+    ap.add_argument(
+        "--fda-key",
+        nargs="?",
+        const=str(_REPO_ROOT / "validation_results" / "fda_label_answer_key.json"),
+        help="use the FDA-label answer key instead of the OncoKB-derived gold "
+        "cases. Independent of every source the engine reads, and the only "
+        "answer key here that is.",
+    )
     ap.add_argument("--a", default="tier2", help="baseline model (production)")
     ap.add_argument("--b", default="fallback", help="challenger model")
     ap.add_argument("--limit", type=int, default=None)
@@ -167,7 +243,12 @@ def main(argv: list[str] | None = None) -> int:
 
     from benchmark_nci_match import run_pipeline
 
-    cases = _load_cases(Path(args.gold), args.limit)
+    if args.fda_key:
+        cases = _load_fda_cases(Path(args.fda_key))
+        if args.limit:
+            cases = cases[: args.limit]
+    else:
+        cases = _load_cases(Path(args.gold), args.limit)
     if args.independent_only:
         cases = _filter_independent(cases)
     if not cases:
@@ -206,6 +287,9 @@ def main(argv: list[str] | None = None) -> int:
         a_only = sum(1 for r in subset if r["a"]["hit"] and not r["b"]["hit"])
         pairs = [(r["a"]["hit"], r["b"]["hit"]) for r in subset]
         lo, hi = _bootstrap_ci(pairs)
+        prec_pairs = [(r["a"]["precision"], r["b"]["precision"]) for r in subset]
+        p_lo, p_hi = _bootstrap_ci_continuous(prec_pairs)
+        p_b, p_a, p_sign = _sign_test(prec_pairs)
         return {
             "n": n,
             "a_hit_at_3": round(100 * a_hits / n, 2),
@@ -221,6 +305,16 @@ def main(argv: list[str] | None = None) -> int:
             "difference_pct_points": round(100 * (b_hits - a_hits) / n, 2),
             "bootstrap_95ci_pct_points": [lo, hi],
             "mcnemar_exact_p": round(_binom_two_sided(b_only, a_only), 5),
+            "precision_difference_pct_points": round(
+                100
+                * sum(b - a for a, b in prec_pairs)
+                / n,
+                2,
+            ),
+            "precision_bootstrap_95ci_pct_points": [p_lo, p_hi],
+            "precision_b_wins": p_b,
+            "precision_a_wins": p_a,
+            "precision_sign_test_p": round(p_sign, 5),
         }
 
     overall = summarise(rows)
@@ -235,7 +329,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         "model_a": args.a,
         "model_b": args.b,
-        "primary_outcome": "hit@3, any expected drug in the top three",
+    "primary_outcome": (
+            "hit@3 where it discriminates; Precision@3 where hit@3 saturates. "
+            "On a broad answer key a gene with several approved drugs makes "
+            "hit@3 near-certain for any sane ranker, so the binary test loses "
+            "its power and P@3 is the outcome to read."
+        ),
         "test": "McNemar exact (two-sided binomial on discordant pairs)",
         "overall": overall,
         "independent_subset": independent,
@@ -269,8 +368,15 @@ def main(argv: list[str] | None = None) -> int:
             f"{block['bootstrap_95ci_pct_points'][1]}]"
         )
         print(
-            f"    discordant: B only {block['b_only_wins']}, A only "
+            f"    hit@3 discordant: B only {block['b_only_wins']}, A only "
             f"{block['a_only_wins']}   McNemar p={block['mcnemar_exact_p']}"
+        )
+        print(
+            f"    P@3 difference {block['precision_difference_pct_points']:+.2f} pts   "
+            f"95% CI [{block['precision_bootstrap_95ci_pct_points'][0]}, "
+            f"{block['precision_bootstrap_95ci_pct_points'][1]}]   "
+            f"B wins {block['precision_b_wins']}, A wins {block['precision_a_wins']}, "
+            f"sign p={block['precision_sign_test_p']}"
         )
     print()
     print(f"  written to {args.out}")

@@ -1,9 +1,9 @@
 {
   "audit": "nci_match_tier2_diagnosis",
   "corrects": "audit_nci_match_independence.py, whose 7.1% independent-subset figure was read as poor generalisation. The benchmark's run_pipeline calls only get_all_drugs_for_variant_live, which is OncoKB plus the static table, so the Tier 2 repurposing path was never invoked and the independent subset was defined by exclusion from the only tier being queried.",
-  "arms_diagnosed": 13,
+  "arms_diagnosed": 12,
   "verdict_counts": {
-    "reachable_but_not_ranked": 6,
+    "reachable_but_not_ranked": 5,
     "out_of_scope_investigational": 3,
     "not_retrieved": 4
   },
@@ -97,27 +97,14 @@
     },
     {
       "arm_id": "W",
-      "gene": "FGFR3",
+      "gene": "FGFR1",
       "assigned_drug": "FGFR Inhibitor AZD4547",
       "in_tier1_evidence_table": false,
       "in_tier2_repurposing": false,
       "tier2_reports_approved": null,
       "tier2_max_phases": [],
-      "tier2_candidate_count": 128,
+      "tier2_candidate_count": 162,
       "verdict": "not_retrieved"
-    },
-    {
-      "arm_id": "X",
-      "gene": "DDR2",
-      "assigned_drug": "dasatinib",
-      "in_tier1_evidence_table": false,
-      "in_tier2_repurposing": true,
-      "tier2_reports_approved": true,
-      "tier2_max_phases": [
-        "4"
-      ],
-      "tier2_candidate_count": 15,
-      "verdict": "reachable_but_not_ranked"
     },
     {
       "arm_id": "Z1G",
