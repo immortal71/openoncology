@@ -1,0 +1,95 @@
+{
+  "audit": "civic_coverage_gain",
+  "question": "How many NCI-MATCH arms the engine currently misses would become reachable if CIViC level A/B predictive evidence were loaded?",
+  "civic_source": "civic_evidence.tsv",
+  "civic_stats": {
+    "rows": 4854,
+    "predictive_supports": 2461,
+    "level_ab": 830,
+    "accepted_rows": 830,
+    "distinct_pairs": 487,
+    "distinct_genes": 159
+  },
+  "accepted_evidence_levels": [
+    "A",
+    "B"
+  ],
+  "caveats": [
+    "Coverage is not correctness: a reachable pair is not a top-three recommendation and not a right one. This is an upper bound.",
+    "Only predictive/supports evidence at level A or B is counted. Loading C, D or E as actionable would inflate what the system claims relative to what it knows."
+  ],
+  "nci_match": {
+    "independent_arms_missed_exact": 13,
+    "would_become_reachable": 3,
+    "still_absent": 10,
+    "reachable_arms": [
+      {
+        "arm_id": "B",
+        "gene": "ERBB2",
+        "assigned_drug": "afatinib"
+      },
+      {
+        "arm_id": "K2",
+        "gene": "FGFR1",
+        "assigned_drug": "erdafitinib"
+      },
+      {
+        "arm_id": "S2",
+        "gene": "GNAQ",
+        "assigned_drug": "trametinib"
+      }
+    ],
+    "absent_arms": [
+      {
+        "arm_id": "I",
+        "gene": "PIK3CA",
+        "assigned_drug": "taselisib"
+      },
+      {
+        "arm_id": "M",
+        "gene": "TSC1",
+        "assigned_drug": "sapanisertib"
+      },
+      {
+        "arm_id": "P",
+        "gene": "PTEN",
+        "assigned_drug": "PI3K-beta inhibitor GSK2636771"
+      },
+      {
+        "arm_id": "U",
+        "gene": "NF2",
+        "assigned_drug": "defactinib"
+      },
+      {
+        "arm_id": "W",
+        "gene": "FGFR3",
+        "assigned_drug": "FGFR Inhibitor AZD4547"
+      },
+      {
+        "arm_id": "X",
+        "gene": "DDR2",
+        "assigned_drug": "dasatinib"
+      },
+      {
+        "arm_id": "Z1G",
+        "gene": "PTEN",
+        "assigned_drug": "copanlisib"
+      },
+      {
+        "arm_id": "Z1H",
+        "gene": "PTEN",
+        "assigned_drug": "copanlisib"
+      },
+      {
+        "arm_id": "Z1I",
+        "gene": "BRCA1",
+        "assigned_drug": "adavosertib"
+      },
+      {
+        "arm_id": "Z1L",
+        "gene": "BRAF",
+        "assigned_drug": "ulixertinib"
+      }
+    ]
+  }
+}

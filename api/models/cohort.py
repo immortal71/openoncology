@@ -19,7 +19,16 @@ import uuid
 from datetime import datetime, UTC
 from typing import Optional, Any
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -36,7 +45,9 @@ class Study(Base):
     description: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
 
     # Primary cancer type (e.g. "LUAD", "BRCA") — cBioPortal cancer type ID
-    cancer_type: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    cancer_type: Mapped[Optional[str]] = mapped_column(
+        String(64), nullable=True, index=True
+    )
     # Human-readable cancer type label
     cancer_type_label: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
@@ -73,10 +84,12 @@ class Sample(Base):
     __tablename__ = "cohort_samples"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    study_id: Mapped[str] = mapped_column(ForeignKey("studies.id"), nullable=False)
+    study_id: Mapped[str] = mapped_column(
+        ForeignKey("studies.id"), nullable=False, index=True
+    )
 
     # Stable sample identifier within the source study
-    sample_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    sample_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     # Patient identifier within the source study (de-identified)
     patient_sample_id: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
@@ -118,11 +131,20 @@ class CohortMutation(Base):
     """
     __tablename__ = "cohort_mutations"
 
+    # Composite index restored from a8bf7eb4833c, which dropped it. The cohort
+    # browser looks a specific alteration up across studies (gene plus protein
+    # change), so neither single-column index answers that query on its own.
+    __table_args__ = (
+        Index("ix_cohort_mutations_gene_protein", "gene", "protein_change"),
+    )
+
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    study_id: Mapped[str] = mapped_column(ForeignKey("studies.id"), nullable=False)
+    study_id: Mapped[str] = mapped_column(
+        ForeignKey("studies.id"), nullable=False, index=True
+    )
     sample_id: Mapped[str] = mapped_column(ForeignKey("cohort_samples.id"), nullable=False)
 
-    gene: Mapped[str] = mapped_column(String(64), nullable=False)
+    gene: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # Protein change in standard notation (e.g. p.L858R, p.G12D)
     protein_change: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
     # HGVS coding sequence change

@@ -39,9 +39,11 @@ class CopyNumberAlteration(Base):
     __tablename__ = "copy_number_alterations"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    submission_id: Mapped[str] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    submission_id: Mapped[str] = mapped_column(
+        ForeignKey("submissions.id"), nullable=False, index=True
+    )
 
-    gene: Mapped[str] = mapped_column(String(64), nullable=False)
+    gene: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     chromosome: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
     # Genomic coordinates of the CNV segment
     segment_start: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -80,10 +82,12 @@ class StructuralVariant(Base):
     __tablename__ = "structural_variants"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    submission_id: Mapped[str] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    submission_id: Mapped[str] = mapped_column(
+        ForeignKey("submissions.id"), nullable=False, index=True
+    )
 
     # For fusions: gene1 is the 5' partner, gene2 is the 3' partner
-    gene1: Mapped[str] = mapped_column(String(64), nullable=False)
+    gene1: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     gene2: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
     chromosome1: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
@@ -120,9 +124,11 @@ class RnaSeqExpression(Base):
     __tablename__ = "rnaseq_expression"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    submission_id: Mapped[str] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    submission_id: Mapped[str] = mapped_column(
+        ForeignKey("submissions.id"), nullable=False, index=True
+    )
 
-    gene: Mapped[str] = mapped_column(String(64), nullable=False)
+    gene: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     # Transcripts Per Million — preferred unit for cross-sample comparison
     tpm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     # Fragments Per Kilobase of exon per Million fragments mapped
@@ -152,7 +158,9 @@ class MutationSignature(Base):
     __tablename__ = "mutation_signatures"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    submission_id: Mapped[str] = mapped_column(ForeignKey("submissions.id"), nullable=False)
+    submission_id: Mapped[str] = mapped_column(
+        ForeignKey("submissions.id"), nullable=False, index=True
+    )
 
     # COSMIC signature name (e.g. "SBS4", "SBS7a")
     signature_name: Mapped[str] = mapped_column(String(16), nullable=False)

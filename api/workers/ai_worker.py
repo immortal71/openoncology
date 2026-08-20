@@ -95,7 +95,13 @@ def run_ai_analysis(
             resistance_by_mutation: dict[int, OncoKBLevel] = {}
             oncokb_lookup_failures: list[str] = []
             for mutation in mutations:
-                oncokb_data = _query_oncokb(mutation.gene, mutation.hgvs_notation)
+                oncokb_data, lookup_status = _query_oncokb_with_status(
+                    mutation.gene, mutation.hgvs_notation
+                )
+                # Stamped whatever the outcome, so a reader can tell which
+                # specific gene was not checked rather than inferring it from a
+                # log line (risk_analysis.md F3).
+                mutation.evidence_lookup_status = lookup_status
                 if not oncokb_data:
                     oncokb_lookup_failures.append(mutation.gene)
                     continue
@@ -164,6 +170,10 @@ def run_ai_analysis(
                 hgvs=top_mutation.hgvs_notation,
                 cancer_type=cancer_type,
                 submission_id=submission_id,
+            )
+
+            drugs = _apply_candidate_pool_policy(
+                drugs, target_gene, top_variant, top_mutation.alphamissense_score
             )
 
             # Score each drug using the composite ranking algorithm
@@ -353,6 +363,33 @@ def run_ai_analysis(
                 logger.warning("[ai] LLM explainer failed: %s", llm_exc)
                 plain_summary = None
 
+            # Degraded-evidence policy (risk_analysis.md F4, open action 4).
+            # Applied here, at the moment recommendations would be persisted,
+            # rather than at import: the question is what served *this* run.
+            # Default policy flags and proceeds; a clinical deployment sets
+            # require_current_evidence and gets a refusal instead.
+            evidence_withheld_reason: str | None = None
+            try:
+                from services.oncokb_evidence import (
+                    DegradedEvidenceError,
+                    enforce_evidence_policy,
+                )
+
+                enforce_evidence_policy()
+            except DegradedEvidenceError as degraded:
+                evidence_withheld_reason = str(degraded)
+                logger.error(
+                    "[ai] withholding %d drug recommendation(s) for %s: %s",
+                    len(repurposing_candidates),
+                    submission_id,
+                    evidence_withheld_reason,
+                )
+                repurposing_candidates = []
+            except Exception as policy_exc:
+                # A broken policy check must not discard a real analysis, but it
+                # must be loud. Failing open here matches _capture_evidence_provenance.
+                logger.error("[ai] evidence policy check failed: %s", policy_exc)
+
             result = Result(
                 submission_id=submission_id,
                 has_targetable_mutation=has_target,
@@ -368,7 +405,9 @@ def run_ai_analysis(
                 # Which evidence table answered, captured now rather than at read
                 # time — the table can be refreshed in between, and the reader is
                 # asking what produced *this* result. See risk_analysis.md F4.
-                evidence_provenance=_capture_evidence_provenance(),
+                evidence_provenance=_capture_evidence_provenance(
+                    withheld_reason=evidence_withheld_reason
+                ),
             )
             db.add(result)
             db.flush()
@@ -405,13 +444,18 @@ def run_ai_analysis(
         raise self.retry(exc=exc)
 
 
-def _capture_evidence_provenance() -> dict | None:
+def _capture_evidence_provenance(withheld_reason: str | None = None) -> dict | None:
     """Snapshot which actionability table is answering right now.
 
     Returns None only if the evidence module cannot be reached at all. It never
     raises: provenance is metadata about a result, and failing to record it must
     not discard the result itself. A None here reads downstream as "provenance
     not recorded", which is deliberately not the same as "evidence was current".
+
+    ``withheld_reason`` records that the degraded-evidence policy suppressed the
+    drug recommendations for this result. An empty recommendation list produced
+    by policy and one produced because nothing scored must not read alike, which
+    is the same asymmetry as F3 and F4 themselves.
     """
     try:
         from services.oncokb_evidence import get_evidence_provenance
@@ -419,7 +463,21 @@ def _capture_evidence_provenance() -> dict | None:
         provenance = get_evidence_provenance()
     except Exception as exc:
         logger.warning("[ai] could not capture evidence provenance: %s", exc)
+        if withheld_reason:
+            # The policy decision still has to survive even when provenance
+            # capture fails, or the result silently loses the reason it is empty.
+            return {
+                "path": "not_recorded",
+                "is_current": False,
+                "recommendations_withheld": True,
+                "withheld_reason": withheld_reason,
+            }
         return None
+
+    provenance = dict(provenance)
+    provenance["recommendations_withheld"] = bool(withheld_reason)
+    if withheld_reason:
+        provenance["withheld_reason"] = withheld_reason
 
     if not provenance.get("is_current"):
         logger.warning(
@@ -693,16 +751,34 @@ def _gene_to_uniprot(gene: str) -> str | None:
 
 
 def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
+    """Query OncoKB for a clinical actionability level.
+
+    Kept returning `dict | None` so existing callers are unaffected. Callers
+    that need to tell "no evidence" apart from "could not ask" should use
+    _query_oncokb_with_status instead (risk_analysis.md F3).
     """
-    Query OncoKB API for clinical actionability level.
+    data, _status = _query_oncokb_with_status(gene, hgvs)
+    return data
+
+
+def _query_oncokb_with_status(
+    gene: str, hgvs: str | None
+) -> "tuple[dict | None, EvidenceLookupStatus]":
+    """Query OncoKB and report whether the question could be asked at all.
+
+    Returns the annotation and the lookup status. A missing token and a failed
+    request both yield no data, but they are different facts about the report:
+    the first is a deployment that never configured evidence, the second is a
+    source that was reachable in principle and was not reached this time.
     Requires a free academic API token from oncokb.org.
     """
     import httpx
     from config import settings
+    from models.mutation import EvidenceLookupStatus
 
     if not settings.oncokb_api_token:
         logger.warning("[oncokb] No API token configured — skipping")
-        return None
+        return None, EvidenceLookupStatus.not_attempted
 
     try:
         resp = httpx.get(
@@ -721,10 +797,10 @@ def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
             "resistance_level": _to_oncokb_level(resistance),
             "treatments": _extract_oncokb_treatment_names(data.get("treatments") or []),
             "lookup_ok": True,
-        }
+        }, EvidenceLookupStatus.ok
     except Exception as exc:
         logger.warning(f"[oncokb] Query failed: {exc}")
-        return None
+        return None, EvidenceLookupStatus.unavailable
 
 
 def _to_oncokb_level(raw: object) -> "OncoKBLevel":
@@ -822,6 +898,100 @@ def _merge_candidate(candidate_bank: dict[str, dict], candidate: dict) -> None:
         existing["opentargets_score"] = new_score
 
 
+def _apply_candidate_pool_policy(
+    drugs: list[dict],
+    gene: str,
+    variant: str | None,
+    alphamissense_score: float | None = None,
+) -> list[dict]:
+    """Decide which candidates are eligible to be ranked.
+
+    Two policies, and the difference is measurable rather than a matter of
+    taste. See docs/BENCHMARK_NCI_MATCH.md.
+
+      tier2           Rank everything the repurposing sources returned, with
+                      evidence-table levels stamped on. What this system has
+                      always done.
+      evidence_first  When the actionability table has an answer for this
+                      variant, rank only those drugs. Fall back to the full
+                      repurposing pool when it does not.
+
+    The two are identical whenever the table is empty, so they can only differ
+    where the table has something to say. On the FDA-label answer key, which is
+    built from approved indications and is independent of every source this
+    engine reads, evidence_first scored 15.1 percentage points higher on
+    Precision@3, 95% CI [5.6, 26.2], winning 7 cases and losing none, sign test
+    p = 0.016. On NCI-MATCH arms it converted 12 exact hits into 15.
+
+    The mechanism is that a broad target-derived pool dilutes a three-slot cut:
+    dozens of candidates score similarly, and the specific drug the evidence
+    names gets displaced by something merely plausible for the same target.
+
+    Default is `evidence_first` as of 2026-08-19, a maintainer decision taken on
+    that evidence. What improves is drug identity within the top three on
+    approved indications. What is not established is any patient outcome, which
+    no benchmark here measures.
+
+    The residual risk runs opposite to the gain. This replaces the pool rather
+    than reordering it, so where the table holds a stale or wrong answer the
+    broader repurposing pool no longer sits underneath it. Every gene measured
+    was an approved indication, where a curated table should be right; emerging
+    and off-label biomarkers are the untested regime. Setting `tier2` restores
+    the previous behaviour exactly.
+
+    Enrichment is preserved either way. Under evidence_first the table decides
+    membership, and any repurposing metadata already gathered for a member drug
+    (SMILES, binding score, phase) is merged in rather than discarded.
+    """
+    from config import settings
+
+    policy = getattr(settings, "candidate_pool_policy", "tier2")
+    if policy != "evidence_first":
+        return drugs
+
+    try:
+        from services.oncokb_evidence import get_all_drugs_for_variant_live
+
+        table = get_all_drugs_for_variant_live(
+            gene, variant or "", cancer_type=None,
+            alphamissense_score=alphamissense_score,
+        ) or {}
+    except Exception as exc:
+        logger.warning(
+            "[pool] evidence lookup failed for %s %s (%s); keeping the "
+            "repurposing pool", gene, variant, exc,
+        )
+        return drugs
+
+    if not table:
+        return drugs
+
+    def _key(name: str) -> str:
+        return "".join(ch for ch in (name or "").lower() if ch.isalnum())
+
+    enrichment = {_key(d.get("drug_name") or ""): d for d in drugs}
+    pool: list[dict] = []
+    for drug_name, level in table.items():
+        level_text = str(level)
+        # Resistance markers are evidence against a drug, never a candidate.
+        if "LEVEL_R" in level_text.upper():
+            continue
+        merged = dict(enrichment.get(_key(drug_name)) or {})
+        merged["drug_name"] = merged.get("drug_name") or drug_name
+        merged["oncokb_level"] = level
+        merged.setdefault("is_approved", True)
+        merged.setdefault("max_phase", 4)
+        pool.append(merged)
+
+    if not pool:
+        return drugs
+    logger.info(
+        "[pool] evidence_first: %d table candidates for %s replace a pool of %d",
+        len(pool), gene, len(drugs),
+    )
+    return pool
+
+
 def _query_repurposing_candidates(
     gene: str,
     protein_variant: str | None = None,
@@ -854,7 +1024,26 @@ def _query_repurposing_candidates(
     from services.chembl import get_molecule, search_molecule_by_name
     from services.civic import get_civic_evidence
     from services.dgidb import get_interactions as get_dgidb_interactions
-    from ai.diffdock.score import score_binding
+
+    # Guarded, following services/drug_discovery.py. This import was
+    # unguarded, and because api/ai/ and the repo-root ai/ were both regular
+    # packages, whichever landed first on sys.path shadowed the other. With
+    # api/ first this raised ModuleNotFoundError before the function did any
+    # work, so the entire repurposing tier returned nothing outside the
+    # container, where the Dockerfile merges the two directories on disk.
+    # See risk_analysis.md F15.
+    #
+    # The packages are namespace packages now and this resolves, but a docking
+    # score is an enrichment on a candidate, not the reason the candidate
+    # exists. Losing it must degrade a recommendation, never delete it.
+    try:
+        from ai.diffdock.score import score_binding
+    except ModuleNotFoundError:
+        score_binding = None
+        logger.warning(
+            "[repurpose] DiffDock module unavailable; candidates keep their "
+            "evidence but carry no binding score"
+        )
 
     async def _fetch() -> tuple[list[dict], str | None, list[dict]]:
         # ── Source 1: OpenTargets (expanded to 50 drugs) ─────────────────────
@@ -1008,7 +1197,7 @@ def _query_repurposing_candidates(
                 )
                 continue
 
-            if drug.get("smiles") and uniprot_id:
+            if drug.get("smiles") and uniprot_id and score_binding is not None:
                 drug["binding_score"] = score_binding(
                     uniprot_id, drug["smiles"], chembl_id,
                     pre_folded_structure=pre_folded_pdb_key,

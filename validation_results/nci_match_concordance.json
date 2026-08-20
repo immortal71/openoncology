@@ -3,11 +3,11 @@
   "source": "ClinicalTrials.gov NCT02465060 (NCI-MATCH / EAY131)",
   "n_arms_parsed": 38,
   "n_scored": 32,
-  "exact_top3": 13,
-  "class_top3": 23,
-  "no_prediction": 2,
-  "exact_top3_pct": 40.6,
-  "class_top3_pct": 71.9,
+  "exact_top3": 15,
+  "class_top3": 25,
+  "no_prediction": 0,
+  "exact_top3_pct": 46.9,
+  "class_top3_pct": 78.1,
   "results": [
     {
       "arm_id": "A",
@@ -84,11 +84,15 @@
       "declared_drugs": [
         "Crizotinib"
       ],
-      "variant_used": null,
-      "gene_used": null,
-      "pipeline_top3": [],
-      "exact_hit": false,
-      "class_hit": false
+      "variant_used": "DELETION",
+      "gene_used": "MET",
+      "pipeline_top3": [
+        "CAPMATINIB",
+        "TEPOTINIB",
+        "CRIZOTINIB"
+      ],
+      "exact_hit": true,
+      "class_hit": true
     },
     {
       "arm_id": "E",
@@ -410,10 +414,12 @@
         "Defactinib",
         "Defactinib Hydrochloride"
       ],
-      "variant_used": "LOSS",
+      "variant_used": "DELETION",
       "gene_used": "NF2",
       "pipeline_top3": [
-        "everolimus"
+        "TEMSIROLIMUS",
+        "BEVACIZUMAB",
+        "EVEROLIMUS"
       ],
       "exact_hit": false,
       "class_hit": false
@@ -429,10 +435,12 @@
       "declared_drugs": [
         "Fexagratinib"
       ],
-      "variant_used": "S249C",
-      "gene_used": "FGFR3",
+      "variant_used": "N577K",
+      "gene_used": "FGFR1",
       "pipeline_top3": [
-        "erdafitinib"
+        "PEMIGATINIB",
+        "INFIGRATINIB",
+        "ERDAFITINIB"
       ],
       "exact_hit": false,
       "class_hit": false
@@ -452,11 +460,15 @@
       "declared_drugs": [
         "Dasatinib"
       ],
-      "variant_used": null,
-      "gene_used": null,
-      "pipeline_top3": [],
-      "exact_hit": false,
-      "class_hit": false
+      "variant_used": "S768R",
+      "gene_used": "DDR2",
+      "pipeline_top3": [
+        "NILOTINIB",
+        "DASATINIB ANHYDROUS",
+        "ERLOTINIB"
+      ],
+      "exact_hit": true,
+      "class_hit": true
     },
     {
       "arm_id": "Z1A",

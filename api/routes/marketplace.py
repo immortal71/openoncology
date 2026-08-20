@@ -498,8 +498,21 @@ async def get_drug_request_detail(
     request_id: str,
     request: Request,
     db: AsyncSession = Depends(get_db),
+    token_payload: dict = Depends(get_current_patient),
 ):
-    """Get a single drug request detail payload used by the custom-drug page."""
+    """Get a single drug request detail payload used by the custom-drug page.
+
+    Authenticated because the payload carries `cancer_type` and
+    `mutation_profile`, and mutation_profile is up to 12 HGVS variant notations.
+    This took no credential at all, while the listing endpoint beside it
+    published every open request id, so a diagnosis and a genomic profile were
+    readable by anyone who walked the list. See risk_analysis.md F14.
+
+    Still coarse: any authenticated principal can read any drug request. Scoping
+    it to the owning patient plus bidding companies needs a pharma role, which
+    the realm does not currently define, so that narrowing is recorded as
+    residual risk rather than guessed at here.
+    """
 
     req = (await db.execute(
         select(DrugRequest).where(DrugRequest.id == request_id)

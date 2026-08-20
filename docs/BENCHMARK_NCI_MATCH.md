@@ -40,6 +40,294 @@ Reproduce that diagnosis: `python scripts/diagnose_concordance_dataset.py`
 
 ---
 
+## How much of this is generalisation, and how much is reading our own table
+
+Added 2026-08-19. `python scripts/audit_nci_match_independence.py`, artifact
+`validation_results/nci_match_independence.json`.
+
+> **Superseded the same day.** The table in this section was produced while the
+> benchmark queried only Tier 1 and the Tier 2 path was dead locally, so its
+> independent subset scored 1/14. The corrected figures are in "The benchmark was
+> querying one tier" below. This section is kept for the reasoning, which still
+> holds, not for its numbers.
+
+The answer key is independent of anything OpenOncology produced, so this is not
+the F5 defect. But independent-of-our-output is not independent-of-our-evidence:
+NCI-MATCH arms and this repository's actionability table are both distillations
+of the same clinical literature. If every arm the engine gets right is an arm
+whose gene-drug pair was already in the table, the benchmark measures whether
+the engine can read its own table and order the result.
+
+Splitting the 32 scored arms on exactly that:
+
+| Subset | n | Exact Top-3 | Class Top-3 |
+|---|---|---|---|
+| Contained — assigned drug already in the evidence table for that gene | 18 | 12 (66.7%) | 17 (94.4%) |
+| Independent — assigned drug not in the table, so a hit came from the repurposing tiers | 14 | **1 (7.1%)** | 6 (42.9%) |
+
+*(Numbers above are the superseded Tier-1-only run. Corrected: contained 17 arms
+at 70.6% exact and 100% class, independent 15 arms at 20.0% exact and 53.3%
+class.)*
+| Combined (the headline) | 32 | 13 (40.6%) | 23 (71.9%) |
+
+**The headline is carried by the contained subset.** On arms whose drug the
+engine did not already hold, exact Top-3 concordance is 1 in 14. *(Retracted:
+see the correction above. The benchmark queries only the evidence table, so this
+subset was defined by exclusion from the one tier being asked.)* The class
+figure holds up better, 42.9%, which says the engine often reaches the right
+drug family without reaching the right drug.
+
+So the defensible claim from this benchmark is narrower than the headline:
+*when a biomarker-drug pair is in the evidence base, the ranker surfaces it in
+the top three most of the time.* Whether the engine generalises to pairs it does
+not already hold is answered by the independent subset, and that answer is
+currently close to no for exact matching.
+
+**Two caveats that cut in opposite directions.** An arm reachable only through
+gene-level fallback is counted as contained, which understates the independent
+subset rather than flattering it. Against that, this run served every lookup
+from the undated static table: OncoKB's public dump returned 401 throughout and
+the degraded-evidence alarm fired on all 33 resolutions. With a current dump,
+more arms would fall into the contained bucket, and the independent subset would
+shrink further rather than improve.
+
+Fourteen arms is an observation, not an estimate. The counts are given because
+the percentages over that n are not worth much on their own.
+
+---
+
+## The benchmark was querying one tier, and Tier 2 was dead locally
+
+Resolved 2026-08-19. The figures at the top of this document are the corrected
+ones. What follows is how they moved and why, because the first version of this
+section drew a conclusion that was wrong.
+
+`run_pipeline` called only `get_all_drugs_for_variant_live`, the OncoKB live API
+plus the curated static table. It never called the Tier 2 repurposing path that
+the TCGA concordance pilot calls. An independence audit then split the arms on
+whether the assigned drug was already in the evidence table and found 7.1% exact
+Top-3 on the ones that were not, which was read as the engine failing to
+generalise. That subset had been constructed to exclude everything the only tier
+being queried could answer.
+
+Wiring Tier 2 in as a fallback changed nothing at first, which turned out to be a
+second and larger defect.
+
+**Two `ai` packages, and only one wins.** `api/ai/` holds `ranking.py`.
+Repo-root `ai/` holds `diffdock/`, `alphamissense/` and `services/`. Both carried
+an empty `__init__.py`, so each was a regular package and whichever appeared
+first on `sys.path` shadowed the other entirely. `_query_repurposing_candidates`
+imports `ai.diffdock.score` unguarded, so with `api/` first the entire Tier 2
+path raised `ModuleNotFoundError` before doing any work.
+
+The deployed container never hits this. `api/Dockerfile` does
+
+    COPY api/. .
+    COPY ai/. ./ai/
+
+which merges both directories into one `/app/ai` on disk. Nothing outside the
+container reproduces that, so every local script, benchmark and developer run got
+a half-populated `ai` package, and the failure surfaced as a capability quietly
+returning nothing rather than as an error.
+
+Both empty `__init__.py` files are now removed, making `ai` a namespace package
+that merges across `sys.path` the way the container merges it on disk.
+
+### What it moved
+
+| | Tier 1 only | Both tiers |
+|---|---|---|
+| Exact Top-3 | 13/32 (40.6%) | **15/32 (46.9%)** |
+| Class Top-3 | 23/32 (71.9%) | **25/32 (78.1%)** |
+| No recommendation | 2/32 | **0/32** |
+
+Splitting the corrected run on whether the drug was already in the evidence
+table:
+
+| Subset | n | Exact Top-3 | Class Top-3 |
+|---|---|---|---|
+| Contained | 17 | 12 (70.6%) | 17 (100%) |
+| Independent | 15 | 3 (20.0%) | 8 (53.3%) |
+
+The independent subset moved from 7.1% to 20.0% exact and from 42.9% to 53.3%
+class. The engine does reach past its own table; the benchmark was not letting
+it. `X DDR2 dasatinib` went from no prediction at all to an exact hit.
+
+20% exact on fifteen arms is still modest, and the honest reading is that the
+engine finds the right drug family more often than the right drug when it has to
+generalise. That is a real result rather than an artifact, which is more than
+could be said of the 7.1%.
+
+### The candidate pool model changes the answer
+
+The benchmark had production backwards. `run_ai_analysis` builds its entire
+candidate pool from `_query_repurposing_candidates`, which is Tier 2, and uses
+the evidence table to decide targetability and stamp a level onto those
+candidates. The pool is Tier 2; the table annotates it. A Tier-1-only benchmark
+measures the annotation and calls it the engine.
+
+`--mode` now selects the pool model, so the difference is measurable rather
+than assumed:
+
+| Mode | Pool | Exact Top-3 | Class Top-3 | No prediction |
+|---|---|---|---|---|
+| `tier1` | evidence table only | 13/32 (40.6%) | 23/32 (71.9%) | 2/32 |
+| `fallback` | table, then Tier 2 when empty | **15/32 (46.9%)** | **25/32 (78.1%)** | 0/32 |
+| `union` | both merged | 9/32 (28.1%) | 24/32 (75.0%) | 0/32 |
+| `tier2` | Tier 2 only, table annotates. **What production does** | 12/32 (37.5%) | **26/32 (81.2%)** | 0/32 |
+
+Three things follow, and the third is the one worth acting on.
+
+**The published figure came from a pool the application does not use.** Every
+number this benchmark has reported was `tier1`. Production is `tier2`, which
+scores 37.5% exact and 81.2% class. The headline in the results table above is
+now the production model for that reason.
+
+**The two pools are good at different things.** `tier2` gives the best class
+concordance of any model, 81.2%: a broad target-derived pool usually reaches the
+right drug family. `fallback` gives the best exact concordance, 46.9%: the
+evidence table names the specific drug when it has an opinion. Neither is better
+outright, and the split is coherent rather than noise. `union` is worst on
+exact, because merging both pools lets similarly scored candidates displace the
+named drug from a three-slot cut, which is F16 showing up in an aggregate.
+
+**So production is probably using the wrong pool model.** `fallback` uses the
+table where it has an answer and Tier 2 where it does not, and on these arms it
+converts 12 exact hits into 15 while giving up one class hit. That suggests
+changing `run_ai_analysis` to prefer evidence-table candidates and fall back to
+the repurposing pool, rather than ranking the repurposing pool and annotating it.
+
+That is a suggestion, not a conclusion. Thirty-two arms is small, the difference
+is three arms, and there are no confidence intervals here. It is enough to
+justify testing the change, not enough to justify making it on this evidence
+alone.
+
+### The A/B, and why it does not settle it
+
+`scripts/ab_candidate_pool.py` ran both models over the ranking gate's 470 gold
+cases with a paired McNemar exact test and a bootstrap interval. Artifact:
+`validation_results/ab_candidate_pool.json`.
+
+| Subset | n | `tier2` hit@3 | `fallback` hit@3 | Difference | 95% CI | McNemar p |
+|---|---|---|---|---|---|---|
+| Overall | 470 | 74.89% | 92.98% | +18.09 | [14.47, 21.91] | ~0 |
+| Contained | 415 | 77.59% | 97.59% | +20.00 | [16.14, 24.10] | ~0 |
+| **Independent** | **8** | **37.50%** | **12.50%** | **-25.00** | [-62.5, 0.0] | 0.5 |
+
+**The overall result is an artifact and must not be quoted.** The harness was
+written on the assumption that leakage inflates both arms equally, so a paired
+difference would survive it. That assumption is wrong here, and this run
+disproved it.
+
+`fallback` reads the evidence table by preference. The contained subset is
+*defined* as the cases whose gold answer is already in the evidence table. So
+scoring `fallback` on contained cases asks whether a model that reads the table
+does well on cases selected for the table holding the answer. It wins by 20
+points, and the number carries almost no information. A leakage bias is neutral
+in a paired comparison only when neither arm correlates with the leak; here one
+arm is defined by it.
+
+Contained cases are 88.3% of the gold set, so they dominate the overall figure
+entirely.
+
+The only subset that can answer the question is the independent one, and there
+`fallback` is **worse**, by 25 points, on 8 cases, with two discordant pairs and
+p = 0.5. That is not evidence for the change and it is not evidence against it.
+It is not evidence.
+
+**So the pool question needed a clean answer key**, which is what
+`scripts/build_fda_label_answer_key.py` now builds: 50 gene-drug pairs across 21
+genes, taken from FDA label INDICATIONS AND USAGE via openFDA, a source queried
+nowhere in the recommendation path.
+
+### The answer, on a key the engine did not help write
+
+`python scripts/ab_candidate_pool.py --fda-key`, artifact
+`validation_results/ab_candidate_pool_fda.json`, n = 21 genes:
+
+| Outcome | `tier2` | `fallback` | Difference | 95% CI | Test |
+|---|---|---|---|---|---|
+| hit@3 | 95.24% | 100.0% | +4.76 | [0.0, 14.29] | McNemar p = 1.0 |
+| **Precision@3** | **57.14%** | **72.22%** | **+15.08** | **[5.56, 26.19]** | sign test p = 0.016, 7 wins to 0 |
+
+hit@3 saturates and says nothing: when a gene's gold set holds five approved
+drugs, any sane ranker puts one in the top three. Precision@3 asks how many of
+the three slots were right, and there `fallback` wins on 7 genes and loses on
+none.
+
+**The containment check this time.** 19 of the 21 genes have their gold drugs
+fully inside the evidence table, which sounds like the same leak that ruined the
+470-case run. It is not, for two reasons. The cases were selected by FDA labels
+rather than by table containment, so containment is an observed property of the
+table rather than a criterion that picked the cases. And more decisively, the
+two models produce identical output whenever the table is empty, because both
+fall through to Tier 2. They can only differ where the table has an answer, so
+restricting attention to that regime is not a bias, it is the only place a
+comparison exists.
+
+What the key does not cover is whether the table is *wrong* somewhere. Every one
+of these 21 genes is an approved indication, where a curated actionability table
+should be right. The regime worth worrying about is emerging or off-label
+biomarkers, and no answer key here reaches it.
+
+### Widening the evidence table changed nothing
+
+The engine leans harder on the actionability table now, and that table is the
+undated built-in set of about 335 entries whenever OncoKB's public dump is
+unreachable, which it has been throughout: every URL returns 401 without a
+token. So the obvious next move was to widen it from the CIViC bulk export
+already sitting in `data/`.
+
+Loading CIViC level A/B predictive evidence adds **298 gene-alteration keys
+across 149 genes**, an expansion of roughly 89%, and overrides **zero** OncoKB
+entries. Concordance on these arms with the supplement enabled:
+
+| | Exact Top-3 | Class Top-3 |
+|---|---|---|
+| Without CIViC | 15/32 (46.9%) | 25/32 (78.1%) |
+| With CIViC | 15/32 (46.9%) | 25/32 (78.1%) |
+
+Identical. Not one arm moved.
+
+That is a real negative result and the reason `civic_supplement_enabled`
+defaults to off. Coverage is not concordance: the keys CIViC adds are for
+gene-alteration pairs these arms do not test, and the three arms an earlier
+audit predicted it would reach were already reachable through Tier 2. Widening
+the table that decides which cancer drugs are recommended, on no measured
+benefit, is not a trade worth making.
+
+It stays implemented, capped at LEVEL_3B and merged underneath OncoKB, because
+the measurement is specific to 32 arms rather than general. A key that tests the
+genes CIViC actually covers could still show a gain, and building that is
+cheaper than rebuilding this.
+
+### What was changed, and what was not
+
+`candidate_pool_policy` in `api/config.py`, with `_apply_candidate_pool_policy`
+in the AI worker. `evidence_first` ranks only the table's answer when it has one
+and falls back to the full repurposing pool when it does not; membership comes
+from the table while any repurposing metadata already gathered for a member drug
+is merged in rather than discarded.
+
+**The default was flipped to `evidence_first` on 2026-08-19**, by the
+maintainer, on the evidence above. The benchmark did not set it; a person did,
+which is the right order for a setting that changes which cancer drugs an
+oncologist is shown.
+
+What improves is drug identity within the top three on approved indications.
+What is not established is any patient outcome, because nothing here measures
+one.
+
+**The residual risk runs opposite to the gain.** `evidence_first` replaces the
+pool rather than reordering it, so wherever the table holds a stale or wrong
+answer, the broader repurposing pool no longer sits underneath it as a
+correction. Every gene measured was an approved indication, exactly where a
+curated table should be right, so the measurement cannot see this failure mode.
+Emerging and off-label biomarkers are the untested regime, and the answer key
+that would cover them does not exist yet.
+
+`candidate_pool_policy = "tier2"` restores the previous behaviour exactly.
+
 ## Why NCI-MATCH
 
 Each NCI-MATCH subprotocol is an explicit, published, expert-committee decision of
@@ -76,16 +364,24 @@ That prevalence rule is not uniformly favourable, which is the point: it moved a
 
 ---
 
-## Results (2026-08-12)
+## Results (2026-08-19, both tiers)
 
 | Metric | Value |
 |---|---|
 | Arms parsed from trial record | 38 |
 | Arms scored | 32 |
 | Out of scope | 6 |
-| **Exact Top-3 concordance** | **12/32 = 37.5%** |
-| **Class Top-3 concordance** | **22/32 = 68.8%** |
-| No recommendation returned | 4/32 = 12.5% |
+| **Exact Top-3 concordance** | **15/32 = 46.9%** |
+| **Class Top-3 concordance** | **25/32 = 78.1%** |
+| No recommendation returned | 0/32 = 0.0% |
+
+These are `--mode fallback`, which is what production does now that
+`candidate_pool_policy` defaults to `evidence_first`. Under the previous
+`tier2` default the same arms scored 12/32 exact and 26/32 class, so the policy
+change trades one class hit for three exact ones here. Earlier runs of this
+table reported 12/32 and 22/32 on 2026-08-12, then 13/32 and 23/32, all under
+`--mode tier1` with the Tier 2 path unreachable. Every mode is reproducible from
+the table above.
 
 > No-prediction fell from 5/32 to 4/32 when the BRCA1/2 truncating-variant fix
 > landed (BRCA1 now returns PARP inhibitors instead of nothing). Concordance did

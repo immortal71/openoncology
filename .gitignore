@@ -113,3 +113,9 @@ validation_results/cache/*.gz
 .coverage
 .coverage.*
 coverage.xml
+
+# GIAB HG002 truth set pulled by scripts/validate_variant_calling.py
+# (benchmark VCF is 156 MB, high-confidence BED is 11 MB). Re-fetch by running
+# that script; it downloads on first use unless --offline is passed.
+validation_results/cache/*.bed
+validation_results/cache/HG002_*

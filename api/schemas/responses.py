@@ -29,6 +29,9 @@ class MutationOut(BaseModel):
     oncokb_level: Optional[str] = None
     is_targetable: bool = False
     alphamissense_score: Optional[float] = None
+    # None means the lookup state was never recorded for this variant, which is
+    # not the same as a successful lookup that found nothing (F3).
+    evidence_lookup_status: Optional[str] = None
 
 
 class DrugCandidateOut(BaseModel):
@@ -159,6 +162,11 @@ class EvidenceProvenanceOut(BaseModel):
     caveat: str = ""
     # Present when the live per-variant API answered: the table's own provenance.
     table_path: Optional[str] = None
+    # True when the degraded-evidence policy suppressed drug recommendations for
+    # this result (open action 4). An empty recommendation list produced by
+    # policy and one produced because nothing scored must not read alike.
+    recommendations_withheld: bool = False
+    withheld_reason: Optional[str] = None
 
 
 class ResultsResponse(BaseModel):

@@ -136,6 +136,27 @@ Nextflow pipeline in `pipeline/main.nf` with `bwa-mem2`, `gatk`, `samtools` and
 `fastqc` available, a reference genome, and a truth-set sample such as a Genome
 in a Bottle reference material with its high-confidence call regions.
 
+The instrument for it now exists even though the measurement does not.
+`scripts/validate_variant_calling.py` compares a query VCF against the GIAB
+HG002 v4.2.1 GRCh38 benchmark inside NIST's high-confidence regions and reports
+sensitivity, PPV and F1 split into SNVs and indels. Point it at a VCF from
+`pipeline/main.nf` and the gate is answered; there is no remaining design work
+between here and the number, only a machine with the toolchain on it.
+
+Run on 2026-08-19 in its `--via-parser` mode, which holds the caller constant at
+perfect and measures only the production ingestion path, it reported 100%
+sensitivity and PPV over 83,325 GIAB chr20 variants (71,387 SNV, 11,938 indel).
+**That figure is not this gate and is close to vacuous on its own.** Both sides
+of the comparison derive from the same file, and of the three ingestion
+behaviours the score appears to endorse, chr20 exercises exactly one: it
+contains 953 multi-allelic records, so the F8 splitting path ran on real data,
+while every record is `PASS` and none are malformed, so the F7 rejected-call
+path and the malformed-record guards were never executed. The script prints and
+records that breakdown under `path_coverage`. What the run supports is narrow:
+the ingestion path is lossless on 83,325 real variants including 953
+multi-allelic sites, and two independently written parsers agree on all of
+them. It bounds ingestion loss and measures no caller.
+
 ### 3.2 Clinical Validation (Prospective)
 
 | Study | Design | Sample Size | Status |

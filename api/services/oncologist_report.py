@@ -268,6 +268,13 @@ def generate_oncologist_report(
             "rank_score_ci_high": c.get("rank_score_ci_high"),
             "confidence_level": c.get("confidence_level", "LOW"),
             "evidence_completeness": c.get("evidence_completeness"),
+            # A rank drawn from a tied group is an ordering, not a preference.
+            # Carried so the reader is told rather than left to assume (F16).
+            "tied_group_size": c.get("tied_group_size"),
+            "order_within_tie_is_arbitrary": bool(
+                c.get("order_within_tie_is_arbitrary")
+            ),
+            "tied_with": c.get("tied_with") or [],
             "missing_sources": c.get("missing_sources", []),
             "evidence_audit_trail": c.get("evidence_audit_trail", []),
             "immunotherapy_context": c.get("immunotherapy_context"),
@@ -328,6 +335,9 @@ def generate_oncologist_report(
             "cosmic_id": m.get("cosmic_id"),
             "clinvar_id": m.get("clinvar_id"),
             "is_targetable": m.get("is_targetable", False),
+            # Carried so the reader can tell a checked-and-clear variant from
+            # one whose evidence lookup never answered (risk_analysis.md F3).
+            "evidence_lookup_status": m.get("evidence_lookup_status"),
         })
 
     # ── 4. Sample quality ──────────────────────────────────────────────────
@@ -1677,6 +1687,24 @@ def _render_plain_text(r: OncologistReport) -> str:
                     f"    AlphaMissense pathogenicity: {am:.3f}  "
                     f"({am_cls or 'unknown class'})"
                 )
+            # An unchecked variant must not read like a checked one that came
+            # back clear. Only the states that undermine the row are printed;
+            # a successful lookup needs no annotation.
+            lookup = alt.get("evidence_lookup_status")
+            if lookup == "unavailable":
+                lines.append(
+                    "    !! Actionability lookup FAILED for this gene. "
+                    "Absence of a targeted therapy above is NOT established."
+                )
+            elif lookup == "not_attempted":
+                lines.append(
+                    "    !! Actionability was never queried for this gene "
+                    "(no evidence source configured). Treat as unassessed."
+                )
+            elif lookup is None:
+                lines.append(
+                    "    -- Actionability lookup state not recorded for this gene."
+                )
     else:
         lines.append("  No genomic alteration data provided.")
     lines.append("")
@@ -1707,6 +1735,19 @@ def _render_plain_text(r: OncologistReport) -> str:
                 f"score={score_str}{ci_str}  |  conf={rec['confidence_level']}{flag}"
             )
             lines.append(f"       {rec['oncokb_label']}")
+
+            # A rank taken from a tied group is an ordering, not a preference.
+            # Saying so is the difference between a ranked list and a list the
+            # reader believes is ranked (risk_analysis.md F16).
+            if rec.get("order_within_tie_is_arbitrary"):
+                others = rec.get("tied_with") or []
+                shown = ", ".join(others[:4])
+                more = f" and {len(others) - 4} more" if len(others) > 4 else ""
+                lines.append(
+                    f"       = EQUALLY SUPPORTED with {shown}{more}. "
+                    "The evidence did not separate these; the order among them "
+                    "is not a preference."
+                )
 
             # Clinical action box (most important — show it prominently)
             action = rec.get("clinical_action", {})

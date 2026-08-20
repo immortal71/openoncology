@@ -137,12 +137,35 @@ async def generate_plain_language_summary(
 
     if openai_key:
         try:
-            return await _openai_summary(
+            generated = await _openai_summary(
                 openai_key, gene, has_target, cancer_type,
                 mutations_summary, top_drug, cosmic_count,
             )
         except Exception as exc:
             logger.warning("[llm] OpenAI summary failed, using template fallback: %s", exc)
+        else:
+            # Generated text is checked before it is returned, never after it is
+            # shown. A patient cannot be expected to discount a sentence they
+            # have already read, so a failing verdict falls back to the
+            # deterministic template rather than publishing with a warning.
+            # risk_analysis.md open action 7; see services/llm_output_guard.py.
+            from services.llm_output_guard import validate_patient_summary
+
+            allowed_genes = {gene} if gene else set()
+            allowed_genes |= {
+                str(m.get("gene")) for m in (mutations_summary or []) if m.get("gene")
+            }
+            verdict = validate_patient_summary(
+                generated,
+                allowed_drugs=[top_drug] if top_drug else [],
+                allowed_genes=allowed_genes,
+            )
+            if verdict.ok:
+                return generated
+            logger.error(
+                "[llm] generated patient summary rejected (%s); using template",
+                verdict.reason(),
+            )
 
     return _template_summary(gene, has_target, cancer_type, top_drug, cosmic_count)
 

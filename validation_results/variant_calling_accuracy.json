@@ -1,0 +1,87 @@
+{
+  "gate": "variant_calling_accuracy",
+  "mode": "ingestion_fidelity",
+  "measures": "Fidelity of the production VCF ingestion path only. This is a ceiling on end-to-end variant calling accuracy, not a measurement of it. The gate in REGULATORY_FRAMEWORK.md 3.1 remains unmet.",
+  "truth_set": {
+    "name": "GIAB HG002 NISTv4.2.1 GRCh38",
+    "vcf": "HG002_GRCh38_1_22_v4.2.1_benchmark.vcf.gz",
+    "bed": "HG002_GRCh38_1_22_v4.2.1_benchmark_noinconsistent.bed",
+    "source": "https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/release/AshkenazimTrio/HG002_NA24385_son/NISTv4.2.1/GRCh38/"
+  },
+  "query": null,
+  "scope": {
+    "chrom": "chr20",
+    "confident_regions_only": true,
+    "genotype_compared": false,
+    "caller_rejected_query_calls_counted": false
+  },
+  "targets": {
+    "sensitivity": 0.99,
+    "ppv": 0.95
+  },
+  "results": {
+    "overall": {
+      "truth_total": 83325,
+      "query_total": 83325,
+      "tp": 83325,
+      "fp": 0,
+      "fn": 0,
+      "sensitivity": 1.0,
+      "ppv": 1.0,
+      "f1": 1.0,
+      "meets_sensitivity_target": true,
+      "meets_ppv_target": true
+    },
+    "snv": {
+      "truth_total": 71387,
+      "query_total": 71387,
+      "tp": 71387,
+      "fp": 0,
+      "fn": 0,
+      "sensitivity": 1.0,
+      "ppv": 1.0,
+      "f1": 1.0,
+      "meets_sensitivity_target": true,
+      "meets_ppv_target": true
+    },
+    "indel": {
+      "truth_total": 11938,
+      "query_total": 11938,
+      "tp": 11938,
+      "fp": 0,
+      "fn": 0,
+      "sensitivity": 1.0,
+      "ppv": 1.0,
+      "f1": 1.0,
+      "meets_sensitivity_target": true,
+      "meets_ppv_target": true
+    },
+    "genotype_mismatches": 0,
+    "query_records_outside_confident_regions": 3579
+  },
+  "elapsed_seconds": 143.6,
+  "caveats": [
+    "Both sides of this comparison come from the same file. It cannot detect an error made by the variant caller, because no variant caller ran.",
+    "This input did not contain instances of: F7 caller-rejected calls dropped (n=0); malformed-record guards (n=0). A perfect score is silent about those paths rather than evidence in their favour.",
+    "Allele-identity comparison after trimming, not haplotype comparison. Indel recall is understated against a real caller; use hap.py or rtg vcfeval once the toolchain exists.",
+    "Only variants inside the NIST high-confidence BED are evaluated.",
+    "Genotype is not compared unless --match-genotype was passed."
+  ],
+  "path_coverage": {
+    "input": {
+      "records": 85951,
+      "alt_alleles": 86904,
+      "multi_allelic_records": 953,
+      "caller_rejected_records": 0,
+      "malformed_records": 0
+    },
+    "exercised": [
+      "F8 multi-allelic splitting (n=953)"
+    ],
+    "not_exercised": [
+      "F7 caller-rejected calls dropped (n=0)",
+      "malformed-record guards (n=0)"
+    ],
+    "note": "A path with no instances in the input was not tested by this run. The score says nothing about it either way."
+  }
+}
