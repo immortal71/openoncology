@@ -496,7 +496,7 @@ ships `api/` without repo-root `ai/` would kill Tier 2 again, silently and in th
 same way. The guard in `drug_discovery.py` is the pattern the worker should
 follow, and the two directories would be better as one.
 
-### F16. When the evidence ties, spelling decides which drugs an oncologist sees (H5) — OPEN
+### F16. When the evidence ties, spelling decides which drugs an oncologist sees (H5) — PARTIALLY FIXED
 
 An absent evidence source has its weight redistributed across the sources that
 are present, so a candidate carrying `LEVEL_1` and nothing else scores exactly
@@ -525,16 +525,31 @@ order carries information it does not have. It connects directly to open action
 6, which asks whether a reader interprets rank as confidence. Here the answer is
 that for tied candidates they would be wrong to.
 
-**Not fixed, deliberately.** What *should* break a tie is a clinical question,
-not an implementation detail. Candidate answers include line of therapy,
-toxicity profile, route of administration, and cost, and choosing among them
-without a clinician is how a ranking function acquires opinions nobody
-sanctioned. `api/tests/test_ranking_ties.py` pins the present behaviour so that
-changing it is deliberate and shows up in a diff.
+**The tiebreak itself is not changed, deliberately.** What *should* break a tie
+is a clinical question, not an implementation detail. Candidate answers include
+line of therapy, toxicity profile, route of administration, and cost, and
+choosing among them without a clinician is how a ranking function acquires
+opinions nobody sanctioned. `api/tests/test_ranking_ties.py` pins the present
+behaviour so that changing it is deliberate and shows up in a diff.
 
-The minimum honest fix, ahead of any tiebreak change, is for the report to say
-when the drugs it lists were tied. A reader who knows the top three were
+**What is fixed: the reader is now told.** `_annotate_ties` in `ai/ranking.py`
+groups candidates on every dimension the sort considered except the drug name,
+and marks each with `tied_group_size`, `order_within_tie_is_arbitrary` and the
+names it tied with. The oncologist report prints, against any such drug:
+
+    = EQUALLY SUPPORTED with binimetinib, cabozantinib. The evidence did not
+      separate these; the order among them is not a preference.
+
+The ordering is untouched. What changed is that it no longer implies a
+preference the scoring never expressed, which is the part of this hazard that
+did not need a clinician to decide. A reader who knows the top three were
 equivalent can ask a different question.
+
+**Residual risk.** The disclosure is only as good as the grouping, and the
+grouping trusts the scoring: two drugs that differ on a dimension the ranker
+does not model still read as distinguishable. The tiebreak remains alphabetical,
+so which tied drugs make a three-slot cut is still decided by spelling, and only
+open action 6 can say what should decide it instead.
 
 **Also recorded:** adding a corroborating source can slightly lower a score. A
 `LEVEL_1` candidate alone scores 1.0000; the same candidate with an OpenTargets

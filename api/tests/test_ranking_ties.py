@@ -71,6 +71,81 @@ class TestEqualEvidenceTies:
         assert "ulixertinib" not in top3
 
 
+class TestTiesAreDisclosed:
+    """The minimum honest fix: say when the order was not a preference.
+
+    What should break a clinical tie stays an open question (line of therapy,
+    toxicity, route, cost) and belongs with open action 6. What does not need a
+    clinician to decide is whether the reader is told a tie happened.
+    """
+
+    def test_tied_candidates_are_marked(self):
+        ranked = rank_candidates([_c(f"drug_{i}") for i in range(4)])
+        assert all(c["order_within_tie_is_arbitrary"] for c in ranked)
+        assert all(c["tied_group_size"] == 4 for c in ranked)
+
+    def test_each_candidate_names_the_others_it_tied_with(self):
+        ranked = rank_candidates([_c("afatinib"), _c("binimetinib")])
+        by_name = {c["drug_name"]: c for c in ranked}
+        assert by_name["afatinib"]["tied_with"] == ["binimetinib"]
+        assert by_name["binimetinib"]["tied_with"] == ["afatinib"]
+
+    def test_a_distinguishable_candidate_is_not_marked_tied(self):
+        ranked = rank_candidates(
+            [
+                _c("evidence_backed"),
+                {
+                    "drug_name": "generic",
+                    "opentargets_score": 0.4,
+                    "is_approved": False,
+                    "max_phase": 2,
+                },
+            ]
+        )
+        by_name = {c["drug_name"]: c for c in ranked}
+        assert by_name["evidence_backed"]["order_within_tie_is_arbitrary"] is False
+        assert by_name["evidence_backed"]["tied_group_size"] == 1
+
+    def test_annotation_does_not_change_the_ordering(self):
+        names = ["zanubrutinib", "afatinib", "midostaurin"]
+        ranked = [c["drug_name"] for c in rank_candidates([_c(n) for n in names])]
+        assert ranked == sorted(names)
+
+    def test_the_report_tells_the_reader(self):
+        from services.oncologist_report import generate_oncologist_report
+
+        ranked = rank_candidates([_c("afatinib"), _c("binimetinib"), _c("cabozantinib")])
+        report = generate_oncologist_report(
+            ranked_candidates=ranked,
+            mutation_summary=[{"gene": "EGFR", "hgvs_notation": "p.L858R"}],
+            cancer_type="Lung adenocarcinoma",
+        )
+        text = report.plain_text or ""
+        assert "EQUALLY SUPPORTED" in text
+        assert "not a preference" in text
+
+    def test_the_report_stays_quiet_when_nothing_tied(self):
+        from services.oncologist_report import generate_oncologist_report
+
+        ranked = rank_candidates(
+            [
+                _c("evidence_backed"),
+                {
+                    "drug_name": "generic",
+                    "opentargets_score": 0.4,
+                    "is_approved": False,
+                    "max_phase": 2,
+                },
+            ]
+        )
+        report = generate_oncologist_report(
+            ranked_candidates=ranked,
+            mutation_summary=[{"gene": "EGFR", "hgvs_notation": "p.L858R"}],
+            cancer_type="Lung adenocarcinoma",
+        )
+        assert "EQUALLY SUPPORTED" not in (report.plain_text or "")
+
+
 class TestEvidenceStillOutranksNoEvidence:
     """The tie only applies among equals. Real evidence must still win."""
 

@@ -268,6 +268,13 @@ def generate_oncologist_report(
             "rank_score_ci_high": c.get("rank_score_ci_high"),
             "confidence_level": c.get("confidence_level", "LOW"),
             "evidence_completeness": c.get("evidence_completeness"),
+            # A rank drawn from a tied group is an ordering, not a preference.
+            # Carried so the reader is told rather than left to assume (F16).
+            "tied_group_size": c.get("tied_group_size"),
+            "order_within_tie_is_arbitrary": bool(
+                c.get("order_within_tie_is_arbitrary")
+            ),
+            "tied_with": c.get("tied_with") or [],
             "missing_sources": c.get("missing_sources", []),
             "evidence_audit_trail": c.get("evidence_audit_trail", []),
             "immunotherapy_context": c.get("immunotherapy_context"),
@@ -1728,6 +1735,19 @@ def _render_plain_text(r: OncologistReport) -> str:
                 f"score={score_str}{ci_str}  |  conf={rec['confidence_level']}{flag}"
             )
             lines.append(f"       {rec['oncokb_label']}")
+
+            # A rank taken from a tied group is an ordering, not a preference.
+            # Saying so is the difference between a ranked list and a list the
+            # reader believes is ranked (risk_analysis.md F16).
+            if rec.get("order_within_tie_is_arbitrary"):
+                others = rec.get("tied_with") or []
+                shown = ", ".join(others[:4])
+                more = f" and {len(others) - 4} more" if len(others) > 4 else ""
+                lines.append(
+                    f"       = EQUALLY SUPPORTED with {shown}{more}. "
+                    "The evidence did not separate these; the order among them "
+                    "is not a preference."
+                )
 
             # Clinical action box (most important — show it prominently)
             action = rec.get("clinical_action", {})

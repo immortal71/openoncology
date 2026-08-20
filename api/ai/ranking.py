@@ -572,7 +572,38 @@ def rank_candidates(
     for c in sorted_candidates:
         c["decision_path"] = path
 
+    _annotate_ties(sorted_candidates, cfg)
+
     return sorted_candidates
+
+
+def _annotate_ties(candidates: list[dict], cfg: RankingConfig = DEFAULT_CONFIG) -> None:
+    """Mark candidates the scoring could not tell apart.
+
+    `_tiebreaker_key` ends in the drug name, so when every scored dimension
+    ahead of it is equal the order within that group is decided by spelling.
+    That is deterministic, which is worth keeping, but a reader shown a ranked
+    list has no way to know that the top three were interchangeable and that
+    others were equally supported. Rank order then carries information it does
+    not have. See risk_analysis.md F16 and RISK_REGISTER.md R15.
+
+    This does not change the ordering. It records what the ordering means, so a
+    report can say "these were equivalent on the evidence" instead of implying a
+    preference the scoring never expressed.
+    """
+    groups: dict[tuple, list[dict]] = {}
+    for c in candidates:
+        # Everything the sort considered except the drug name.
+        groups.setdefault(_tiebreaker_key(c, cfg)[:-1], []).append(c)
+
+    for members in groups.values():
+        tied = len(members) > 1
+        names = sorted(str(m.get("drug_name") or "") for m in members)
+        for c in members:
+            c["tied_group_size"] = len(members)
+            c["order_within_tie_is_arbitrary"] = tied
+            if tied:
+                c["tied_with"] = [n for n in names if n != str(c.get("drug_name") or "")]
 
 
 def _tiebreaker_key(c: dict, cfg: RankingConfig = DEFAULT_CONFIG) -> tuple:
