@@ -28,8 +28,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 if TYPE_CHECKING:
     # Runtime imports of the DB models stay inside the task body, so the Celery
-    # module can be imported without pulling in SQLAlchemy.
-    from models.mutation import OncoKBLevel
+    # module can be imported without pulling in SQLAlchemy. Names used only in
+    # annotations still have to resolve for a linter, hence both here.
+    from models.mutation import EvidenceLookupStatus, OncoKBLevel
 
 from workers import celery_app
 

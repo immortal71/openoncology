@@ -47,7 +47,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import asdict, is_dataclass
-from typing import Any, Optional
+from typing import Any
 
 # Moved by hand when ranking behaviour changes in a way a reader would notice.
 # The fingerprint below moves on its own; when the two disagree, a test fails
