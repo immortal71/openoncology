@@ -1668,6 +1668,99 @@ def _download_public_oncokb_table() -> tuple[dict[tuple[str, str], dict[str, str
     return {}, ""
 
 
+# CIViC level A/B evidence, loaded as a capped supplement to the actionability
+# table. See _load_civic_supplement.
+_CIVIC_SUPPLEMENT_LEVEL = "LEVEL_3B"
+_CIVIC_TSV = Path(__file__).resolve().parents[2] / "data" / "civic_evidence.tsv"
+_CIVIC_SUPPLEMENT_LOADED = {"active": False, "pairs": 0, "genes": 0}
+
+
+def get_civic_supplement_state() -> dict[str, object]:
+    """Whether CIViC entries are currently in the actionability table."""
+    return dict(_CIVIC_SUPPLEMENT_LOADED)
+
+
+def _load_civic_supplement(path: Optional[Path] = None) -> dict[tuple[str, str], dict[str, str]]:
+    """CIViC level A/B predictive evidence, as actionability-table entries.
+
+    OncoKB's public dumps require a token this deployment may not have, and
+    without one the table falls back to the undated built-in set. That mattered
+    less when the ranker scored a broad repurposing pool. It matters more now
+    that `candidate_pool_policy` defaults to evidence_first, because the table
+    decides what is recommended wherever it has an answer.
+
+    `data/civic_evidence.tsv` is a CIViC bulk export already in this repository,
+    used only for live per-variant lookups and never loaded into the table.
+
+    Three restrictions, each of which costs coverage on purpose:
+
+      * Level A and B only. A is a validated association and B is clinical
+        evidence; C, D and E are case study, preclinical and inferential, and
+        loading those as actionable would inflate what the system claims
+        relative to what it knows.
+      * Predictive evidence with a Supports direction only. Diagnostic and
+        prognostic entries say something real and say nothing about which drug
+        to give.
+      * Capped at LEVEL_3B regardless of CIViC's own rating. A CIViC A is not an
+        FDA approval, and an entry that claimed LEVEL_1 would outrank genuine
+        standard-of-care evidence in the ranker, where the OncoKB level carries
+        the single largest weight.
+
+    Entries never override OncoKB. The caller merges this as the base layer so
+    anything already in the table wins.
+    """
+    import csv
+
+    source = path or _CIVIC_TSV
+    table: dict[tuple[str, str], dict[str, str]] = {}
+    if not source.exists():
+        logger.info("[civic] no bulk export at %s; supplement not loaded", source)
+        return table
+
+    genes: set[str] = set()
+    try:
+        with open(source, "r", encoding="utf-8", newline="") as fh:
+            for row in csv.DictReader(fh, delimiter="	"):
+                if (row.get("evidence_type") or "").strip().lower() != "predictive":
+                    continue
+                if (row.get("evidence_direction") or "").strip().lower() != "supports":
+                    continue
+                if (row.get("evidence_level") or "").strip().upper()[:1] not in ("A", "B"):
+                    continue
+                profile = (row.get("molecular_profile") or "").strip().split()
+                if len(profile) < 2:
+                    continue
+                gene = _normalise_gene(profile[0])
+                alteration = _normalise_alteration(" ".join(profile[1:])).upper()
+                if not gene or not alteration:
+                    continue
+                for drug in re.split(r"[;,]", row.get("therapies") or ""):
+                    drug = drug.strip()
+                    if not drug:
+                        continue
+                    table.setdefault((gene, alteration), {})[drug] = _CIVIC_SUPPLEMENT_LEVEL
+                    genes.add(gene)
+    except Exception as exc:
+        logger.warning("[civic] supplement load failed: %s", exc)
+        return {}
+
+    _CIVIC_SUPPLEMENT_LOADED.update(
+        {
+            "active": bool(table),
+            "pairs": sum(len(v) for v in table.values()),
+            "genes": len(genes),
+            "capped_at": _CIVIC_SUPPLEMENT_LEVEL,
+            "source": source.name,
+        }
+    )
+    logger.info(
+        "[civic] supplement: %d gene-alteration keys, %d drug pairs across %d genes, "
+        "all capped at %s",
+        len(table), _CIVIC_SUPPLEMENT_LOADED["pairs"], len(genes), _CIVIC_SUPPLEMENT_LEVEL,
+    )
+    return table
+
+
 def _merge_level_tables(
     base: dict[tuple[str, str], dict[str, str]],
     incoming: dict[tuple[str, str], dict[str, str]],
@@ -1715,6 +1808,34 @@ def load_oncokb_flat_file() -> None:
     _bootstrap_oncokb_public_table()
 
 
+def _apply_civic_supplement() -> None:
+    """Merge CIViC level A/B under the existing table, if enabled.
+
+    Merged as the BASE layer, so anything already in the table takes precedence.
+    A curated OncoKB entry always beats a CIViC one for the same gene, alteration
+    and drug; CIViC only fills keys nothing else answers.
+
+    Off by default. This changes which drugs the engine can recommend, and
+    `candidate_pool_policy` now makes the table decisive, so widening it is a
+    deliberate act rather than a side effect of a config default.
+    """
+    global _LEVEL_TABLE
+    if _CIVIC_SUPPLEMENT_LOADED.get("active"):
+        return
+    try:
+        from config import settings
+
+        if not getattr(settings, "civic_supplement_enabled", False):
+            return
+    except Exception:
+        return
+
+    supplement = _load_civic_supplement()
+    if not supplement:
+        return
+    _LEVEL_TABLE = _merge_level_tables(supplement, _LEVEL_TABLE)
+
+
 def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
     """Ensure OncoKB actionable table is sufficiently populated for offline scripts.
 
@@ -1722,6 +1843,8 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
     """
     global _LEVEL_TABLE
     cache_path = get_oncokb_cache_path()
+
+    _apply_civic_supplement()
 
     if _is_cache_fresh(cache_path):
         logger.info("[OncoKB] ensure path=fresh_cache")

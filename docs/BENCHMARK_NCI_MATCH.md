@@ -270,6 +270,37 @@ of these 21 genes is an approved indication, where a curated actionability table
 should be right. The regime worth worrying about is emerging or off-label
 biomarkers, and no answer key here reaches it.
 
+### Widening the evidence table changed nothing
+
+The engine leans harder on the actionability table now, and that table is the
+undated built-in set of about 335 entries whenever OncoKB's public dump is
+unreachable, which it has been throughout: every URL returns 401 without a
+token. So the obvious next move was to widen it from the CIViC bulk export
+already sitting in `data/`.
+
+Loading CIViC level A/B predictive evidence adds **298 gene-alteration keys
+across 149 genes**, an expansion of roughly 89%, and overrides **zero** OncoKB
+entries. Concordance on these arms with the supplement enabled:
+
+| | Exact Top-3 | Class Top-3 |
+|---|---|---|
+| Without CIViC | 15/32 (46.9%) | 25/32 (78.1%) |
+| With CIViC | 15/32 (46.9%) | 25/32 (78.1%) |
+
+Identical. Not one arm moved.
+
+That is a real negative result and the reason `civic_supplement_enabled`
+defaults to off. Coverage is not concordance: the keys CIViC adds are for
+gene-alteration pairs these arms do not test, and the three arms an earlier
+audit predicted it would reach were already reachable through Tier 2. Widening
+the table that decides which cancer drugs are recommended, on no measured
+benefit, is not a trade worth making.
+
+It stays implemented, capped at LEVEL_3B and merged underneath OncoKB, because
+the measurement is specific to 32 arms rather than general. A key that tests the
+genes CIViC actually covers could still show a gain, and building that is
+cheaper than rebuilding this.
+
 ### What was changed, and what was not
 
 `candidate_pool_policy` in `api/config.py`, with `_apply_candidate_pool_policy`
@@ -340,11 +371,14 @@ That prevalence rule is not uniformly favourable, which is the point: it moved a
 | Arms parsed from trial record | 38 |
 | Arms scored | 32 |
 | Out of scope | 6 |
-| **Exact Top-3 concordance** | **12/32 = 37.5%** |
-| **Class Top-3 concordance** | **26/32 = 81.2%** |
+| **Exact Top-3 concordance** | **15/32 = 46.9%** |
+| **Class Top-3 concordance** | **25/32 = 78.1%** |
 | No recommendation returned | 0/32 = 0.0% |
 
-These are `--mode tier2`, the pool production actually uses. Earlier runs of this
+These are `--mode fallback`, which is what production does now that
+`candidate_pool_policy` defaults to `evidence_first`. Under the previous
+`tier2` default the same arms scored 12/32 exact and 26/32 class, so the policy
+change trades one class hit for three exact ones here. Earlier runs of this
 table reported 12/32 and 22/32 on 2026-08-12, then 13/32 and 23/32, all under
 `--mode tier1` with the Tier 2 path unreachable. Every mode is reproducible from
 the table above.

@@ -63,6 +63,19 @@ class Settings(BaseSettings):
     # decides whether recommendations are withheld as well as flagged.
     require_current_evidence: bool = False
 
+    # Merge CIViC level A/B predictive evidence into the actionability table,
+    # capped at LEVEL_3B and never overriding an OncoKB entry.
+    #
+    # OncoKB's public dumps need a token this deployment may not have, and
+    # without one the table is the undated built-in set of ~335 entries. That
+    # mattered less when the ranker scored a broad repurposing pool; it matters
+    # more now that candidate_pool_policy defaults to evidence_first and the
+    # table decides what is recommended wherever it has an answer.
+    #
+    # Off by default: widening the evidence table changes which drugs can be
+    # recommended, and that should be a deliberate act rather than a default.
+    civic_supplement_enabled: bool = False
+
     # Which candidates are eligible to be ranked (risk_analysis.md, and
     # docs/BENCHMARK_NCI_MATCH.md for the measurements).
     #

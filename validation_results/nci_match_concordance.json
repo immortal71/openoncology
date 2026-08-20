@@ -3,11 +3,11 @@
   "source": "ClinicalTrials.gov NCT02465060 (NCI-MATCH / EAY131)",
   "n_arms_parsed": 38,
   "n_scored": 32,
-  "exact_top3": 12,
-  "class_top3": 26,
+  "exact_top3": 15,
+  "class_top3": 25,
   "no_prediction": 0,
-  "exact_top3_pct": 37.5,
-  "class_top3_pct": 81.2,
+  "exact_top3_pct": 46.9,
+  "class_top3_pct": 78.1,
   "results": [
     {
       "arm_id": "A",
@@ -24,9 +24,9 @@
       "variant_used": "L858R",
       "gene_used": "EGFR",
       "pipeline_top3": [
-        "AFATINIB",
-        "DACOMITINIB ANHYDROUS",
-        "ERLOTINIB"
+        "afatinib",
+        "dacomitinib",
+        "erlotinib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -46,12 +46,11 @@
       "variant_used": "S310F",
       "gene_used": "ERBB2",
       "pipeline_top3": [
-        "ADO-TRASTUZUMAB EMTANSINE",
-        "TRASTUZUMAB",
-        "LAPATINIB"
+        "trastuzumab deruxtecan",
+        "zongertinib"
       ],
       "exact_hit": false,
-      "class_hit": true
+      "class_hit": false
     },
     {
       "arm_id": "C1",
@@ -67,9 +66,9 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "MET",
       "pipeline_top3": [
-        "CAPMATINIB",
-        "TEPOTINIB",
-        "CRIZOTINIB"
+        "capmatinib",
+        "tepotinib",
+        "crizotinib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -111,11 +110,9 @@
       "variant_used": "T790M",
       "gene_used": "EGFR",
       "pipeline_top3": [
-        "AMIVANTAMAB",
-        "MOBOCERTINIB",
-        "NECITUMUMAB"
+        "osimertinib"
       ],
-      "exact_hit": false,
+      "exact_hit": true,
       "class_hit": true
     },
     {
@@ -132,9 +129,9 @@
       "variant_used": "FUSION",
       "gene_used": "ALK",
       "pipeline_top3": [
-        "ALECTINIB",
-        "BRIGATINIB",
-        "CERITINIB"
+        "alectinib",
+        "brigatinib",
+        "ceritinib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -153,9 +150,9 @@
       "variant_used": "FUSION",
       "gene_used": "ROS1",
       "pipeline_top3": [
-        "CRIZOTINIB",
-        "LORLATINIB",
-        "REPOTRECTINIB"
+        "crizotinib",
+        "entrectinib",
+        "lorlatinib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -178,9 +175,9 @@
       "variant_used": "V600E",
       "gene_used": "BRAF",
       "pipeline_top3": [
-        "BINIMETINIB",
-        "DABRAFENIB",
-        "ENCORAFENIB"
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -199,9 +196,9 @@
       "variant_used": "E545K",
       "gene_used": "PIK3CA",
       "pipeline_top3": [
-        "ALPELISIB",
-        "CAPIVASERTIB",
-        "INAVOLISIB"
+        "alpelisib",
+        "capivasertib",
+        "inavolisib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -218,9 +215,9 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "ERBB2",
       "pipeline_top3": [
-        "ADO-TRASTUZUMAB EMTANSINE",
-        "LAPATINIB",
-        "TRASTUZUMAB"
+        "ado-trastuzumab emtansine",
+        "lapatinib",
+        "neratinib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -239,9 +236,8 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "FGFR1",
       "pipeline_top3": [
-        "PEMIGATINIB",
-        "INFIGRATINIB",
-        "ERDAFITINIB"
+        "erdafitinib",
+        "infigratinib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -260,11 +256,9 @@
       "variant_used": "FUSION",
       "gene_used": "FGFR1",
       "pipeline_top3": [
-        "PEMIGATINIB",
-        "INFIGRATINIB",
-        "ERDAFITINIB"
+        "pemigatinib"
       ],
-      "exact_hit": true,
+      "exact_hit": false,
       "class_hit": true
     },
     {
@@ -281,9 +275,8 @@
       "variant_used": "N891Kfs*13",
       "gene_used": "TSC1",
       "pipeline_top3": [
-        "EVEROLIMUS",
-        "TEMSIROLIMUS",
-        "ERDAFITINIB"
+        "everolimus",
+        "temsirolimus"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -302,9 +295,7 @@
       "variant_used": "DELETION",
       "gene_used": "PTEN",
       "pipeline_top3": [
-        "ALPELISIB",
-        "PACLITAXEL PROTEIN-BOUND",
-        "TEMSIROLIMUS"
+        "everolimus"
       ],
       "exact_hit": false,
       "class_hit": false
@@ -321,9 +312,9 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "ERBB2",
       "pipeline_top3": [
-        "ADO-TRASTUZUMAB EMTANSINE",
-        "LAPATINIB",
-        "TRASTUZUMAB"
+        "ado-trastuzumab emtansine",
+        "lapatinib",
+        "neratinib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -344,9 +335,9 @@
       "variant_used": "V600",
       "gene_used": "BRAF",
       "pipeline_top3": [
-        "BINIMETINIB",
-        "DABRAFENIB",
-        "ENCORAFENIB"
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -365,11 +356,11 @@
       "variant_used": "R440*",
       "gene_used": "NF1",
       "pipeline_top3": [
-        "SELUMETINIB",
-        "TRAMETINIB DIMETHYL SULFOXIDE",
-        "EVEROLIMUS"
+        "selumetinib",
+        "cobimetinib",
+        "trametinib"
       ],
-      "exact_hit": false,
+      "exact_hit": true,
       "class_hit": true
     },
     {
@@ -386,12 +377,10 @@
       "variant_used": "Q209P",
       "gene_used": "GNAQ",
       "pipeline_top3": [
-        "MIRDAMETINIB",
-        "SELUMETINIB",
-        "MERCAPTOPURINE"
+        "tebentafusp"
       ],
       "exact_hit": false,
-      "class_hit": true
+      "class_hit": false
     },
     {
       "arm_id": "T",
@@ -407,9 +396,8 @@
       "variant_used": "P694Lfs*82",
       "gene_used": "SMO",
       "pipeline_top3": [
-        "SONIDEGIB",
-        "VISMODEGIB",
-        "GLASDEGIB"
+        "sonidegib",
+        "vismodegib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -496,12 +484,12 @@
       "variant_used": "Q61R",
       "gene_used": "NRAS",
       "pipeline_top3": [
-        "TRAMETINIB DIMETHYL SULFOXIDE",
-        "VEMURAFENIB",
-        "CETUXIMAB"
+        "binimetinib",
+        "cobimetinib",
+        "trametinib"
       ],
-      "exact_hit": false,
-      "class_hit": false
+      "exact_hit": true,
+      "class_hit": true
     },
     {
       "arm_id": "Z1B",
@@ -517,9 +505,9 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "CCND1",
       "pipeline_top3": [
-        "PALBOCICLIB",
-        "RIBOCICLIB",
-        "ABEMACICLIB"
+        "abemaciclib",
+        "palbociclib",
+        "ribociclib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -538,9 +526,9 @@
       "variant_used": "AMPLIFICATION",
       "gene_used": "CDK4",
       "pipeline_top3": [
-        "PALBOCICLIB",
-        "RIBOCICLIB",
-        "ABEMACICLIB"
+        "abemaciclib",
+        "palbociclib",
+        "ribociclib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -560,9 +548,9 @@
       "variant_used": "FUSION",
       "gene_used": "NTRK1",
       "pipeline_top3": [
-        "LAROTRECTINIB",
-        "ENTRECTINIB",
-        "REPOTRECTINIB"
+        "entrectinib",
+        "larotrectinib",
+        "repotrectinib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -582,9 +570,9 @@
       "variant_used": "E545K",
       "gene_used": "PIK3CA",
       "pipeline_top3": [
-        "ALPELISIB",
-        "CAPIVASERTIB",
-        "INAVOLISIB"
+        "alpelisib",
+        "capivasertib",
+        "inavolisib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -604,9 +592,7 @@
       "variant_used": "DELETION",
       "gene_used": "PTEN",
       "pipeline_top3": [
-        "ALPELISIB",
-        "PACLITAXEL PROTEIN-BOUND",
-        "TEMSIROLIMUS"
+        "everolimus"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -626,9 +612,9 @@
       "variant_used": "T319*",
       "gene_used": "PTEN",
       "pipeline_top3": [
-        "EVEROLIMUS",
-        "ALPELISIB",
-        "CAPIVASERTIB"
+        "alpelisib",
+        "capivasertib",
+        "idelalisib"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -647,9 +633,9 @@
       "variant_used": "K654Sfs*47",
       "gene_used": "BRCA1",
       "pipeline_top3": [
-        "OLAPARIB",
-        "RUCAPARIB",
-        "TALAZOPARIB"
+        "niraparib",
+        "olaparib",
+        "rucaparib"
       ],
       "exact_hit": false,
       "class_hit": false
@@ -668,11 +654,11 @@
       "variant_used": "E17K",
       "gene_used": "AKT1",
       "pipeline_top3": [
-        "CAPIVASERTIB",
-        "AFATINIB",
-        "DABRAFENIB"
+        "capivasertib",
+        "ipatasertib",
+        "alpelisib"
       ],
-      "exact_hit": false,
+      "exact_hit": true,
       "class_hit": true
     },
     {
@@ -691,9 +677,9 @@
       "variant_used": "V600",
       "gene_used": "BRAF",
       "pipeline_top3": [
-        "BINIMETINIB",
-        "DABRAFENIB",
-        "ENCORAFENIB"
+        "binimetinib",
+        "dabrafenib",
+        "encorafenib"
       ],
       "exact_hit": false,
       "class_hit": false
