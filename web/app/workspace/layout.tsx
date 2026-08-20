@@ -1,9 +1,11 @@
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Self-hosted; see the note in app/layout.tsx.
+const inter = localFont({
+  src: "../fonts/Inter-Variable.woff2",
   variable: "--font-inter",
-  weight: ["400", "500", "600"],
+  weight: "100 900",
+  display: "swap",
 });
 
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
