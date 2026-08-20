@@ -1,8 +1,8 @@
 fastapi==0.141.1
-uvicorn[standard]==0.52.1
+uvicorn[standard]==0.52.3
 pydantic[email]==2.13.4
 pydantic-settings==2.15.0
-sqlalchemy[asyncio]==2.0.51
+sqlalchemy[asyncio]==2.0.52
 asyncpg==0.31.0
 psycopg2-binary==2.9.12
 alembic==1.19.1
@@ -11,7 +11,7 @@ redis==5.0.4
 python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.32
-boto3==1.43.67
+boto3==1.43.71
 requests==2.34.2          # transitive dep, pinned past PYSEC-2026-187x/2275 (floor was 2.32.4)
 httpx==0.28.1
 tenacity==9.1.4
@@ -20,7 +20,7 @@ pytest==9.1.1
 pytest-asyncio==1.4.0
 aiosqlite==0.22.1          # async sqlite driver for the in-memory test DB (api/tests/conftest.py)
 stripe==9.8.0
-resend==2.35.0            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
+resend==2.36.0            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
 python-dotenv==1.2.2
 
 # Observability
@@ -33,6 +33,6 @@ structlog==26.1.0
 
 # Phase 3 — AI / cheminformatics
 rdkit==2025.09.1           # SMILES → SDF conversion for DiffDock inputs
-ruff==0.16.2                # linter (also used by CI)
+ruff==0.16.3                # linter (also used by CI)
 biopython==1.88            # CIF → PDB conversion for AlphaFold Server outputs
 weasyprint==69.0           # PDF export (patient letter + oncologist report)
