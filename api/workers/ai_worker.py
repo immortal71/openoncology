@@ -1000,8 +1000,24 @@ def _apply_candidate_pool_policy(
         merged = dict(enrichment.get(_key(drug_name)) or {})
         merged["drug_name"] = merged.get("drug_name") or drug_name
         merged["oncokb_level"] = level
-        merged.setdefault("is_approved", True)
-        merged.setdefault("max_phase", 4)
+
+        # Approval is derived from the level, never assumed. LEVEL_1 and
+        # LEVEL_2 are FDA-approved or standard-of-care; LEVEL_3A, 3B and 4 are
+        # compelling evidence for agents that are still investigational.
+        #
+        # Defaulting every table drug to approved bypassed the approved-only
+        # filter this engine relies on, and the clinical gate caught it: TP53
+        # R248W is a negative control with no approved therapy, and the dump
+        # carries "TP53 R248W Any Solid Tumor LEVEL_3A APR-246". APR-246 is
+        # investigational, so asserting approval put it in a patient's top
+        # three as a high-confidence recommendation.
+        #
+        # A drug enriched from the repurposing sources keeps their answer,
+        # which is measured rather than inferred; only table-only drugs fall
+        # back to the level.
+        approved_by_level = level_text.upper() in ("LEVEL_1", "LEVEL_2", "LEVEL_2A", "LEVEL_2B")
+        merged.setdefault("is_approved", approved_by_level)
+        merged.setdefault("max_phase", 4 if approved_by_level else None)
         pool.append(merged)
 
     if not pool:

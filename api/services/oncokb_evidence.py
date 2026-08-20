@@ -1610,6 +1610,14 @@ def _iter_dump_rows(text: str):
         yield dict(zip(header, fields))
 
 
+# Levels the dump may contribute to the actionability table: approved or
+# standard-of-care tiers, plus resistance, which is a safety floor rather than a
+# recommendation. Investigational tiers (3A, 3B, 4) are excluded; see the note
+# in _parse_oncokb_public_dump_tsv.
+_DUMP_ADMISSIBLE_LEVELS = frozenset(
+    {"LEVEL_1", "LEVEL_2", "LEVEL_2A", "LEVEL_2B", "LEVEL_R1", "LEVEL_R2"}
+)
+
 # Sensitising levels, strongest first. Resistance levels are deliberately not
 # on this scale: they mean the opposite thing, not a weaker version of it.
 _SENSITISING_STRENGTH = ("LEVEL_1", "LEVEL_2", "LEVEL_3A", "LEVEL_3B", "LEVEL_4")
@@ -1693,6 +1701,26 @@ def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[s
         alt_norm = _normalise_public_alteration(alteration_raw)
         level = _normalise_level_token(level_raw)
         if not alt_norm or level is None:
+            continue
+        if level not in _DUMP_ADMISSIBLE_LEVELS:
+            # Investigational tiers are not admitted from the dump. LEVEL_3A,
+            # 3B and 4 are compelling evidence for agents that are not
+            # approved, and a table lookup presents them with the same weight
+            # as standard of care.
+            #
+            # The clinical gate caught this. TP53 R248W is a negative control
+            # with no approved therapy, and the dump carries
+            # "TP53 R248W  Any Solid Tumor  LEVEL_3A  APR-246". Admitting it
+            # put a discontinued investigational agent into a patient's top
+            # three as a high-confidence recommendation.
+            #
+            # Investigational options belong to the repurposing tier, which
+            # carries phase and approval status alongside them, not to an
+            # actionability table that has neither. This costs three drug
+            # pairs out of 218 in the shipped dump.
+            #
+            # Resistance levels are admitted deliberately: they are a safety
+            # floor, never a recommendation (risk_analysis.md F1).
             continue
 
         key = (gene, alt_norm)

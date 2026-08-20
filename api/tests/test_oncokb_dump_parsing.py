@@ -175,6 +175,73 @@ class TestCrossCancerConflicts:
         assert ("BRAF", "V600E") not in ev._parse_oncokb_public_dump_tsv(text)
 
 
+class TestInvestigationalTiersAreNotAdmitted:
+    """The dump may supply approved evidence and resistance, nothing else.
+
+    The clinical gate caught this one. TP53 R248W is a negative control with no
+    approved therapy, and the shipped dump carries
+
+        TP53  R248W  Any Solid Tumor  LEVEL_3A  APR-246
+
+    which is factually correct: OncoKB does list APR-246 there. But LEVEL_3A is
+    compelling evidence for an agent that is not approved, and an actionability
+    table presents it with the same weight as standard of care, so a
+    discontinued investigational drug reached a patient's top three as a
+    high-confidence recommendation.
+
+    Investigational options belong to the repurposing tier, which carries phase
+    and approval status alongside them. This costs three drug pairs out of 218.
+
+    Resistance is admitted on purpose: it is a safety floor, never a
+    recommendation (risk_analysis.md F1).
+    """
+
+    @staticmethod
+    def _dump(*rows):
+        header = ("Gene", "Alteration", "Cancer Type", "Level", "Drug(s)")
+        return NL.join([TAB.join(header)] + [TAB.join(r) for r in rows]) + NL
+
+    def test_level_3a_is_refused(self):
+        text = self._dump(
+            ("TP53", "R248W", "Any Solid Tumor", "LEVEL_3A", "APR-246")
+        )
+        assert ev._parse_oncokb_public_dump_tsv(text) == {}
+
+    @pytest.mark.parametrize("level", ["LEVEL_3A", "LEVEL_3B", "LEVEL_4"])
+    def test_every_investigational_tier_is_refused(self, level):
+        text = self._dump(("GENEX", "V1M", "Any Solid Tumor", level, "drugx"))
+        assert ev._parse_oncokb_public_dump_tsv(text) == {}
+
+    @pytest.mark.parametrize("level", ["LEVEL_1", "LEVEL_2"])
+    def test_approved_tiers_are_admitted(self, level):
+        text = self._dump(("EGFR", "L858R", "NSCLC", level, "Osimertinib"))
+        assert ev._parse_oncokb_public_dump_tsv(text)[("EGFR", "L858R")] == {
+            "osimertinib": level
+        }
+
+    @pytest.mark.parametrize("level", ["LEVEL_R1", "LEVEL_R2"])
+    def test_resistance_is_admitted_as_a_safety_floor(self, level):
+        text = self._dump(("EGFR", "T790M", "NSCLC", level, "Gefitinib"))
+        assert ev._parse_oncokb_public_dump_tsv(text)[("EGFR", "T790M")] == {
+            "gefitinib": level
+        }
+
+    def test_the_shipped_dump_yields_no_investigational_levels(self):
+        path = ev.get_oncokb_cache_path()
+        if not path.exists():
+            pytest.skip("no cache file in this checkout")
+        table = ev._load_public_table_from_cache(path)
+        levels = {lv for drugs in table.values() for lv in drugs.values()}
+        assert not (levels - ev._DUMP_ADMISSIBLE_LEVELS), (
+            f"inadmissible levels reached the table: "
+            f"{sorted(levels - ev._DUMP_ADMISSIBLE_LEVELS)}"
+        )
+
+    def test_tp53_r248w_has_no_table_answer(self):
+        """The exact negative control the gate scores."""
+        assert ev.lookup_oncokb_level("TP53", "R248W", "APR-246") is None
+
+
 class TestCuratedEvidenceWins:
     """A cancer-blind dump must not overwrite a cancer-aware curated entry.
 

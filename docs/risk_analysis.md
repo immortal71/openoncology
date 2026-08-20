@@ -623,6 +623,24 @@ reports `stale_cache` and `is_current` stays `False`, because dated is not
 current. The actionability table goes from 335 undated entries to 421 entries
 carrying a real snapshot date.
 
+**One more restriction, added after the clinical gate caught a false positive.**
+The dump may contribute approved tiers and resistance, nothing else. `TP53
+R248W` is a negative control with no approved therapy, and the dump carries
+`TP53 R248W  Any Solid Tumor  LEVEL_3A  APR-246`, which is factually correct:
+OncoKB does list it. But LEVEL_3A is compelling evidence for an agent that is
+not approved, and an actionability table presents it with the same weight as
+standard of care, so a discontinued investigational drug reached the top three
+as a high-confidence recommendation and `scripts/hard_benchmark_gate.py` failed
+on it. LEVEL_3A, 3B and 4 are now refused from the dump; investigational options
+belong to the repurposing tier, which carries phase and approval beside them.
+That costs three drug pairs out of 218. Resistance levels are admitted on
+purpose, because they are a safety floor rather than a recommendation.
+
+The same assumption was wrong in `_apply_candidate_pool_policy`, which defaulted
+every table-only drug to `is_approved=True` and `max_phase=4`. Approval is now
+derived from the level, so a drug the repurposing sources never saw cannot claim
+an approval nobody checked.
+
 **Residual risk.** Two dropped entries are a real coverage loss, taken
 deliberately over a wrong answer, and the eight downgraded ones understate their
 evidence in the cancer where the stronger level applies. Both are consequences
