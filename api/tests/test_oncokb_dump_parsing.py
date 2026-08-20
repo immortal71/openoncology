@@ -200,6 +200,47 @@ class TestCuratedEvidenceWins:
         assert merged[("RARE", "V1M")]["drugx"] == "LEVEL_3B"
 
 
+class TestPrecedenceIsUniformAcrossPaths:
+    """Cache age must not decide which evidence wins.
+
+    Briefly it did: a stale cache merged underneath the curated table while a
+    fresh one merged on top, so the same dump produced different
+    recommendations depending on the age of a file. Currency and cancer context
+    are different properties and only the second is at stake in the merge, so
+    every path now merges the dump underneath.
+
+    These read the source rather than running the loaders, because reaching the
+    fresh_cache and download branches needs a reachable dump and an OncoKB
+    token, and neither is available here. Checking the call shape is what is
+    possible; leaving the branches unpinned is not.
+    """
+
+    @staticmethod
+    def _source() -> str:
+        return (_API_DIR / "services" / "oncokb_evidence.py").read_text(
+            encoding="utf-8"
+        )
+
+    def test_no_path_merges_the_dump_on_top(self):
+        src = self._source()
+        assert "_merge_level_tables(_LEVEL_TABLE, " not in src, (
+            "a dump merged on top of the curated table can overwrite a "
+            "cancer-aware level with a cancer-blind one"
+        )
+
+    def test_every_merge_puts_the_curated_table_second(self):
+        import re
+
+        calls = re.findall(r"_merge_level_tables\(([^,]+), ([^)]+)\)", self._source())
+        calls = [c for c in calls if "base" not in c[0]]
+        assert calls, "no merge calls found; this test is not looking at anything"
+        for first, second in calls:
+            assert second.strip() == "_LEVEL_TABLE", (
+                f"_merge_level_tables({first}, {second}) puts the curated table "
+                "first, so the dump would overrule it"
+            )
+
+
 class TestStaleBeatsUndated:
     def test_stale_cache_is_a_known_provenance_path(self):
         assert ev.PROVENANCE_STALE_CACHE == "stale_cache"

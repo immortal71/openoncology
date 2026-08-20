@@ -1929,6 +1929,23 @@ def _merge_level_tables(
     base: dict[tuple[str, str], dict[str, str]],
     incoming: dict[tuple[str, str], dict[str, str]],
 ) -> dict[tuple[str, str], dict[str, str]]:
+    """Overlay `incoming` on `base`; incoming wins where both answer.
+
+    Every caller passes a dump-derived table as `base` and the curated table as
+    `incoming`, so the curated entry always wins and the dump fills gaps.
+
+    That order is deliberate and does not depend on how fresh the dump is. The
+    dump is one row per cancer type and this table has no cancer dimension, so
+    any projection of it loses that context; the curated table keeps it, through
+    _apply_cancer_context_override. A cancer-blind LEVEL_2 drawn from some other
+    cancer must not overwrite a curated LEVEL_1, and a newer file does not make
+    it less cancer-blind. Currency and cancer context are different properties,
+    and only one of them is at stake in this merge.
+
+    Briefly the paths disagreed: a stale cache merged underneath while a fresh
+    one merged on top, so identical data produced different recommendations
+    depending on the age of a file. That is not a property of the evidence.
+    """
     merged: dict[tuple[str, str], dict[str, str]] = {k: dict(v) for k, v in base.items()}
     for key, incoming_drugs in incoming.items():
         if key not in merged:
@@ -1945,14 +1962,14 @@ def _bootstrap_oncokb_public_table() -> None:
         cached = _load_public_table_from_cache(cache_path)
         if cached:
             logger.info("[OncoKB] bootstrap path=fresh_cache")
-            _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _LEVEL_TABLE = _merge_level_tables(cached, _LEVEL_TABLE)
             _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return
 
     downloaded, raw_tsv_text = _download_public_oncokb_table()
     if downloaded:
         logger.info("[OncoKB] bootstrap path=download")
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
+        _LEVEL_TABLE = _merge_level_tables(downloaded, _LEVEL_TABLE)
         _write_public_table_cache(raw_tsv_text, cache_path)
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
         return
@@ -2035,7 +2052,7 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
         logger.info("[OncoKB] ensure path=fresh_cache")
         cached = _load_public_table_from_cache(cache_path)
         if cached:
-            _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _LEVEL_TABLE = _merge_level_tables(cached, _LEVEL_TABLE)
             _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return len(_LEVEL_TABLE)
         logger.info("[OncoKB] ensure fresh cache unreadable; will download")
@@ -2043,7 +2060,7 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
     logger.info("[OncoKB] ensure path=download_attempt")
     downloaded, raw_tsv_text = _download_public_oncokb_table()
     if downloaded:
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
+        _LEVEL_TABLE = _merge_level_tables(downloaded, _LEVEL_TABLE)
         _write_public_table_cache(raw_tsv_text, cache_path)
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
         return len(_LEVEL_TABLE)

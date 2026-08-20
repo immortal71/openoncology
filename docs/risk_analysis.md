@@ -630,11 +630,17 @@ of a table with no cancer dimension, and the proper fix is that dimension, which
 is a schema change. Until then any dump this system ingests is silently narrower
 and weaker than the dump itself.
 
-The `fresh_cache` and `download` paths still merge on top of the curated table
-rather than underneath it. The conflict guard protects them from the inversion,
-but a token-holding deployment can still see a curated level overwritten by a
-cancer-blind one. That is untested here because no token is available, and it is
-recorded rather than changed blind.
+All seven merge sites now put the dump underneath the curated table, including
+`fresh_cache` and `download`. They briefly disagreed, and that disagreement was
+itself the defect: a stale cache merged underneath while a fresh one merged on
+top, so identical data produced different recommendations depending on the age
+of a file. Cache age is not a property of the evidence. Currency and cancer
+context are different things, and only the second is at stake in the merge, so a
+newer dump is no less cancer-blind than an older one.
+
+Those two branches need a reachable dump and a token to execute, so they are
+pinned by reading the call shape in the source rather than by running them.
+Checking the shape is what is available; leaving them unpinned was not.
 
 ---
 
