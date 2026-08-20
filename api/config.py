@@ -63,6 +63,26 @@ class Settings(BaseSettings):
     # decides whether recommendations are withheld as well as flagged.
     require_current_evidence: bool = False
 
+    # Which candidates are eligible to be ranked (risk_analysis.md, and
+    # docs/BENCHMARK_NCI_MATCH.md for the measurements).
+    #
+    #   tier2           rank everything the repurposing sources returned, with
+    #                   evidence-table levels stamped on. Current behaviour.
+    #   evidence_first  when the actionability table has an answer for the
+    #                   variant, rank only those drugs; fall back to the full
+    #                   repurposing pool when it does not.
+    #
+    # The two differ only where the table has something to say. On the
+    # FDA-label answer key, which is independent of every source this engine
+    # reads, evidence_first scored +15.1 points on Precision@3, 95% CI
+    # [5.6, 26.2], 7 wins to 0, sign test p = 0.016; on NCI-MATCH arms it
+    # turned 12 exact hits into 15.
+    #
+    # Default stays tier2 anyway. This setting changes which cancer drugs an
+    # oncologist is shown, and two small answer keys agreeing is a reason for a
+    # human to decide, not a reason for a benchmark to decide by itself.
+    candidate_pool_policy: str = "tier2"
+
     # Consecutive static-fallback resolutions before the log escalates from
     # WARNING to ERROR. One fallback is a blip; a sustained run means the
     # evidence source has been unreachable for a while and nobody noticed.

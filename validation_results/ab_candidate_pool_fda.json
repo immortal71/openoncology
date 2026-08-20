@@ -1,0 +1,62 @@
+{
+  "audit": "ab_candidate_pool",
+  "question": "Does the fallback candidate pool beat the tier2 pool that production uses, on drug identity within the top three?",
+  "model_a": "tier2",
+  "model_b": "fallback",
+  "primary_outcome": "hit@3 where it discriminates; Precision@3 where hit@3 saturates. On a broad answer key a gene with several approved drugs makes hit@3 near-certain for any sane ranker, so the binary test loses its power and P@3 is the outcome to read.",
+  "test": "McNemar exact (two-sided binomial on discordant pairs)",
+  "overall": {
+    "n": 21,
+    "a_hit_at_3": 95.24,
+    "b_hit_at_3": 100.0,
+    "a_precision_at_3": 57.14,
+    "b_precision_at_3": 72.22,
+    "b_only_wins": 1,
+    "a_only_wins": 0,
+    "difference_pct_points": 4.76,
+    "bootstrap_95ci_pct_points": [
+      0.0,
+      14.29
+    ],
+    "mcnemar_exact_p": 1.0,
+    "precision_difference_pct_points": 15.08,
+    "precision_bootstrap_95ci_pct_points": [
+      5.56,
+      26.19
+    ],
+    "precision_b_wins": 7,
+    "precision_a_wins": 0,
+    "precision_sign_test_p": 0.01562
+  },
+  "independent_subset": {
+    "n": 21,
+    "a_hit_at_3": 95.24,
+    "b_hit_at_3": 100.0,
+    "a_precision_at_3": 57.14,
+    "b_precision_at_3": 72.22,
+    "b_only_wins": 1,
+    "a_only_wins": 0,
+    "difference_pct_points": 4.76,
+    "bootstrap_95ci_pct_points": [
+      0.0,
+      14.29
+    ],
+    "mcnemar_exact_p": 1.0,
+    "precision_difference_pct_points": 15.08,
+    "precision_bootstrap_95ci_pct_points": [
+      5.56,
+      26.19
+    ],
+    "precision_b_wins": 7,
+    "precision_a_wins": 0,
+    "precision_sign_test_p": 0.01562
+  },
+  "contained_subset": {
+    "n": 0
+  },
+  "caveats": [
+    "The leakage is NOT neutral between these arms. `fallback` reads the evidence table by design, and the contained subset is defined as cases whose answer is in that table, so its win there is close to circular. Read the independent subset, and note how small it is.",
+    "A win is a win on drug identity in the top three, not evidence of better treatment decisions, which nothing here measures.",
+    "Tier 2 is a live service; results move as it does."
+  ]
+}

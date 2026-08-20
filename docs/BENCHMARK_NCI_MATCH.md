@@ -235,11 +235,54 @@ The only subset that can answer the question is the independent one, and there
 p = 0.5. That is not evidence for the change and it is not evidence against it.
 It is not evidence.
 
-**So the pool question is still open, and the answer is "we cannot tell yet".**
-The NCI-MATCH arms suggested `fallback`; the only clean subset here leans the
-other way; neither has the power to decide. What is needed is a biomarker-driven
-case set whose answers are not drawn from the evidence table being tested, at a
-scale well beyond eight. `run_ai_analysis` is unchanged.
+**So the pool question needed a clean answer key**, which is what
+`scripts/build_fda_label_answer_key.py` now builds: 50 gene-drug pairs across 21
+genes, taken from FDA label INDICATIONS AND USAGE via openFDA, a source queried
+nowhere in the recommendation path.
+
+### The answer, on a key the engine did not help write
+
+`python scripts/ab_candidate_pool.py --fda-key`, artifact
+`validation_results/ab_candidate_pool_fda.json`, n = 21 genes:
+
+| Outcome | `tier2` | `fallback` | Difference | 95% CI | Test |
+|---|---|---|---|---|---|
+| hit@3 | 95.24% | 100.0% | +4.76 | [0.0, 14.29] | McNemar p = 1.0 |
+| **Precision@3** | **57.14%** | **72.22%** | **+15.08** | **[5.56, 26.19]** | sign test p = 0.016, 7 wins to 0 |
+
+hit@3 saturates and says nothing: when a gene's gold set holds five approved
+drugs, any sane ranker puts one in the top three. Precision@3 asks how many of
+the three slots were right, and there `fallback` wins on 7 genes and loses on
+none.
+
+**The containment check this time.** 19 of the 21 genes have their gold drugs
+fully inside the evidence table, which sounds like the same leak that ruined the
+470-case run. It is not, for two reasons. The cases were selected by FDA labels
+rather than by table containment, so containment is an observed property of the
+table rather than a criterion that picked the cases. And more decisively, the
+two models produce identical output whenever the table is empty, because both
+fall through to Tier 2. They can only differ where the table has an answer, so
+restricting attention to that regime is not a bias, it is the only place a
+comparison exists.
+
+What the key does not cover is whether the table is *wrong* somewhere. Every one
+of these 21 genes is an approved indication, where a curated actionability table
+should be right. The regime worth worrying about is emerging or off-label
+biomarkers, and no answer key here reaches it.
+
+### What was changed, and what was not
+
+`candidate_pool_policy` in `api/config.py`, with `_apply_candidate_pool_policy`
+in the AI worker. `evidence_first` ranks only the table's answer when it has one
+and falls back to the full repurposing pool when it does not; membership comes
+from the table while any repurposing metadata already gathered for a member drug
+is merged in rather than discarded.
+
+**The default stays `tier2`, the existing behaviour.** Two small answer keys
+agreeing is a reason for a person to decide, not a reason for a benchmark to
+decide by itself, and this setting changes which cancer drugs an oncologist is
+shown. The evidence for flipping it is above. The case against is that n is 21
+and 32, and that neither key measures patient outcome.
 
 ## Why NCI-MATCH
 

@@ -172,6 +172,10 @@ def run_ai_analysis(
                 submission_id=submission_id,
             )
 
+            drugs = _apply_candidate_pool_policy(
+                drugs, target_gene, top_variant, top_mutation.alphamissense_score
+            )
+
             # Score each drug using the composite ranking algorithm
             from ai.ranking import rank_candidates
 
@@ -892,6 +896,94 @@ def _merge_candidate(candidate_bank: dict[str, dict], candidate: dict) -> None:
     new_score = float(candidate.get("opentargets_score") or 0)
     if new_score > current_score:
         existing["opentargets_score"] = new_score
+
+
+def _apply_candidate_pool_policy(
+    drugs: list[dict],
+    gene: str,
+    variant: str | None,
+    alphamissense_score: float | None = None,
+) -> list[dict]:
+    """Decide which candidates are eligible to be ranked.
+
+    Two policies, and the difference is measurable rather than a matter of
+    taste. See docs/BENCHMARK_NCI_MATCH.md.
+
+      tier2           Rank everything the repurposing sources returned, with
+                      evidence-table levels stamped on. What this system has
+                      always done.
+      evidence_first  When the actionability table has an answer for this
+                      variant, rank only those drugs. Fall back to the full
+                      repurposing pool when it does not.
+
+    The two are identical whenever the table is empty, so they can only differ
+    where the table has something to say. On the FDA-label answer key, which is
+    built from approved indications and is independent of every source this
+    engine reads, evidence_first scored 15.1 percentage points higher on
+    Precision@3, 95% CI [5.6, 26.2], winning 7 cases and losing none, sign test
+    p = 0.016. On NCI-MATCH arms it converted 12 exact hits into 15.
+
+    The mechanism is that a broad target-derived pool dilutes a three-slot cut:
+    dozens of candidates score similarly, and the specific drug the evidence
+    names gets displaced by something merely plausible for the same target.
+
+    Default is `tier2`, the existing behaviour. This changes which cancer drugs
+    an oncologist is shown, so flipping it is a clinical decision for a human,
+    not a default a benchmark gets to set. The evidence for flipping it is in
+    the docs above; the case against is that both answer keys are small and
+    neither measures patient outcome.
+
+    Enrichment is preserved either way. Under evidence_first the table decides
+    membership, and any repurposing metadata already gathered for a member drug
+    (SMILES, binding score, phase) is merged in rather than discarded.
+    """
+    from config import settings
+
+    policy = getattr(settings, "candidate_pool_policy", "tier2")
+    if policy != "evidence_first":
+        return drugs
+
+    try:
+        from services.oncokb_evidence import get_all_drugs_for_variant_live
+
+        table = get_all_drugs_for_variant_live(
+            gene, variant or "", cancer_type=None,
+            alphamissense_score=alphamissense_score,
+        ) or {}
+    except Exception as exc:
+        logger.warning(
+            "[pool] evidence lookup failed for %s %s (%s); keeping the "
+            "repurposing pool", gene, variant, exc,
+        )
+        return drugs
+
+    if not table:
+        return drugs
+
+    def _key(name: str) -> str:
+        return "".join(ch for ch in (name or "").lower() if ch.isalnum())
+
+    enrichment = {_key(d.get("drug_name") or ""): d for d in drugs}
+    pool: list[dict] = []
+    for drug_name, level in table.items():
+        level_text = str(level)
+        # Resistance markers are evidence against a drug, never a candidate.
+        if "LEVEL_R" in level_text.upper():
+            continue
+        merged = dict(enrichment.get(_key(drug_name)) or {})
+        merged["drug_name"] = merged.get("drug_name") or drug_name
+        merged["oncokb_level"] = level
+        merged.setdefault("is_approved", True)
+        merged.setdefault("max_phase", 4)
+        pool.append(merged)
+
+    if not pool:
+        return drugs
+    logger.info(
+        "[pool] evidence_first: %d table candidates for %s replace a pool of %d",
+        len(pool), gene, len(drugs),
+    )
+    return pool
 
 
 def _query_repurposing_candidates(
