@@ -56,6 +56,13 @@ class Result(Base):
     # See risk_analysis.md F4.
     evidence_provenance: Mapped[Any] = mapped_column(JSON, nullable=True)
 
+    # Which scoring rules produced this recommendation (migration 0016).
+    # Separate from evidence_provenance on purpose: that says which evidence
+    # answered, this says what was done with it. Nullable, so a result written
+    # before the column existed reads as "not recorded" rather than being
+    # claimed to have run under the current rules.
+    algorithm_version: Mapped[Any] = mapped_column(JSON, nullable=True)
+
     # S3 key for the generated PDF report
     report_pdf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
 

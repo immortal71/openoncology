@@ -408,6 +408,7 @@ def run_ai_analysis(
                 evidence_provenance=_capture_evidence_provenance(
                     withheld_reason=evidence_withheld_reason
                 ),
+                algorithm_version=_capture_algorithm_version(),
             )
             db.add(result)
             db.flush()
@@ -442,6 +443,25 @@ def run_ai_analysis(
     except Exception as exc:
         logger.error(f"[ai] Analysis failed for {submission_id}: {exc}")
         raise self.retry(exc=exc)
+
+
+def _capture_algorithm_version() -> dict | None:
+    """Stamp the scoring rules that produced this result.
+
+    Captured here rather than read at request time, because settings can change
+    between producing a recommendation and reading it, and the question a reader
+    has is which rules produced this one.
+
+    Never fails the analysis. A missing version reads as unrecorded, which is
+    honest; raising here would lose a completed result over an audit field.
+    """
+    try:
+        from services.algorithm_version import get_algorithm_version
+
+        return get_algorithm_version()
+    except Exception as exc:
+        logger.warning("[algorithm] version capture failed: %s", exc)
+        return None
 
 
 def _capture_evidence_provenance(withheld_reason: str | None = None) -> dict | None:
