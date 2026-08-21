@@ -176,8 +176,8 @@
       "gene_used": "BRAF",
       "pipeline_top3": [
         "binimetinib",
-        "dabrafenib",
-        "encorafenib"
+        "cetuximab",
+        "dabrafenib"
       ],
       "exact_hit": true,
       "class_hit": true
@@ -198,7 +198,7 @@
       "pipeline_top3": [
         "alpelisib",
         "capivasertib",
-        "inavolisib"
+        "fulvestrant"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -275,8 +275,7 @@
       "variant_used": "N891Kfs*13",
       "gene_used": "TSC1",
       "pipeline_top3": [
-        "everolimus",
-        "temsirolimus"
+        "everolimus"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -417,9 +416,7 @@
       "variant_used": "DELETION",
       "gene_used": "NF2",
       "pipeline_top3": [
-        "TEMSIROLIMUS",
-        "BEVACIZUMAB",
-        "EVEROLIMUS"
+        "everolimus"
       ],
       "exact_hit": false,
       "class_hit": false
@@ -572,7 +569,7 @@
       "pipeline_top3": [
         "alpelisib",
         "capivasertib",
-        "inavolisib"
+        "fulvestrant"
       ],
       "exact_hit": false,
       "class_hit": true
@@ -655,8 +652,8 @@
       "gene_used": "AKT1",
       "pipeline_top3": [
         "capivasertib",
-        "ipatasertib",
-        "alpelisib"
+        "fulvestrant",
+        "ipatasertib"
       ],
       "exact_hit": true,
       "class_hit": true

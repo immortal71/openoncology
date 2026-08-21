@@ -63,6 +63,25 @@ If the platform is used to select patients for a specific investigational drug,
 it becomes a companion diagnostic (CDx) requiring:
 - FDA PMA (Class III) or De Novo with the drug NDA/BLA
 - Locked algorithm version with change-control SOP
+  - **Partly in place.** `services/algorithm_version.py` computes a
+    deterministic fingerprint over every input that can reorder drugs for fixed
+    evidence: the ranking configuration, the candidate-pool policy, the CIViC
+    supplement flag and the degraded-evidence policy. It is stamped onto each
+    result at production time (`results.algorithm_version`, migration `0016`),
+    so a recommendation names the rules that produced it rather than the rules
+    in force when someone reads it.
+  - `ALGORITHM_VERSION` is a semantic version moved by hand. The fingerprint
+    moves on its own, and a test fails when the two disagree, so a behaviour
+    change cannot land quietly. That is the change-control mechanism: code
+    cannot lock an algorithm, it can only make a change impossible to make
+    without a person noticing.
+  - The fingerprint deliberately excludes the evidence table's contents. That
+    identity belongs to `results.evidence_provenance`; folding it in would make
+    the algorithm version churn on every OncoKB refresh and answer neither
+    question well.
+  - **Still missing for a submission:** a written SOP naming who approves a
+    version change and on what evidence, and retention of superseded versions.
+    The mechanism exists; the procedure around it does not.
 - Clinical validity study (≥200 patient retrospective + prospective cohort)
 
 ---

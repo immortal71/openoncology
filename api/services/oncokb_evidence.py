@@ -69,6 +69,7 @@ _ONCOKB_CACHE_MAX_AGE_DAYS = 7
 PROVENANCE_FRESH_CACHE = "fresh_cache"
 PROVENANCE_DOWNLOAD = "download"
 PROVENANCE_STATIC_FALLBACK = "static_fallback"
+PROVENANCE_STALE_CACHE = "stale_cache"
 # The live per-variant OncoKB API answered for this specific lookup. Recorded
 # per-call rather than in module state, because it says nothing about the table.
 PROVENANCE_LIVE_API = "live_api"
@@ -77,6 +78,10 @@ _PROVENANCE_CAVEATS: dict[str, str] = {
     PROVENANCE_DOWNLOAD: "",
     PROVENANCE_FRESH_CACHE: "",
     PROVENANCE_LIVE_API: "",
+    PROVENANCE_STALE_CACHE: (
+        "the cached OncoKB dump is older than the freshness window and the live "
+        "dump was unreachable, so actionability is dated but out of date"
+    ),
     PROVENANCE_STATIC_FALLBACK: (
         "Evidence served from the built-in static table, which carries no version "
         "and no release date. The OncoKB public dump could not be reached, so this "
@@ -1561,10 +1566,120 @@ def _split_drug_names(raw_drugs: str) -> list[str]:
     return cleaned
 
 
+def _iter_dump_rows(text: str):
+    r"""Yield dict rows from an OncoKB dump, tab- or whitespace-separated.
+
+    The published dump is tab-separated, but the documented workaround for a
+    401 is to download it from the dataAccess page by hand, and a file that has
+    been through a browser or a copy-paste arrives column-aligned with runs of
+    spaces and no tabs at all.
+
+    That is not hypothetical. The cache file committed to this repository has
+    zero tab characters and eight-space separators, so csv.DictReader with
+    delimiter="\t" read the entire header as ONE column, every field lookup
+    missed, every row was skipped, and 253 real rows of OncoKB data parsed to
+    nothing. Nothing said so: an unparseable cache and an absent cache both
+    produced an empty table.
+
+    Splitting on two-or-more spaces rather than one is what keeps
+    "BCR-ABL1 Fusion" and "Chronic Myelogenous Leukemia" intact.
+    """
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return
+    # Strip a byte-order mark; it survives a browser download and would
+    # otherwise corrupt the first column name.
+    lines[0] = lines[0].lstrip("﻿")
+
+    if "\t" in lines[0]:
+        yield from csv.DictReader(lines, delimiter="\t")
+        return
+
+    header = re.split(r" {2,}", lines[0].strip())
+    if len(header) < 2:
+        return
+    logger.info(
+        "[OncoKB] dump has no tabs; reading %d whitespace-aligned columns",
+        len(header),
+    )
+    for line in lines[1:]:
+        fields = re.split(r" {2,}", line.strip())
+        if len(fields) < 2:
+            continue
+        fields += [""] * (len(header) - len(fields))
+        yield dict(zip(header, fields))
+
+
+# Levels the dump may contribute to the actionability table: approved or
+# standard-of-care tiers, plus resistance, which is a safety floor rather than a
+# recommendation. Investigational tiers (3A, 3B, 4) are excluded; see the note
+# in _parse_oncokb_public_dump_tsv.
+_DUMP_ADMISSIBLE_LEVELS = frozenset(
+    {"LEVEL_1", "LEVEL_2", "LEVEL_2A", "LEVEL_2B", "LEVEL_R1", "LEVEL_R2"}
+)
+
+# Sensitising levels, strongest first. Resistance levels are deliberately not
+# on this scale: they mean the opposite thing, not a weaker version of it.
+_SENSITISING_STRENGTH = ("LEVEL_1", "LEVEL_2", "LEVEL_3A", "LEVEL_3B", "LEVEL_4")
+
+
+def _reconcile_cross_cancer_levels(first: str, second: str) -> Optional[str]:
+    """Resolve two levels for one gene, alteration and drug, or refuse to.
+
+    The dump is one row per cancer type and this table has no cancer dimension,
+    so the same drug arrives more than once with different levels. Those splits
+    are not all the same kind of disagreement.
+
+        BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+        BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+
+    is a contradiction: sensitising in one cancer, resistant in another. No
+    single value is right without the cancer context, so this returns None and
+    the caller drops the entry.
+
+        ERBB2 Amplification  Breast Cancer  LEVEL_1  Trastuzumab
+        ERBB2 Amplification  <other>        LEVEL_2  Trastuzumab
+
+    is not a contradiction. Both say the drug works; they differ on how strong
+    the evidence is. Dropping those would discard real actionability to avoid a
+    disagreement that has a safe answer, so the weaker level is kept. The drug
+    still surfaces, and the report does not claim standard-of-care support in a
+    cancer where only lower-tier evidence exists.
+
+    Of the ten conflicts in the shipped dump, two are contradictions and eight
+    are strength differences.
+    """
+    a = _normalise_level_token(first)
+    b = _normalise_level_token(second)
+    if a is None or b is None:
+        return None
+    a_resistant = a.startswith("LEVEL_R")
+    b_resistant = b.startswith("LEVEL_R")
+
+    if a_resistant != b_resistant:
+        return None  # sensitising against resistant: genuinely unrepresentable
+
+    if a_resistant:
+        # Both resistance. Keep the stronger warning; R1 outranks R2.
+        return "LEVEL_R1" if "LEVEL_R1" in (a, b) else a
+
+    ranks = [
+        _SENSITISING_STRENGTH.index(lv)
+        for lv in (a, b)
+        if lv in _SENSITISING_STRENGTH
+    ]
+    if len(ranks) != 2:
+        return None
+    return _SENSITISING_STRENGTH[max(ranks)]
+
+
 def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[str, str]]:
     parsed: dict[tuple[str, str], dict[str, str]] = {}
-    reader = csv.DictReader(tsv_text.splitlines(), delimiter="\t")
-    for row in reader:
+    # Drugs whose level differs between cancer types, and are therefore
+    # unrepresentable in a cancer-agnostic table. See the note below.
+    conflicts: list[tuple[str, str, str, str, str]] = []
+    dropped: set[tuple[tuple[str, str], str]] = set()
+    for row in _iter_dump_rows(tsv_text):
         gene = _pick_field(row, ("HUGO_SYMBOL", "GENE", "GENE_SYMBOL", "SYMBOL")).upper()
         alteration_raw = _pick_field(
             row,
@@ -1587,14 +1702,78 @@ def _parse_oncokb_public_dump_tsv(tsv_text: str) -> dict[tuple[str, str], dict[s
         level = _normalise_level_token(level_raw)
         if not alt_norm or level is None:
             continue
+        if level not in _DUMP_ADMISSIBLE_LEVELS:
+            # Investigational tiers are not admitted from the dump. LEVEL_3A,
+            # 3B and 4 are compelling evidence for agents that are not
+            # approved, and a table lookup presents them with the same weight
+            # as standard of care.
+            #
+            # The clinical gate caught this. TP53 R248W is a negative control
+            # with no approved therapy, and the dump carries
+            # "TP53 R248W  Any Solid Tumor  LEVEL_3A  APR-246". Admitting it
+            # put a discontinued investigational agent into a patient's top
+            # three as a high-confidence recommendation.
+            #
+            # Investigational options belong to the repurposing tier, which
+            # carries phase and approval status alongside them, not to an
+            # actionability table that has neither. This costs three drug
+            # pairs out of 218 in the shipped dump.
+            #
+            # Resistance levels are admitted deliberately: they are a safety
+            # floor, never a recommendation (risk_analysis.md F1).
+            continue
 
         key = (gene, alt_norm)
         if key not in parsed:
             parsed[key] = {}
 
         for drug in _split_drug_names(drugs_raw):
+            previous = parsed[key].get(drug)
+            if previous is not None and previous != level:
+                resolved = _reconcile_cross_cancer_levels(previous, level)
+                if resolved is not None:
+                    # Same direction, different strength. Keeping the weaker
+                    # level is the conservative read: the drug still surfaces,
+                    # and it does not claim standard-of-care support in a cancer
+                    # where only lower-tier evidence exists.
+                    parsed[key][drug] = resolved
+                    continue
+                # The dump is one row per cancer type; this table has no cancer
+                # dimension. The same gene, alteration and drug can therefore
+                # arrive twice with opposite meanings:
+                #
+                #   BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+                #   BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+                #
+                # Last-write-wins turned vemurafenib for BRAF V600E into a
+                # resistance marker, which would suppress a correct melanoma
+                # recommendation. Picking the other way would claim a drug works
+                # in colorectal where it does not.
+                #
+                # Neither is safe without the cancer context, so the conflicted
+                # drug is dropped from the dump-derived table and the curated
+                # entry answers instead. That table applies cancer context via
+                # _apply_cancer_context_override; this one cannot.
+                conflicts.append((gene, alt_norm, drug, previous, level))
+                parsed[key].pop(drug, None)
+                dropped.add((key, drug))
+                continue
+            if (key, drug) in dropped:
+                continue
             parsed[key][drug] = level
 
+    if conflicts:
+        logger.warning(
+            "[OncoKB] %d gene/alteration/drug entries disagree across cancer types "
+            "and were dropped from the dump-derived table, because it has no cancer "
+            "dimension to hold both. Example: %s %s %s is %s and %s. The curated "
+            "table answers for these.",
+            len(conflicts),
+            *conflicts[0][:3],
+            conflicts[0][3],
+            conflicts[0][4],
+        )
+    parsed = {k: v for k, v in parsed.items() if v}
     return parsed
 
 
@@ -1609,6 +1788,19 @@ def _load_public_table_from_cache(cache_path: Path) -> dict[tuple[str, str], dic
                 "[OncoKB] loaded %d entries from local cache: %s",
                 len(table),
                 cache_path,
+            )
+        elif text.strip():
+            # A cache that exists and yields nothing is a broken cache, not an
+            # absent one, and returning an empty table makes those two
+            # indistinguishable. This file sat here parsing to zero rows while
+            # the service reported only that the dump was unreachable.
+            logger.warning(
+                "[OncoKB] cache file %s is %d bytes and parsed to ZERO entries. "
+                "It exists but cannot be read, which is not the same as missing. "
+                "Expected columns Gene / Alteration / Level / Drug(s), separated "
+                "by tabs or by runs of spaces.",
+                cache_path,
+                len(text),
             )
         return table
     except Exception as exc:
@@ -1765,6 +1957,23 @@ def _merge_level_tables(
     base: dict[tuple[str, str], dict[str, str]],
     incoming: dict[tuple[str, str], dict[str, str]],
 ) -> dict[tuple[str, str], dict[str, str]]:
+    """Overlay `incoming` on `base`; incoming wins where both answer.
+
+    Every caller passes a dump-derived table as `base` and the curated table as
+    `incoming`, so the curated entry always wins and the dump fills gaps.
+
+    That order is deliberate and does not depend on how fresh the dump is. The
+    dump is one row per cancer type and this table has no cancer dimension, so
+    any projection of it loses that context; the curated table keeps it, through
+    _apply_cancer_context_override. A cancer-blind LEVEL_2 drawn from some other
+    cancer must not overwrite a curated LEVEL_1, and a newer file does not make
+    it less cancer-blind. Currency and cancer context are different properties,
+    and only one of them is at stake in this merge.
+
+    Briefly the paths disagreed: a stale cache merged underneath while a fresh
+    one merged on top, so identical data produced different recommendations
+    depending on the age of a file. That is not a property of the evidence.
+    """
     merged: dict[tuple[str, str], dict[str, str]] = {k: dict(v) for k, v in base.items()}
     for key, incoming_drugs in incoming.items():
         if key not in merged:
@@ -1781,16 +1990,37 @@ def _bootstrap_oncokb_public_table() -> None:
         cached = _load_public_table_from_cache(cache_path)
         if cached:
             logger.info("[OncoKB] bootstrap path=fresh_cache")
-            _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _LEVEL_TABLE = _merge_level_tables(cached, _LEVEL_TABLE)
             _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return
 
     downloaded, raw_tsv_text = _download_public_oncokb_table()
     if downloaded:
         logger.info("[OncoKB] bootstrap path=download")
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
+        _LEVEL_TABLE = _merge_level_tables(downloaded, _LEVEL_TABLE)
         _write_public_table_cache(raw_tsv_text, cache_path)
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
+        return
+
+    # Before giving up on dated evidence: a cache past its freshness window is
+    # still a real OncoKB dump with a date on it, and the built-in table has no
+    # date at all. Preferring the undated table over a week-old real one is the
+    # wrong way round, so a stale cache is used when the download fails and the
+    # provenance says stale_cache rather than claiming currency.
+    stale = _load_public_table_from_cache(cache_path)
+    if stale:
+        logger.warning(
+            "[OncoKB] bootstrap path=stale_cache — the dump was unreachable and the "
+            "cache is past its %d-day window, so actionability is dated but out of "
+            "date. Preferred over the undated built-in table.",
+            _ONCOKB_CACHE_MAX_AGE_DAYS,
+        )
+        # Curated first, dump second: the curated table applies cancer context
+        # through _apply_cancer_context_override and this projection of the dump
+        # cannot, so a cancer-blind LEVEL_2 must not overwrite a curated LEVEL_1.
+        # The dump fills keys the curated table does not answer.
+        _LEVEL_TABLE = _merge_level_tables(stale, _LEVEL_TABLE)
+        _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
         return
 
     # Degraded: undated hardcoded table. Warn, not info — this is the state in
@@ -1850,7 +2080,7 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
         logger.info("[OncoKB] ensure path=fresh_cache")
         cached = _load_public_table_from_cache(cache_path)
         if cached:
-            _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, cached)
+            _LEVEL_TABLE = _merge_level_tables(cached, _LEVEL_TABLE)
             _record_evidence_provenance(PROVENANCE_FRESH_CACHE, cache_path)
             return len(_LEVEL_TABLE)
         logger.info("[OncoKB] ensure fresh cache unreadable; will download")
@@ -1858,9 +2088,28 @@ def ensure_oncokb_table_loaded(min_entries: int = 200) -> int:
     logger.info("[OncoKB] ensure path=download_attempt")
     downloaded, raw_tsv_text = _download_public_oncokb_table()
     if downloaded:
-        _LEVEL_TABLE = _merge_level_tables(_LEVEL_TABLE, downloaded)
+        _LEVEL_TABLE = _merge_level_tables(downloaded, _LEVEL_TABLE)
         _write_public_table_cache(raw_tsv_text, cache_path)
         _record_evidence_provenance(PROVENANCE_DOWNLOAD)
+        return len(_LEVEL_TABLE)
+
+    # A cache past its freshness window is still a dated OncoKB dump, and the
+    # built-in table has no date at all. See the same branch in
+    # _bootstrap_oncokb_public_table.
+    stale = _load_public_table_from_cache(cache_path)
+    if stale:
+        logger.warning(
+            "[OncoKB] ensure path=stale_cache — the dump was unreachable and the "
+            "cache is past its %d-day window, so actionability is dated but out "
+            "of date. Preferred over the undated built-in table.",
+            _ONCOKB_CACHE_MAX_AGE_DAYS,
+        )
+        # Curated first, dump second: the curated table applies cancer context
+        # through _apply_cancer_context_override and this projection of the dump
+        # cannot, so a cancer-blind LEVEL_2 must not overwrite a curated LEVEL_1.
+        # The dump fills keys the curated table does not answer.
+        _LEVEL_TABLE = _merge_level_tables(stale, _LEVEL_TABLE)
+        _record_evidence_provenance(PROVENANCE_STALE_CACHE, cache_path)
         return len(_LEVEL_TABLE)
 
     logger.warning(

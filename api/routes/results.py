@@ -205,6 +205,7 @@ async def get_results(
         "custom_drug_reason": custom_drug_reason,
         # Empty on the normal path. Names any section that was requested and
         # could not be generated, so a null section is not read as an empty one.
+        "algorithm_version": (result.algorithm_version if result else None),
         "generation_errors": generation_errors,
         # oncologist_report: only populated when include_oncologist_report=true
         "oncologist_report": oncologist_report_data or None,

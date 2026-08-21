@@ -28,8 +28,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 if TYPE_CHECKING:
     # Runtime imports of the DB models stay inside the task body, so the Celery
-    # module can be imported without pulling in SQLAlchemy.
-    from models.mutation import OncoKBLevel
+    # module can be imported without pulling in SQLAlchemy. Names used only in
+    # annotations still have to resolve for a linter, hence both here.
+    from models.mutation import EvidenceLookupStatus, OncoKBLevel
 
 from workers import celery_app
 
@@ -408,6 +409,7 @@ def run_ai_analysis(
                 evidence_provenance=_capture_evidence_provenance(
                     withheld_reason=evidence_withheld_reason
                 ),
+                algorithm_version=_capture_algorithm_version(),
             )
             db.add(result)
             db.flush()
@@ -442,6 +444,25 @@ def run_ai_analysis(
     except Exception as exc:
         logger.error(f"[ai] Analysis failed for {submission_id}: {exc}")
         raise self.retry(exc=exc)
+
+
+def _capture_algorithm_version() -> dict | None:
+    """Stamp the scoring rules that produced this result.
+
+    Captured here rather than read at request time, because settings can change
+    between producing a recommendation and reading it, and the question a reader
+    has is which rules produced this one.
+
+    Never fails the analysis. A missing version reads as unrecorded, which is
+    honest; raising here would lose a completed result over an audit field.
+    """
+    try:
+        from services.algorithm_version import get_algorithm_version
+
+        return get_algorithm_version()
+    except Exception as exc:
+        logger.warning("[algorithm] version capture failed: %s", exc)
+        return None
 
 
 def _capture_evidence_provenance(withheld_reason: str | None = None) -> dict | None:
@@ -979,8 +1000,24 @@ def _apply_candidate_pool_policy(
         merged = dict(enrichment.get(_key(drug_name)) or {})
         merged["drug_name"] = merged.get("drug_name") or drug_name
         merged["oncokb_level"] = level
-        merged.setdefault("is_approved", True)
-        merged.setdefault("max_phase", 4)
+
+        # Approval is derived from the level, never assumed. LEVEL_1 and
+        # LEVEL_2 are FDA-approved or standard-of-care; LEVEL_3A, 3B and 4 are
+        # compelling evidence for agents that are still investigational.
+        #
+        # Defaulting every table drug to approved bypassed the approved-only
+        # filter this engine relies on, and the clinical gate caught it: TP53
+        # R248W is a negative control with no approved therapy, and the dump
+        # carries "TP53 R248W Any Solid Tumor LEVEL_3A APR-246". APR-246 is
+        # investigational, so asserting approval put it in a patient's top
+        # three as a high-confidence recommendation.
+        #
+        # A drug enriched from the repurposing sources keeps their answer,
+        # which is measured rather than inferred; only table-only drugs fall
+        # back to the level.
+        approved_by_level = level_text.upper() in ("LEVEL_1", "LEVEL_2", "LEVEL_2A", "LEVEL_2B")
+        merged.setdefault("is_approved", approved_by_level)
+        merged.setdefault("max_phase", 4 if approved_by_level else None)
         pool.append(merged)
 
     if not pool:

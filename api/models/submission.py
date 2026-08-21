@@ -26,8 +26,11 @@ class Submission(Base):
     )
 
     cancer_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    # Indexed: submissions are listed and polled by status, and migration 0015
+    # recreates this index. Declaring it here is what keeps `alembic check`
+    # agreeing with the migration.
     status: Mapped[SubmissionStatus] = mapped_column(
-        SAEnum(SubmissionStatus), default=SubmissionStatus.queued
+        SAEnum(SubmissionStatus), default=SubmissionStatus.queued, index=True
     )
 
     # S3/MinIO keys — never expose to client

@@ -57,13 +57,18 @@ _INDEXES = [
     ),
     ("ix_cohort_samples_study_id", "cohort_samples", ["study_id"]),
     ("ix_cohort_samples_sample_id", "cohort_samples", ["sample_id"]),
-    ("ix_cna_submission_id", "copy_number_alterations", ["submission_id"]),
-    ("ix_cna_gene", "copy_number_alterations", ["gene"]),
-    ("ix_sig_submission_id", "mutation_signatures", ["submission_id"]),
-    ("ix_rnaseq_submission_id", "rnaseq_expression", ["submission_id"]),
-    ("ix_rnaseq_gene", "rnaseq_expression", ["gene"]),
-    ("ix_sv_submission_id", "structural_variants", ["submission_id"]),
-    ("ix_sv_gene1", "structural_variants", ["gene1"]),
+    # These four groups are recreated under the names SQLAlchemy derives from
+    # index=True, ix_<tablename>_<column>, not the abbreviated names
+    # a8bf7eb4833c dropped. A migration that creates ix_cna_gene while the model
+    # declares ix_copy_number_alterations_gene leaves `alembic check` reporting
+    # drift forever, which is the check this migration exists to satisfy.
+    ("ix_copy_number_alterations_submission_id", "copy_number_alterations", ["submission_id"]),
+    ("ix_copy_number_alterations_gene", "copy_number_alterations", ["gene"]),
+    ("ix_mutation_signatures_submission_id", "mutation_signatures", ["submission_id"]),
+    ("ix_rnaseq_expression_submission_id", "rnaseq_expression", ["submission_id"]),
+    ("ix_rnaseq_expression_gene", "rnaseq_expression", ["gene"]),
+    ("ix_structural_variants_submission_id", "structural_variants", ["submission_id"]),
+    ("ix_structural_variants_gene1", "structural_variants", ["gene1"]),
     ("ix_studies_cancer_type", "studies", ["cancer_type"]),
 ]
 

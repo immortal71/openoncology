@@ -208,3 +208,6 @@ class ResultsResponse(BaseModel):
     # Always present. Defaults to not_recorded/is_current=False so a result that
     # predates provenance capture cannot be read as having used current evidence.
     evidence_provenance: EvidenceProvenanceOut = Field(default_factory=EvidenceProvenanceOut)
+    # None means the scoring rules were not recorded for this result, which
+    # is not the same as having run under the current ones.
+    algorithm_version: Optional[dict[str, Any]] = None

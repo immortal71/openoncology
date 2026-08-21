@@ -558,6 +558,108 @@ onto itself. The effect is about 0.3% and usually clipped by the 1.0 cap, so it
 is recorded as a known non-monotonicity, marked xfail in the tests, rather than
 presented as urgent.
 
+### F17. The OncoKB dump parser read nothing, and would have inverted a drug if it had (H1, H4) — FIXED
+
+Two defects in one file, and the second was hidden by the first.
+
+**The dump parsed to zero rows.** `api/static/oncokb_actionable_variants_cache.txt`
+holds 253 rows of real OncoKB data and produced an empty table for as long as it
+has been in the repository. `csv.DictReader(..., delimiter="	")` read the whole
+header as a single column, because the file has no tab characters at all: its
+columns are aligned with runs of eight spaces, which is what a download by hand
+from the dataAccess page produces. That route is the documented workaround for
+the `401` the public dump returns without a token, so the format the workaround
+produces was the one format the parser could not read.
+
+Nothing said so. An unparseable cache and an absent cache both returned an empty
+table, and the service logged only that the dump was unreachable, which was true
+and beside the point. A cache that exists and yields nothing now logs at
+`WARNING` naming the byte count and the expected columns.
+
+**The dump is per cancer type; the table is not.** Fixing the parsing exposed
+the real hazard. The dump carries a Cancer Type column that the parser discards,
+so rows collapse onto a `(gene, alteration)` key that cannot hold them:
+
+    BRAF V600E  Melanoma           LEVEL_1   Vemurafenib
+    BRAF V600E  Hairy Cell Leuk.   LEVEL_1   Vemurafenib
+    BRAF V600E  Colorectal Cancer  LEVEL_R1  Vemurafenib
+
+Last write wins, so once the dump parsed, `BRAF V600E` + vemurafenib became
+`LEVEL_R1`. A sensitising drug read as a resistance marker, which would suppress
+a correct melanoma recommendation. Picking the other way is no better: it would
+claim the drug works in colorectal, where the R1 exists precisely because it
+does not. Ten entries in this dump conflict that way.
+
+This was latent rather than new. The same collapse applies to the `fresh_cache`
+and `download` paths, so any deployment that configures a token and reaches a
+real dump was exposed to it. It never fired only because the parser had never
+successfully read a dump.
+
+**Fixed**, but not by refusing to choose in every case. The first attempt
+dropped all ten conflicts, which was too blunt: they are two different kinds of
+disagreement and only one is a contradiction.
+
+    BRAF V600E  vemurafenib   LEVEL_1 / LEVEL_R1   opposite meaning
+    ERBB2 Amp   trastuzumab   LEVEL_1 / LEVEL_2    same meaning, different strength
+
+Two are contradictions and are dropped, because no value is right without the
+cancer context. The other eight say the same thing at different strengths, and
+dropping those discarded real actionability to avoid a disagreement that has a
+safe answer. Those keep the weaker level: the drug still surfaces, and the
+report does not claim standard-of-care support in a cancer where only
+lower-tier evidence exists. Two resistance levels keep the stronger warning.
+
+**Precedence also had to change.** Merging the dump on top of the curated table
+let a cancer-blind `LEVEL_2` overwrite a curated `LEVEL_1`, which is how
+`ERBB2 Amplification` + trastuzumab briefly read as `LEVEL_2`. The curated table
+resolves cancer context through `_apply_cancer_context_override` and this
+projection of the dump cannot, so the dump is merged underneath: it fills keys
+the curated table does not answer and never overrules one it does.
+
+**Also changed:** a cache past its freshness window is now preferred over the
+built-in table. A week-old dump carries a date; the built-in table has none, so
+discarding the dated one for the undated one was the wrong way round. Provenance
+reports `stale_cache` and `is_current` stays `False`, because dated is not
+current. The actionability table goes from 335 undated entries to 421 entries
+carrying a real snapshot date.
+
+**One more restriction, added after the clinical gate caught a false positive.**
+The dump may contribute approved tiers and resistance, nothing else. `TP53
+R248W` is a negative control with no approved therapy, and the dump carries
+`TP53 R248W  Any Solid Tumor  LEVEL_3A  APR-246`, which is factually correct:
+OncoKB does list it. But LEVEL_3A is compelling evidence for an agent that is
+not approved, and an actionability table presents it with the same weight as
+standard of care, so a discontinued investigational drug reached the top three
+as a high-confidence recommendation and `scripts/hard_benchmark_gate.py` failed
+on it. LEVEL_3A, 3B and 4 are now refused from the dump; investigational options
+belong to the repurposing tier, which carries phase and approval beside them.
+That costs three drug pairs out of 218. Resistance levels are admitted on
+purpose, because they are a safety floor rather than a recommendation.
+
+The same assumption was wrong in `_apply_candidate_pool_policy`, which defaulted
+every table-only drug to `is_approved=True` and `max_phase=4`. Approval is now
+derived from the level, so a drug the repurposing sources never saw cannot claim
+an approval nobody checked.
+
+**Residual risk.** Two dropped entries are a real coverage loss, taken
+deliberately over a wrong answer, and the eight downgraded ones understate their
+evidence in the cancer where the stronger level applies. Both are consequences
+of a table with no cancer dimension, and the proper fix is that dimension, which
+is a schema change. Until then any dump this system ingests is silently narrower
+and weaker than the dump itself.
+
+All seven merge sites now put the dump underneath the curated table, including
+`fresh_cache` and `download`. They briefly disagreed, and that disagreement was
+itself the defect: a stale cache merged underneath while a fresh one merged on
+top, so identical data produced different recommendations depending on the age
+of a file. Cache age is not a property of the evidence. Currency and cancer
+context are different things, and only the second is at stake in the merge, so a
+newer dump is no less cancer-blind than an older one.
+
+Those two branches need a reachable dump and a token to execute, so they are
+pinned by reading the call shape in the source rather than by running them.
+Checking the shape is what is available; leaving them unpinned was not.
+
 ---
 
 ## 3. What is not yet analysed
@@ -638,7 +740,7 @@ column is asserted, not enforced.
 
 | Hazard | Findings | Control in place | Test that fails if it stops running |
 |---|---|---|---|
-| H1 resistance ignored | F1, F7, F9 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
+| H1 resistance ignored | F1, F7, F9, F17 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H2 actionable variant missed | F2, F8, F15 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H3 lookup failure read as a negative | F3, F10, F11, F14 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py` |
 | H4 stale evidence base | F4 | Provenance stamped onto the result at production time; static fallback logged at `WARNING` | `test_evidence_provenance.py` |
