@@ -16,7 +16,7 @@
     "banner": "npx ts-node --esm ../scripts/banner.ts"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.8.0",
+    "@hookform/resolvers": "^5.9.1",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.1.15",
