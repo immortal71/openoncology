@@ -24,6 +24,18 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: low
 -->
 
+### OO-4: Refresh the stale figures in the pyproject coverage comment
+- **Why**: The comment moved into `[tool.coverage.report]` by OO-2 cites 53.93% over 8,353 production statements with 844 api tests. The suite has grown since: it now measures about 61% over 8,798 statements with 1,102 api tests. Anyone reading the comment concludes the gate sits a point below the measured total, when it actually sits nine points below, so the gate catches less than the comment claims it does.
+- **Files**: pyproject.toml
+- **Acceptance**:
+  - The comment cites the current measured coverage, statement count and api test count, taken from an actual local run rather than copied from this entry
+  - The narrative explaining why the number moved 63, 69, 52 is preserved, not replaced
+  - `fail_under` itself is unchanged at 52
+  - `make test-backend` still passes
+  - `pytest api/tests/test_coverage_threshold_consistency.py` still passes
+- **Out of scope**: changing the threshold; the `omit` list; README and CONTRIBUTING, which quote the gate rather than the measurement.
+- **Risk**: low
+
 ---
 
 ## In progress
