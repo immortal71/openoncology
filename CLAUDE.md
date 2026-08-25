@@ -55,12 +55,28 @@ Single test: `PYTHONPATH=. pytest api/tests/test_ranking.py::test_name -v`
 
 ### Coverage gate
 
-**52**, enforced once at the end of the `ai/tests` run. Keep the Makefile and
-`.github/workflows/ci.yml` in step; they have drifted apart before, letting a local
-`make test-backend` pass what CI rejected. `CONTRIBUTING.md` still says 62 and the
-README badge says 62%, and both are stale. The threshold dropped from 69 to 52 when
-`*/tests/*` was omitted from coverage: a test module is ~100% covered by the act of
-running it, and 34 of them were inflating the headline. Coverage did not regress.
+**52**, declared once in `pyproject.toml` under `[tool.coverage.report] fail_under`.
+`Makefile` and `.github/workflows/ci.yml` inherit it by omitting `--cov-fail-under` on
+the ai-suite invocation. The api-suite invocation passes an explicit
+`--cov-fail-under=0`, because coverage is only complete after the second run appends
+to it.
+
+Do not put the number back on a command line. It lived in two files before, drifted to
+62 against 63, and a local `make test-backend` passed what CI rejected.
+`api/tests/test_coverage_threshold_consistency.py` now fails the build if the README
+badge, the `CONTRIBUTING.md` prose, or a `--cov-fail-under` literal disagrees with the
+config.
+
+The threshold dropped from 69 to 52 when `*/tests/*` was omitted from coverage: a test
+module is ~100% covered by the act of running it, and 34 of them were inflating the
+headline. Coverage did not regress. The comment in `pyproject.toml` still cites 53.93%
+over 8,353 statements; the suite has grown since and now measures about 61% over
+8,798, so the gate has more slack than that comment implies.
+
+One trap this creates. Any `pytest --cov=...` run inherits the gate unless it opts
+out, so running a single suite alone measures only that suite: `pytest ai/tests/
+--cov=ai --cov=api` reports about 14% and exits non-zero with all 42 tests passing.
+Add `--cov-fail-under=0`, or drop `--cov`, when you only want to know if tests pass.
 
 ### Import paths
 
@@ -88,6 +104,14 @@ If the hook fires: record the proposed change in `BACKLOG.md` under
 `## Needs human decision` and move on to other work. Do not route around it with Bash,
 sed, a script, or a copy. Routing around it is worse than not making the change.
 Humans edit these files in an interactive session with `OO_GUARD_OFF=1`.
+
+Know its one hole before relying on it. The hook derives the repo root from where the
+script itself lives, and `relative()` returns `None` for any path outside that root,
+which `main()` treats as allow. A protected file reached through a git worktree, a
+second clone, or an agent running with `isolation: "worktree"` is therefore not
+guarded: the same `api/ai/ranking.py` exits 2 inside the checkout and 0 outside it.
+`.claude/` is also untracked, so a fresh clone carries no hook at all. Work in the
+primary checkout when touching anything the guard covers.
 
 ## Quality gates that block CI
 
@@ -150,8 +174,14 @@ The Playwright config builds and serves a production bundle on :3100 because
 `BACKLOG.md` is git-tracked project state. Read it at session start and update it at
 session end, so work survives compaction and restarts. `/groom "<objective>"` fills
 it, `/next` takes the top `## Ready` entry through implementer, validator, reviewer,
-and PR, and `/standup` reports status. `loop.ps1` runs `/next` headlessly until the
-backlog drains. Subagent definitions live in `.claude/agents/`.
+and PR, and `/standup` reports status. Subagent definitions live in `.claude/agents/`.
+
+`loop.ps1` is meant to run `/next` headlessly until the backlog drains, but it invokes
+`claude -p` without `--permission-mode`. In print mode nothing can approve a tool call,
+so the first one that needs approval blocks instead of failing: one run sat 22 minutes
+on 18 seconds of CPU, having finished the implementer and stalled the moment the
+validator reached for Bash. A hung iteration is indistinguishable from a slow one from
+outside. Run `/next` interactively, or pass a permission mode deliberately.
 
 Suitable for unattended work: frontend, docs, CI, type coverage, error handling, dead
 code, dependency hygiene. Not suitable: anything reachable from the ranking path,
