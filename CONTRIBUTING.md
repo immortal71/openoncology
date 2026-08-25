@@ -303,7 +303,8 @@ print(report.summary())
 
 CI already runs the backend and frontend suites on every push/PR — see
 [.github/workflows/ci.yml](.github/workflows/ci.yml). It enforces a backend
-coverage gate (`--cov-fail-under=52`), the hard clinical benchmark gate, ESLint
+coverage gate (`fail_under` in `pyproject.toml`, currently 52), the hard clinical
+benchmark gate, ESLint
 (`--max-warnings 0`), `tsc --noEmit`, Vitest, and Playwright. A separate
 [.github/workflows/security.yml](.github/workflows/security.yml) runs pip-audit
 (blocking), Trivy (blocking on fixable HIGH/CRITICAL), plus report-only Bandit,
