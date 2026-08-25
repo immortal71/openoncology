@@ -119,3 +119,6 @@ coverage.xml
 # that script; it downloads on first use unless --offline is passed.
 validation_results/cache/*.bed
 validation_results/cache/HG002_*
+
+.claude/
+loop.ps1
