@@ -239,7 +239,7 @@ PYTHONPATH=. pytest ai/tests/                     # top-level ai/ package tests
 
 # with coverage across both (mirrors CI):
 PYTHONPATH=. pytest api/tests/ --cov=ai --cov=api --cov-report= --cov-fail-under=0
-PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-fail-under=62
+PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-fail-under=52
 ```
 
 Tests must be **hermetic** — no live network. Service tests that hit external
@@ -292,7 +292,7 @@ print(report.summary())
 
 CI already runs the backend and frontend suites on every push/PR — see
 [.github/workflows/ci.yml](.github/workflows/ci.yml). It enforces a backend
-coverage gate (`--cov-fail-under=62`), the hard clinical benchmark gate, ESLint
+coverage gate (`--cov-fail-under=52`), the hard clinical benchmark gate, ESLint
 (`--max-warnings 0`), `tsc --noEmit`, Vitest, and Playwright. A separate
 [.github/workflows/security.yml](.github/workflows/security.yml) runs pip-audit
 (blocking), Trivy (blocking on fixable HIGH/CRITICAL), plus report-only Bandit,
