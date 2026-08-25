@@ -38,3 +38,29 @@ omit = [
     "*/tests/*",
     "*/conftest.py",
 ]
+
+[tool.coverage.report]
+# Single source of truth for the backend coverage gate. The Makefile and
+# .github/workflows/ci.yml used to carry the number themselves and drifted apart
+# (62 in one, 63 in the other), so a local `make test-backend` passed what CI
+# rejected. Neither now passes --cov-fail-under on the ai-suite invocation; they
+# inherit this value. The api-suite invocation still passes an explicit
+# --cov-fail-under=0, because coverage is only complete after the second run.
+#
+# The number this gate measures changed, so read the sequence before reading 52
+# as a regression:
+#
+#   63 gate / 67 reported    counted api/tests and ai/tests themselves
+#   69 gate / 70 reported    same measurement, tightened
+#   52 gate / 54 reported    production code only
+#
+# [tool.coverage.run] above omits */tests/* from coverage. A test module is
+# ~100% covered by the act of running it, and 34 of them were being averaged
+# into the headline. On identical coverage data the same suite reads 70% with
+# tests counted and 53.93% without. Coverage did not fall by 17 points; the
+# earlier figures were partly measuring the tests.
+#
+# 53.93% over 8,353 production statements, 844 api + 42 ai tests passing. Gate
+# at 52 leaves about a point, which is the spread observed between the CI runner
+# and a local Windows run.
+fail_under = 52
