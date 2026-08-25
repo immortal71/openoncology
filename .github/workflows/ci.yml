@@ -207,25 +207,12 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
-      # Coverage threshold. The number this gate measures changed, so read the
-      # sequence before reading 52 as a regression:
-      #
-      #   63 gate / 67 reported    counted api/tests and ai/tests themselves
-      #   69 gate / 70 reported    same measurement, tightened
-      #   52 gate / 54 reported    production code only
-      #
-      # pyproject.toml now omits */tests/* from coverage. A test module is ~100%
-      # covered by the act of running it, and 34 of them were being averaged into
-      # the headline. On identical coverage data the same suite reads 70% with
-      # tests counted and 53.93% without. Coverage did not fall by 17 points; the
-      # earlier figures were partly measuring the tests.
-      #
-      # 53.93% over 8,353 production statements, 844 api + 42 ai tests passing.
-      # Gate at 52 leaves about a point, which is the spread observed between this
-      # runner and a local Windows run.
+      # No --cov-fail-under here: the threshold is declared once in
+      # pyproject.toml ([tool.coverage.report] fail_under), which also carries
+      # the history of how the measured number changed. This step inherits it.
       - name: Run backend tests (ai suite)
         working-directory: ${{ github.workspace }}
-        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=52
+        run: pytest ai/tests/ -v --tb=short --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml
         env:
           PYTHONPATH: ${{ github.workspace }}
 

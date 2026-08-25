@@ -27,12 +27,12 @@ install:
 # top-level ai/ package and the app's api/ai/ package claim the import name `ai`,
 # so one interpreter can't load both. Coverage is combined via --cov-append.
 #
-# Keep --cov-fail-under in step with .github/workflows/ci.yml. They disagreed
-# (62 here, 63 there), so a local `make test-backend` could pass something CI
-# would reject.
+# The threshold lives in pyproject.toml ([tool.coverage.report] fail_under) and
+# is inherited by the second invocation here and by ci.yml. The first one opts
+# out with --cov-fail-under=0 because coverage is only complete after the second.
 test-backend:
 	$(PYTEST) api/tests/ $(COV) --cov-report= --cov-fail-under=0
-	$(PYTEST) ai/tests/ $(COV) --cov-append --cov-report=term-missing --cov-fail-under=52
+	$(PYTEST) ai/tests/ $(COV) --cov-append --cov-report=term-missing
 
 test-frontend:
 	cd web && npm run test:run
@@ -44,7 +44,7 @@ test: test-backend test-frontend test-e2e
 
 coverage:
 	$(PYTEST) api/tests/ $(COV) --cov-report= --cov-fail-under=0
-	$(PYTEST) ai/tests/ $(COV) --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=52
+	$(PYTEST) ai/tests/ $(COV) --cov-append --cov-report=term-missing --cov-report=xml:coverage.xml
 
 # ── Lint / type-check ──────────────────────────────────────────────────────────
 

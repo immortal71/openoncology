@@ -239,8 +239,19 @@ PYTHONPATH=. pytest ai/tests/                     # top-level ai/ package tests
 
 # with coverage across both (mirrors CI):
 PYTHONPATH=. pytest api/tests/ --cov=ai --cov=api --cov-report= --cov-fail-under=0
-PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing --cov-fail-under=52
+PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing
 ```
+
+The threshold is not passed on the command line. It lives in `pyproject.toml`
+under `[tool.coverage.report] fail_under`, and the second invocation inherits it.
+The first one opts out with `--cov-fail-under=0` because coverage is only
+complete after the second has appended to it.
+
+One consequence worth knowing while iterating: any `pytest --cov=...` run now
+inherits that gate unless it opts out. Running one suite on its own measures
+only that suite, so `pytest ai/tests/ --cov=ai --cov=api` reports around 14% and
+exits non-zero even though all 42 tests pass. Add `--cov-fail-under=0`, or drop
+`--cov` entirely, when you only want to know whether the tests pass.
 
 Tests must be **hermetic** — no live network. Service tests that hit external
 APIs (OncoKB, OpenTargets, ChEMBL, cBioPortal) mock the HTTP layer. If you add a

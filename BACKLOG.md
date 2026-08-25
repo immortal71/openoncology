@@ -85,6 +85,25 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
 
+### OO-2 follow-up: CONTRIBUTING.md:242 falls out of step with CI
+- **Why**: OO-2's last acceptance bullet asks that `CONTRIBUTING.md:240-243` still
+  reproduce the exact commands CI runs, but `CONTRIBUTING.md` is not in the entry's
+  **Files** list. Now that `ci.yml` no longer passes `--cov-fail-under` on the ai
+  suite, the documented command no longer matches it character for character. The
+  documented form is stricter-looking but harmless (52 is what the config says
+  anyway); it is a doc drift, not a broken gate.
+- **Proposed change** — `CONTRIBUTING.md:242`, one line:
+
+      PYTHONPATH=. pytest ai/tests/  --cov=ai --cov=api --cov-append --cov-report=term-missing
+
+  and, if wanted, `CONTRIBUTING.md:295` ("coverage gate (`--cov-fail-under=52`)")
+  reworded to name `pyproject.toml` `[tool.coverage.report] fail_under` as the
+  source of the number.
+- **Why not done**: outside OO-2's declared file list; expanding scope silently is
+  the failure mode the file list exists to prevent. Needs either an amended OO-2 or
+  its own entry.
+- **Risk**: low
+
 ---
 
 ## Done
