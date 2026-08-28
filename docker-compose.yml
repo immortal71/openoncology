@@ -162,6 +162,46 @@ services:
     command: celery -A workers.notify_worker worker --loglevel=info -Q notify
 
   # ─────────────────────────────────────────────
+  # Celery GDPR Worker  →  background
+  # ─────────────────────────────────────────────
+  # Consumes the `gdpr` queue: erasure requests from DELETE /api/me, and the
+  # daily retention sweep celery-beat schedules. task_routes has sent work here
+  # since the queue was added and nothing consumed it, so both accumulated in
+  # Redis unexecuted while every producer saw a successful enqueue.
+  worker-gdpr:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://openoncology:${DB_PASSWORD}@db:5432/openoncology
+      - REDIS_URL=redis://redis:6379/0
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - MINIO_ENDPOINT=storage:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./api:/app
+      - ./ai/alphamissense:/app/ai/alphamissense
+      - ./ai/diffdock:/app/ai/diffdock
+      - ./ai/repurposing:/app/ai/repurposing
+      - ./ai/services:/app/ai/services
+    depends_on:
+      - db
+      - redis
+      - storage
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.gdpr_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - openoncology
+    command: celery -A workers.gdpr_worker worker --loglevel=info -Q gdpr
+
+  # ─────────────────────────────────────────────
   # PostgreSQL Database  →  localhost:5432
   # ─────────────────────────────────────────────
   db:

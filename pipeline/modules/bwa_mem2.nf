@@ -5,6 +5,7 @@ process BWA_MEM2_ALIGN {
     tag "$reads"
     publishDir "${params.output_dir}/bam", mode: 'copy'
 
+    label "process_high"
     conda 'bioconda::bwa-mem2=2.2.1 bioconda::samtools=1.19'
 
     input:

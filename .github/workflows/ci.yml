@@ -228,6 +228,101 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
+  # ── Deployment manifests ──────────────────────────────────────────────────
+  # Nothing in this file had ever rendered the Helm chart. The readiness probe
+  # in infra/helm/templates/api.yaml pointed at /health, which answers 200
+  # unconditionally, while infra/k8s/deployment.yaml used /ready, which
+  # round-trips Postgres and Redis. Two manifests for one service, disagreeing,
+  # on the path production deploys from — and no job that would notice.
+  #
+  # api/tests/test_deployment_manifests.py asserts the same properties by
+  # parsing, so the suite catches this offline. This job is what catches a chart
+  # that no longer renders at all, or renders into invalid Kubernetes.
+  validate-manifests:
+    name: Deployment manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.16.2
+
+      - name: Helm lint (base values)
+        run: helm lint infra/helm --values infra/helm/values.yaml
+
+      - name: Helm lint (production values)
+        run: |
+          helm lint infra/helm \
+            --values infra/helm/values.yaml \
+            --values infra/helm/values.production.yaml
+
+      - name: Install kubeconform
+        run: |
+          curl -sSLo kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar xf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/
+
+      # Chart.yaml declares postgresql and redis and neither is vendored, so
+      # `helm template` refuses to render anything at all until they are
+      # fetched. The first version of this job piped straight into kubeconform,
+      # which meant helm's error went to stderr, stdout was empty, kubeconform
+      # reported "0 resource found parsing stdin - Valid: 0", and the pipe
+      # returned kubeconform's exit code. A job that renders nothing and passes
+      # is worse than no job, so the render below writes to a file, runs under
+      # pipefail, and has to produce resources before anything is validated.
+      - name: Fetch chart dependencies
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency update infra/helm
+
+      - name: Render and validate the chart against the Kubernetes schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          helm template openoncology infra/helm \
+            --values infra/helm/values.yaml \
+            --values infra/helm/values.production.yaml \
+            --api-versions autoscaling/v2 \
+            --namespace openoncology > rendered.yaml
+          test -s rendered.yaml
+          kubeconform -strict -summary -ignore-missing-schemas \
+            -kubernetes-version 1.29.0 rendered.yaml
+
+      # Schema validity says the YAML is well formed, not that it deploys what
+      # it is supposed to. These are the properties this chart got wrong, so
+      # they are asserted against the rendered output rather than the templates.
+      - name: Assert the rendered chart deploys what it should
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          check() {
+            if grep -q -- "$1" rendered.yaml; then
+              echo "ok: $2"
+            else
+              echo "MISSING: $2"; fail=1
+            fi
+          }
+          check 'path: /ready'         'API readiness probe checks its dependencies'
+          check 'workers.gdpr_worker'  'a worker consumes the gdpr queue'
+          check 'component: beat'      'Celery Beat is deployed'
+          check 'KEYCLOAK_AUDIENCE'    'the audience production requires is wired'
+          check 'kind: PodDisruptionBudget' 'the API has a disruption budget'
+          check 'terminationGracePeriodSeconds' 'shutdown is given a grace period'
+          exit $fail
+
+      - name: Validate the standalone k8s manifests
+        run: |
+          kubeconform -strict -summary -ignore-missing-schemas \
+            -kubernetes-version 1.29.0 infra/k8s/
+
+      - name: Validate docker-compose
+        run: docker compose -f docker-compose.yml config --quiet
+
   # ── Docker build check ────────────────────────────────────────────────────
   docker-build:
     name: Docker build (no push)

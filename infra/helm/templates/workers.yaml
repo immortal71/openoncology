@@ -23,6 +23,13 @@ spec:
         app.kubernetes.io/component: worker-{{ $name }}
     spec:
       serviceAccountName: {{ include "openoncology.serviceAccountName" $root }}
+      # SIGTERM is a warm shutdown for Celery: the worker stops taking new
+      # messages and finishes the one in hand. That only helps if Kubernetes
+      # waits for it. At the 30-second default a genomic task is SIGKILLed
+      # mid-run on every deploy, leaving the submission stuck in `processing`
+      # with nothing to retry it, so the grace period is set from how long the
+      # queue's longest task actually takes.
+      terminationGracePeriodSeconds: {{ $cfg.terminationGracePeriodSeconds }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

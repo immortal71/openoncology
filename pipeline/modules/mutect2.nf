@@ -23,7 +23,12 @@
 process MUTECT2 {
     tag "${tumour_bam.simpleName}"
     label "process_high"
-    container "broadinstitute/gatk:4.4.0.0"
+    // Pinned from params.gatk_version so this cannot drift from the
+    // HaplotypeCaller module again. The two were 4.4.0.0 and 4.5.0.0, so a
+    // germline and a somatic call from one run came from different releases of
+    // the same caller.
+    container "broadinstitute/gatk:${params.gatk_version}"
+    conda "bioconda::gatk4=${params.gatk_version} bioconda::samtools=1.19"
 
     input:
     path tumour_bam

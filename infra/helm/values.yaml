@@ -19,6 +19,16 @@ api:
     pullPolicy: IfNotPresent
   replicaCount: 2
   port: 8000
+  # preStop holds the container open while endpoint removal propagates to the
+  # proxies; the grace period has to exceed it plus the longest request the API
+  # serves, or SIGKILL arrives while the sleep is still running.
+  terminationGracePeriodSeconds: 60
+  preStopSleepSeconds: 10
+  # Voluntary disruptions — node drains, cluster upgrades — are not covered by
+  # the Deployment's maxUnavailable, which only governs rollouts.
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
   resources:
     requests:
       cpu: "250m"
@@ -36,6 +46,11 @@ api:
     ENVIRONMENT: production
     KEYCLOAK_REALM: openoncology
     KEYCLOAK_CLIENT_ID: openoncology-api
+    # Must match what the client's audience mapper emits. Keycloak puts the
+    # client id in `azp` and "account" in `aud` unless a mapper says otherwise,
+    # so this value is a claim someone has to configure the realm to produce —
+    # it is not automatic, and the API will not boot in production without it.
+    KEYCLOAK_AUDIENCE: openoncology-api
     MINIO_SECURE: "true"
     MINIO_BUCKET_RAW: openoncology-raw
     MINIO_BUCKET_VCF: openoncology-vcf
@@ -63,9 +78,22 @@ web:
     NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: openoncology-web
 
 # ── Celery Workers ────────────────────────────────────────────────────────────
+# One entry per Celery queue. The key is the queue name and the worker module
+# both — `workers.<key>_worker`, consuming `-Q <key>` — so a queue that
+# `task_routes` in api/workers/__init__.py sends work to and that has no entry
+# here has no consumer in the cluster. Messages then accumulate in Redis and are
+# never executed, which is silent: the producer's `apply_async` succeeds.
+# `api/tests/test_celery_queue_coverage.py` fails the build on that mismatch.
+#
+# terminationGracePeriodSeconds is per queue because SIGTERM is a warm shutdown
+# for Celery — stop consuming, finish the task in hand — and the wait each queue
+# needs is the length of its longest task. Tasks are `acks_late`, so one killed
+# at the deadline is redelivered rather than lost; it restarts from the
+# beginning, and any side effect it had already performed happens twice.
 workers:
   genomic:
     replicaCount: 2
+    terminationGracePeriodSeconds: 900
     resources:
       requests:
         cpu: "500m"
@@ -75,6 +103,7 @@ workers:
         memory: "4Gi"
   ai:
     replicaCount: 1
+    terminationGracePeriodSeconds: 600
     resources:
       requests:
         cpu: "1000m"
@@ -84,6 +113,7 @@ workers:
         memory: "8Gi"
   notify:
     replicaCount: 1
+    terminationGracePeriodSeconds: 120
     resources:
       requests:
         cpu: "100m"
@@ -91,6 +121,42 @@ workers:
       limits:
         cpu: "500m"
         memory: "512Mi"
+  # Erasure requests and the daily retention sweep. This queue had no consumer
+  # in either deployment path: `DELETE /api/me` enqueued `erase_patient_data`
+  # and told the patient their data would be gone within 30 days, and the task
+  # sat in Redis. Deletion is a GDPR obligation with a deadline attached, so the
+  # absence of a consumer was a compliance failure that looked like a success
+  # from every side that could observe it.
+  gdpr:
+    replicaCount: 1
+    terminationGracePeriodSeconds: 300
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+
+# ── Celery Beat (periodic tasks) ──────────────────────────────────────────────
+# The scheduler for `beat_schedule`: GDPR retention enforcement daily, and the
+# hourly sweep that recovers submissions stuck in `processing` after a pipeline
+# crash. docker-compose has run it since the beginning; the chart never did, so
+# in Kubernetes neither periodic task had ever fired.
+#
+# Exactly one replica, and Recreate rather than RollingUpdate. Two beats against
+# one schedule enqueue every task twice, which for the retention sweep means
+# two concurrent deletion passes over the same rows.
+beat:
+  enabled: true
+  terminationGracePeriodSeconds: 30
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
 
 # ── PostgreSQL (Bitnami sub-chart) ────────────────────────────────────────────
 postgresql:
@@ -159,6 +225,25 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
     nginx.ingress.kubernetes.io/rate-limit: "100"
     nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    # The API host routes `/` as a Prefix, so every path on the pod is public,
+    # /metrics included. It carries no authentication and publishes per-handler
+    # request counts and latencies — traffic shape for a service whose traffic
+    # is patients submitting tumour genomes.
+    #
+    # Prometheus is unaffected: infra/prometheus.yml scrapes `api:8000`
+    # in-cluster and the ServiceMonitor scrapes the Service, neither through
+    # this ingress.
+    #
+    # One caveat worth knowing rather than assuming away: ingress-nginx ships
+    # `allow-snippet-annotations: false` since 1.9, and where it is false the
+    # controller ignores this annotation instead of rejecting it. That fails
+    # open. Confirm the rendered nginx.conf actually contains the location block
+    # before treating the endpoint as closed.
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location /metrics {
+        deny all;
+        return 403;
+      }
   hosts:
     api: api.openoncology.org
     web: openoncology.org

@@ -5,6 +5,7 @@ process OPENCRAVAT {
     tag "$vcf"
     publishDir "${params.output_dir}/annotated", mode: 'copy'
 
+    label "process_medium"
     conda 'bioconda::open-cravat=2.4.2'
 
     input:
