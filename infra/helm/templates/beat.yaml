@@ -1,0 +1,88 @@
+{{/*
+Celery Beat — the scheduler behind `beat_schedule` in api/workers/__init__.py.
+
+Two tasks depend on it: `gdpr-enforce-retention-daily`, which deletes patient
+data past its retention window, and `sweep-stale-submissions-hourly`, which
+recovers submissions left in `processing` by a crashed pipeline. Neither has a
+non-scheduled trigger, so without this Deployment neither has ever run in the
+cluster.
+
+Single replica, Recreate strategy. Beat holds no lock; a second instance
+enqueues the same schedule again, and two retention passes would run concurrent
+deletions over the same rows.
+*/}}
+{{- if .Values.beat.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "openoncology.fullname" . }}-beat
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: beat
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: beat
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: beat
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+      terminationGracePeriodSeconds: {{ .Values.beat.terminationGracePeriodSeconds }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: beat
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          # The schedule file is state beat writes on every tick. The root
+          # filesystem is read-only, so it is pointed at the tmp emptyDir; losing
+          # it on restart re-runs a missed cron entry at worst, which both tasks
+          # tolerate.
+          command:
+            - celery
+            - -A
+            - workers
+            - beat
+            - --loglevel=info
+            - --schedule=/tmp/celerybeat-schedule
+          envFrom:
+            - configMapRef:
+                name: {{ include "openoncology.fullname" . }}-config
+            - secretRef:
+                name: {{ .Values.api.secretRef }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openoncology-pg-secret
+                  key: password
+          resources:
+            {{- toYaml .Values.beat.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

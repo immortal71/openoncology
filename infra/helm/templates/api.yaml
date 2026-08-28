@@ -21,12 +21,22 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+      # Endpoint removal and SIGTERM race each other: both start when the pod is
+      # deleted, and a proxy that has not yet seen the removal keeps sending
+      # requests to a server that has already stopped listening. The preStop
+      # sleep holds the container open across that window, so the rollout stays
+      # as invisible to callers as `maxUnavailable: 0` promises.
+      terminationGracePeriodSeconds: {{ .Values.api.terminationGracePeriodSeconds }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
       containers:
         - name: api
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "{{ .Values.api.preStopSleepSeconds }}"]
           image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
           imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           ports:
@@ -46,6 +56,16 @@ spec:
                   key: password
           resources:
             {{- toYaml .Values.api.resources | nindent 12 }}
+          # /health answers 200 unconditionally — it reports that the process is
+          # up, which is what liveness asks. Readiness must ask a different
+          # question, and /ready is the endpoint that answers it: it round-trips
+          # Postgres and Redis and returns 503 when either is unreachable.
+          #
+          # This probe pointed at /health, so a pod whose database was gone
+          # passed readiness and was sent traffic, on the deployment path
+          # production actually uses. infra/k8s/deployment.yaml had it right the
+          # whole time; the two manifests simply drifted, and nothing rendered
+          # or compared them. The infra-manifests job in ci.yml now does.
           livenessProbe:
             httpGet:
               path: /health
@@ -55,10 +75,11 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: http
             initialDelaySeconds: 5
             periodSeconds: 10
+            failureThreshold: 3
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

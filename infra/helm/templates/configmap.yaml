@@ -10,6 +10,11 @@ data:
   KEYCLOAK_URL: {{ printf "https://%s" .Values.ingress.hosts.keycloak | quote }}
   KEYCLOAK_REALM: {{ .Values.api.env.KEYCLOAK_REALM | quote }}
   KEYCLOAK_CLIENT_ID: {{ .Values.api.env.KEYCLOAK_CLIENT_ID | quote }}
+  # The API refuses to start in production without this. KEYCLOAK_URL above is
+  # already the public ingress hostname, so the derived issuer is correct here
+  # and KEYCLOAK_ISSUER is left unset; it is needed only where the API dials an
+  # internal Service address instead.
+  KEYCLOAK_AUDIENCE: {{ .Values.api.env.KEYCLOAK_AUDIENCE | quote }}
   MINIO_ENDPOINT: {{ printf "%s-minio:9000" .Release.Name | quote }}
   MINIO_SECURE: {{ .Values.api.env.MINIO_SECURE | quote }}
   MINIO_BUCKET_RAW: {{ .Values.api.env.MINIO_BUCKET_RAW | quote }}

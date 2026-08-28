@@ -1,0 +1,27 @@
+{{/*
+PodDisruptionBudget for the API.
+
+infra/k8s/pdb.yaml has carried one since the beginning; the chart did not, and
+the chart is what production deploys from. Without it a node drain or a cluster
+upgrade can evict every API replica at once, and `maxUnavailable: 0` on the
+Deployment does not help — that governs rollouts, not voluntary disruptions.
+
+`minAvailable` is a count rather than a percentage on purpose: a percentage
+rounds up against small replica counts and can deadlock the drain outright.
+*/}}
+{{- if .Values.api.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "openoncology.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  minAvailable: {{ .Values.api.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+{{- end }}
