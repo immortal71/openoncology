@@ -5,6 +5,7 @@ process FASTQC {
     tag "$reads"
     publishDir "${params.output_dir}/fastqc", mode: 'copy'
 
+    label "process_low"
     conda 'bioconda::fastqc=0.12.1'
 
     input:

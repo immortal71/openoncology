@@ -5,6 +5,7 @@ process TRIMMOMATIC {
     tag "$reads"
     publishDir "${params.output_dir}/trimmed", mode: 'copy'
 
+    label "process_low"
     conda 'bioconda::trimmomatic=0.39'
 
     input:

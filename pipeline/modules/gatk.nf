@@ -5,7 +5,10 @@ process GATK_HAPLOTYPE {
     tag "$bam"
     publishDir "${params.output_dir}/vcf", mode: 'copy'
 
-    conda 'bioconda::gatk4=4.5.0.0'
+    label "process_high"
+    // Version comes from params.gatk_version, shared with the Mutect2 module.
+    conda "bioconda::gatk4=${params.gatk_version} bioconda::samtools=1.19"
+    container "broadinstitute/gatk:${params.gatk_version}"
 
     input:
     path bam
