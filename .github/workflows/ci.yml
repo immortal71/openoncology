@@ -266,19 +266,54 @@ jobs:
           tar xf kubeconform.tar.gz kubeconform
           sudo mv kubeconform /usr/local/bin/
 
-      # The sub-charts are what `helm dependency build` would fetch from the
-      # Bitnami repo. They are not this repository's manifests and their schemas
-      # are not what this job is checking, so they are skipped rather than
-      # pulled on every run.
-      - name: Render and validate the chart against the Kubernetes schema
+      # Chart.yaml declares postgresql and redis and neither is vendored, so
+      # `helm template` refuses to render anything at all until they are
+      # fetched. The first version of this job piped straight into kubeconform,
+      # which meant helm's error went to stderr, stdout was empty, kubeconform
+      # reported "0 resource found parsing stdin - Valid: 0", and the pipe
+      # returned kubeconform's exit code. A job that renders nothing and passes
+      # is worse than no job, so the render below writes to a file, runs under
+      # pipefail, and has to produce resources before anything is validated.
+      - name: Fetch chart dependencies
         run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm dependency update infra/helm
+
+      - name: Render and validate the chart against the Kubernetes schema
+        shell: bash
+        run: |
+          set -euo pipefail
           helm template openoncology infra/helm \
             --values infra/helm/values.yaml \
             --values infra/helm/values.production.yaml \
             --api-versions autoscaling/v2 \
-            --namespace openoncology \
-            | kubeconform -strict -summary -ignore-missing-schemas \
-                -kubernetes-version 1.29.0
+            --namespace openoncology > rendered.yaml
+          test -s rendered.yaml
+          kubeconform -strict -summary -ignore-missing-schemas \
+            -kubernetes-version 1.29.0 rendered.yaml
+
+      # Schema validity says the YAML is well formed, not that it deploys what
+      # it is supposed to. These are the properties this chart got wrong, so
+      # they are asserted against the rendered output rather than the templates.
+      - name: Assert the rendered chart deploys what it should
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail=0
+          check() {
+            if grep -q -- "$1" rendered.yaml; then
+              echo "ok: $2"
+            else
+              echo "MISSING: $2"; fail=1
+            fi
+          }
+          check 'path: /ready'         'API readiness probe checks its dependencies'
+          check 'workers.gdpr_worker'  'a worker consumes the gdpr queue'
+          check 'component: beat'      'Celery Beat is deployed'
+          check 'KEYCLOAK_AUDIENCE'    'the audience production requires is wired'
+          check 'kind: PodDisruptionBudget' 'the API has a disruption budget'
+          check 'terminationGracePeriodSeconds' 'shutdown is given a grace period'
+          exit $fail
 
       - name: Validate the standalone k8s manifests
         run: |
