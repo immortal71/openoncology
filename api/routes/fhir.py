@@ -99,6 +99,7 @@ async def get_observation(
         select(Mutation)
         .join(Submission)
         .join(Patient)
+        .options(selectinload(Mutation.submission).selectinload(Submission.result))
         .where(
             Mutation.id == mutation_id,
             Patient.keycloak_id == keycloak_id,
@@ -108,7 +109,14 @@ async def get_observation(
     if not mutation:
         raise not_found_error(request, "Mutation not found or access denied.")
 
-    observation = build_observation(mutation)
+    # An Observation fetched on its own still has to say whether a clinician
+    # signed off the report it belongs to, so the result is loaded rather than
+    # letting the parameter fall back to its default.
+    submission = getattr(mutation, "submission", None)
+    result = getattr(submission, "result", None) if submission else None
+    reviewed = bool(getattr(result, "oncologist_reviewed", False)) if result else False
+
+    observation = build_observation(mutation, clinician_reviewed=reviewed)
 
     return JSONResponse(
         content=observation,

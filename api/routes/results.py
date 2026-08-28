@@ -16,6 +16,7 @@ from models.patient import Patient
 from models.result import Result
 from routes.auth import get_current_patient
 from schemas import ResultsResponse, SubmissionStatusOut
+from services.intended_use import intended_use_payload
 from utils.http import conflict_error, not_found_error
 from middleware.rate_limit import limiter, READ_LIMIT
 
@@ -178,6 +179,15 @@ async def get_results(
         "submission_id": submission_id,
         "cancer_type": submission.cancer_type,
         "status": "complete",
+        # Unconditional, and deliberately not inside patient_summary. The only
+        # disclaimer this payload used to carry was nested in that section,
+        # which is generated inside a try and becomes None when it fails. A
+        # caller reading plain_language_summary after that failure got drug
+        # names, has_targetable_mutation and per-mutation OncoKB levels with
+        # nothing in the response saying what produced them.
+        "intended_use": intended_use_payload(
+            clinician_reviewed=bool(result.oncologist_reviewed) if result else False
+        ),
         # The QC verdict stopped at the rendered report until now, so no API
         # consumer could tell a clean sample from a flagged one.
         "sample_qc": qc_payload_for_api(submission.sample_qc),

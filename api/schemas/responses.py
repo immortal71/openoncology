@@ -5,6 +5,12 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
+from services.intended_use import (
+    NO_CLINICIAN_REVIEW_STATEMENT,
+    REFERENCE_DOCUMENT,
+    RESEARCH_USE_STATEMENT,
+)
+
 
 class SubmissionResponse(BaseModel):
     status: str
@@ -169,6 +175,29 @@ class EvidenceProvenanceOut(BaseModel):
     withheld_reason: Optional[str] = None
 
 
+class IntendedUseOut(BaseModel):
+    """What this output is, and what it is not.
+
+    Every default here is the conservative answer, so a response that forgets to
+    populate the field still states that the output is research output and that
+    nobody has reviewed it. That is the same reason ``sample_qc`` and
+    ``evidence_provenance`` carry default factories: a reader must never receive
+    silence where a limitation belongs.
+
+    Before this existed, the only disclaimer in the results payload lived inside
+    ``patient_summary``, which is generated in a try/except and becomes None on
+    failure. The response after that failure still carried drug names,
+    ``has_targetable_mutation`` and per-mutation OncoKB levels.
+    """
+    intended_use: str = "research"
+    clinical_use_approved: bool = False
+    regulator_cleared: bool = False
+    clinician_reviewed: bool = False
+    statement: str = RESEARCH_USE_STATEMENT
+    clinician_review_statement: str = NO_CLINICIAN_REVIEW_STATEMENT
+    reference: str = REFERENCE_DOCUMENT
+
+
 class ResultsResponse(BaseModel):
     submission_id: str
     cancer_type: Optional[str] = None
@@ -211,3 +240,5 @@ class ResultsResponse(BaseModel):
     # None means the scoring rules were not recorded for this result, which
     # is not the same as having run under the current ones.
     algorithm_version: Optional[dict[str, Any]] = None
+    # Always present, and not nested inside a section that is allowed to fail.
+    intended_use: IntendedUseOut = Field(default_factory=IntendedUseOut)
