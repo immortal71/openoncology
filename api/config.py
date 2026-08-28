@@ -37,6 +37,31 @@ class Settings(BaseSettings):
     keycloak_client_secret: str = ""
     keycloak_admin_password: str = "admin"  # Keycloak admin-cli password
 
+    # Expected `aud` claim. Empty disables the audience check, which is what the
+    # code did unconditionally before: it passed audience="account" and then set
+    # verify_aud False, so a token minted for any other client in the realm
+    # verified against every protected route. Empty is tolerated outside
+    # production so a local realm needs no extra mapper; production requires it,
+    # enforced below.
+    #
+    # Keycloak does not put the client id in `aud` by default — it goes in
+    # `azp`, and `aud` is "account". Setting this means adding an audience
+    # mapper to the client, which is the documented way round and the only one
+    # that makes the claim mean anything.
+    keycloak_audience: str = ""
+
+    # Expected `iss` claim. Empty derives it from keycloak_url and the realm.
+    # Set it explicitly wherever the URL the API dials differs from the hostname
+    # Keycloak signs with, which is the normal case in a cluster: the API talks
+    # to the internal Service while tokens carry the public ingress hostname.
+    keycloak_issuer: str = ""
+
+    # How long a fetched JWKS is reused. A `kid` miss forces a refresh before
+    # the TTL lapses, so this bounds staleness for revoked keys rather than
+    # delaying rotation pickup.
+    keycloak_jwks_cache_seconds: int = 300
+    keycloak_jwks_timeout_seconds: float = 5.0
+
     # Stripe
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
@@ -142,6 +167,13 @@ class Settings(BaseSettings):
                 )
             if self.minio_secret_key == "password":
                 raise ValueError("MINIO_SECRET_KEY must be changed from the default in production")
+            if not self.keycloak_audience.strip():
+                raise ValueError(
+                    "KEYCLOAK_AUDIENCE must be set in production. Without it the `aud` "
+                    "claim is not checked, and a token issued to any other client in the "
+                    "realm authenticates against every protected route. Add an audience "
+                    "mapper to the Keycloak client and set this to the value it emits."
+                )
         if self.environment == "development" and self.sentry_dsn:
             raise ValueError(
                 "ENVIRONMENT is 'development' but SENTRY_DSN is set — this looks like a "
