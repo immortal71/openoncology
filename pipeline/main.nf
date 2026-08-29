@@ -110,6 +110,16 @@ def _sample_id_from_reads(String name) {
     return base ?: 'sample'
 }
 
+/*
+ * The files `bwa-mem2 index` writes beside the FASTA. They are inputs to the
+ * alignment process rather than something it builds, so they have to be named
+ * for Nextflow to stage them.
+ */
+def _bwa_index_files(String fasta) {
+    def suffixes = ['.0123', '.amb', '.ann', '.bwt.2bit.64', '.pac']
+    return suffixes.collect { file("${fasta}${it}") }
+}
+
 def _resolve_first_existing_path(String primary, List<String> fallbacks = []) {
     for (candidate in [primary, *fallbacks]) {
         if (candidate && file(candidate).exists()) {
@@ -148,6 +158,15 @@ workflow {
         }
         if (!file(resolved_dbsnp).exists()) {
             error "ERROR: Missing dbSNP VCF: ${resolved_dbsnp}. Run pipeline/scripts/download_references.sh or set --dbsnp to a valid dbSNP VCF."
+        }
+    }
+
+    if (is_fastq) {
+        // Fail here, with the fix named, rather than half an hour into an
+        // alignment task that would silently rebuild the index itself.
+        def missing_index = _bwa_index_files(resolved_ref_fasta).findAll { !it.exists() }
+        if (missing_index) {
+            error "ERROR: Missing BWA-MEM2 index for ${resolved_ref_fasta}: ${missing_index*.name.join(', ')}. Run pipeline/scripts/download_references.sh, which builds it once."
         }
     }
 
@@ -218,7 +237,7 @@ workflow {
     // otherwise, exactly one of which carries an item for any given sample.
     trimmed_ch = TRIMMOMATIC.out.trimmed.mix(TRIMMOMATIC.out.trimmed_se)
 
-    BWA_MEM2_ALIGN(trimmed_ch, resolved_ref_fasta)
+    BWA_MEM2_ALIGN(trimmed_ch, resolved_ref_fasta, _bwa_index_files(resolved_ref_fasta))
 
     if (params.caller == "somatic") {
         MUTECT2(BWA_MEM2_ALIGN.out.bam, normal_bam_ch.first(), Channel.value(resolved_ref_fasta), germline_vcf_ch.first())

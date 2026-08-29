@@ -158,6 +158,43 @@ beat:
       cpu: "200m"
       memory: "256Mi"
 
+# ── Database backup ───────────────────────────────────────────────────────────
+# Nothing backed the application database up before this existed, and
+# HIPAA_COMPLIANCE.md claimed otherwise. Persistence is not backup: losing the
+# PVC, a failed migration or corruption took every submission and result with it.
+#
+# Enabled by default. A backup that has to be switched on is one that is off in
+# the deployment that needed it, and the failure is only discovered during a
+# recovery. It requires `objectStore.credentialsSecret` to exist; if it does not,
+# the CronJob fails visibly rather than skipping quietly.
+backup:
+  enabled: true
+  # 02:00 UTC, before the 03:00 GDPR retention sweep in beat_schedule, so a day's
+  # backup captures the rows that sweep is about to delete.
+  schedule: "0 2 * * *"
+  retentionDays: 30
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 7
+  # A run skipped because the controller was down leaves no trace otherwise.
+  startingDeadlineSeconds: 3600
+  image:
+    # Carries both pg_dump and mc. Pin to a digest before relying on this.
+    repository: bitnami/postgresql
+    tag: "16"
+    pullPolicy: IfNotPresent
+  objectStore:
+    bucket: openoncology-backups
+    # An `MC_HOST_store` alias URL, e.g. https://KEY:SECRET@minio.example:9000
+    credentialsSecret: openoncology-backup-secrets
+    credentialsKey: mc-host-url
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
 # ── PostgreSQL (Bitnami sub-chart) ────────────────────────────────────────────
 postgresql:
   enabled: true

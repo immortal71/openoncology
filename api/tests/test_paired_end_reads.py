@@ -48,11 +48,9 @@ def test_reads_travel_as_one_item_per_sample():
            "tuple(_sample_id_from_reads" in MAIN_NF
 
 
-@pytest.mark.parametrize(
-    "module,name",
-    [(TRIMMOMATIC_NF, "trimmomatic"), (BWA_NF, "bwa_mem2"), (FASTQC_NF, "fastqc")],
-)
-def test_fastq_modules_take_the_sample_tuple(module, name):
+@pytest.mark.parametrize("name", ["trimmomatic", "bwa_mem2", "fastqc"])
+def test_fastq_modules_take_the_sample_tuple(name):
+    module = (PIPELINE / "modules" / f"{name}.nf").read_text(encoding="utf-8")
     assert "tuple val(sample_id), path(reads)" in module, (
         f"{name} still takes a bare path, so it cannot receive both mates"
     )
@@ -325,3 +323,47 @@ def test_task_signature_tolerates_a_redelivered_five_argument_message():
 
     sig = inspect.signature(run_genomic_pipeline)
     assert sig.parameters["dna_r2_s3_key"].default is None
+
+
+# ── The reference index is an input, not something alignment rebuilds ────────
+#
+# OO-11. BWA_MEM2_ALIGN declared only the FASTA, so Nextflow staged the FASTA and
+# none of the index files beside it, and the script ran `bwa-mem2 index` to
+# rebuild what pipeline/scripts/download_references.sh had already built. About
+# 30 minutes and 12 GB per task by that script's own estimate, discarded with the
+# work directory.
+
+def test_alignment_does_not_rebuild_the_index():
+    bwa = (PIPELINE / "modules" / "bwa_mem2.nf").read_text(encoding="utf-8")
+    script = bwa[bwa.index("script:"):]
+    assert "bwa-mem2 index" not in script, (
+        "the alignment script still builds the index; setup already did"
+    )
+
+
+def test_alignment_declares_the_index_as_an_input():
+    bwa = (PIPELINE / "modules" / "bwa_mem2.nf").read_text(encoding="utf-8")
+    inputs = bwa[bwa.index("input:"):bwa.index("output:")]
+    assert "path ref_index" in inputs, (
+        "without declaring the index files Nextflow stages only the FASTA"
+    )
+
+
+def test_main_names_every_bwa_index_suffix():
+    """
+    A missing suffix stages an incomplete index, which fails inside the aligner
+    rather than at the check. bwa-mem2 writes all five.
+    """
+    helper = MAIN_NF[MAIN_NF.index("def _bwa_index_files"):]
+    helper = helper[: helper.index("\n}")]
+    for suffix in (".0123", ".amb", ".ann", ".bwt.2bit.64", ".pac"):
+        assert suffix in helper, f"index suffix {suffix} not staged"
+
+
+def test_a_missing_index_fails_before_alignment_starts():
+    assert "Missing BWA-MEM2 index" in MAIN_NF
+    assert "download_references.sh" in MAIN_NF
+
+
+def test_the_aligner_receives_the_index():
+    assert "BWA_MEM2_ALIGN(trimmed_ch, resolved_ref_fasta, _bwa_index_files(" in MAIN_NF
