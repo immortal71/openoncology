@@ -1,0 +1,95 @@
+# Alerting rules for OpenOncology.
+#
+# BACKLOG.md OO-13. Before this file existed, infra/prometheus.yml set
+# `rule_files: []` and `alertmanagers: []`, so every metric was scraped and no
+# alert could ever fire.
+#
+# Every rule here is written against a metric that is genuinely exported:
+# `up` and `scrape_*` come from Prometheus itself, and the `http_*` series come
+# from prometheus_fastapi_instrumentator's default set, which api/main.py
+# installs. `api/tests/test_alert_rules.py` fails the build if a rule references
+# anything outside that set, because an alert on a metric nobody emits is
+# indistinguishable from no alert at all.
+#
+# Two things deliberately have no rule yet, and both are filed rather than
+# faked:
+#
+#   * Celery queue depth and task age. No exporter emits them. See OO-16.
+#   * The degraded-evidence condition. `settings.degraded_evidence_alert_after`
+#     escalates a log line to ERROR and emits no metric, so there is nothing to
+#     alert on from here. See OO-17.
+
+groups:
+  - name: openoncology-availability
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus target {{ $labels.job }} is not responding"
+          description: >-
+            {{ $labels.job }} at {{ $labels.instance }} has failed every scrape
+            for five minutes. For the api job this means the service is
+            unreachable, not merely unhealthy: /ready is excluded from
+            instrumentation, so a pod that is up but degraded still scrapes
+            successfully and will not trigger this.
+
+      - alert: PrometheusScrapesNothing
+        expr: count(up == 1) < 2
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Fewer than two Prometheus targets are up"
+          description: >-
+            Prometheus scrapes itself, so a healthy deployment has at least
+            Prometheus and the API. One target means only Prometheus is
+            answering and monitoring is effectively blind.
+
+  - name: openoncology-api
+    rules:
+      - alert: ApiErrorRateHigh
+        expr: >-
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
+          / clamp_min(sum(rate(http_requests_total[5m])), 0.001) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Over 5% of API responses are server errors"
+          description: >-
+            Sustained 5xx rate above five percent for ten minutes. The
+            denominator is clamped so an idle service cannot divide by zero and
+            produce a spurious alert.
+
+      - alert: ApiLatencyHigh
+        expr: >-
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[10m])) by (le)
+          ) > 5
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API 95th percentile latency above 5 seconds"
+          description: >-
+            Submission and results endpoints do real work, so this is set well
+            above a typical web threshold. It is meant to catch a stuck
+            dependency rather than ordinary load.
+
+      - alert: ApiServingNoTraffic
+        expr: sum(rate(http_requests_total[30m])) == 0
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API has served no requests for 30 minutes"
+          description: >-
+            Expected to be noisy on a low-traffic or research deployment. Route
+            it to a low-priority receiver or silence it there rather than
+            deleting it, because on a deployment that should have traffic it is
+            the only rule here that catches an ingress or DNS failure in front
+            of a healthy pod.

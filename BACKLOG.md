@@ -96,17 +96,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: choosing a managed database, which is a hosting decision
 - **Risk**: high while open. This is the one entry where the failure mode is unrecoverable rather than merely wrong.
 
-### OO-13: Prometheus scrapes metrics that can never alert anyone
-- **Why**: `infra/prometheus.yml` has `alertmanagers: []` and `rule_files: []`, and no rule file exists anywhere in the repository. Every metric is collected and nothing can ever fire. The consequences are specific rather than general: the sustained static-fallback alarm from risk_analysis open action 4 escalates a **log line** to ERROR, and `/ready` reports Postgres and Redis health to Kubernetes but to nobody else, so a degraded evidence base, a stalled `genomic` queue, or a worker crash-looping are all invisible unless a person happens to be reading logs.
-- **Files**: infra/prometheus.yml, infra/helm/templates/, infra/alerts/
-- **Acceptance**:
-  - An Alertmanager target and at least one rule file are configured
-  - Rules cover: sustained degraded evidence, queue depth or task age on `genomic` and `gdpr`, `/ready` failing, and worker absence
-  - Each rule names where it routes; a rule with no receiver is the same absence in a different place
-  - A deliberately triggered rule has been observed to fire
-- **Out of scope**: paging rotas and escalation policy, which are operational rather than repository concerns
-- **Risk**: medium
-
 ### OO-14: A compliance ✅ should have to cite something that exists
 - **Why**: Two rows in `HIPAA_COMPLIANCE.md` carried ✅ against controls that were never implemented, one citing a file that is a different database. Both read as verified for as long as nobody checked. This is the same shape as the coverage-threshold drift that OO-3 closed with a test, and the same shape as F11, F14 and F18: an assertion about something present, with nothing asserting the absence. The document is the one a compliance officer would be handed.
 - **Files**: api/tests/test_compliance_claims.py, docs/HIPAA_COMPLIANCE.md
@@ -117,6 +106,27 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - The test fails today against the pre-correction version of the document
 - **Out of scope**: the substance of HIPAA compliance, which is a legal question and not a test
 - **Risk**: low
+
+### OO-16: Deploy the exporters the monitoring config was scraping
+- **Why**: `infra/prometheus.yml` scraped `db-exporter:9187`, `redis-exporter:9121` and `worker-*:9100`. None of the first two exists in `docker-compose.yml` or the Helm chart, and nothing in `api/workers/` starts a metrics server, so port 9100 is not listening. All four reported `up == 0` permanently, invisibly, because nothing alerted on `up`. Those jobs are commented out rather than deleted, since the intent is right and the deployment is what is missing. `api/tests/test_alert_rules.py` now fails if a scrape job names a host no deployment defines.
+- **Files**: docker-compose.yml, infra/helm/templates/, infra/prometheus.yml, api/workers/__init__.py
+- **Acceptance**:
+  - postgres_exporter and redis_exporter are deployed in both deployment paths, or the jobs stay commented and the reason is recorded here
+  - Celery workers expose a metrics endpoint, or the celery-exporter is deployed against the broker instead
+  - Each job is uncommented only once its exporter is actually reachable, and `test_alert_rules.py` passes with it active
+  - Queue depth and task age on `genomic` and `gdpr` become alertable, which is what OO-13 could not cover
+- **Out of scope**: dashboards
+- **Risk**: low
+
+### OO-17: The degraded-evidence alarm emits no metric, and two metrics emit nothing
+- **Why**: `settings.degraded_evidence_alert_after` escalates a **log line** to ERROR after a run of static-fallback resolutions. That is the control risk_analysis open action 4 closed, and it can only be seen by someone reading logs: there is no metric, so it cannot alert. Separately, `api/main.py` declares `openoncology_mutations_processed_total` and `openoncology_genomic_pipeline_seconds` and neither is ever incremented, so both are permanently absent from `/metrics`. A rule written against either would look like coverage and never fire, which is why `test_alert_rules.py` rejects them.
+- **Files**: api/main.py, api/services/oncokb_evidence.py, api/workers/genomic_worker.py, infra/alerts/openoncology.rules.yml
+- **Acceptance**:
+  - A counter or gauge reflects consecutive static-fallback resolutions, and an alert fires on a sustained run
+  - The two declared metrics are either incremented at the points they describe, or removed
+  - `test_alert_rules.py`'s allowed-metric set grows only alongside the code that emits them
+- **Out of scope**: what the alert threshold should be, which is the same policy question as `degraded_evidence_alert_after` itself
+- **Risk**: low to implement. Worth noting the evidence path is adjacent to ranking, so the metric should be emitted where the fallback is already logged rather than anywhere new.
 
 ---
 
