@@ -1,6 +1,25 @@
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Environments where the hardening checks below are deliberately relaxed, because
+# they hold no real data and are not reachable from outside.
+#
+# The list is of the RELAXED ones on purpose. Every guard used to be written as
+# `environment == "production"`, so `staging` fell into a third state with the
+# development conveniences off and the safety checks off as well: it accepted the
+# literal default SECRET_KEY, the default MinIO password, and no audience claim.
+# It failed open and silently, which is the wrong direction for the one
+# environment that most resembles production.
+#
+# Keyed this way, an unrecognised value gets the guards rather than losing them,
+# so a typo like "prod" or "Production" is hardened rather than wide open.
+_RELAXED_ENVIRONMENTS = {"development", "test"}
+
+
+def is_hardened(environment: str) -> bool:
+    """True for any environment that is not explicitly a local or CI one."""
+    return (environment or "").strip().lower() not in _RELAXED_ENVIRONMENTS
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -150,16 +169,18 @@ class Settings(BaseSettings):
     @classmethod
     def _validate_secret_key(cls, v: str, info) -> str:
         env = (info.data or {}).get("environment", "development")
-        if env == "production" and v == "dev-secret-key-change-in-production":
+        if is_hardened(env) and v == "dev-secret-key-change-in-production":
             raise ValueError(
-                "SECRET_KEY must be changed from the default value in production. "
+                f"SECRET_KEY must be changed from the default value in {env!r}. "
                 "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
             )
         return v
 
     @model_validator(mode="after")
     def _validate_production_settings(self) -> "Settings":
-        if self.environment == "production":
+        # Applies to staging as much as production. Staging for a system holding
+        # patient genomic data is not a scratch environment.
+        if is_hardened(self.environment):
             if not self.sentry_dsn:
                 import logging
                 logging.getLogger("openoncology.config").warning(

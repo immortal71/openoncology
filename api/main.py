@@ -10,7 +10,7 @@ from redis import asyncio as redis_asyncio
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import select, text
 
-from config import settings
+from config import settings, is_hardened
 from database import engine, Base, AsyncSessionLocal
 from middleware.audit import AuditMiddleware
 from middleware.rate_limit import limiter
@@ -136,8 +136,10 @@ async def _seed_local_demo_data() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Production safety guards ───────────────────────────────────────────
-    if settings.environment == "production":
+    # ── Safety guards for any non-local environment ────────────────────────
+    # Keyed on the environment class rather than the literal string
+    # "production", so staging gets them too. See config.is_hardened.
+    if is_hardened(settings.environment):
         if settings.secret_key == "dev-secret-key-change-in-production":
             raise RuntimeError("SECRET_KEY must be set to a secure value in production")
         if any("localhost" in o or "127.0.0.1" in o for o in settings.cors_allow_origins):
@@ -230,7 +232,8 @@ async def add_security_headers(request: Request, call_next):
     response.headers.setdefault("Referrer-Policy", "no-referrer")
     response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
     response.headers.setdefault("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; base-uri 'self'")
-    if settings.environment == "production":
+    # Staging is served over TLS through the same ingress, so it gets HSTS too.
+    if is_hardened(settings.environment):
         response.headers.setdefault("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
     return response
 

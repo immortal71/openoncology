@@ -695,3 +695,77 @@ def test_in_progress_holds_at_most_one_entry():
     """The file says one maximum; more than one means a session died mid-work."""
     in_progress = [t for sec, t in _backlog_entries() if sec == "In progress"]
     assert len(in_progress) <= 1, f"In progress holds {len(in_progress)} entries"
+
+
+# ── Staging is hardened, not relaxed ─────────────────────────────────────────
+#
+# Every safety check used to read `environment == "production"` while every
+# convenience read `environment == "development"`, so `staging` landed in a third
+# state with the conveniences off and the guards off too. It accepted the literal
+# default SECRET_KEY, the default MinIO password, and an empty audience, and it
+# did so silently. That is the wrong direction for the environment that most
+# resembles production.
+
+STAGING_VALUES = HELM / "values.staging.yaml"
+
+
+def test_a_staging_values_file_exists():
+    """
+    values.yaml calls itself the base for development and staging while setting
+    ENVIRONMENT: production, so a staging deploy from it ran as production under
+    a different name.
+    """
+    assert STAGING_VALUES.exists()
+
+
+def test_staging_names_its_environment_honestly():
+    values = yaml.safe_load(STAGING_VALUES.read_text(encoding="utf-8"))
+    assert values["api"]["env"]["ENVIRONMENT"] == "staging"
+
+
+def test_staging_is_treated_as_hardened():
+    from config import is_hardened
+
+    assert is_hardened("staging")
+    assert is_hardened("production")
+    assert not is_hardened("development")
+    assert not is_hardened("test")
+
+
+def test_an_unrecognised_environment_is_hardened():
+    """A typo must lose the conveniences, not the guards."""
+    from config import is_hardened
+
+    for typo in ("prod", "Production", "stagng", ""):
+        assert is_hardened(typo), f"{typo!r} would run without the safety checks"
+
+
+def test_staging_rejects_the_default_credentials():
+    """The concrete hole: Settings(environment='staging') used to accept all three."""
+    from config import Settings
+
+    with pytest.raises(ValueError):
+        Settings(environment="staging")
+
+    with pytest.raises(ValueError, match="KEYCLOAK_AUDIENCE"):
+        Settings(
+            environment="staging",
+            secret_key="x" * 64,
+            minio_secret_key="not-the-default",
+            sentry_dsn="https://example@sentry.invalid/1",
+            keycloak_audience="",
+        )
+
+
+def test_staging_relaxes_capacity_and_not_security():
+    """
+    The file is allowed to shrink replicas and volumes. It must not turn off a
+    control that production keeps, other than the disruption budget, which
+    cannot be satisfied by a single replica.
+    """
+    staging = yaml.safe_load(STAGING_VALUES.read_text(encoding="utf-8"))
+    assert staging["backup"]["enabled"] is True
+    assert staging["exporters"]["enabled"] is True
+    assert staging.get("ingress", {}).get("tls", {}).get("enabled") is True
+    assert staging["api"]["podDisruptionBudget"]["enabled"] is False
+    assert staging["api"]["replicaCount"] == 1
