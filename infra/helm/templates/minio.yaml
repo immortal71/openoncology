@@ -1,0 +1,140 @@
+{{/*
+MinIO object storage.
+
+BACKLOG.md OO-18. `configmap.yaml` has set `MINIO_ENDPOINT` to
+`{release}-minio:9000` and `values.yaml` has carried a `minio:` block with an
+image and 200Gi of persistence, while nothing in this chart or its dependencies
+created a MinIO. A `helm install` produced an application configured to reach
+object storage that did not exist, so every VCF upload, report write and GDPR
+object deletion failed, and so did the backup CronJob, which writes dumps
+through `mc`.
+
+Object storage is where patient genomic files live, so this is the store, not a
+cache. It is a StatefulSet with a volume claim rather than a Deployment.
+
+The Service name is `{{ .Release.Name }}-minio` and must stay that, because it
+is what `openoncology.minioEndpoint` resolves to and what the application has
+always been told to dial. Both now come from the same helper so they cannot
+drift apart again.
+
+Single replica. MinIO's distributed mode needs at least four and a different
+volume layout, and pretending otherwise by setting a replica count here would
+produce a cluster that cannot heal. Running distributed is a deployment decision
+that belongs with whoever sizes the storage.
+
+Buckets are not created here. `api/services/storage.py` calls `create_bucket`
+on demand for the application's three, and the backup job makes its own.
+*/}}
+{{- if .Values.minio.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+spec:
+  type: ClusterIP
+  ports:
+    - name: api
+      port: 9000
+      targetPort: api
+    - name: console
+      port: 9001
+      targetPort: console
+  selector:
+    {{- include "openoncology.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-minio
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: minio
+spec:
+  serviceName: {{ .Release.Name }}-minio
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: minio
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: minio
+    spec:
+      serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: minio
+          image: "{{ .Values.minio.image.repository }}:{{ .Values.minio.image.tag }}"
+          imagePullPolicy: {{ .Values.minio.image.pullPolicy }}
+          args:
+            - server
+            - /data
+            - --console-address
+            - ":9001"
+          envFrom:
+            # MINIO_ROOT_USER and MINIO_ROOT_PASSWORD. The application reads the
+            # same pair as MINIO_ACCESS_KEY and MINIO_SECRET_KEY from its own
+            # secret; they have to agree, and nothing here can check that.
+            - secretRef:
+                name: {{ .Values.minio.secretRef }}
+          ports:
+            - name: api
+              containerPort: 9000
+            - name: console
+              containerPort: 9001
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: api
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          # MinIO distinguishes live from ready, and readiness is the one that
+          # reports whether the backend can actually serve objects.
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml .Values.minio.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- with .Values.global.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.minio.persistence.size }}
+{{- end }}

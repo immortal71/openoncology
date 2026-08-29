@@ -115,6 +115,10 @@ spec:
                   printf '{"timestamp":"%s","database":"%s","bytes":%s,"format":"pg_dump-plain-gzip"}\n' \
                     "$STAMP" "$PGDATABASE" "$BYTES" > /tmp/manifest.json
 
+                  # mc cp into a bucket that does not exist fails, and the
+                  # application only ever creates its own three.
+                  mc mb --ignore-existing "store/${BACKUP_BUCKET}"
+
                   mc cp "$DUMP" "store/${BACKUP_BUCKET}/db/${STAMP}.sql.gz"
                   mc cp /tmp/manifest.json "store/${BACKUP_BUCKET}/db/${STAMP}.manifest.json"
 
