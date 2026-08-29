@@ -1,0 +1,105 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenOncology Helm Values — STAGING overrides
+# Usage: helm upgrade --install openoncology-staging ./infra/helm \
+#          -f infra/helm/values.yaml \
+#          -f infra/helm/values.staging.yaml \
+#          --namespace openoncology-staging
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Why this file exists. values.yaml describes itself as the base for
+# "development / staging" and sets ENVIRONMENT: production, so a staging deploy
+# from the base file alone ran as production while being called staging. Naming
+# the environment honestly is the point of this file.
+#
+# ENVIRONMENT: staging is NOT a relaxation. `config.is_hardened` treats anything
+# outside {development, test} as hardened, so staging enforces the same
+# requirements production does: a real SECRET_KEY, a non-default MinIO password,
+# KEYCLOAK_AUDIENCE set, no localhost in CORS, and HSTS on responses. That is
+# deliberate. Staging for a system handling patient genomic data is not a
+# scratch environment, and the point of staging is to find what breaks under
+# production rules before production does.
+#
+# What this file relaxes is capacity and blast radius, not security.
+
+api:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  env:
+    ENVIRONMENT: staging
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+  # One replica, so a disruption budget requiring one available blocks every
+  # node drain. Off here; production keeps it.
+  podDisruptionBudget:
+    enabled: false
+
+web:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "512Mi"
+
+workers:
+  genomic:
+    replicaCount: 1
+  ai:
+    replicaCount: 1
+  notify:
+    replicaCount: 1
+  gdpr:
+    replicaCount: 1
+
+postgresql:
+  primary:
+    persistence:
+      size: 20Gi
+
+keycloakDatabase:
+  persistence:
+    size: 5Gi
+
+minio:
+  persistence:
+    size: 20Gi
+
+redis:
+  master:
+    persistence:
+      size: 2Gi
+
+# Backups stay on. A staging deploy is where the restore drill in
+# docs/RUNBOOK_BACKUP_RESTORE.md should be exercised, and OO-12 stays open until
+# somebody has. Shorter retention because these dumps are for practising the
+# restore, not for keeping.
+backup:
+  enabled: true
+  retentionDays: 7
+  schedule: "0 2 * * *"
+
+exporters:
+  enabled: true
+
+# Off, as in production, until someone has watched what it does to a running
+# deployment. Staging is the right place to turn it on first: a wrong selector
+# fails closed, and finding that here is the entire purpose of this environment.
+networkPolicy:
+  enabled: false
+
+ingress:
+  hosts:
+    api: api.staging.openoncology.org
+    web: staging.openoncology.org
+    keycloak: auth.staging.openoncology.org
+  tls:
+    enabled: true
+    secretName: openoncology-staging-tls
