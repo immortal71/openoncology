@@ -35,16 +35,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: the conda-only modules, which pin exact versions already; choosing different tool versions
 - **Risk**: low
 
-### OO-9: Keycloak's database is sized by the application database's setting
-- **Why**: `templates/postgres.yaml` is Keycloak's database, not the application's, which uses the Bitnami `postgresql` sub-chart. Its `volumeClaimTemplates` requests `.Values.postgresql.primary.persistence.size`, the sub-chart's value. `values.production.yaml` sets that to 200Gi, so Keycloak's realm database, a few megabytes of users and clients, claims a 200Gi volume, and anyone resizing the application database silently resizes Keycloak's too. Found while scoping OO-5.
-- **Files**: infra/helm/templates/postgres.yaml, infra/helm/values.yaml, infra/helm/values.production.yaml
-- **Acceptance**:
-  - Keycloak's database size comes from its own value, defaulted to something proportionate
-  - The two databases are distinguishable by name or comment, so the next reader does not assume `postgres.yaml` is the application's
-  - `helm template` still renders and passes kubeconform
-- **Out of scope**: consolidating the two databases, which is a data-migration decision rather than a chart one
-- **Risk**: low to change, but note `volumeClaimTemplates` is immutable on an existing StatefulSet, so an in-place `helm upgrade` will reject the edit. The entry is only safe on a fresh install or with a documented recreate step, and that caveat is the reason it is filed rather than done in passing.
-
 ### OO-12: There is no backup of patient data, and the compliance checklist said there was
 - **Why**: Nothing in this repository backs up the application database or object storage. No `archive_mode`, `archive_command` or `wal_level`; no MinIO versioning; no `pg_dump`, pgBackRest, wal-g or Velero anywhere. The Bitnami `postgresql` sub-chart has persistence, and persistence is not backup: a deleted PVC, a bad migration or a ransomware event loses every submission, mutation and result permanently, with no recovery path. `HIPAA_COMPLIANCE.md` carried ✅ against §164.308 contingency planning, citing "PostgreSQL WAL + MinIO versioning (see `infra/helm/postgres.yaml`)", and that file is Keycloak's database rather than the application's. The claim has been corrected; the gap it was covering is this entry.
 - **Files**: infra/helm/values.yaml, infra/helm/values.production.yaml, infra/helm/templates/, docs/HIPAA_COMPLIANCE.md, docs/SETUP.md

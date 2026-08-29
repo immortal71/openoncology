@@ -548,3 +548,55 @@ def test_the_network_policy_can_select_the_object_store(helm_values):
             f"minio.yaml sets. Its pods carry the chart selectorLabels plus "
             f"component: minio, so app.kubernetes.io/name is the chart name."
         )
+
+
+# ── The two databases are configured separately ──────────────────────────────
+#
+# OO-9. templates/postgres.yaml is Keycloak's database; the application uses the
+# Bitnami postgresql sub-chart. The first read `postgresql.primary.persistence`
+# and `postgresql.primary.resources`, which belong to the second, so production
+# gave a realm database holding a few megabytes a 200Gi volume and resizing one
+# silently resized the other.
+#
+# The confusion has caused two defects already: HIPAA_COMPLIANCE.md cited this
+# file as evidence of a backup for patient data, and the OO-5 network policy
+# nearly granted the application egress to this database rather than its own.
+
+KEYCLOAK_DB = HELM / "templates" / "postgres.yaml"
+
+
+def test_keycloak_database_is_sized_by_its_own_value(helm_values):
+    assert "keycloakDatabase" in helm_values
+    text = KEYCLOAK_DB.read_text(encoding="utf-8")
+    assert "keycloakDatabase.persistence.size" in text
+    assert "postgresql.primary.persistence" not in text
+
+
+def test_keycloak_database_does_not_borrow_the_application_resources():
+    text = KEYCLOAK_DB.read_text(encoding="utf-8")
+    assert "keycloakDatabase.resources" in text
+    assert "postgresql.primary.resources" not in text
+
+
+def test_the_two_databases_are_sized_independently(helm_values):
+    """
+    Equal sizes would pass the assertions above while still meaning nobody chose
+    either number.
+    """
+    app = helm_values["postgresql"]["primary"]["persistence"]["size"]
+    keycloak = helm_values["keycloakDatabase"]["persistence"]["size"]
+    assert app != keycloak, (
+        "both databases request the same volume size, which suggests one is "
+        "still inheriting the other's number"
+    )
+
+
+def test_the_template_says_which_database_it_is():
+    """
+    A reader arriving at a file called postgres.yaml reasonably assumes it is
+    the application's. Two defects came from exactly that assumption.
+    """
+    text = KEYCLOAK_DB.read_text(encoding="utf-8")
+    head = text[: text.index("apiVersion")]
+    assert "KEYCLOAK" in head.upper()
+    assert "not the application" in head.lower()

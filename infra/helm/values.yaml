@@ -350,6 +350,40 @@ minio:
   # MINIO_ACCESS_KEY and MINIO_SECRET_KEY the API reads from its own secret.
   secretRef: openoncology-minio-secrets
 
+# ── Keycloak's database ───────────────────────────────────────────────────────
+# This chart runs TWO PostgreSQL instances and they are easy to confuse.
+#
+#   {release}-postgresql            the Bitnami sub-chart. The APPLICATION
+#                                   database: submissions, mutations, results.
+#                                   Configured under `postgresql:` below.
+#   {release}-openoncology-postgres templates/postgres.yaml. KEYCLOAK's
+#                                   database: users, clients, the realm.
+#                                   Configured here.
+#
+# Until now the second read `postgresql.primary.persistence.size` and
+# `postgresql.primary.resources`, which belong to the first. In production that
+# gave a realm database holding a few megabytes a 200Gi volume, and meant
+# resizing the application database silently resized Keycloak's. See OO-9.
+#
+# IMPORTANT for existing deployments. `volumeClaimTemplates` is immutable on a
+# StatefulSet, so `helm upgrade` will reject a changed size against a cluster
+# where this already exists. Applying it needs a fresh install, or deleting the
+# StatefulSet with `--cascade=orphan` and recreating it. Do not attempt that
+# without a backup of the realm; `docs/RUNBOOK_BACKUP_RESTORE.md` records that
+# this database is not covered by the nightly dump.
+keycloakDatabase:
+  persistence:
+    # Proportionate to what it holds. Keycloak's schema is users, clients,
+    # sessions and the realm, not patient data.
+    size: 10Gi
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
 # ── Keycloak ──────────────────────────────────────────────────────────────────
 keycloak:
   enabled: true
