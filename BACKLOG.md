@@ -85,6 +85,39 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: whether to ship or cache a prebuilt index, which is a distribution decision
 - **Risk**: low
 
+### OO-12: There is no backup of patient data, and the compliance checklist said there was
+- **Why**: Nothing in this repository backs up the application database or object storage. No `archive_mode`, `archive_command` or `wal_level`; no MinIO versioning; no `pg_dump`, pgBackRest, wal-g or Velero anywhere. The Bitnami `postgresql` sub-chart has persistence, and persistence is not backup: a deleted PVC, a bad migration or a ransomware event loses every submission, mutation and result permanently, with no recovery path. `HIPAA_COMPLIANCE.md` carried ✅ against §164.308 contingency planning, citing "PostgreSQL WAL + MinIO versioning (see `infra/helm/postgres.yaml`)", and that file is Keycloak's database rather than the application's. The claim has been corrected; the gap it was covering is this entry.
+- **Files**: infra/helm/values.yaml, infra/helm/values.production.yaml, infra/helm/templates/, docs/HIPAA_COMPLIANCE.md, docs/SETUP.md
+- **Acceptance**:
+  - The application database has scheduled backups with a stated retention, and object storage has versioning or an equivalent
+  - A **restore** has been performed into a scratch namespace and the result checked, because an unexercised backup is a belief rather than a control
+  - RPO and RTO are written down, even if the numbers are modest
+  - `HIPAA_COMPLIANCE.md` moves to ✅ only after that restore, and names what was restored and when
+- **Out of scope**: choosing a managed database, which is a hosting decision
+- **Risk**: high while open. This is the one entry where the failure mode is unrecoverable rather than merely wrong.
+
+### OO-13: Prometheus scrapes metrics that can never alert anyone
+- **Why**: `infra/prometheus.yml` has `alertmanagers: []` and `rule_files: []`, and no rule file exists anywhere in the repository. Every metric is collected and nothing can ever fire. The consequences are specific rather than general: the sustained static-fallback alarm from risk_analysis open action 4 escalates a **log line** to ERROR, and `/ready` reports Postgres and Redis health to Kubernetes but to nobody else, so a degraded evidence base, a stalled `genomic` queue, or a worker crash-looping are all invisible unless a person happens to be reading logs.
+- **Files**: infra/prometheus.yml, infra/helm/templates/, infra/alerts/
+- **Acceptance**:
+  - An Alertmanager target and at least one rule file are configured
+  - Rules cover: sustained degraded evidence, queue depth or task age on `genomic` and `gdpr`, `/ready` failing, and worker absence
+  - Each rule names where it routes; a rule with no receiver is the same absence in a different place
+  - A deliberately triggered rule has been observed to fire
+- **Out of scope**: paging rotas and escalation policy, which are operational rather than repository concerns
+- **Risk**: medium
+
+### OO-14: A compliance ✅ should have to cite something that exists
+- **Why**: Two rows in `HIPAA_COMPLIANCE.md` carried ✅ against controls that were never implemented, one citing a file that is a different database. Both read as verified for as long as nobody checked. This is the same shape as the coverage-threshold drift that OO-3 closed with a test, and the same shape as F11, F14 and F18: an assertion about something present, with nothing asserting the absence. The document is the one a compliance officer would be handed.
+- **Files**: api/tests/test_compliance_claims.py, docs/HIPAA_COMPLIANCE.md
+- **Acceptance**:
+  - Every ✅ row whose Implementation cites a repository path is checked: the path exists
+  - Where a row cites a specific mechanism that is greppable (`archive_mode`, `data_checksums`, an env var, a middleware module), the test asserts it is actually present
+  - Rows that cannot be checked mechanically are listed explicitly with the reason, the way `test_marketplace_phi_disclosure.py` handles its exemptions, so the uncheckable set is visible rather than implied
+  - The test fails today against the pre-correction version of the document
+- **Out of scope**: the substance of HIPAA compliance, which is a legal question and not a test
+- **Risk**: low
+
 ---
 
 ## In progress
