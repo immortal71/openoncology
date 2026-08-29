@@ -60,21 +60,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: consolidating the two databases, which is a data-migration decision rather than a chart one
 - **Risk**: low to change, but note `volumeClaimTemplates` is immutable on an existing StatefulSet, so an in-place `helm upgrade` will reject the edit. The entry is only safe on a fresh install or with a documented recreate step, and that caveat is the reason it is filed rather than done in passing.
 
-### OO-10: The FASTQ path aligns paired-end reads as single-end
-- **Why**: `main.nf:116` channels the input with `Channel.fromPath`, not `fromFilePairs`; `trimmomatic.nf` runs `trimmomatic SE` against `TruSeq3-SE.fa`; `bwa_mem2.nf` passes one read file to `bwa-mem2 mem`. Nothing pairs a mate file at any point. Essentially all clinical sequencing is paired-end, and so is the GIAB HG002 data the 3.1 validation gate is measured against, so mate-pair information is discarded exactly where it resolves the repetitive regions in which variants are missed. Found while writing `docs/RUNBOOK_VARIANT_CALLING_VALIDATION.md`, and it is why that runbook recommends the BAM route first.
-
-  This is not only a validation-path problem. `POST /api/submit` accepts a single `dna_file` described as "VCF, FASTQ, or BAM", so a clinician holding the two files every sequencer emits can upload only one of them, and nothing says so. The result is a real sample aligned single-end with half its reads absent, reported with the same confidence as any other. That puts this on the clinical intake path rather than the benchmark path, and raises it above the other Ready entries.
-- **Files**: pipeline/main.nf, pipeline/modules/trimmomatic.nf, pipeline/modules/bwa_mem2.nf, api/routes/submit.py
-- **Acceptance**:
-  - A paired FASTQ input is consumed as one sample, not as two independent runs
-  - Trimmomatic runs `PE` with paired adapters, and its unpaired outputs are handled deliberately rather than dropped by accident
-  - `bwa-mem2 mem` receives both mates
-  - Single-end input still works, or its removal is a stated decision rather than a side effect
-  - A test asserts a paired input produces one BAM per sample
-  - `POST /api/submit` either accepts a mate pair, or states plainly that it does not and what that costs
-- **Out of scope**: the somatic and RNA-seq paths, beyond what falls out of the same change
-- **Risk**: medium. This changes what the pipeline computes, so it invalidates any variant-calling measurement taken before it. Either sequence it ahead of the run in the runbook, or record which configuration produced which number.
-
 ### OO-12: There is no backup of patient data, and the compliance checklist said there was
 - **Why**: Nothing in this repository backs up the application database or object storage. No `archive_mode`, `archive_command` or `wal_level`; no MinIO versioning; no `pg_dump`, pgBackRest, wal-g or Velero anywhere. The Bitnami `postgresql` sub-chart has persistence, and persistence is not backup: a deleted PVC, a bad migration or a ransomware event loses every submission, mutation and result permanently, with no recovery path. `HIPAA_COMPLIANCE.md` carried ✅ against §164.308 contingency planning, citing "PostgreSQL WAL + MinIO versioning (see `infra/helm/postgres.yaml`)", and that file is Keycloak's database rather than the application's. The claim has been corrected; the gap it was covering is this entry.
 - **Files**: infra/helm/values.yaml, infra/helm/values.production.yaml, infra/helm/templates/, docs/HIPAA_COMPLIANCE.md, docs/SETUP.md
@@ -86,17 +71,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: choosing a managed database, which is a hosting decision
 - **Progress 2026-08-29**: nightly `pg_dump` CronJob added to the chart, enabled by default, writing to object storage with a manifest and 30 day retention, plus `docs/RUNBOOK_BACKUP_RESTORE.md`. The entry **stays open**: its acceptance requires an exercised restore, and nobody has run one. Object storage versioning is still absent, so a database-only restore yields rows referencing missing files, and Keycloak's database is still unbacked.
 - **Risk**: high while open. This is the one entry where the failure mode is unrecoverable rather than merely wrong. Lower than it was, since a dump now exists; not closed, because a backup nobody has restored is a belief about a file.
-
-### OO-14: A compliance ✅ should have to cite something that exists
-- **Why**: Two rows in `HIPAA_COMPLIANCE.md` carried ✅ against controls that were never implemented, one citing a file that is a different database. Both read as verified for as long as nobody checked. This is the same shape as the coverage-threshold drift that OO-3 closed with a test, and the same shape as F11, F14 and F18: an assertion about something present, with nothing asserting the absence. The document is the one a compliance officer would be handed.
-- **Files**: api/tests/test_compliance_claims.py, docs/HIPAA_COMPLIANCE.md
-- **Acceptance**:
-  - Every ✅ row whose Implementation cites a repository path is checked: the path exists
-  - Where a row cites a specific mechanism that is greppable (`archive_mode`, `data_checksums`, an env var, a middleware module), the test asserts it is actually present
-  - Rows that cannot be checked mechanically are listed explicitly with the reason, the way `test_marketplace_phi_disclosure.py` handles its exemptions, so the uncheckable set is visible rather than implied
-  - The test fails today against the pre-correction version of the document
-- **Out of scope**: the substance of HIPAA compliance, which is a legal question and not a test
-- **Risk**: low
 
 ### OO-15: Two governance controls the compliance guard exposed
 - **Why**: `api/tests/test_compliance_claims.py` failed against two further rows once it existed. **Security officer**: the row cited a CODEOWNERS file, and no such file exists at the root, under `.github/` or under `docs/`, so the role is unassigned rather than assigned somewhere else. **Automatic log-off**: the row quoted "30 min idle / 8 hr max" and nothing in this repository sets `ssoSessionIdleTimeout` or `ssoSessionMaxLifespan`, so sessions run at the Keycloak image's defaults, which do not match the figure quoted. Both rows are corrected; these are the gaps behind them.
@@ -140,22 +114,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 ## In review
 
 <!-- Entry plus PR URL. Cleared by hand when merged. -->
-
-### OO-4: Refresh the stale figures in the pyproject coverage comment
-- **Why**: The comment moved into `[tool.coverage.report]` by OO-2 cites 53.93% over 8,353 production statements with 844 api tests. The suite has grown since: it now measures about 61% over 8,798 statements with 1,102 api tests. Anyone reading the comment concludes the gate sits a point below the measured total, when it actually sits nine points below, so the gate catches less than the comment claims it does.
-- **Files**: pyproject.toml
-- **Acceptance**:
-  - The comment cites the current measured coverage, statement count and api test count, taken from an actual local run rather than copied from this entry
-  - The narrative explaining why the number moved 63, 69, 52 is preserved, not replaced
-  - `fail_under` itself is unchanged at 52
-  - `make test-backend` still passes
-  - `pytest api/tests/test_coverage_threshold_consistency.py` still passes
-- **Out of scope**: changing the threshold; the `omit` list; README and CONTRIBUTING, which quote the gate rather than the measurement.
-- **Risk**: low
-
-**PR**: [#132](https://github.com/immortal71/openoncology/pull/132). Rebased onto
-`main` after #130 and #131 merged, and the figures re-measured: the ones the
-branch was carrying had themselves gone stale by two merges while it sat open.
 
 ---
 
@@ -209,6 +167,71 @@ branch was carrying had themselves gone stale by two merges while it sat open.
 ## Done
 
 <!-- Merged entries, newest first. Trim periodically. -->
+
+### OO-14: A compliance mark must cite something that exists
+Merged in [#138](https://github.com/immortal71/openoncology/pull/138).
+`api/tests/test_compliance_claims.py` fails the build when a row in
+`HIPAA_COMPLIANCE.md` claims implementation and cites a path or mechanism that is
+absent. It found two more the moment it existed: the security officer row cited a
+CODEOWNERS file that does not exist, and automatic log-off quoted session
+timeouts nothing sets. Both corrected; the gaps behind them are OO-15.
+
+The check had two defects of its own before merge, both recorded in the PR. It
+read only backticked tokens, so it missed CODEOWNERS entirely. And its evidence
+search covered `api/`, so it matched its own pattern list and reported a backup
+mechanism present that was not. A check that passes by reading its own source is
+the pathology it exists to catch, one level up.
+
+### OO-13: Prometheus rules that can fire, against targets that exist
+Merged in [#140](https://github.com/immortal71/openoncology/pull/140).
+`rule_files: []` and `alertmanagers: []` meant every metric was collected and no
+alert could fire. Adding rules first required correcting the scrape config: four
+of seven jobs pointed at exporters deployed nowhere and reported `up == 0`
+permanently, which pages continuously once anything watches `up`.
+
+Alertmanager's address is deliberately still unset. A wrong one fails silently.
+
+### OO-12: Nightly database backup, restore not yet exercised
+Partially addressed in [#141](https://github.com/immortal71/openoncology/pull/141).
+The entry **stays open** in Ready. A `pg_dump` CronJob and
+`docs/RUNBOOK_BACKUP_RESTORE.md` exist; nobody has restored from one, so
+`HIPAA_COMPLIANCE.md` keeps §164.308 at not-implemented.
+
+### OO-11: BWA-MEM2 rebuilt the reference index every task
+Merged in [#139](https://github.com/immortal71/openoncology/pull/139). The
+process staged the FASTA and none of the index files beside it, so it rebuilt
+what setup had already built, at roughly 30 minutes and 12 GB per task. A missing
+index now fails up front naming `download_references.sh`, instead of being
+silently absorbed.
+
+### OO-10: Paired-end reads carried from upload to aligner
+Merged in [#136](https://github.com/immortal71/openoncology/pull/136). The FASTQ
+path processed paired-end data as single-end at every stage and `POST /api/submit`
+accepted one of the two files a sequencer produces. Read groups also carried a
+constant `SM:patient`, so every BAM claimed the same sample name.
+
+This changes what the pipeline computes, so variant-calling measurements taken
+before it are not comparable with any taken after.
+
+### Runbook for closing the variant-calling accuracy gate
+Merged in [#134](https://github.com/immortal71/openoncology/pull/134).
+`docs/RUNBOOK_VARIANT_CALLING_VALIDATION.md`, scoped to chr20 in NIST confident
+regions to match the existing reference figure. Writing it is what found OO-10
+and OO-11.
+
+### HIPAA checklist corrected, four controls were never implemented
+Merged in [#137](https://github.com/immortal71/openoncology/pull/137) and
+[#138](https://github.com/immortal71/openoncology/pull/138). Contingency planning
+cited WAL archiving and object-store versioning, neither configured, pointing at
+Keycloak's database rather than the application's. Data-at-rest cited PostgreSQL
+checksums, which are off.
+
+### OO-4: Refresh the stale figures in the pyproject coverage comment
+Merged in [#132](https://github.com/immortal71/openoncology/pull/132). Rebased
+onto main after #130 and #131, and re-measured: the figures the branch was
+carrying had themselves gone stale by two merges while it sat open. The comment
+now carries its date as part of the number, because `fail_under` can be pinned by
+a test and a measurement of a moving suite cannot.
 
 ### Intended use stated on every output path
 Merged in [#131](https://github.com/immortal71/openoncology/pull/131), recorded as
