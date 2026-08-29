@@ -22,6 +22,13 @@ from __future__ import annotations
 
 from datetime import datetime, UTC
 
+from services.intended_use import (
+    FHIR_EXTENSION_URL,
+    RESEARCH_USE_STATEMENT,
+    fhir_meta,
+    prefix_conclusion,
+)
+
 
 def build_diagnostic_report(
     submission: object,
@@ -50,7 +57,8 @@ def build_diagnostic_report(
     else:
         issued_str = str(issued)
 
-    status = _map_status(getattr(submission, "status", "unknown"))
+    clinician_reviewed = bool(getattr(result, "oncologist_reviewed", False)) if result else False
+    status = _map_status(getattr(submission, "status", "unknown"), clinician_reviewed)
 
     observation_refs = [
         {"reference": f"Observation/mutation-{m.id}"}
@@ -69,6 +77,7 @@ def build_diagnostic_report(
         "id": f"diagnostic-report-{getattr(submission, 'id', 'unknown')}",
         "meta": {
             "profile": ["http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/genomics-report"],
+            "tag": fhir_meta(clinician_reviewed),
         },
         "status": status,
         "category": [
@@ -95,7 +104,7 @@ def build_diagnostic_report(
         "subject": {"reference": patient_id_fhir},
         "issued": issued_str,
         "result": observation_refs,
-        "conclusion": interpretation_text,
+        "conclusion": prefix_conclusion(interpretation_text, clinician_reviewed),
         "conclusionCode": [
             {
                 "coding": [
@@ -116,6 +125,10 @@ def build_diagnostic_report(
                 "url": "http://openoncology.org/fhir/StructureDefinition/targetable-mutation",
                 "valueBoolean": has_targetable,
             },
+            {
+                "url": FHIR_EXTENSION_URL,
+                "valueString": RESEARCH_USE_STATEMENT,
+            },
         ],
     }
 
@@ -132,7 +145,7 @@ def build_diagnostic_report(
     return report
 
 
-def build_observation(mutation: object) -> dict:
+def build_observation(mutation: object, clinician_reviewed: bool = False) -> dict:
     """Build a FHIR R4 Observation resource for a single somatic mutation.
 
     Uses the HL7 Genomics Reporting IG (v2.0) Variant profile:
@@ -245,8 +258,13 @@ def build_observation(mutation: object) -> dict:
         "id": f"mutation-{mutation_id}",
         "meta": {
             "profile": ["http://hl7.org/fhir/uv/genomics-reporting/StructureDefinition/variant"],
+            # An Observation is individually addressable at
+            # /api/fhir/Observation/{id} and travels out of the bundle on its
+            # own, so it has to carry the marker itself rather than inherit it
+            # from the DiagnosticReport that references it.
+            "tag": fhir_meta(clinician_reviewed),
         },
-        "status": "final",
+        "status": "final" if clinician_reviewed else "preliminary",
         "category": [
             {
                 "coding": [
@@ -292,13 +310,26 @@ def build_observation(mutation: object) -> dict:
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
-def _map_status(submission_status: str) -> str:
-    """Map OpenOncology submission status to FHIR DiagnosticReport.status."""
+def _map_status(submission_status: str, clinician_reviewed: bool = False) -> str:
+    """
+    Map an OpenOncology submission status to FHIR DiagnosticReport.status.
+
+    A completed submission mapped to `final`, which in FHIR R4 means the report
+    is complete and verified. Nothing here verifies anything: the pipeline
+    finishing is the only condition that was being reported. `preliminary` is
+    the code for results that are complete but not verified, which is what an
+    unreviewed report is, so a completed submission only reaches `final` once a
+    clinician has actually signed it off.
+
+    This is the one signal in the resource an EMR is guaranteed to act on. Tags
+    and extensions can be dropped on ingest; status cannot, because the receiving
+    system needs it to decide how to file the report.
+    """
     mapping = {
         "queued": "registered",
         "processing": "partial",
         "awaiting_ai": "partial",
-        "complete": "final",
+        "complete": "final" if clinician_reviewed else "preliminary",
         "failed": "cancelled",
     }
     return mapping.get(str(submission_status).lower(), "unknown")
