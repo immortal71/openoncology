@@ -14,7 +14,18 @@ namespace: openoncology
 # ── API (FastAPI) ─────────────────────────────────────────────────────────────
 api:
   image:
-    repository: ghcr.io/openoncology/api
+    # ghcr.io/<owner>/<repo>/<component>, which is what publish-images in ci.yml
+    # produces. This previously named ghcr.io/openoncology, an account that does
+    # not own this repository, so the reference could not have resolved even
+    # once images existed.
+    repository: ghcr.io/immortal71/openoncology/api
+    # `latest` is a placeholder, not a deployment choice. It is mutable, so a pod
+    # restart can change the running version, and this system's output is
+    # clinical evidence whose provenance has to be answerable. Pin `sha-<short>`
+    # for staging and a `v*` tag for production once images exist; BACKLOG.md
+    # OO-19 tracks that, and it is deliberately not done here because no image
+    # has been published yet and pinning a tag that does not exist is worse than
+    # pinning a mutable one.
     tag: latest
     pullPolicy: IfNotPresent
   replicaCount: 2
@@ -61,7 +72,7 @@ api:
 # ── Web (Next.js) ─────────────────────────────────────────────────────────────
 web:
   image:
-    repository: ghcr.io/openoncology/web
+    repository: ghcr.io/immortal71/openoncology/web
     tag: latest
     pullPolicy: IfNotPresent
   replicaCount: 2

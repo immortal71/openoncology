@@ -769,3 +769,67 @@ def test_staging_relaxes_capacity_and_not_security():
     assert staging.get("ingress", {}).get("tls", {}).get("enabled") is True
     assert staging["api"]["podDisruptionBudget"]["enabled"] is False
     assert staging["api"]["replicaCount"] == 1
+
+
+# ── Images are published, and the chart names ones that exist ────────────────
+#
+# Until publish-images existed, CI built both images and discarded them. The job
+# was called "Docker build (no push)" and did exactly that, so the chart's
+# ghcr.io references named images the repository had never produced. A helm
+# install could only reach ImagePullBackOff, before any other configuration
+# mattered.
+
+WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+
+
+def _workflow() -> dict:
+    return yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+
+
+def test_ci_publishes_images():
+    jobs = _workflow()["jobs"]
+    assert "publish-images" in jobs, "nothing publishes container images"
+    steps = jobs["publish-images"]["steps"]
+    uses = [s.get("uses", "") for s in steps]
+    assert any("build-push-action" in u for u in uses)
+
+
+def test_publishing_waits_for_the_gates():
+    """
+    An image that reaches the registry without passing the benchmark gate and
+    both test suites is an image somebody can deploy.
+    """
+    needs = _workflow()["jobs"]["publish-images"]["needs"]
+    assert "test-backend" in needs, "images could publish without the backend gates"
+
+
+def test_publishing_has_package_write_permission():
+    perms = _workflow()["jobs"]["publish-images"]["permissions"]
+    assert perms.get("packages") == "write"
+
+
+def test_the_build_is_exercised_on_pull_requests():
+    """
+    A publish job that only runs after merge has its first execution and its
+    first test on main. The push is disabled on pull requests; the build is not.
+    """
+    steps = _workflow()["jobs"]["publish-images"]["steps"]
+    push = [s for s in steps if "build-push-action" in s.get("uses", "")]
+    assert push, "no build step found"
+    assert "pull_request" in str(push[0]["with"]["push"]), (
+        "the build step pushes unconditionally, or does not run on pull requests"
+    )
+
+
+@pytest.mark.parametrize("component", ["api", "web"])
+def test_the_chart_names_an_image_this_repository_publishes(component, helm_values):
+    """
+    The chart named `ghcr.io/openoncology/...`, an account that does not own this
+    repository, so the reference could not resolve even once images existed.
+    GHCR paths are ghcr.io/<owner>/<repo>/<component>.
+    """
+    repo = helm_values[component]["image"]["repository"]
+    assert repo.startswith("ghcr.io/immortal71/openoncology/"), (
+        f"{component} image {repo!r} is not a path publish-images produces"
+    )
+    assert repo.endswith(f"/{component}")

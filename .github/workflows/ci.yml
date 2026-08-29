@@ -376,18 +376,86 @@ jobs:
       - name: Validate docker-compose
         run: docker compose -f docker-compose.yml config --quiet
 
-  # ── Docker build check ────────────────────────────────────────────────────
-  docker-build:
-    name: Docker build (no push)
+  # ── Container images ──────────────────────────────────────────────────────
+  # Until this job existed, CI built both images and discarded them. Nothing in
+  # the repository ever published one, so the chart's ghcr.io/... references
+  # named images that had never been produced and a helm install could only ever
+  # reach ImagePullBackOff.
+  #
+  # It runs on pull requests too, with push disabled. A publish job that only
+  # runs after merge is one whose first execution is also its first test, and
+  # the failure lands on main.
+  #
+  # `needs:` is kept deliberately. An image that reaches the registry without
+  # passing the benchmark gate and both test suites is an image somebody can
+  # deploy.
+  publish-images:
+    name: Build and publish container images
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [lint-frontend, test-frontend, e2e-frontend, test-backend]
+
+    permissions:
+      contents: read
+      # GITHUB_TOKEN is enough for GHCR on a repository in the same account, so
+      # there is no secret to create, store or rotate.
+      packages: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: .
+            dockerfile: api/Dockerfile
+          - name: web
+            context: ./web
+            dockerfile: ./web/Dockerfile
 
     steps:
       - uses: actions/checkout@v7
 
-      - name: Build API image
-        run: docker build -t openoncology-api:ci -f api/Dockerfile .
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build web image
-        run: docker build -t openoncology-web:ci ./web
+      - name: Log in to GHCR
+        # Skipped on pull requests, where nothing is pushed and a fork would
+        # have no token with package scope.
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # sha- and version tags are immutable and are what a values file should
+      # pin. `latest` is published as a convenience and deliberately points at
+      # nothing anyone deploys: a mutable tag means a pod restart can change the
+      # running version, and this system's output is clinical evidence whose
+      # provenance has to be answerable.
+      - name: Compute tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.name }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=tag
+            type=semver,pattern=v{{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,scope=${{ matrix.name }},mode=max
+
+      - name: Report what was published
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Published:"
+          echo "${{ steps.meta.outputs.tags }}" | sed 's/^/  /'
