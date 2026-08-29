@@ -60,6 +60,28 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: consolidating the two databases, which is a data-migration decision rather than a chart one
 - **Risk**: low to change, but note `volumeClaimTemplates` is immutable on an existing StatefulSet, so an in-place `helm upgrade` will reject the edit. The entry is only safe on a fresh install or with a documented recreate step, and that caveat is the reason it is filed rather than done in passing.
 
+### OO-10: The FASTQ path aligns paired-end reads as single-end
+- **Why**: `main.nf:116` channels the input with `Channel.fromPath`, not `fromFilePairs`; `trimmomatic.nf` runs `trimmomatic SE` against `TruSeq3-SE.fa`; `bwa_mem2.nf` passes one read file to `bwa-mem2 mem`. Nothing pairs a mate file at any point. Essentially all clinical sequencing is paired-end, and so is the GIAB HG002 data the 3.1 validation gate is measured against, so mate-pair information is discarded exactly where it resolves the repetitive regions in which variants are missed. Found while writing `docs/RUNBOOK_VARIANT_CALLING_VALIDATION.md`, and it is why that runbook recommends the BAM route first.
+- **Files**: pipeline/main.nf, pipeline/modules/trimmomatic.nf, pipeline/modules/bwa_mem2.nf
+- **Acceptance**:
+  - A paired FASTQ input is consumed as one sample, not as two independent runs
+  - Trimmomatic runs `PE` with paired adapters, and its unpaired outputs are handled deliberately rather than dropped by accident
+  - `bwa-mem2 mem` receives both mates
+  - Single-end input still works, or its removal is a stated decision rather than a side effect
+  - A test asserts a paired input produces one BAM per sample
+- **Out of scope**: the somatic and RNA-seq paths, beyond what falls out of the same change
+- **Risk**: medium. This changes what the pipeline computes, so it invalidates any variant-calling measurement taken before it. Either sequence it ahead of the run in the runbook, or record which configuration produced which number.
+
+### OO-11: BWA-MEM2 rebuilds the reference index on every alignment task
+- **Why**: `BWA_MEM2_ALIGN` declares `path ref_fasta` as its only reference input, so Nextflow stages the FASTA into the task work directory and none of the index files beside it. The script then runs `bwa-mem2 index $ref_fasta`, which `pipeline/scripts/download_references.sh` puts at roughly 30 minutes and 12 GB of RAM, and the result is discarded with the work directory. Setup builds the index and the pipeline never sees it, so every sample pays the cost again and every retry pays it once more.
+- **Files**: pipeline/modules/bwa_mem2.nf, pipeline/main.nf
+- **Acceptance**:
+  - The index files are staged as inputs alongside the FASTA
+  - `bwa-mem2 index` is gone from the alignment script, or runs only when the index is genuinely absent
+  - A missing index fails with a message pointing at `download_references.sh`, rather than silently costing half an hour
+- **Out of scope**: whether to ship or cache a prebuilt index, which is a distribution decision
+- **Risk**: low
+
 ---
 
 ## In progress
