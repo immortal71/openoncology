@@ -59,6 +59,18 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Still open**: the security-officer half. A file naming a code owner is not a person accepting the §164.308(a)(2) role. That is an appointment, and it stays at not-implemented until it is recorded somewhere a reviewer can check. Nothing an agent does can close it.
 - **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
 
+### OO-19: Pin the deployed image tags once images exist
+- **Why**: `values.yaml` uses `latest` for the api and web images. That is mutable: a pod restart can change the running version, and nothing records which code produced a given result. For software whose output is clinical evidence this is the same defect as the mutable pipeline container tags in OO-6, on the images that run the ranking. #151 added `publish-images`, which emits an immutable `sha-<short>` on every push to main and a `v*` tag on a git tag, so the tags to pin will exist after the first merge.
+- **Not done in #151 on purpose**: no image has been published yet, and pinning a tag that does not exist is worse than pinning a mutable one. It has to follow the first successful publish rather than accompany it.
+- **Files**: infra/helm/values.staging.yaml, infra/helm/values.production.yaml, api/tests/test_deployment_manifests.py
+- **Acceptance**:
+  - `values.staging.yaml` pins `api.image.tag` and `web.image.tag` to a `sha-` tag that exists in the registry
+  - `values.production.yaml` pins a `v*` tag
+  - A test fails if either file uses `latest`, or omits a tag and so inherits it
+  - `values.yaml` may keep `latest`, since it is the base and is never deployed from alone
+- **Out of scope**: digest pinning for these two images, which is stricter again and belongs with OO-6's decision about how digests get refreshed
+- **Risk**: low. Worth noting the first pin cannot be verified from this repository: whether the tag resolves is a property of the registry.
+
 ---
 
 ## In progress
