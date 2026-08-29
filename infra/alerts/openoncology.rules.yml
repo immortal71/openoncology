@@ -179,3 +179,40 @@ groups:
           description: >-
             Redis is the Celery broker. While it is down nothing is queued or
             consumed, and submissions accepted by the API go nowhere.
+
+  - name: openoncology-evidence
+    rules:
+      # risk_analysis.md open action 4. A degraded evidence base means
+      # recommendations are produced from an undated source, and the control
+      # that noticed it was a log line nobody reads. The signal is queried from
+      # results.evidence_provenance rather than counted in the worker, because
+      # the worker's counter is a module global in a process nothing scrapes and
+      # it resets on restart, which is when a sustained run would look like it
+      # had stopped.
+      - alert: EvidenceBaseDegraded
+        expr: openoncology_evidence_degraded_last_hour > 0
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Results are being produced from an undated evidence base"
+          description: >-
+            One or more results in the last hour resolved actionability from the
+            built-in static table rather than a current source, and that has
+            persisted for half an hour. Recommendations are still being returned
+            unless require_current_evidence is set. Absent provenance counts
+            here: a result that cannot be shown to have used current evidence is
+            treated as not having done so.
+
+      - alert: RecommendationsBeingWithheld
+        expr: openoncology_evidence_withheld_last_hour > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "The degraded-evidence policy is suppressing recommendations"
+          description: >-
+            require_current_evidence is enabled and results are coming back with
+            recommendations withheld. This is the policy working, not failing,
+            but patients and clinicians are receiving empty result sets and
+            somebody should know why.

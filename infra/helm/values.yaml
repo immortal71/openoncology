@@ -205,6 +205,12 @@ exporters:
       env:
         DATA_SOURCE_URI: "{{ .Release.Name }}-postgresql:5432/openoncology?sslmode=disable"
         DATA_SOURCE_USER: openoncology
+        # The degraded-evidence query lives in templates/exporter-queries.yaml.
+        # It is read from the database rather than counted in the worker,
+        # because the worker's counter is a module global in a process nothing
+        # scrapes, and it resets on restart. See OO-17.
+        PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yaml
+      queriesConfigMap: true
       secretEnv:
         DATA_SOURCE_PASS:
           secret: openoncology-pg-secret

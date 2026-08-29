@@ -116,6 +116,18 @@ spec:
               drop: ["ALL"]
           resources:
             {{- toYaml $.Values.exporters.resources | nindent 12 }}
+          {{- if $cfg.queriesConfigMap }}
+          volumeMounts:
+            - name: queries
+              mountPath: /etc/postgres-exporter
+              readOnly: true
+          {{- end }}
+      {{- if $cfg.queriesConfigMap }}
+      volumes:
+        - name: queries
+          configMap:
+            name: {{ include "openoncology.fullname" $ }}-exporter-queries
+      {{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
