@@ -56,11 +56,21 @@ omit = [
 #
 # [tool.coverage.run] above omits */tests/* from coverage. A test module is
 # ~100% covered by the act of running it, and 34 of them were being averaged
-# into the headline. On identical coverage data the same suite reads 70% with
-# tests counted and 53.93% without. Coverage did not fall by 17 points; the
-# earlier figures were partly measuring the tests.
+# into the headline. On the coverage data of the day the same suite read 70%
+# with tests counted and 53.93% without. Coverage did not fall by 17 points; the
+# earlier figures were partly measuring the tests. Those two numbers are the
+# before and after of that one change, not a current measurement.
 #
-# 53.93% over 8,353 production statements, 844 api + 42 ai tests passing. Gate
-# at 52 leaves about a point, which is the spread observed between the CI runner
-# and a local Windows run.
+# Measured locally on 2026-08-29 (make test-backend, Windows): 61.75% over 8,895
+# production statements, 1,168 api tests passing with 2 xfailed, plus 42 ai
+# tests. When the gate was set at 52 it sat about a point under the total, the
+# spread between the CI runner and a local run. The suite has grown faster than
+# the gate, so the slack is now close to ten points: 52 catches a large
+# regression, not a small one. Re-measure before reading it as tight.
+#
+# This figure goes out of date on any commit that adds a test or a module, which
+# is most of them, so treat the date as part of the number. Unlike fail_under
+# itself, which test_coverage_threshold_consistency.py pins across the README,
+# CONTRIBUTING and the workflow, nothing can pin a measurement to a moving
+# suite. It was already stale by two merges when this refresh landed.
 fail_under = 52
