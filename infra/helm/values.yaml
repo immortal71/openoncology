@@ -158,6 +158,40 @@ beat:
       cpu: "200m"
       memory: "256Mi"
 
+# ── Network policies ──────────────────────────────────────────────────────────
+# Default deny plus explicit allows. infra/k8s/namespace.yaml has carried these
+# since the beginning; the chart, which is what production deploys from, had
+# none.
+#
+# OFF by default, and that is not timidity. A NetworkPolicy fails closed, nothing
+# in this repository can test one against a real cluster, and the sub-chart pod
+# labels below vary by sub-chart version. A wrong selector denies the database
+# and renders perfectly. Enable it while watching, not on a Friday.
+#
+# Before enabling, check the datastore selectors against
+# `kubectl get pod -n openoncology --show-labels`. Bitnami has changed these
+# between chart majors.
+networkPolicy:
+  enabled: false
+  # Namespace labels, not names. Most clusters set
+  # kubernetes.io/metadata.name automatically; some do not.
+  dnsNamespace: kube-system
+  ingressNamespace: ingress-nginx
+  datastores:
+    # The Bitnami postgresql sub-chart, which is the APPLICATION database.
+    # Not `component: postgres`, which is the chart-local StatefulSet that
+    # belongs to Keycloak.
+    postgresql:
+      app.kubernetes.io/name: postgresql
+    redis:
+      app.kubernetes.io/name: redis
+    # MinIO is referenced by configmap.yaml and deployed by nothing in this
+    # chart. See BACKLOG.md OO-18. This selector is what it would carry once
+    # something creates it; until then the rule matches no pod, which under
+    # default-deny means the API cannot reach object storage either way.
+    objectStore:
+      app.kubernetes.io/name: minio
+
 # ── Database backup ───────────────────────────────────────────────────────────
 # Nothing backed the application database up before this existed, and
 # HIPAA_COMPLIANCE.md claimed otherwise. Persistence is not backup: losing the
