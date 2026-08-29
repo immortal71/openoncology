@@ -660,6 +660,78 @@ Those two branches need a reachable dump and a token to execute, so they are
 pinned by reading the call shape in the source rather than by running them.
 Checking the shape is what is available; leaving them unpinned was not.
 
+### F18. Output left the system without saying what it was (H5, H3) — FIXED
+
+Every clinical validation gate in `REGULATORY_FRAMEWORK.md` section 3 is unmet,
+so no output here has been shown fit to inform a treatment decision. That was
+recorded in the documentation and enforced in two renderers: `patient_summary.py`
+carried `DISCLAIMER` for the patient letter and `oncologist_report.py` carried
+`ONCOLOGIST_DISCLAIMER` for the clinician report, with two more hardcoded strings
+in `pdf_export.py`. Nothing related them and nothing said which paths were
+covered. Two were not.
+
+**The FHIR export carried no marker at all.** `services/fhir_export.py` exists to
+be ingested by an EMR; its own docstring names Epic, Cerner and OpenEMR, and
+cites the ONC Final Rule. Once a `DiagnosticReport` is filed in a chart it is
+indistinguishable from one a validated laboratory produced, and this one arrived
+with nothing to distinguish it. This is the highest-consequence instance of H5 in
+the system: not a benchmark figure overstating performance in a document someone
+may read sceptically, but an unvalidated result entering the record that clinical
+decisions are made from, wearing the format reserved for validated ones.
+
+It also reported `status: "final"` for any completed submission. In FHIR R4
+`final` means the report is complete **and verified**. The only thing verified
+was that the pipeline had finished. The resource asserted a clinician sign-off
+that `oncologist_reviewed` recorded as absent three fields away in the same
+database row.
+
+**The results API had no statement of its own.** The only disclaimer in that
+payload was nested inside `patient_summary`, which `routes/results.py` builds
+inside a `try` and sets to `None` on failure. That path is real, is logged, and
+names itself in `generation_errors`, which is the F10 control working as
+designed. But the response after it still carries `summary`,
+`plain_language_summary`, `has_targetable_mutation`, `target_gene` and
+per-mutation OncoKB levels. So the disclaimer was present exactly when nothing
+had gone wrong and absent exactly when something had, which is H3 turned inside
+out: not a failure presented as a negative result, but a failure that removes the
+warning while leaving the recommendation.
+
+Found by asking which output paths state the limitation rather than checking
+that the two known disclaimers were still in place. The same question that found
+F11 and F14, applied to egress instead of access.
+
+Fixed in `services/intended_use.py`, which declares the statements once. The
+results payload carries `intended_use` at the top level, typed in
+`ResultsResponse` with a default factory whose every default is the conservative
+answer, so a response that fails to populate it still says research output and
+unreviewed. That typing was load-bearing rather than decorative: `response_model`
+filters the returned dict to declared fields, so the first attempt returned 200
+with the key silently dropped. The FHIR resources carry a `meta.tag`, an
+extension, and the statement at the **head** of `conclusion` rather than the
+tail, because EMR summary views truncate. An unreviewed report is `preliminary`,
+FHIR's code for complete but unverified, and reaches `final` only once
+`oncologist_reviewed` is true. Observations carry the marker themselves, since
+they are individually addressable and leave the bundle alone.
+`api/tests/test_intended_use_coverage.py` pins all of it, including the case
+where patient summary generation fails and the statement has to outlive it.
+Before this the FHIR path had no tests whatsoever.
+
+**Residual risk, and it is the important part of this entry.** Labelling is not
+validation. Nothing here moves any gate in `REGULATORY_FRAMEWORK.md` section 3,
+and a correctly labelled unvalidated result is still an unvalidated result. The
+entry belongs in this document because an unlabelled one is worse, not because
+the labelled one is safe.
+
+Three narrower limits. `meta.tag` and extensions can be dropped by an ingesting
+system, so the load-bearing signals are `status` and `conclusion`, and
+`conclusion` can be truncated. `preliminary` communicates "not verified", which
+is true but weaker than "produced by software that has never been clinically
+validated"; FHIR has no code for the latter and the tag under this project's own
+namespace is not one a receiving system will recognise. And coverage is enforced
+only where it is tested: a renderer added later can still omit the statement, the
+same way these two did.
+
+
 ---
 
 ## 3. What is not yet analysed
@@ -724,6 +796,12 @@ Verified present, not merely intended:
 - Every route under a PHI prefix is asserted to require a credential, or named
   in an exemption list with the reason it is public
   (`api/tests/test_marketplace_phi_disclosure.py`).
+- Intended use stated on every machine-readable output path: `intended_use` at
+  the top level of `ResultsResponse`, typed with conservative defaults so an
+  unpopulated field still reads as research output, and `meta.tag`, an extension
+  and a leading `conclusion` statement on both FHIR resources. An unreviewed
+  report is `preliminary`, not `final` (`api/services/intended_use.py`,
+  `api/tests/test_intended_use_coverage.py`).
 - Generated patient text is validated before it is returned, and failing text
   falls back to the deterministic template rather than being published with a
   warning (`api/services/llm_output_guard.py`).
@@ -742,9 +820,9 @@ column is asserted, not enforced.
 |---|---|---|---|
 | H1 resistance ignored | F1, F7, F9, F17 | Static-table resistance floor reachable on the worker path; rejected calls dropped; VAF carried onto the mutation | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
 | H2 actionable variant missed | F2, F8, F15 | Wire format mapped onto `OncoKBLevel`; each ALT allele emitted separately | `test_ai_worker_oncokb_levels.py`, `test_vcf_ingestion_safety.py` |
-| H3 lookup failure read as a negative | F3, F10, F11, F14 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py` |
+| H3 lookup failure read as a negative | F3, F10, F11, F14, F18 | `evidence_provenance` returned with the answer; QC verdict persisted and rendered; audit coverage derived from the mounted route table; `generation_errors` names a failed section; the intended-use statement sits at the top level of the payload rather than inside a section that is allowed to fail | `test_evidence_provenance.py`, `test_genomic_worker_qc_persistence.py`, `test_middleware_audit.py::TestEveryMountedPhiRouteIsAudited`, `test_marketplace_phi_disclosure.py`, `test_evidence_lookup_status.py`, `test_intended_use_coverage.py` |
 | H4 stale evidence base | F4 | Provenance stamped onto the result at production time; static fallback logged at `WARNING` | `test_evidence_provenance.py` |
-| H5 overstated figures | F5, F12, F13, F16 | Circularity gate on the answer key; webhook event ids claimed before handling; Connect return route no longer varies by id | `scripts/detect_label_circularity.py` in CI, `test_webhook_and_stripe_disclosure.py` |
+| H5 overstated figures | F5, F12, F13, F16, F18 | Circularity gate on the answer key; webhook event ids claimed before handling; Connect return route no longer varies by id; intended use stated on the results payload and both FHIR resources, unreviewed reports reported as `preliminary` | `scripts/detect_label_circularity.py` in CI, `test_webhook_and_stripe_disclosure.py`, `test_intended_use_coverage.py` |
 | H6 wrong variant call | F6, F7 | **None for calling accuracy.** F7 removes calls the caller itself rejected, which is not the same thing. The gate's measuring instrument exists but has never been given caller output | `test_vcf_ingestion_safety.py` and `test_variant_calling_validation.py` cover the harness, not the caller |
 
 H6 has no control. The row is here so that absence does not read as coverage by
