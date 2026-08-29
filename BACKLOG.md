@@ -57,15 +57,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: who the security officer is, which is the maintainer's decision and not a code change
 - **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
 
-### OO-17: The degraded-evidence alarm emits no metric, and two metrics emit nothing
-- **Why**: `settings.degraded_evidence_alert_after` escalates a **log line** to ERROR after a run of static-fallback resolutions. That is the control risk_analysis open action 4 closed, and it can only be seen by someone reading logs: there is no metric, so it cannot alert. Separately, `api/main.py` declares `openoncology_mutations_processed_total` and `openoncology_genomic_pipeline_seconds` and neither is ever incremented, so both are permanently absent from `/metrics`. A rule written against either would look like coverage and never fire, which is why `test_alert_rules.py` rejects them.
-- **Files**: api/main.py, api/services/oncokb_evidence.py, api/workers/genomic_worker.py, infra/alerts/openoncology.rules.yml
-- **Acceptance**:
-  - A counter or gauge reflects consecutive static-fallback resolutions, and an alert fires on a sustained run
-  - The two declared metrics are either incremented at the points they describe, or removed
-  - `test_alert_rules.py`'s allowed-metric set grows only alongside the code that emits them
-- **Out of scope**: what the alert threshold should be, which is the same policy question as `degraded_evidence_alert_after` itself
-- **Risk**: low to implement. Worth noting the evidence path is adjacent to ranking, so the metric should be emitted where the fallback is already logged rather than anywhere new.
 ### OO-7: Decide whether `civic_supplement_enabled` should default to True
 - **Why**: Asked as "how do we raise the benchmark", and the measurements already
   in the repository answer it in a way that rules ranking work out. In

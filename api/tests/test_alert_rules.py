@@ -59,6 +59,21 @@ EXPORTER_METRICS = {
     "pg_up",
     "pg_stat_activity_count",
     "pg_settings_max_connections",
+    # Custom queries from templates/exporter-queries.yaml (OO-17). Named for the
+    # query block plus the column, which is how postgres_exporter composes them.
+    "openoncology_evidence_results_last_hour",
+    "openoncology_evidence_degraded_last_hour",
+    "openoncology_evidence_withheld_last_hour",
+}
+
+# Declared in api/main.py and never incremented, for as long as they existed.
+# They described work the Celery workers do, and workers are separate processes,
+# so a counter registered in the API could never have carried their data. Both
+# are removed; these names are kept here so a rule written against them fails
+# loudly rather than evaluating against an absent series forever.
+REMOVED_METRICS = {
+    "openoncology_mutations_processed_total",
+    "openoncology_genomic_pipeline_seconds",
 }
 
 _SUFFIXES = ("", "_bucket", "_count", "_sum", "_created")
@@ -230,3 +245,53 @@ def test_celery_task_events_are_enabled():
     source = (REPO_ROOT / "api" / "workers" / "__init__.py").read_text(encoding="utf-8")
     assert "worker_send_task_events=True" in source
     assert "task_send_sent_event=True" in source
+
+
+# ── Metrics that were removed must not come back in a rule ───────────────────
+
+@pytest.mark.parametrize("rule_id,rule", _rules(), ids=[r[0] for r in _rules()])
+def test_no_rule_references_a_removed_metric(rule_id, rule):
+    used = _metric_names(rule["expr"]) & REMOVED_METRICS
+    assert not used, (
+        f"{rule_id} references {sorted(used)}, which api/main.py declared and "
+        "never incremented. They are removed; a rule on them can never fire."
+    )
+
+
+def test_the_removed_metrics_are_actually_gone_from_the_app():
+    """The allowlist rejecting them is only meaningful while nothing emits them."""
+    main = (REPO_ROOT / "api" / "main.py").read_text(encoding="utf-8")
+    for name in REMOVED_METRICS:
+        assert f'"{name}"' not in main, f"{name} is declared again in api/main.py"
+
+
+# ── The degraded-evidence signal is queried, not counted in-process ──────────
+
+def test_the_evidence_query_is_shipped_and_mounted():
+    """
+    OO-17. The worker's counter is a module global in a process nothing scrapes,
+    and it resets on restart, which is exactly when a sustained run of fallbacks
+    would look like it had stopped. The signal comes from the database instead.
+    """
+    queries = REPO_ROOT / "infra" / "helm" / "templates" / "exporter-queries.yaml"
+    assert queries.exists()
+    text = queries.read_text(encoding="utf-8")
+    assert "evidence_provenance" in text
+    assert "is_current" in text
+
+    values = yaml.safe_load((REPO_ROOT / "infra" / "helm" / "values.yaml").read_text(encoding="utf-8"))
+    pg = values["exporters"]["instances"]["postgres"]
+    assert pg.get("queriesConfigMap") is True
+    assert pg["env"].get("PG_EXPORTER_EXTEND_QUERY_PATH"), (
+        "the query file is shipped but the exporter is not told to read it"
+    )
+
+
+def test_absent_provenance_is_treated_as_degraded():
+    """
+    A result predating provenance capture cannot be shown to have used current
+    evidence, and the safe reading of absent is not-current. `coalesce(..., false)`
+    is what makes null count; without it those rows would be silently excluded.
+    """
+    text = (REPO_ROOT / "infra" / "helm" / "templates" / "exporter-queries.yaml").read_text(encoding="utf-8")
+    assert "coalesce" in text.lower()

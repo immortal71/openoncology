@@ -167,20 +167,21 @@ app.state.limiter = limiter
 # ── Prometheus metrics ────────────────────────────────────────────────────
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
-    from prometheus_client import Counter, Histogram
     Instrumentator(excluded_handlers=["/health", "/ready", "/metrics"]).instrument(app).expose(
         app, endpoint="/metrics", include_in_schema=False
     )
-    MUTATIONS_PROCESSED = Counter(
-        "openoncology_mutations_processed_total",
-        "Total mutations analysed by the AI pipeline",
-        ["oncokb_level"],
-    )
-    PIPELINE_DURATION = Histogram(
-        "openoncology_genomic_pipeline_seconds",
-        "End-to-end genomic pipeline duration in seconds",
-        ["cancer_type"],
-    )
+    # Two metrics used to be declared here, openoncology_mutations_processed_total
+    # and openoncology_genomic_pipeline_seconds, and neither was ever
+    # incremented. They describe work the Celery workers do, and workers are
+    # separate processes: a counter registered in this one could never carry
+    # their data no matter where it was incremented. They were absent from
+    # /metrics for as long as they existed, so an alert written against either
+    # would have stayed silent forever, which is why test_alert_rules.py rejects
+    # them by name.
+    #
+    # Task-level observability comes from celery-exporter against the broker
+    # (OO-16), and the evidence-base signal from a postgres_exporter query over
+    # results.evidence_provenance (OO-17). Both read where the data actually is.
 except ImportError:
     pass  # prometheus-fastapi-instrumentator not installed
 

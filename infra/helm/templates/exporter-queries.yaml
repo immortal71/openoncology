@@ -1,0 +1,67 @@
+{{/*
+Custom postgres_exporter queries.
+
+BACKLOG.md OO-17. `settings.degraded_evidence_alert_after` escalates a log line
+to ERROR after a run of static-fallback resolutions. That is the control open
+action 4 closed, and a log line reaches nobody: there was no metric, so it could
+not alert.
+
+The obvious fix, a Prometheus counter beside the log call, does not work here.
+`_CONSECUTIVE_STATIC_FALLBACKS` is a module global in `oncokb_evidence.py`,
+which runs inside the ai worker. Workers are separate processes from the API and
+expose no metrics endpoint, so a counter incremented there would never appear on
+the API's `/metrics`. That is the same constraint that made #145 use
+celery-exporter against the broker rather than instrumenting the workers.
+
+What does survive the process boundary is the database. Every result carries
+`evidence_provenance`, and `is_current` is False whenever the answer came from
+the undated static table. So the signal is queried where it is durably recorded
+rather than where it happened to be computed, which also means it survives a
+worker restart, and a restart is exactly when an in-memory counter resets and
+the run of fallbacks looks like it stopped.
+*/}}
+{{- if and .Values.exporters.enabled .Values.exporters.instances.postgres.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "openoncology.fullname" . }}-exporter-queries
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres-exporter
+data:
+  queries.yaml: |
+    openoncology_evidence:
+      query: |
+        SELECT
+          count(*) FILTER (
+            WHERE created_at > now() - interval '1 hour'
+          ) AS results_last_hour,
+          count(*) FILTER (
+            WHERE created_at > now() - interval '1 hour'
+              AND coalesce((evidence_provenance ->> 'is_current')::boolean, false) = false
+          ) AS degraded_last_hour,
+          count(*) FILTER (
+            WHERE created_at > now() - interval '1 hour'
+              AND coalesce((evidence_provenance ->> 'recommendations_withheld')::boolean, false)
+          ) AS withheld_last_hour
+        FROM results
+      master: true
+      metrics:
+        - results_last_hour:
+            usage: "GAUGE"
+            description: "Results produced in the last hour"
+        - degraded_last_hour:
+            usage: "GAUGE"
+            description: >-
+              Results in the last hour whose actionability evidence came from an
+              undated source. Null provenance counts as degraded: a result that
+              predates provenance capture cannot be shown to have used current
+              evidence, and the safe reading of absent is not-current.
+        - withheld_last_hour:
+            usage: "GAUGE"
+            description: >-
+              Results in the last hour where the degraded-evidence policy
+              suppressed recommendations. Non-zero means require_current_evidence
+              is on and being exercised.
+{{- end }}
