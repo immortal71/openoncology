@@ -94,7 +94,8 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - RPO and RTO are written down, even if the numbers are modest
   - `HIPAA_COMPLIANCE.md` moves to ✅ only after that restore, and names what was restored and when
 - **Out of scope**: choosing a managed database, which is a hosting decision
-- **Risk**: high while open. This is the one entry where the failure mode is unrecoverable rather than merely wrong.
+- **Progress 2026-08-29**: nightly `pg_dump` CronJob added to the chart, enabled by default, writing to object storage with a manifest and 30 day retention, plus `docs/RUNBOOK_BACKUP_RESTORE.md`. The entry **stays open**: its acceptance requires an exercised restore, and nobody has run one. Object storage versioning is still absent, so a database-only restore yields rows referencing missing files, and Keycloak's database is still unbacked.
+- **Risk**: high while open. This is the one entry where the failure mode is unrecoverable rather than merely wrong. Lower than it was, since a dump now exists; not closed, because a backup nobody has restored is a belief about a file.
 
 ### OO-13: Prometheus scrapes metrics that can never alert anyone
 - **Why**: `infra/prometheus.yml` has `alertmanagers: []` and `rule_files: []`, and no rule file exists anywhere in the repository. Every metric is collected and nothing can ever fire. The consequences are specific rather than general: the sustained static-fallback alarm from risk_analysis open action 4 escalates a **log line** to ERROR, and `/ready` reports Postgres and Redis health to Kubernetes but to nobody else, so a degraded evidence base, a stalled `genomic` queue, or a worker crash-looping are all invisible unless a person happens to be reading logs.

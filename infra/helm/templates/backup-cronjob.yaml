@@ -1,0 +1,133 @@
+{{/*
+Scheduled logical backup of the application database into object storage.
+
+BACKLOG.md OO-12. Nothing backed this data up. The Bitnami sub-chart provides a
+PersistentVolume, and persistence is not backup: losing the PVC, a failed
+migration, or corruption took every submission, mutation and result with no
+recovery path. HIPAA_COMPLIANCE.md claimed a contingency plan existed, citing
+WAL archiving that was never configured.
+
+`pg_dump` rather than WAL archiving on purpose. WAL gives point-in-time recovery
+and needs archive storage wired into the database server itself, which is the
+Bitnami sub-chart's territory and changes with its version. A logical dump is
+coarser, is entirely inside this chart, and can be restored into a different
+PostgreSQL version, which is what actually gets used when someone is recovering
+under pressure. Point-in-time recovery is a later decision, not a prerequisite
+for having any backup at all.
+
+Two properties this deliberately has:
+
+  * It fails loudly. `set -euo pipefail`, no `|| true`, and
+    `backoffLimit: 2`. A backup that fails quietly is worse than none, because
+    it is believed.
+  * It writes a manifest beside each dump recording the timestamp, the database
+    and the byte count. A restore is verified against that rather than against
+    the existence of a file, since a zero-byte object is also a file.
+
+What this does NOT provide, and OO-12 stays open until it does: an exercised
+restore. A backup nobody has restored is a belief about a file.
+*/}}
+{{- if .Values.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "openoncology.fullname" . }}-db-backup
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: db-backup
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: {{ .Values.backup.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.backup.failedJobsHistoryLimit }}
+  # Kubernetes drops a scheduled run silently if the controller was unavailable
+  # past this window. Without it a missed backup leaves no trace at all.
+  startingDeadlineSeconds: {{ .Values.backup.startingDeadlineSeconds }}
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            {{- include "openoncology.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: db-backup
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            fsGroup: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: backup
+              image: "{{ .Values.backup.image.repository }}:{{ .Values.backup.image.tag }}"
+              imagePullPolicy: {{ .Values.backup.image.pullPolicy }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: ["ALL"]
+              env:
+                - name: PGHOST
+                  value: {{ printf "%s-postgresql" .Release.Name | quote }}
+                - name: PGPORT
+                  value: "5432"
+                - name: PGUSER
+                  value: {{ .Values.postgresql.auth.username | quote }}
+                - name: PGDATABASE
+                  value: {{ .Values.postgresql.auth.database | quote }}
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.postgresql.auth.existingSecret }}
+                      key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey }}
+                - name: MC_HOST_store
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.backup.objectStore.credentialsSecret }}
+                      key: {{ .Values.backup.objectStore.credentialsKey }}
+                - name: BACKUP_BUCKET
+                  value: {{ .Values.backup.objectStore.bucket | quote }}
+                - name: RETENTION_DAYS
+                  value: {{ .Values.backup.retentionDays | quote }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -euo pipefail
+                  STAMP="$(date -u +%Y-%m-%dT%H-%M-%SZ)"
+                  DUMP="/tmp/${PGDATABASE}-${STAMP}.sql.gz"
+
+                  pg_dump --format=plain --no-owner --no-privileges \
+                    | gzip -9 > "$DUMP"
+
+                  BYTES="$(wc -c < "$DUMP")"
+                  # A dump smaller than this is not a database. Catching it here
+                  # is the difference between a failed backup and a believed one.
+                  if [ "$BYTES" -lt 1024 ]; then
+                    echo "backup aborted: dump is ${BYTES} bytes" >&2
+                    exit 1
+                  fi
+
+                  printf '{"timestamp":"%s","database":"%s","bytes":%s,"format":"pg_dump-plain-gzip"}\n' \
+                    "$STAMP" "$PGDATABASE" "$BYTES" > /tmp/manifest.json
+
+                  mc cp "$DUMP" "store/${BACKUP_BUCKET}/db/${STAMP}.sql.gz"
+                  mc cp /tmp/manifest.json "store/${BACKUP_BUCKET}/db/${STAMP}.manifest.json"
+
+                  mc rm --recursive --force --older-than "${RETENTION_DAYS}d" \
+                    "store/${BACKUP_BUCKET}/db/" || true
+
+                  echo "backup complete: ${STAMP}, ${BYTES} bytes"
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              resources:
+                {{- toYaml .Values.backup.resources | nindent 16 }}
+          volumes:
+            - name: tmp
+              emptyDir: {}
+{{- end }}
