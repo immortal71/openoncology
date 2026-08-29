@@ -1,0 +1,38 @@
+# Code owners for OpenOncology.
+#
+# BACKLOG.md OO-15. HIPAA_COMPLIANCE.md recorded a security officer as assigned
+# and cited this file, which did not exist. It exists now, and what it records is
+# review ownership.
+#
+# Naming an owner here is not the same as a person having accepted the HIPAA
+# §164.308(a)(2) security officer role. That is an appointment, not a file, and
+# the compliance checklist says so rather than treating this file as evidence of
+# it.
+
+# Default owner for everything not matched below.
+*                           @immortal71
+
+# ── Paths the PreToolUse guard protects ──────────────────────────────────────
+# .claude/protected-paths.json hard-blocks agent writes here because this
+# repository's four real defects all passed the test suite. Human review is the
+# only control on these, which makes ownership load-bearing rather than
+# administrative.
+/api/ai/                    @immortal71
+/api/services/benchmark.py  @immortal71
+/scripts/                   @immortal71
+/data/                      @immortal71
+/validation_results/        @immortal71
+/test-fixtures/             @immortal71
+/PAPER.md                   @immortal71
+
+# ── Quality gates ────────────────────────────────────────────────────────────
+# Changing a gate is how a gate stops being one.
+/.github/workflows/         @immortal71
+/pyproject.toml             @immortal71
+
+# ── Risk and regulatory documents ────────────────────────────────────────────
+/docs/risk_analysis.md            @immortal71
+/docs/RISK_REGISTER.md            @immortal71
+/docs/REGULATORY_FRAMEWORK.md     @immortal71
+/docs/HIPAA_COMPLIANCE.md         @immortal71
+/docs/ROADMAP_TO_CLINICAL_USE.md  @immortal71

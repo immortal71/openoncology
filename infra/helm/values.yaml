@@ -398,6 +398,21 @@ keycloak:
     tag: "24.0"
   replicaCount: 1
   secretRef: openoncology-keycloak-secrets
+  adminUser: admin
+  adminPasswordKey: admin-password
+  # HIPAA_COMPLIANCE.md recorded automatic log-off as implemented and quoted
+  # "30 min idle / 8 hr max". Nothing set either value, so sessions ran at the
+  # image defaults and the quoted maximum was not one of them. See OO-15.
+  #
+  # These are the quoted figures, now actually applied. They are a starting
+  # point rather than a finding: §164.312(a)(2)(iii) requires automatic logoff
+  # and does not name a duration, so the numbers are someone's judgement about
+  # how long a clinician's session should survive unattended. Change them
+  # deliberately rather than inheriting them from this file.
+  sessionPolicy:
+    enabled: true
+    ssoSessionIdleTimeout: 1800    # 30 minutes
+    ssoSessionMaxLifespan: 28800   # 8 hours
 
 # ── Ingress ───────────────────────────────────────────────────────────────────
 ingress:

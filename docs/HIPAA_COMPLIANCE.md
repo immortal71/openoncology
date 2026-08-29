@@ -31,7 +31,7 @@
 
 | Control | Status | Implementation |
 |---|---|---|
-| Security Officer assigned | ⬜ | No CODEOWNERS file exists in this repository, at the root, under `.github/` or under `docs/`. The role is unassigned rather than assigned elsewhere. See BACKLOG.md OO-15 |
+| Security Officer assigned | ⬜ | `.github/CODEOWNERS` now exists and names review ownership, including every guard-protected path. That is not the same as a person having accepted the §164.308(a)(2) role, which is an appointment rather than a file, and this row stays open until that appointment is recorded somewhere a reviewer can check |
 | Risk Analysis performed | ✅ | See `docs/risk_analysis.md` |
 | Workforce training policy | ⬜ | Annual HIPAA training required for all contributors |
 | Sanction policy | ⬜ | Document disciplinary procedure for policy violations |
@@ -60,7 +60,7 @@
 |---|---|---|
 | Unique user identification | ✅ | Keycloak user UUID (`sub`) in every JWT |
 | Emergency access procedure | ⬜ | Document break-glass procedure for oncologist emergency access |
-| Automatic log-off | ⬜ | Nothing here configures `ssoSessionIdleTimeout` or `ssoSessionMaxLifespan`. Sessions run at whatever the Keycloak image defaults to, which is not the 8 hour maximum this row previously stated. Relying on an upstream default is not the same as configuring one. See BACKLOG.md OO-15 |
+| Automatic log-off | ✅ | `ssoSessionIdleTimeout` 1800s and `ssoSessionMaxLifespan` 28800s, applied to the realm by `infra/helm/templates/keycloak-session-policy.yaml` on every install and upgrade. §164.312(a)(2)(iii) requires automatic logoff and names no duration, so these figures are a judgement rather than a finding; they are set in `values.yaml` under `keycloak.sessionPolicy` |
 | Encryption + decryption | ✅ | TLS 1.3 in transit (NGINX ingress); AES-256 at rest (cloud disk encryption) |
 
 ### 3.2 Audit Controls (§164.312(b))

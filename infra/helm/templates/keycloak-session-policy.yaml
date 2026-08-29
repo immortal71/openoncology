@@ -1,0 +1,123 @@
+{{/*
+Set session lifetimes on the Keycloak realm.
+
+BACKLOG.md OO-15. HIPAA_COMPLIANCE.md recorded automatic log-off as implemented,
+citing "Keycloak session timeout: 30 min idle / 8 hr max". Nothing in this
+repository set either value, so sessions ran at whatever the image defaults to,
+and the quoted maximum was not that default. The row was corrected to
+not-implemented in #138; this is the gap behind it.
+
+A post-install Job running kcadm rather than a realm import. Importing a realm
+replaces it wholesale, and this chart does not carry the clients, roles and
+mappers a real deployment has accumulated, so an import would silently discard
+them. Updating two attributes on whatever realm exists is the operation actually
+wanted, and it is idempotent: running it twice sets the same values twice.
+
+The hook is post-install and post-upgrade so the values are reasserted on every
+deploy. A setting that drifts because someone changed it in the admin console is
+the same class of problem as the compliance row that claimed it was set.
+
+Not a substitute for the realm existing. If the realm has not been created this
+Job fails, which is the correct outcome: silently succeeding against a realm
+that is not there would recreate exactly the defect being fixed.
+*/}}
+{{- if .Values.keycloak.sessionPolicy.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "openoncology.fullname" . }}-keycloak-session-policy
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak-session-policy
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: keycloak-session-policy
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: kcadm
+          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: KC_URL
+              value: {{ printf "http://%s-keycloak:8080" (include "openoncology.fullname" .) | quote }}
+            - name: KC_REALM
+              value: {{ .Values.api.env.KEYCLOAK_REALM | quote }}
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.adminUser | default "admin" | quote }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.secretRef }}
+                  key: {{ .Values.keycloak.adminPasswordKey | default "admin-password" }}
+            - name: IDLE_TIMEOUT
+              value: {{ .Values.keycloak.sessionPolicy.ssoSessionIdleTimeout | quote }}
+            - name: MAX_LIFESPAN
+              value: {{ .Values.keycloak.sessionPolicy.ssoSessionMaxLifespan | quote }}
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              KCADM=/opt/keycloak/bin/kcadm.sh
+
+              # Keycloak may still be starting when the hook fires.
+              for attempt in $(seq 1 30); do
+                if "$KCADM" config credentials \
+                     --server "$KC_URL" --realm master \
+                     --user "$KEYCLOAK_ADMIN" --password "$KEYCLOAK_ADMIN_PASSWORD" \
+                     >/dev/null 2>&1; then
+                  break
+                fi
+                echo "waiting for Keycloak (${attempt}/30)"
+                sleep 10
+              done
+
+              # Fail rather than continue unauthenticated: a Job that reports
+              # success without having set anything is the defect being fixed.
+              "$KCADM" config credentials \
+                --server "$KC_URL" --realm master \
+                --user "$KEYCLOAK_ADMIN" --password "$KEYCLOAK_ADMIN_PASSWORD"
+
+              "$KCADM" update "realms/${KC_REALM}" \
+                -s "ssoSessionIdleTimeout=${IDLE_TIMEOUT}" \
+                -s "ssoSessionMaxLifespan=${MAX_LIFESPAN}"
+
+              echo "realm ${KC_REALM}: idle=${IDLE_TIMEOUT}s max=${MAX_LIFESPAN}s"
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: kc-home
+              mountPath: /opt/keycloak/.kcadm
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: kc-home
+          emptyDir: {}
+{{- end }}

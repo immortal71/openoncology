@@ -55,6 +55,8 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - Session lifetimes are set explicitly in the realm configuration the chart deploys, at values someone has chosen, rather than inherited
   - Both rows return to implemented only once `test_compliance_claims.py` passes with them marked so
 - **Out of scope**: who the security officer is, which is the maintainer's decision and not a code change
+- **Progress 2026-08-29**: session lifetimes are applied by `infra/helm/templates/keycloak-session-policy.yaml`, a post-install and post-upgrade Job running `kcadm`, at the 1800s / 28800s the checklist had been quoting without setting. That half is closed and the row is back to implemented. `.github/CODEOWNERS` now exists, naming review ownership for every guard-protected path and every risk document.
+- **Still open**: the security-officer half. A file naming a code owner is not a person accepting the §164.308(a)(2) role. That is an appointment, and it stays at not-implemented until it is recorded somewhere a reviewer can check. Nothing an agent does can close it.
 - **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
 
 ### OO-7: Decide whether `civic_supplement_enabled` should default to True

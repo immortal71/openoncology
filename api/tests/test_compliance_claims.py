@@ -27,6 +27,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOC = REPO_ROOT / "docs" / "HIPAA_COMPLIANCE.md"
@@ -260,3 +261,48 @@ def test_every_exemption_still_corresponds_to_a_claimed_control():
 def test_exemptions_carry_a_reason():
     for control, reason in EXEMPT.items():
         assert len(reason.strip()) > 40, f"exemption for {control!r} needs a real reason"
+
+
+# ── Session lifetimes are set, not inherited ─────────────────────────────────
+
+def test_session_lifetimes_are_configured_not_defaulted():
+    """
+    OO-15. The row quoted "30 min idle / 8 hr max" while nothing set either
+    value, so sessions ran at the Keycloak image's defaults. Relying on an
+    upstream default is not configuring one, and the quoted maximum was not that
+    default anyway.
+    """
+    values = yaml.safe_load(
+        (REPO_ROOT / "infra" / "helm" / "values.yaml").read_text(encoding="utf-8")
+    )
+    policy = values["keycloak"]["sessionPolicy"]
+    assert policy["enabled"] is True
+    assert policy["ssoSessionIdleTimeout"] > 0
+    assert policy["ssoSessionMaxLifespan"] > policy["ssoSessionIdleTimeout"]
+
+
+def test_the_session_policy_job_fails_rather_than_reporting_false_success():
+    """
+    A Job that cannot authenticate and exits zero would leave the compliance row
+    claiming a control that is not applied, which is the defect this closes.
+    """
+    job = REPO_ROOT / "infra" / "helm" / "templates" / "keycloak-session-policy.yaml"
+    assert job.exists()
+    text = job.read_text(encoding="utf-8")
+    assert "set -euo pipefail" in text
+    assert "ssoSessionIdleTimeout" in text and "ssoSessionMaxLifespan" in text
+
+
+def test_the_documented_session_figures_match_the_configured_ones():
+    """The row quoting one number while the chart applies another is how this
+    started."""
+    values = yaml.safe_load(
+        (REPO_ROOT / "infra" / "helm" / "values.yaml").read_text(encoding="utf-8")
+    )
+    policy = values["keycloak"]["sessionPolicy"]
+    row = [impl for c, impl in _claimed() if "log-off" in c.lower()]
+    if not row:
+        pytest.skip("automatic log-off is not currently claimed as implemented")
+    text = row[0]
+    assert str(policy["ssoSessionIdleTimeout"]) in text
+    assert str(policy["ssoSessionMaxLifespan"]) in text
