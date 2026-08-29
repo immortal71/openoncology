@@ -39,9 +39,33 @@ INSTRUMENTATOR_BASE = {
     "http_request_size_bytes",
     "http_response_size_bytes",
 }
+# Emitted by the exporters the chart deploys (OO-16). This list grows only
+# alongside an exporter that actually produces the series: that is the whole
+# point of the check below, and adding a name here to make a rule pass would
+# reintroduce exactly the defect it exists to catch.
+EXPORTER_METRICS = {
+    # oliver006/redis_exporter. redis_key_size carries the Celery queue depths,
+    # one series per key named in REDIS_EXPORTER_CHECK_KEYS.
+    "redis_up",
+    "redis_key_size",
+    # danihodovic/celery-exporter. Requires worker_send_task_events and
+    # task_send_sent_event, both set in api/workers/__init__.py.
+    "celery_worker_up",
+    "celery_task_failed_total",
+    "celery_task_received_total",
+    "celery_task_succeeded_total",
+    "celery_task_runtime_seconds",
+    # prometheuscommunity/postgres-exporter.
+    "pg_up",
+    "pg_stat_activity_count",
+    "pg_settings_max_connections",
+}
+
 _SUFFIXES = ("", "_bucket", "_count", "_sum", "_created")
-ALLOWED_METRICS = PROMETHEUS_INTERNAL | {
-    base + suffix for base in INSTRUMENTATOR_BASE for suffix in _SUFFIXES
+ALLOWED_METRICS = PROMETHEUS_INTERNAL | EXPORTER_METRICS | {
+    base + suffix
+    for base in INSTRUMENTATOR_BASE | EXPORTER_METRICS
+    for suffix in _SUFFIXES
 }
 
 # PromQL functions and keywords that appear where a metric name would, and are
@@ -162,3 +186,47 @@ def test_no_active_scrape_job_targets_an_undeployed_exporter():
         "scrape jobs target hosts that no deployment defines: "
         f"{undeployed}. Comment the job out until its exporter is deployed."
     )
+
+
+# ── Queue alerts need the exporter to be watching that queue ─────────────────
+
+def test_every_alerted_queue_is_watched_by_the_redis_exporter():
+    """
+    `redis_key_size` only exists for keys named in REDIS_EXPORTER_CHECK_KEYS.
+    An alert on a queue absent from that list is a rule that can never fire,
+    which is the defect this module exists for, one layer further down.
+    """
+    values = yaml.safe_load((REPO_ROOT / "infra" / "helm" / "values.yaml").read_text(encoding="utf-8"))
+    watched = set(
+        values["exporters"]["instances"]["redis"]["env"]["REDIS_EXPORTER_CHECK_KEYS"].split(",")
+    )
+    alerted = set()
+    for _, rule in _rules():
+        alerted |= set(re.findall(r'redis_key_size\{key="([a-z]+)"\}', rule["expr"]))
+    missing = sorted(alerted - watched)
+    assert not missing, (
+        f"alerts reference queue depths the exporter does not collect: {missing}"
+    )
+
+
+def test_the_exporter_watches_every_routed_queue():
+    """The other direction: a queue Celery routes to and nothing measures."""
+    values = yaml.safe_load((REPO_ROOT / "infra" / "helm" / "values.yaml").read_text(encoding="utf-8"))
+    watched = set(
+        values["exporters"]["instances"]["redis"]["env"]["REDIS_EXPORTER_CHECK_KEYS"].split(",")
+    )
+    source = (REPO_ROOT / "api" / "workers" / "__init__.py").read_text(encoding="utf-8")
+    routed = set(re.findall(r'"queue":\s*"([a-z]+)"', source))
+    assert routed <= watched, (
+        f"queues Celery routes to that no exporter measures: {sorted(routed - watched)}"
+    )
+
+
+def test_celery_task_events_are_enabled():
+    """
+    celery-exporter reports nothing without them, so every celery_* rule above
+    would evaluate against an absent series and stay silent.
+    """
+    source = (REPO_ROOT / "api" / "workers" / "__init__.py").read_text(encoding="utf-8")
+    assert "worker_send_task_events=True" in source
+    assert "task_send_sent_event=True" in source

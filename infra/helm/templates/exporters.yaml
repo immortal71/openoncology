@@ -1,0 +1,121 @@
+{{/*
+Prometheus exporters.
+
+BACKLOG.md OO-16. infra/prometheus.yml declared scrape jobs for
+`db-exporter:9187`, `redis-exporter:9121` and `worker-*:9100`, and none of those
+existed. Each reported `up == 0` permanently. #140 commented those jobs out
+rather than leaving them to page continuously once anything watched `up`; this
+deploys the exporters so they can be uncommented, which is done in the same
+change.
+
+What each one is for, since "more metrics" is not a reason:
+
+  redis      Celery queues are Redis lists named after the queue, so
+             `redis_key_size{key="gdpr"}` IS the queue depth. This is the one
+             that makes a stalled queue visible. A gdpr queue that stops
+             draining means erasure requests are not being honoured, and that is
+             an obligation with a 30 day deadline.
+
+  celery     Task lifecycle. Depth alone cannot distinguish a queue nothing is
+             enqueueing to from one nothing is consuming, and it says nothing
+             about how long work waits. Needs worker_send_task_events and
+             task_send_sent_event, both set in api/workers/__init__.py.
+
+  postgres   Connection saturation and transaction age. The application shares
+             one pool across the API and every worker, so exhaustion presents as
+             unrelated timeouts everywhere at once.
+
+Each is a Deployment rather than a sidecar so a restart does not disturb the
+thing it observes.
+*/}}
+{{- if .Values.exporters.enabled }}
+{{- $fullName := include "openoncology.fullname" . }}
+{{- $ns := .Values.namespace }}
+{{- range $name, $cfg := .Values.exporters.instances }}
+{{- if $cfg.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $fullName }}-{{ $name }}-exporter
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: {{ $cfg.port }}
+      targetPort: metrics
+  selector:
+    {{- include "openoncology.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}-exporter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $fullName }}-{{ $name }}-exporter
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $name }}-exporter
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $name }}-exporter
+    spec:
+      serviceAccountName: {{ include "openoncology.serviceAccountName" $ }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: exporter
+          image: "{{ $cfg.image.repository }}:{{ $cfg.image.tag }}"
+          imagePullPolicy: {{ $.Values.exporters.pullPolicy }}
+          ports:
+            - name: metrics
+              containerPort: {{ $cfg.port }}
+          {{- with $cfg.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            {{- range $k, $v := $cfg.env }}
+            - name: {{ $k }}
+              value: {{ tpl $v $ | quote }}
+            {{- end }}
+            {{- with $cfg.secretEnv }}
+            {{- range $k, $ref := . }}
+            - name: {{ $k }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ref.secret }}
+                  key: {{ $ref.key }}
+            {{- end }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ $cfg.metricsPath | default "/metrics" }}
+              port: metrics
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            {{- toYaml $.Values.exporters.resources | nindent 12 }}
+{{- end }}
+{{- end }}
+{{- end }}

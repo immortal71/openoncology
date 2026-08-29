@@ -281,6 +281,43 @@ services:
     command: start-dev
 
   # ─────────────────────────────────────────────
+  # Prometheus exporters  →  scraped by prometheus
+  # ─────────────────────────────────────────────
+  # infra/prometheus.yml declared jobs for these and nothing ran them, so every
+  # one reported up == 0 permanently. Service names match the scrape targets.
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.62.0
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      # One per Celery queue. redis_key_size for these keys is the queue depth.
+      - REDIS_EXPORTER_CHECK_KEYS=genomic,ai,notify,gdpr
+    depends_on:
+      - redis
+    networks:
+      - openoncology
+
+  celery-exporter:
+    image: danihodovic/celery-exporter:0.10.5
+    environment:
+      - CE_BROKER_URL=redis://redis:6379/0
+      - CE_ACCEPT_CONTENT=["json"]
+    depends_on:
+      - redis
+    networks:
+      - openoncology
+
+  db-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      - DATA_SOURCE_URI=db:5432/openoncology?sslmode=disable
+      - DATA_SOURCE_USER=openoncology
+      - DATA_SOURCE_PASS=${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - openoncology
+
+  # ─────────────────────────────────────────────
   # Prometheus Metrics  →  localhost:9090
   # ─────────────────────────────────────────────
   prometheus:

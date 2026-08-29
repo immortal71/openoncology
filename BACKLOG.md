@@ -67,17 +67,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: who the security officer is, which is the maintainer's decision and not a code change
 - **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
 
-### OO-16: Deploy the exporters the monitoring config was scraping
-- **Why**: `infra/prometheus.yml` scraped `db-exporter:9187`, `redis-exporter:9121` and `worker-*:9100`. None of the first two exists in `docker-compose.yml` or the Helm chart, and nothing in `api/workers/` starts a metrics server, so port 9100 is not listening. All four reported `up == 0` permanently, invisibly, because nothing alerted on `up`. Those jobs are commented out rather than deleted, since the intent is right and the deployment is what is missing. `api/tests/test_alert_rules.py` now fails if a scrape job names a host no deployment defines.
-- **Files**: docker-compose.yml, infra/helm/templates/, infra/prometheus.yml, api/workers/__init__.py
-- **Acceptance**:
-  - postgres_exporter and redis_exporter are deployed in both deployment paths, or the jobs stay commented and the reason is recorded here
-  - Celery workers expose a metrics endpoint, or the celery-exporter is deployed against the broker instead
-  - Each job is uncommented only once its exporter is actually reachable, and `test_alert_rules.py` passes with it active
-  - Queue depth and task age on `genomic` and `gdpr` become alertable, which is what OO-13 could not cover
-- **Out of scope**: dashboards
-- **Risk**: low
-
 ### OO-17: The degraded-evidence alarm emits no metric, and two metrics emit nothing
 - **Why**: `settings.degraded_evidence_alert_after` escalates a **log line** to ERROR after a run of static-fallback resolutions. That is the control risk_analysis open action 4 closed, and it can only be seen by someone reading logs: there is no metric, so it cannot alert. Separately, `api/main.py` declares `openoncology_mutations_processed_total` and `openoncology_genomic_pipeline_seconds` and neither is ever incremented, so both are permanently absent from `/metrics`. A rule written against either would look like coverage and never fire, which is why `test_alert_rules.py` rejects them.
 - **Files**: api/main.py, api/services/oncokb_evidence.py, api/workers/genomic_worker.py, infra/alerts/openoncology.rules.yml

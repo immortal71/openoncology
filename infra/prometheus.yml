@@ -25,47 +25,20 @@ scrape_configs:
     static_configs:
       - targets: ["api:8000"]
 
-  # ── Targets that were configured but never deployed ──────────────────────
+  # These were commented out in #140 because nothing deployed them and each
+  # reported `up == 0` permanently. The exporters exist now (OO-16), so the jobs
+  # are live again. `api/tests/test_alert_rules.py` fails if a scrape job names a
+  # host no deployment defines, which is what keeps this honest.
   #
-  # The four jobs below were scraping endpoints that do not exist anywhere in
-  # this repository, so each reported `up == 0` permanently. That was invisible
-  # while nothing alerted on `up`; with the rules in alerts/ it would page
-  # continuously and train whoever is on call to ignore the one signal that
-  # matters.
-  #
-  # They are commented rather than deleted because the intent is right and the
-  # deployment is what is missing:
-  #
-  #   postgres  db-exporter:9187     no such service in docker-compose.yml or
-  #                                  the Helm chart
-  #   redis     redis-exporter:9121  same
-  #   celery-*  worker-*:9100        the worker services exist in
-  #                                  docker-compose.yml, but nothing in
-  #                                  api/workers/ starts a metrics server, so
-  #                                  port 9100 is not listening
-  #
-  # Deploying the exporters and giving the workers a metrics endpoint is
-  # BACKLOG.md OO-16. Uncomment each job as its exporter is actually deployed.
-  #
-  # - job_name: postgres
-  #   static_configs:
-  #     - targets: ["db-exporter:9187"]
-  #
-  # - job_name: redis
-  #   static_configs:
-  #     - targets: ["redis-exporter:9121"]
-  #
-  # - job_name: celery-worker-genomic
-  #   metrics_path: /metrics
-  #   static_configs:
-  #     - targets: ["worker-genomic:9100"]
-  #
-  # - job_name: celery-worker-ai
-  #   metrics_path: /metrics
-  #   static_configs:
-  #     - targets: ["worker-ai:9100"]
-  #
-  # - job_name: celery-worker-notify
-  #   metrics_path: /metrics
-  #   static_configs:
-  #     - targets: ["worker-notify:9100"]
+  # Names match the Helm Services. docker-compose uses the same short names.
+  - job_name: redis
+    static_configs:
+      - targets: ["redis-exporter:9121"]
+
+  - job_name: celery
+    static_configs:
+      - targets: ["celery-exporter:9808"]
+
+  - job_name: postgres
+    static_configs:
+      - targets: ["db-exporter:9187"]
