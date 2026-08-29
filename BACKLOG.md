@@ -62,13 +62,16 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 ### OO-10: The FASTQ path aligns paired-end reads as single-end
 - **Why**: `main.nf:116` channels the input with `Channel.fromPath`, not `fromFilePairs`; `trimmomatic.nf` runs `trimmomatic SE` against `TruSeq3-SE.fa`; `bwa_mem2.nf` passes one read file to `bwa-mem2 mem`. Nothing pairs a mate file at any point. Essentially all clinical sequencing is paired-end, and so is the GIAB HG002 data the 3.1 validation gate is measured against, so mate-pair information is discarded exactly where it resolves the repetitive regions in which variants are missed. Found while writing `docs/RUNBOOK_VARIANT_CALLING_VALIDATION.md`, and it is why that runbook recommends the BAM route first.
-- **Files**: pipeline/main.nf, pipeline/modules/trimmomatic.nf, pipeline/modules/bwa_mem2.nf
+
+  This is not only a validation-path problem. `POST /api/submit` accepts a single `dna_file` described as "VCF, FASTQ, or BAM", so a clinician holding the two files every sequencer emits can upload only one of them, and nothing says so. The result is a real sample aligned single-end with half its reads absent, reported with the same confidence as any other. That puts this on the clinical intake path rather than the benchmark path, and raises it above the other Ready entries.
+- **Files**: pipeline/main.nf, pipeline/modules/trimmomatic.nf, pipeline/modules/bwa_mem2.nf, api/routes/submit.py
 - **Acceptance**:
   - A paired FASTQ input is consumed as one sample, not as two independent runs
   - Trimmomatic runs `PE` with paired adapters, and its unpaired outputs are handled deliberately rather than dropped by accident
   - `bwa-mem2 mem` receives both mates
   - Single-end input still works, or its removal is a stated decision rather than a side effect
   - A test asserts a paired input produces one BAM per sample
+  - `POST /api/submit` either accepts a mate pair, or states plainly that it does not and what that costs
 - **Out of scope**: the somatic and RNA-seq paths, beyond what falls out of the same change
 - **Risk**: medium. This changes what the pipeline computes, so it invalidates any variant-calling measurement taken before it. Either sequence it ahead of the run in the runbook, or record which configuration produced which number.
 
