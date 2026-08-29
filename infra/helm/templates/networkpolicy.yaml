@@ -1,0 +1,325 @@
+{{/*
+NetworkPolicies for the chart.
+
+BACKLOG.md OO-5. infra/k8s/namespace.yaml has carried a default-deny set since
+the beginning and the chart, which is what production deploys from, had none.
+This is not a verbatim port: the k8s copy could not have worked here, for three
+reasons found while scoping it.
+
+  * `allow-workers-egress` selects on `app.kubernetes.io/part-of:
+    openoncology-workers`, and `_helpers.tpl` emits no such label. The rule
+    matched nothing.
+  * Workers render four distinct component values, so no single equality
+    selector reaches them. They are matched with `In` here.
+  * `component: postgres` is *Keycloak's* database. The application talks to the
+    Bitnami sub-chart at `{release}-postgresql`, which carries Bitnami's labels
+    and not this chart's. An egress rule written against `component: postgres`
+    allows the wrong database and denies the right one.
+
+DEFAULT OFF. A NetworkPolicy fails closed, nothing in this repository can be
+tested against a real cluster, and the labels of the sub-chart pods vary by
+sub-chart version. Enabling it is a deliberate act by someone who can watch what
+happens. `helm template --set networkPolicy.enabled=true` is rendered and
+validated in CI, which proves it renders, not that it is correct for your
+cluster.
+
+THE DNS RULE IS LOAD-BEARING. Under default-deny, egress to kube-dns must be
+allowed explicitly or every name lookup fails, and the symptom is every
+dependency appearing to be down at once. It is first below for that reason.
+
+Sub-chart selectors are values, not literals, because Bitnami has changed these
+labels between chart majors and a wrong one here denies the database silently.
+Check them against `kubectl get pod --show-labels` before enabling.
+*/}}
+{{- if .Values.networkPolicy.enabled }}
+{{- $fullName := include "openoncology.fullname" . }}
+{{- $ns := .Values.namespace }}
+{{- $np := .Values.networkPolicy }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-default-deny
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+{{/* Without this, nothing resolves and every dependency looks unreachable. */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-allow-dns
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.dnsNamespace }}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-api
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: api
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.ingressNamespace }}
+    # The web pod calls the API server-side as well as through the browser.
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: web
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.postgresql | nindent 14 }}
+      ports:
+        - port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.redis | nindent 14 }}
+      ports:
+        - port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.objectStore | nindent 14 }}
+      ports:
+        - port: 9000
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: keycloak
+      ports:
+        - port: 8080
+    # OncoKB, OpenTargets, ChEMBL, AlphaFold, Stripe, Resend, Sentry.
+    - ports:
+        - port: 443
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-web
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: web
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.ingressNamespace }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: api
+      ports:
+        - port: {{ .Values.api.port }}
+    - ports:
+        - port: 443
+---
+{{/*
+Workers and beat. `In` rather than equality because workers.yaml renders one
+Deployment per queue and each carries its own component value, so no single
+equality selector reaches them all.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-workers
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          {{- range $name, $cfg := .Values.workers }}
+          - worker-{{ $name }}
+          {{- end }}
+          - beat
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.postgresql | nindent 14 }}
+      ports:
+        - port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.redis | nindent 14 }}
+      ports:
+        - port: 6379
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.objectStore | nindent 14 }}
+      ports:
+        - port: 9000
+    - ports:
+        - port: 443
+---
+{{/*
+The gdpr worker alone needs Keycloak: erase_patient_data calls the admin API to
+delete the user. Policies are additive, so this grants that on top of the shared
+worker rules above. Omitting it breaks erasure silently, which is the obligation
+#130 restored.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-worker-gdpr-keycloak
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker-gdpr
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: keycloak
+      ports:
+        - port: 8080
+---
+{{/*
+Keycloak talks to the chart-local StatefulSet, which is a different database
+from the application's. Getting this backwards is the mistake the k8s copy
+would have made.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-keycloak
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: keycloak
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.ingressNamespace }}
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: api
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: worker-gdpr
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: postgres
+      ports:
+        - port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-keycloak-postgres
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              {{- include "openoncology.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: keycloak
+      ports:
+        - port: 5432
+{{- if .Values.backup.enabled }}
+---
+{{/*
+The backup CronJob reads the application database and writes to object storage.
+Denying it produces a backup that fails every night, and nothing alerts on that
+until OO-16.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-db-backup
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "openoncology.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: db-backup
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.postgresql | nindent 14 }}
+      ports:
+        - port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.objectStore | nindent 14 }}
+      ports:
+        - port: 9000
+    # An off-cluster object store.
+    - ports:
+        - port: 443
+{{- end }}
+{{- end }}

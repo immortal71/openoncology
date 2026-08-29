@@ -24,21 +24,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: low
 -->
 
-### OO-5: Port the NetworkPolicy set from infra/k8s into the Helm chart
-- **Why**: `infra/k8s/namespace.yaml` carries default-deny plus four allow rules; the chart carries none, and the chart is what production deploys from. Same drift class as the readiness probe and the missing beat Deployment, both fixed on `fix/deployment-and-auth-hardening`. Not fixed alongside them because it cannot be ported verbatim: `allow-workers-egress` selects on `app.kubernetes.io/part-of: openoncology-workers`, and `_helpers.tpl` never emits that label, so the rule as written selects nothing. Shipping a default-deny policy whose allow rules match no pods severs every worker from Postgres and Redis, and it renders and lints clean.
-- **Files**: infra/helm/templates/networkpolicy.yaml, infra/helm/templates/_helpers.tpl, infra/helm/values.yaml, api/tests/test_deployment_manifests.py
-- **Acceptance**:
-  - Every allow rule's selector matches labels the chart actually emits, verified against `helm template` output rather than read off the k8s copy
-  - Worker, beat, api and web pods each keep egress to Postgres, Redis and 443
-  - A test asserts every NetworkPolicy podSelector matches at least one rendered pod
-  - `helm template` output passes kubeconform in the `validate-manifests` job
-- **Topology found while scoping this, and it invalidates a verbatim port**: the chart runs *two* Postgres instances. `values.yaml` enables the Bitnami `postgresql` sub-chart and `openoncology.databaseUrl` points the app at `{release}-postgresql`; separately `templates/postgres.yaml` renders an ungated StatefulSet at `{fullname}-postgres` carrying `component: postgres`, and that one is Keycloak's database (`keycloak.yaml:32`). So an egress rule allowing `component: postgres` reaches Keycloak's database and not the application's. The Bitnami pods carry Bitnami's labels, not this chart's, and those differ by sub-chart version. Redis is Bitnami-only; there is no chart-local template for it.
-  Workers also render four distinct component values (`worker-genomic`, `worker-ai`, `worker-notify`, `worker-gdpr`), so one selector cannot match them by `component` and needs either a shared label or `matchExpressions`.
-  The gdpr worker needs egress the others do not: it calls Keycloak's admin API to delete users and MinIO to delete objects (`workers/gdpr_worker.py`). A policy modelled on the other three silently breaks erasure, which is the obligation #130 just restored.
-- **Recommended shape**: gate the whole set behind `networkPolicy.enabled`, default **false**. A wrong policy fails closed, there is no cluster to test against here, and default-on means the first person to find out is whoever deploys it. Drive the datastore selectors from values so an operator can match their actual sub-chart labels.
-- **Out of scope**: the raw `infra/k8s` manifests, which already have this
-- **Risk**: medium — a wrong policy fails closed and silently
-
 ### OO-6: Pin the pipeline's container images by digest
 - **Why**: `pipeline/modules/*.nf` pin containers by tag (`broadinstitute/gatk:4.5.0.0`, `etal/cnvkit:0.9.10`, `docker.io/szarate/manta:1.6.0`, two biocontainers). A tag is mutable. The variant-calling validation gate asks which pipeline produced a call set, and a tag cannot answer it: the same tag six months apart is a different image and possibly different calls. `nextflow.config` now declares `gatk_version` once, so the GATK pair can no longer diverge, but neither is pinned to an immutable reference.
 - **Files**: pipeline/nextflow.config, pipeline/modules/*.nf, api/tests/test_pipeline_config.py
@@ -128,6 +113,17 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - `test_alert_rules.py`'s allowed-metric set grows only alongside the code that emits them
 - **Out of scope**: what the alert threshold should be, which is the same policy question as `degraded_evidence_alert_after` itself
 - **Risk**: low to implement. Worth noting the evidence path is adjacent to ranking, so the metric should be emitted where the fallback is already logged rather than anywhere new.
+### OO-18: The chart points the application at a MinIO that it never deploys
+- **Why**: `configmap.yaml:18` sets `MINIO_ENDPOINT` to `{release}-minio:9000` and `values.yaml` carries a `minio:` block with an image, a 200Gi persistence size and a `secretRef`. No template creates a MinIO Deployment, StatefulSet or Service, and `Chart.yaml` lists only `postgresql` and `redis` as dependencies. A `helm install` therefore produces an application configured to reach object storage that does not exist. Every VCF upload, report write and GDPR object deletion fails, and so does the backup CronJob added in #141, which writes dumps through `mc`. Object storage is where patient genomic files live, so this is not a peripheral gap. Found while scoping OO-5, because a NetworkPolicy cannot grant egress to a pod nothing creates.
+- **Files**: infra/helm/templates/minio.yaml, infra/helm/Chart.yaml, infra/helm/values.yaml, api/tests/test_deployment_manifests.py
+- **Acceptance**:
+  - MinIO is deployed by the chart, or added as a sub-chart dependency, or `values.yaml` and the ConfigMap are rewritten to describe an external object store the operator supplies
+  - `MINIO_ENDPOINT` resolves to something the chart or its dependencies actually create
+  - `networkPolicy.datastores.objectStore` selects the pods that result
+  - A test asserts every service the ConfigMap names is created by the chart or declared as a dependency, which is the general form of this defect
+- **Out of scope**: whether to run MinIO in-cluster at all, which is a hosting decision
+- **Risk**: high. The deployment cannot store a patient file. It ranks below OO-12 only because it fails loudly on first use rather than silently until a recovery.
+
 ---
 
 ## In progress

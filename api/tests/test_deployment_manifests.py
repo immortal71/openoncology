@@ -338,3 +338,117 @@ def test_a_restore_procedure_is_documented():
     text = runbook.read_text(encoding="utf-8")
     assert "alembic_version" in text, "a restore is not verified without a schema check"
     assert "Restore drill" in text
+
+
+# ── Network policies ─────────────────────────────────────────────────────────
+#
+# OO-5. infra/k8s/namespace.yaml carried a default-deny set and the chart carried
+# none. It could not be ported verbatim: `allow-workers-egress` selects on
+# `app.kubernetes.io/part-of`, a label _helpers.tpl never emits, so the rule
+# matched nothing and a default-deny alongside it would have severed every
+# worker from Postgres and Redis while rendering and linting clean.
+#
+# The rendered check lives in the validate-manifests CI job, which can run helm.
+# These assert the properties that are visible in the template.
+
+NETPOL = HELM / "templates" / "networkpolicy.yaml"
+
+
+def test_the_chart_has_network_policies():
+    assert NETPOL.exists()
+
+
+def test_network_policies_are_off_by_default(helm_values):
+    """
+    A NetworkPolicy fails closed and nothing here can test one against a real
+    cluster. On by default means the first person to discover a wrong selector
+    is whoever deploys it.
+    """
+    assert helm_values["networkPolicy"]["enabled"] is False
+
+
+def test_dns_egress_is_allowed():
+    """
+    The rule everything else depends on. Under default-deny, egress to kube-dns
+    must be explicit or every lookup fails, and the symptom is every dependency
+    appearing to be down at once.
+    """
+    text = NETPOL.read_text(encoding="utf-8")
+    assert "allow-dns" in text
+    assert "port: 53" in text
+    assert "protocol: UDP" in text
+
+
+def _netpol_without_comments() -> str:
+    """
+    Helm comment blocks explain why the k8s copy could not be ported, and quote
+    the label that made it unusable. Scanning them as if they were selectors is
+    how the first version of this test failed on its own documentation.
+    """
+    return re.sub(r"\{\{/\*.*?\*/\}\}", "", NETPOL.read_text(encoding="utf-8"), flags=re.S)
+
+
+def test_no_policy_selects_on_a_label_the_chart_never_emits():
+    """
+    The specific defect that made the k8s copy unusable here.
+    `app.kubernetes.io/part-of` is selected on there and emitted nowhere.
+    """
+    text = _netpol_without_comments()
+    emitted = (HELM / "templates" / "_helpers.tpl").read_text(encoding="utf-8")
+    # component is set inline by each template rather than by the helper.
+    known = set(re.findall(r"(app\.kubernetes\.io/[a-z-]+):", emitted)) | {
+        "app.kubernetes.io/component"
+    }
+    # Two forms, and missing the second is how the first version of this guard
+    # passed a deliberately broken policy: matchLabels writes `label: value`,
+    # matchExpressions writes `key: label`.
+    selectors = set(re.findall(r"(app\.kubernetes\.io/[a-z-]+):", text))
+    selectors |= set(re.findall(r"key:\s*(app\.kubernetes\.io/[a-z-]+)", text))
+    unknown = sorted(selectors - known)
+    assert not unknown, f"policies select on labels no template emits: {unknown}"
+
+
+def test_workers_are_matched_by_expression_not_equality(helm_values):
+    """
+    workers.yaml renders one Deployment per queue, each with its own component
+    value, so a single equality selector cannot reach them all.
+    """
+    text = NETPOL.read_text(encoding="utf-8")
+    assert "matchExpressions" in text
+    assert "operator: In" in text
+    assert len(helm_values["workers"]) >= 4
+
+
+def test_the_gdpr_worker_keeps_its_keycloak_egress():
+    """
+    erase_patient_data calls Keycloak's admin API to delete the user. A policy
+    modelled on the other three workers breaks erasure silently, which is the
+    obligation #130 restored.
+    """
+    text = NETPOL.read_text(encoding="utf-8")
+    assert "worker-gdpr" in text
+    gdpr = text[text.index("worker-gdpr-keycloak"):]
+    assert "component: keycloak" in gdpr
+
+
+def test_datastore_selectors_are_values_not_literals(helm_values):
+    """
+    Bitnami has changed these labels between chart majors, and a wrong one
+    denies the database while rendering perfectly.
+    """
+    stores = helm_values["networkPolicy"]["datastores"]
+    assert set(stores) >= {"postgresql", "redis", "objectStore"}
+    text = NETPOL.read_text(encoding="utf-8")
+    assert "$np.datastores.postgresql" in text
+
+
+def test_the_application_database_is_not_confused_with_keycloaks():
+    """
+    `component: postgres` is Keycloak's StatefulSet. The application uses the
+    Bitnami sub-chart. An egress rule on the former allows the wrong database
+    and denies the right one.
+    """
+    text = NETPOL.read_text(encoding="utf-8")
+    api_policy = text[text.index("-api\n"):text.index("-web\n")]
+    assert "$np.datastores.postgresql" in api_policy
+    assert "component: postgres\n" not in api_policy
