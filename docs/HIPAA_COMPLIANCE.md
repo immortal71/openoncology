@@ -6,6 +6,20 @@
 
 ---
 
+> **On the accuracy of this checklist.** Two rows below carried ✅ against
+> controls that were never implemented: the contingency plan cited WAL archiving
+> and MinIO versioning, neither of which is configured anywhere, and pointed at
+> the wrong database; data-at-rest integrity cited PostgreSQL checksums, which
+> are off. Both were corrected on 2026-08-29 after being checked against the
+> infrastructure rather than read.
+>
+> A ✅ here should mean someone has verified the control in the deployed
+> configuration, not that it was intended. Anything not verified that way belongs
+> at ⬜ with the gap named, which costs nothing and is the only version of this
+> document that is safe to rely on.
+
+---
+
 ## 1. Administrative Safeguards (§164.308)
 
 | Control | Status | Implementation |
@@ -16,7 +30,7 @@
 | Sanction policy | ⬜ | Document disciplinary procedure for policy violations |
 | Access management policy | ✅ | Keycloak RBAC — roles: `patient`, `oncologist`, `admin` |
 | Audit controls policy | ✅ | `api/middleware/audit.py` — structured PHI access log |
-| Contingency plan (backup) | ✅ | PostgreSQL WAL + MinIO versioning (see `infra/helm/postgres.yaml`) |
+| Contingency plan (backup) | ⬜ | **Nothing implements this.** No `archive_mode`, `archive_command` or `wal_level` is set anywhere, and no MinIO versioning is enabled. `infra/helm/templates/postgres.yaml`, which this row used to cite, is Keycloak's database: the application uses the Bitnami `postgresql` sub-chart. Persistence is not backup, so a deleted PVC or a bad migration loses every submission and result permanently. See BACKLOG.md OO-12 |
 | Business Associate Agreements | ⬜ | Required with: AWS/GCP, Stripe, Resend, Keycloak cloud hosting |
 
 ---
@@ -56,7 +70,7 @@
 | Control | Status | Implementation |
 |---|---|---|
 | PHI transmission integrity | ✅ | HTTPS enforced (HSTS header in `values.production.yaml`) |
-| Data at rest integrity | ✅ | PostgreSQL checksums enabled; MinIO ETag validation |
+| Data at rest integrity | ⬜ | MinIO ETag validation is present. PostgreSQL data checksums are **not** enabled: nothing sets `data_checksums`, and the pinned PostgreSQL 16 defaults it off. Enabling it requires `initdb --data-checksums`, so it is a fresh-cluster decision rather than a config change. See BACKLOG.md OO-12 |
 
 ### 3.4 Transmission Security (§164.312(e))
 
