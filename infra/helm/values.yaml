@@ -158,6 +158,58 @@ beat:
       cpu: "200m"
       memory: "256Mi"
 
+# ── Prometheus exporters ──────────────────────────────────────────────────────
+# infra/prometheus.yml declared scrape jobs for these and nothing deployed them,
+# so each reported `up == 0` permanently. See OO-16.
+#
+# The redis one carries the queue depths. Celery queues are Redis lists named
+# after the queue, so `redis_key_size{key="gdpr"}` is how many erasure requests
+# are waiting. That is the metric worth having.
+exporters:
+  enabled: true
+  pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  instances:
+    redis:
+      enabled: true
+      port: 9121
+      image:
+        repository: oliver006/redis_exporter
+        tag: v1.62.0
+      env:
+        REDIS_ADDR: "redis://{{ .Release.Name }}-redis-master:6379"
+        # One entry per Celery queue in api/workers/__init__.py task_routes.
+        # A queue absent here has no depth metric and cannot be alerted on.
+        REDIS_EXPORTER_CHECK_KEYS: "genomic,ai,notify,gdpr"
+    celery:
+      enabled: true
+      port: 9808
+      image:
+        repository: danihodovic/celery-exporter
+        tag: 0.10.5
+      env:
+        CE_BROKER_URL: "redis://{{ .Release.Name }}-redis-master:6379/0"
+        CE_ACCEPT_CONTENT: '["json"]'
+    postgres:
+      enabled: true
+      port: 9187
+      image:
+        repository: prometheuscommunity/postgres-exporter
+        tag: v0.15.0
+      env:
+        DATA_SOURCE_URI: "{{ .Release.Name }}-postgresql:5432/openoncology?sslmode=disable"
+        DATA_SOURCE_USER: openoncology
+      secretEnv:
+        DATA_SOURCE_PASS:
+          secret: openoncology-pg-secret
+          key: password
+
 # ── Network policies ──────────────────────────────────────────────────────────
 # Default deny plus explicit allows. infra/k8s/namespace.yaml has carried these
 # since the beginning; the chart, which is what production deploys from, had
@@ -177,6 +229,9 @@ networkPolicy:
   # kubernetes.io/metadata.name automatically; some do not.
   dnsNamespace: kube-system
   ingressNamespace: ingress-nginx
+  # Where Prometheus runs. It scrapes the exporters, so under default-deny it
+  # needs ingress permission to reach them.
+  monitoringNamespace: monitoring
   datastores:
     # The Bitnami postgresql sub-chart, which is the APPLICATION database.
     # Not `component: postgres`, which is the chart-local StatefulSet that

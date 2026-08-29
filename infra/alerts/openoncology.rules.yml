@@ -93,3 +93,89 @@ groups:
             deleting it, because on a deployment that should have traffic it is
             the only rule here that catches an ingress or DNS failure in front
             of a healthy pod.
+
+  - name: openoncology-queues
+    rules:
+      # Celery queues are Redis lists named after the queue, so the key size is
+      # the number of messages waiting. OO-16 deployed the exporter that
+      # measures this; before it, a stalled queue was invisible.
+      - alert: GdprQueueNotDraining
+        expr: redis_key_size{key="gdpr"} > 0
+        for: 2h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Erasure requests have been waiting over two hours"
+          description: >-
+            The gdpr queue carries right-to-erasure requests and the daily
+            retention sweep. Work sitting here means deletions are not being
+            performed, which is an obligation with a 30 day deadline rather than
+            a backlog. This queue is normally empty, so any sustained depth is
+            worth waking someone for. That it had no consumer at all until #130
+            is the reason this alert exists.
+
+      - alert: GenomicQueueBacklog
+        expr: redis_key_size{key="genomic"} > 20
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Genomic queue has held over 20 submissions for an hour"
+          description: >-
+            Either throughput is insufficient or the workers have stopped
+            consuming. Check `celery_worker_up` before scaling: a queue that is
+            deep because nothing is consuming does not improve with more
+            capacity.
+
+      - alert: CeleryWorkersAbsent
+        expr: sum(celery_worker_up) == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "No Celery worker is reporting"
+          description: >-
+            Nothing is processing submissions, erasures or notifications. Task
+            events must be enabled for this to be meaningful; they are set in
+            api/workers/__init__.py, and if that changes this alert goes quiet
+            rather than firing.
+
+      - alert: CeleryTaskFailureRateHigh
+        expr: >-
+          sum(rate(celery_task_failed_total[15m]))
+          / clamp_min(sum(rate(celery_task_received_total[15m])), 0.001) > 0.2
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Over 20% of Celery tasks are failing"
+          description: >-
+            Tasks are acks_late, so failures are redelivered and a persistent
+            failure becomes a redelivery loop that looks like throughput.
+
+  - name: openoncology-datastores
+    rules:
+      - alert: PostgresConnectionsNearLimit
+        expr: >-
+          sum(pg_stat_activity_count)
+          / clamp_min(sum(pg_settings_max_connections), 1) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Postgres connections above 80% of max"
+          description: >-
+            The API and every worker share one pool. Exhaustion presents as
+            unrelated timeouts across all of them at once rather than as a
+            database alert.
+
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is not responding to the exporter"
+          description: >-
+            Redis is the Celery broker. While it is down nothing is queued or
+            consumed, and submissions accepted by the API go nowhere.

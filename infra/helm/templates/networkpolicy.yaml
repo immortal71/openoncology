@@ -285,6 +285,49 @@ spec:
               app.kubernetes.io/component: keycloak
       ports:
         - port: 5432
+{{- if .Values.exporters.enabled }}
+---
+{{/*
+Exporters read their backend and are scraped by Prometheus. Denying either half
+gives a target that is up and reports nothing, which alerts on `up` only if the
+scrape itself fails, so it can look healthy while measuring nothing.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $fullName }}-exporters
+  namespace: {{ $ns }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values:
+          {{- range $name, $cfg := .Values.exporters.instances }}
+          - {{ $name }}-exporter
+          {{- end }}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ $np.monitoringNamespace }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.postgresql | nindent 14 }}
+      ports:
+        - port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- toYaml $np.datastores.redis | nindent 14 }}
+      ports:
+        - port: 6379
+{{- end }}
 {{- if .Values.backup.enabled }}
 ---
 {{/*

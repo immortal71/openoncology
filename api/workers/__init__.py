@@ -48,6 +48,19 @@ celery_app.conf.update(
     task_queues_default_exchange_type="direct",
     # Result expiry — keep task results 24 h then auto-expire
     result_expires=86400,
+    # ── Observability ──────────────────────────────────────────────────────
+    # Celery emits nothing about task lifecycle unless asked. Without these the
+    # broker carries the work and no external observer can tell a queue that is
+    # draining from one that has stalled, which is what BACKLOG.md OO-16 is
+    # about: the gdpr queue silently not draining means erasure requests are not
+    # being honoured, and that is an obligation with a deadline attached.
+    #
+    # Two separate switches. worker_send_task_events makes workers publish
+    # started/succeeded/failed; task_send_sent_event makes the *producer*
+    # publish on enqueue, which is the only way to measure the gap between
+    # submission and pickup. Queue latency needs both.
+    worker_send_task_events=True,
+    task_send_sent_event=True,
     task_routes={
         "workers.genomic_worker.*": {"queue": "genomic"},
         "workers.ai_worker.*": {"queue": "ai"},
