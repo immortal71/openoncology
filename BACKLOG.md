@@ -59,6 +59,28 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Still open**: the security-officer half. A file naming a code owner is not a person accepting the §164.308(a)(2) role. That is an appointment, and it stays at not-implemented until it is recorded somewhere a reviewer can check. Nothing an agent does can close it.
 - **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
 
+---
+
+## In progress
+
+<!-- One entry maximum. An entry stranded here means a session died mid-work;
+     /standup will surface it. -->
+
+---
+
+## In review
+
+<!-- Entry plus PR URL. Cleared by hand when merged. -->
+
+---
+
+## Needs human decision
+
+<!-- Anything an agent declined to do unattended: guard-hook blocks, validator
+     BLOCKs, mis-scoped entries, and anything the planner marked
+     Risk: scientific. This section is the safety valve. When it grows, that is
+     the system working, not failing. -->
+
 ### OO-7: Decide whether `civic_supplement_enabled` should default to True
 - **Why**: Asked as "how do we raise the benchmark", and the measurements already
   in the repository answer it in a way that rules ranking work out. In
@@ -101,7 +123,53 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 ## Done
 
+
 <!-- Merged entries, newest first. Trim periodically. -->
+
+### OO-15: Session lifetimes applied; security officer still unassigned
+Half closed in [#148](https://github.com/immortal71/openoncology/pull/148). A
+`kcadm` Job applies `ssoSessionIdleTimeout` 1800s and `ssoSessionMaxLifespan`
+28800s on install and upgrade, which are the figures HIPAA_COMPLIANCE.md had been
+quoting without setting. `.github/CODEOWNERS` now exists.
+
+The entry stays in Ready. A file naming a code owner is not a person accepting
+the §164.308(a)(2) role, and nothing in a pull request can record an appointment.
+
+### OO-17: The degraded-evidence condition is alertable
+Merged in [#147](https://github.com/immortal71/openoncology/pull/147). A counter
+beside the log call could not work: the fallback count is a module global in the
+ai worker, a separate process from the API with no metrics endpoint, and it
+resets on restart, which is when a sustained run would look like it had stopped.
+The signal is read from `results.evidence_provenance` by a postgres_exporter
+query instead. Two metrics declared in `api/main.py` and never incremented were
+removed rather than wired up.
+
+### OO-9: Keycloak's database sized from its own values
+Merged in [#146](https://github.com/immortal71/openoncology/pull/146). It read
+the application sub-chart's values, so production gave a realm database a 200Gi
+volume and resizing one silently resized the other. `volumeClaimTemplates` is
+immutable, so applying this to an existing cluster needs a recreate; the runbook
+records that next to the note that this database is not backed up.
+
+### OO-16: Exporters deployed, queue depth alertable
+Merged in [#145](https://github.com/immortal71/openoncology/pull/145).
+`redis_key_size{key="gdpr"}` is the number of erasure requests waiting. Celery
+task events had to be enabled for any task metric to exist at all, which is
+guarded, because without them every `celery_*` rule evaluates against an absent
+series and stays silent.
+
+### OO-18: The chart deploys the object storage it pointed at
+Merged in [#144](https://github.com/immortal71/openoncology/pull/144).
+`MINIO_ENDPOINT` named `{release}-minio:9000` and nothing created it, so every
+upload, report write and object deletion failed, as did the backup job. Found
+while scoping OO-5, because a policy cannot grant egress to a pod nothing
+creates.
+
+### OO-5: Network policies for the chart, off by default
+Merged in [#143](https://github.com/immortal71/openoncology/pull/143). Not a port
+of the `infra/k8s` set: that selects on a label `_helpers.tpl` never emits, uses
+equality where workers render four component values, and points at Keycloak's
+database rather than the application's. All three fail closed and render clean.
 
 ### OO-14: A compliance mark must cite something that exists
 Merged in [#138](https://github.com/immortal71/openoncology/pull/138).

@@ -600,3 +600,98 @@ def test_the_template_says_which_database_it_is():
     head = text[: text.index("apiVersion")]
     assert "KEYCLOAK" in head.upper()
     assert "not the application" in head.lower()
+
+
+# ── The backlog's safety valve still exists ──────────────────────────────────
+#
+# BACKLOG.md lost three section headers across #144 to #148. Each of those PRs
+# removed a completed entry with a helper that located the end of a block by
+# searching for the next "### ", which skips over "## " section headers. Removing
+# the last entry in a section therefore swallowed the following header and its
+# comment.
+#
+# The consequence was not cosmetic. OO-7 and OO-8 are both Risk: scientific and
+# belong in "Needs human decision", which CLAUDE.md calls the safety valve and
+# which /next never pulls from. With the header gone they sat under "## Ready",
+# which /next pulls from the top of. An agent could have taken a decision about
+# which drugs the system recommends.
+#
+# Every check stayed green throughout, because nothing asserted the structure.
+
+BACKLOG = REPO_ROOT / "BACKLOG.md"
+_REQUIRED_SECTIONS = [
+    "Ready",
+    "In progress",
+    "In review",
+    "Needs human decision",
+    "Done",
+]
+
+
+def _backlog_entries() -> list[tuple[str, str]]:
+    """(section, entry title) for every ### entry."""
+    out, section = [], None
+    for line in BACKLOG.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## "):
+            section = line[3:].strip()
+        elif line.startswith("### ") and section:
+            out.append((section, line[4:].strip()))
+    return out
+
+
+def test_every_backlog_section_is_present():
+    offsets = _heading_offsets()
+    missing = [s for s in _REQUIRED_SECTIONS if s not in offsets]
+    assert not missing, (
+        f"BACKLOG.md is missing sections: {missing}. Entries that belonged to "
+        "them are now filed under whichever section precedes them."
+    )
+
+
+def _heading_offsets() -> dict:
+    """
+    Line-anchored, because the file's own preamble mentions `## Ready` and
+    `## Needs human decision` in prose. A substring search finds those first,
+    which is the same mistake as scanning a template's comments for selectors.
+    """
+    text = BACKLOG.read_text(encoding="utf-8")
+    return {
+        m.group(1).strip(): m.start()
+        for m in re.finditer(r"^## (.+)$", text, re.M)
+    }
+
+
+def test_the_sections_are_in_pipeline_order():
+    """Order carries meaning: /next pulls from the top of Ready."""
+    offsets = _heading_offsets()
+    positions = [offsets[s] for s in _REQUIRED_SECTIONS if s in offsets]
+    assert len(positions) == len(_REQUIRED_SECTIONS), "a section heading is missing"
+    assert positions == sorted(positions), "backlog sections are out of order"
+
+
+def test_no_scientific_risk_entry_sits_in_ready():
+    """
+    The safety valve. CLAUDE.md: anything Risk: scientific stays in "Needs human
+    decision", and nothing pulls from there. An entry that drifts into Ready is
+    one an agent may pick up unattended.
+    """
+    text = BACKLOG.read_text(encoding="utf-8")
+    offsets = _heading_offsets()
+    ready = text[offsets["Ready"]:offsets["In progress"]]
+    offenders = re.findall(r"^### (.+)$", ready, re.M)
+    scientific = []
+    for title in offenders:
+        start = ready.index(f"### {title}")
+        nxt = ready.find("### ", start + 4)
+        block = ready[start: nxt if nxt != -1 else len(ready)]
+        if re.search(r"\*\*Risk\*\*:.*scientific", block):
+            scientific.append(title)
+    assert not scientific, (
+        f"Risk: scientific entries are in Ready, which /next pulls from: {scientific}"
+    )
+
+
+def test_in_progress_holds_at_most_one_entry():
+    """The file says one maximum; more than one means a session died mid-work."""
+    in_progress = [t for sec, t in _backlog_entries() if sec == "In progress"]
+    assert len(in_progress) <= 1, f"In progress holds {len(in_progress)} entries"
