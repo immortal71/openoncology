@@ -833,3 +833,116 @@ def test_the_chart_names_an_image_this_repository_publishes(component, helm_valu
         f"{component} image {repo!r} is not a path publish-images produces"
     )
     assert repo.endswith(f"/{component}")
+
+
+# ── Deployed image tags are immutable ────────────────────────────────────────
+#
+# OO-19. `latest` is mutable, so a pod restart can change the running version and
+# nothing records which code produced a result. For software whose output is
+# clinical evidence that is the same defect as the mutable pipeline container
+# tags in OO-6, applied to the images that run the ranking.
+#
+# values.yaml keeps `latest`. It is the base, is never deployed from alone, and
+# an environment file always overrides it.
+
+_MUTABLE_TAGS = {"latest", "main", "master", "edge", "stable"}
+_ENV_VALUES = {
+    "staging": HELM / "values.staging.yaml",
+    "production": HELM / "values.production.yaml",
+}
+
+
+def _pinned_tags(path: Path) -> dict:
+    values = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {
+        component: values.get(component, {}).get("image", {}).get("tag")
+        for component in ("api", "web")
+    }
+
+
+def test_staging_pins_immutable_image_tags():
+    """
+    A `sha-` tag exists for every commit on main, so staging has no reason to
+    inherit a mutable one.
+    """
+    tags = _pinned_tags(_ENV_VALUES["staging"])
+    for component, tag in tags.items():
+        assert tag, f"staging does not pin an image tag for {component}"
+        assert tag not in _MUTABLE_TAGS, (
+            f"staging pins {component} to the mutable tag {tag!r}"
+        )
+
+
+@pytest.mark.parametrize("env", sorted(_ENV_VALUES))
+def test_no_environment_pins_a_mutable_tag(env):
+    """
+    Covers both directions: a file that pins must not pin something mutable.
+    Production currently sets no tag and so inherits `latest` from the base,
+    which is why this asserts on what is set rather than on what is absent.
+    Pinning production needs a `v*` release tag to exist first, and none does.
+    """
+    for component, tag in _pinned_tags(_ENV_VALUES[env]).items():
+        if tag is None:
+            continue
+        assert tag not in _MUTABLE_TAGS, (
+            f"{env} pins {component} to the mutable tag {tag!r}"
+        )
+
+
+def test_the_pinned_tag_matches_what_publish_images_produces():
+    """
+    The job emits `sha-<short>` and `v*`. A tag in another shape is one the
+    registry does not have, which fails at pull time rather than here.
+    """
+    for component, tag in _pinned_tags(_ENV_VALUES["staging"]).items():
+        assert re.fullmatch(r"(sha-[0-9a-f]{7,}|v\d+\.\d+\.\d+)", tag), (
+            f"staging pins {component} to {tag!r}, which publish-images does not emit"
+        )
+
+
+# ── The staging runbook matches the chart ────────────────────────────────────
+#
+# A deploy runbook that omits a required secret sends someone into a
+# CrashLoopBackOff with no idea why. It drifts the moment the chart gains a
+# dependency, and nothing about a stale runbook looks wrong.
+
+STAGING_RUNBOOK = REPO_ROOT / "docs" / "RUNBOOK_STAGING_DEPLOY.md"
+
+
+def test_the_staging_runbook_exists():
+    assert STAGING_RUNBOOK.exists()
+
+
+def test_the_runbook_documents_every_secret_the_chart_requires(helm_values):
+    """
+    Five secrets must exist before install. Two of them stop the API booting at
+    all, because staging is hardened.
+    """
+    required = {
+        helm_values["api"]["secretRef"],
+        helm_values["minio"]["secretRef"],
+        helm_values["keycloak"]["secretRef"],
+        helm_values["postgresql"]["auth"]["existingSecret"],
+        helm_values["backup"]["objectStore"]["credentialsSecret"],
+    }
+    text = STAGING_RUNBOOK.read_text(encoding="utf-8")
+    missing = sorted(s for s in required if s not in text)
+    assert not missing, f"the runbook does not tell anyone to create: {missing}"
+
+
+def test_the_runbook_covers_every_worker_queue(helm_values):
+    """A queue nobody checks for is one nobody notices is absent, which is how
+    the gdpr queue went unconsumed."""
+    text = STAGING_RUNBOOK.read_text(encoding="utf-8")
+    missing = [q for q in helm_values["workers"] if q not in text]
+    assert not missing, f"the runbook's checks omit queues: {missing}"
+
+
+def test_the_runbook_names_the_audience_the_chart_expects(helm_values):
+    """
+    The audience mapper is the step most easily missed, and missing it makes
+    every request 401.
+    """
+    text = STAGING_RUNBOOK.read_text(encoding="utf-8")
+    assert helm_values["api"]["env"]["KEYCLOAK_AUDIENCE"] in text
+    assert "audience mapper" in text.lower()
