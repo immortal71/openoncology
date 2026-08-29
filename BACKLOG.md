@@ -32,6 +32,10 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - Worker, beat, api and web pods each keep egress to Postgres, Redis and 443
   - A test asserts every NetworkPolicy podSelector matches at least one rendered pod
   - `helm template` output passes kubeconform in the `validate-manifests` job
+- **Topology found while scoping this, and it invalidates a verbatim port**: the chart runs *two* Postgres instances. `values.yaml` enables the Bitnami `postgresql` sub-chart and `openoncology.databaseUrl` points the app at `{release}-postgresql`; separately `templates/postgres.yaml` renders an ungated StatefulSet at `{fullname}-postgres` carrying `component: postgres`, and that one is Keycloak's database (`keycloak.yaml:32`). So an egress rule allowing `component: postgres` reaches Keycloak's database and not the application's. The Bitnami pods carry Bitnami's labels, not this chart's, and those differ by sub-chart version. Redis is Bitnami-only; there is no chart-local template for it.
+  Workers also render four distinct component values (`worker-genomic`, `worker-ai`, `worker-notify`, `worker-gdpr`), so one selector cannot match them by `component` and needs either a shared label or `matchExpressions`.
+  The gdpr worker needs egress the others do not: it calls Keycloak's admin API to delete users and MinIO to delete objects (`workers/gdpr_worker.py`). A policy modelled on the other three silently breaks erasure, which is the obligation #130 just restored.
+- **Recommended shape**: gate the whole set behind `networkPolicy.enabled`, default **false**. A wrong policy fails closed, there is no cluster to test against here, and default-on means the first person to find out is whoever deploys it. Drive the datastore selectors from values so an operator can match their actual sub-chart labels.
 - **Out of scope**: the raw `infra/k8s` manifests, which already have this
 - **Risk**: medium — a wrong policy fails closed and silently
 
@@ -46,12 +50,28 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: the conda-only modules, which pin exact versions already; choosing different tool versions
 - **Risk**: low
 
+### OO-9: Keycloak's database is sized by the application database's setting
+- **Why**: `templates/postgres.yaml` is Keycloak's database, not the application's, which uses the Bitnami `postgresql` sub-chart. Its `volumeClaimTemplates` requests `.Values.postgresql.primary.persistence.size`, the sub-chart's value. `values.production.yaml` sets that to 200Gi, so Keycloak's realm database, a few megabytes of users and clients, claims a 200Gi volume, and anyone resizing the application database silently resizes Keycloak's too. Found while scoping OO-5.
+- **Files**: infra/helm/templates/postgres.yaml, infra/helm/values.yaml, infra/helm/values.production.yaml
+- **Acceptance**:
+  - Keycloak's database size comes from its own value, defaulted to something proportionate
+  - The two databases are distinguishable by name or comment, so the next reader does not assume `postgres.yaml` is the application's
+  - `helm template` still renders and passes kubeconform
+- **Out of scope**: consolidating the two databases, which is a data-migration decision rather than a chart one
+- **Risk**: low to change, but note `volumeClaimTemplates` is immutable on an existing StatefulSet, so an in-place `helm upgrade` will reject the edit. The entry is only safe on a fresh install or with a documented recreate step, and that caveat is the reason it is filed rather than done in passing.
+
 ---
 
 ## In progress
 
 <!-- One entry maximum. An entry stranded here means a session died mid-work;
      /standup will surface it. -->
+
+---
+
+## In review
+
+<!-- Entry plus PR URL. Cleared by hand when merged. -->
 
 ### OO-4: Refresh the stale figures in the pyproject coverage comment
 - **Why**: The comment moved into `[tool.coverage.report]` by OO-2 cites 53.93% over 8,353 production statements with 844 api tests. The suite has grown since: it now measures about 61% over 8,798 statements with 1,102 api tests. Anyone reading the comment concludes the gate sits a point below the measured total, when it actually sits nine points below, so the gate catches less than the comment claims it does.
@@ -65,11 +85,9 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: changing the threshold; the `omit` list; README and CONTRIBUTING, which quote the gate rather than the measurement.
 - **Risk**: low
 
----
-
-## In review
-
-<!-- Entry plus PR URL. Cleared by hand when merged. -->
+**PR**: [#132](https://github.com/immortal71/openoncology/pull/132). Rebased onto
+`main` after #130 and #131 merged, and the figures re-measured: the ones the
+branch was carrying had themselves gone stale by two merges while it sat open.
 
 ---
 
@@ -123,6 +141,35 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 ## Done
 
 <!-- Merged entries, newest first. Trim periodically. -->
+
+### Intended use stated on every output path
+Merged in [#131](https://github.com/immortal71/openoncology/pull/131), recorded as
+F18 in [risk_analysis.md](docs/risk_analysis.md). The FHIR export carried no
+research-use marker and reported `status: final`, which in FHIR R4 means complete
+and verified; the only thing verified was that the pipeline had finished. Unreviewed
+reports are now `preliminary`. The results payload's only disclaimer lived inside
+`patient_summary`, which fails to None, so it vanished exactly when generation went
+wrong and the response still carried drug names and OncoKB levels. `intended_use` is
+now a top-level typed field with conservative defaults.
+
+Labelling is not validation. Nothing here moves a gate in `REGULATORY_FRAMEWORK.md`
+section 3.
+
+### Deployment path: unconsumed gdpr queue, missing beat, readiness probe, JWKS auth
+Merged in [#130](https://github.com/immortal71/openoncology/pull/130). Four absences
+that no check could catch because every check asserted a positive about something
+present. `task_routes` sent erasure tasks to a `gdpr` queue nothing consumed, so
+`DELETE /api/me` promised deletion within 30 days and the message sat in Redis. The
+chart had no Celery Beat, so neither periodic task had ever fired in Kubernetes. The
+readiness probe asked `/health`, which answers 200 unconditionally. Auth refetched
+one Keycloak key per request and passed `audience` with `verify_aud: False`.
+
+A `validate-manifests` job now renders the chart through kubeconform. Its first
+version passed in eight seconds having rendered nothing: helm's dependency error went
+to stderr, kubeconform read empty stdin and reported "Valid: 0", and the pipe returned
+kubeconform's status. Fixed in the same PR under `pipefail` with assertions on the
+rendered output, which is the section 7 lesson arriving inside the commit that was
+about the same failure.
 
 ### OO-3: Add a drift guard test for the coverage threshold
 Merged in [#128](https://github.com/immortal71/openoncology/pull/128).
