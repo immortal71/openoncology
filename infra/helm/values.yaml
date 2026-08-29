@@ -185,12 +185,12 @@ networkPolicy:
       app.kubernetes.io/name: postgresql
     redis:
       app.kubernetes.io/name: redis
-    # MinIO is referenced by configmap.yaml and deployed by nothing in this
-    # chart. See BACKLOG.md OO-18. This selector is what it would carry once
-    # something creates it; until then the rule matches no pod, which under
-    # default-deny means the API cannot reach object storage either way.
+    # templates/minio.yaml labels its pods with the chart's selectorLabels plus
+    # component: minio, so `name` is the chart name and NOT "minio". Selecting
+    # on name here matched nothing, which under default-deny denies the API its
+    # object storage while rendering perfectly.
     objectStore:
-      app.kubernetes.io/name: minio
+      app.kubernetes.io/component: minio
 
 # ── Database backup ───────────────────────────────────────────────────────────
 # Nothing backed the application database up before this existed, and
@@ -270,12 +270,29 @@ redis:
 
 # ── MinIO ─────────────────────────────────────────────────────────────────────
 minio:
+  # Deployed by this chart when true. Before templates/minio.yaml existed this
+  # block configured an image and a volume for something nothing created, and
+  # the application was pointed at it regardless. See OO-18.
   enabled: true
+  # Set this and enabled: false to use an external object store, e.g. S3.
+  externalEndpoint: ""
   image:
     repository: minio/minio
-    tag: latest
+    # Pinned rather than `latest`, which was what this said. An object store
+    # that changes version on a pod restart is not a store you can reason about.
+    tag: RELEASE.2024-06-13T22-53-53Z
+    pullPolicy: IfNotPresent
   persistence:
     size: 200Gi
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  # Must carry MINIO_ROOT_USER and MINIO_ROOT_PASSWORD, matching the
+  # MINIO_ACCESS_KEY and MINIO_SECRET_KEY the API reads from its own secret.
   secretRef: openoncology-minio-secrets
 
 # ── Keycloak ──────────────────────────────────────────────────────────────────

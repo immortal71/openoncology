@@ -452,3 +452,99 @@ def test_the_application_database_is_not_confused_with_keycloaks():
     api_policy = text[text.index("-api\n"):text.index("-web\n")]
     assert "$np.datastores.postgresql" in api_policy
     assert "component: postgres\n" not in api_policy
+
+
+# ── Every service the ConfigMap names is actually created ────────────────────
+#
+# OO-18. `MINIO_ENDPOINT` pointed at `{release}-minio:9000` and no template
+# created a MinIO, so a helm install produced an application configured to reach
+# object storage that did not exist. Every upload, report write and GDPR object
+# deletion failed, as did the backup job, which writes through `mc`.
+#
+# This is the general form: an endpoint the application is told to dial must be
+# something the chart creates, something a declared dependency creates, or an
+# external address the operator supplies deliberately.
+
+def _chart_service_names() -> set[str]:
+    """Service and StatefulSet names the templates define, with Helm's two name
+    expressions reduced to markers."""
+    names = set()
+    for path in (HELM / "templates").glob("*.yaml"):
+        text = path.read_text(encoding="utf-8")
+        for match in re.finditer(r"name:\s*(\{\{[^}]*\}\}[-a-z0-9]*)", text):
+            token = match.group(1)
+            token = re.sub(r"\{\{[^}]*fullname[^}]*\}\}", "FULLNAME", token)
+            token = re.sub(r"\{\{[^}]*Release\.Name[^}]*\}\}", "RELEASE", token)
+            names.add(token.strip())
+    return names
+
+
+def test_minio_is_deployed_by_the_chart(helm_values):
+    minio = HELM / "templates" / "minio.yaml"
+    assert minio.exists(), (
+        "the ConfigMap points the application at MinIO and nothing creates one"
+    )
+    assert helm_values["minio"]["enabled"] is True
+
+
+def test_the_minio_service_name_matches_the_endpoint_the_app_dials():
+    """
+    The Service must be named `{release}-minio` because that is what
+    `openoncology.minioEndpoint` resolves to. Both read the same helper now, so
+    they cannot drift; this asserts the name itself has not moved.
+    """
+    minio = (HELM / "templates" / "minio.yaml").read_text(encoding="utf-8")
+    helpers = (HELM / "templates" / "_helpers.tpl").read_text(encoding="utf-8")
+    assert "{{ .Release.Name }}-minio" in minio
+    assert "minioEndpoint" in helpers
+    configmap = (HELM / "templates" / "configmap.yaml").read_text(encoding="utf-8")
+    assert "openoncology.minioEndpoint" in configmap, (
+        "the ConfigMap builds the endpoint itself instead of using the helper"
+    )
+
+
+def test_disabling_minio_requires_an_external_endpoint():
+    """Turning it off must not silently leave the application dialling nothing."""
+    helpers = (HELM / "templates" / "_helpers.tpl").read_text(encoding="utf-8")
+    assert "required" in helpers and "externalEndpoint" in helpers
+
+
+def test_minio_keeps_its_data_on_a_volume():
+    """It is the store for patient genomic files, not a cache."""
+    minio = (HELM / "templates" / "minio.yaml").read_text(encoding="utf-8")
+    assert "kind: StatefulSet" in minio
+    assert "volumeClaimTemplates" in minio
+
+
+def test_the_object_store_image_is_pinned():
+    """`latest` on an object store means the version changes on a pod restart."""
+    minio = (HELM / "templates" / "minio.yaml").read_text(encoding="utf-8")
+    values = yaml.safe_load((HELM / "values.yaml").read_text(encoding="utf-8"))
+    assert values["minio"]["image"]["tag"] != "latest"
+
+
+def test_the_backup_job_creates_its_bucket():
+    """
+    `mc cp` into a bucket that does not exist fails. The application creates its
+    own three on demand and knows nothing about the backup bucket.
+    """
+    text = (HELM / "templates" / "backup-cronjob.yaml").read_text(encoding="utf-8")
+    assert "mc mb --ignore-existing" in text
+
+
+def test_the_network_policy_can_select_the_object_store(helm_values):
+    """
+    The egress rule added in OO-5 pointed at a selector that matched nothing,
+    because nothing was deployed. It has to match what minio.yaml now labels.
+    """
+    selector = helm_values["networkPolicy"]["datastores"]["objectStore"]
+    minio = (HELM / "templates" / "minio.yaml").read_text(encoding="utf-8")
+    # No substring fallback. The first version of this accepted `value in minio`,
+    # which passed on the word "minio" appearing anywhere in the file and let a
+    # selector through that matched no pod.
+    for key, value in selector.items():
+        assert f"{key}: {value}" in minio, (
+            f"networkPolicy objectStore selector {key}={value} matches no label "
+            f"minio.yaml sets. Its pods carry the chart selectorLabels plus "
+            f"component: minio, so app.kubernetes.io/name is the chart name."
+        )

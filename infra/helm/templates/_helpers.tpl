@@ -36,6 +36,20 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 postgresql+asyncpg://{{ .Values.postgresql.auth.username }}:$(DB_PASSWORD)@{{ .Release.Name }}-postgresql:5432/{{ .Values.postgresql.auth.database }}
 {{- end }}
 
+{{/*
+Object storage endpoint. When minio.enabled the chart deploys a Service of this
+exact name; when it is false the operator supplies an external endpoint. The
+ConfigMap and minio.yaml both read this, so the address the application dials
+and the Service that answers cannot drift apart, which is how OO-18 happened.
+*/}}
+{{- define "openoncology.minioEndpoint" -}}
+{{- if .Values.minio.enabled -}}
+{{ .Release.Name }}-minio:9000
+{{- else -}}
+{{ required "minio.enabled is false, so minio.externalEndpoint must be set" .Values.minio.externalEndpoint }}
+{{- end -}}
+{{- end }}
+
 {{/* Redis URL from redis sub-chart */}}
 {{- define "openoncology.redisUrl" -}}
 redis://{{ .Release.Name }}-redis-master:6379/0
