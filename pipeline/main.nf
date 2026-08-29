@@ -17,6 +17,18 @@ nextflow.enable.dsl=2
  *     --cancer_type "Lung adenocarcinoma" \
  *     --caller somatic
  *
+ *   # Paired-end FASTQ. Both mates, because that is what a sequencer produces,
+ *   # and aligning one alone throws away the insert-size information that
+ *   # places reads in repetitive regions:
+ *   nextflow run main.nf \
+ *     --input_file sample_R1.fastq.gz \
+ *     --reads_r2 sample_R2.fastq.gz \
+ *     --output_dir ./results \
+ *     --caller germline
+ *
+ *   # A {1,2} glob on --input_file does NOT pair the mates. It runs the
+ *   # workflow twice, once per file. Use --reads_r2.
+ *
  *   # Full multi-omic (WES tumour/normal pair):
  *   nextflow run main.nf \
  *     --input_file tumour.bam \
@@ -28,6 +40,14 @@ nextflow.enable.dsl=2
  */
 
 params.input_file  = null
+// Mate 2 of a paired-end FASTQ sample. Empty means single-end.
+//
+// Paired-end is what every sequencer emits and what all of the reference data
+// this pipeline is validated against uses. Until this existed the FASTQ path
+// ran `trimmomatic SE` and handed one file to `bwa-mem2 mem`, so a paired
+// sample could only be submitted one mate at a time and was aligned without the
+// insert-size information that resolves ambiguous placements.
+params.reads_r2    = ""
 params.output_dir  = "./results"
 params.cancer_type = "unknown"
 params.genome      = "GRCh38"
@@ -38,6 +58,12 @@ params.dbsnp       = "${projectDir}/references/dbsnp_146.hg38.vcf.gz"
 params.caller       = "germline"   // germline | somatic
 params.normal_bam   = ""           // matched normal BAM for somatic calling
 params.germline_vcf = ""           // gnomAD VCF for Mutect2 germline resource
+
+// Trimmomatic adapter files. Parameters rather than literals because the paths
+// differ by execution profile: these defaults are where the bioconda package
+// puts them, and a container image will not agree.
+params.adapters_se  = "/opt/conda/share/trimmomatic/adapters/TruSeq3-SE.fa"
+params.adapters_pe  = "/opt/conda/share/trimmomatic/adapters/TruSeq3-PE.fa"
 
 // Multi-omic flags
 params.run_cnv      = false        // Run CNVkit for copy number alterations
@@ -70,6 +96,18 @@ def _is_bam_name(String name) {
 def _is_vcf_name(String name) {
     def n = (name ?: '').toLowerCase()
     return n.endsWith('.vcf') || n.endsWith('.vcf.gz')
+}
+
+/*
+ * Sample id from a read filename, with the mate marker removed so R1 and R2 of
+ * one sample agree. Without stripping it the pair would be named after mate 1
+ * and every output would read as though mate 2 belonged to a different sample.
+ */
+def _sample_id_from_reads(String name) {
+    def base = (name ?: '')
+        .replaceAll(/\.(fastq|fq)(\.gz)?$/, '')
+        .replaceAll(/[._-](R?[12])$/, '')
+    return base ?: 'sample'
 }
 
 def _resolve_first_existing_path(String primary, List<String> fallbacks = []) {
@@ -114,6 +152,26 @@ workflow {
     }
 
     input_ch = Channel.fromPath(params.input_file, checkIfExists: true)
+
+    // Reads travel as (sample_id, [mates]) so one sample stays one item through
+    // QC, trimming and alignment. Passing a {1,2} glob to --input_file does not
+    // do this: fromPath emits two independent items and the workflow would run
+    // twice, once per mate, which is what used to happen.
+    def r2_given = params.reads_r2 ? params.reads_r2.toString().trim() : ""
+    if (r2_given && !is_fastq) {
+        error "ERROR: --reads_r2 is only meaningful with FASTQ input; --input_file is ${params.input_file}"
+    }
+    if (r2_given && !file(r2_given).exists()) {
+        error "ERROR: Missing mate 2 file: ${r2_given}"
+    }
+
+    reads_ch = r2_given
+        ? Channel.of(tuple(
+              _sample_id_from_reads(file(params.input_file).name),
+              [file(params.input_file), file(r2_given)]
+          ))
+        : input_ch.map { r -> tuple(_sample_id_from_reads(r.name), [r]) }
+
     normal_bam_ch = params.normal_bam ? Channel.fromPath(params.normal_bam) : Channel.value(file("NO_NORMAL"))
     germline_vcf_ch = params.germline_vcf ? Channel.fromPath(params.germline_vcf) : Channel.value(file("NO_GERMLINE"))
     targets_bed_ch = params.targets_bed ? Channel.fromPath(params.targets_bed) : Channel.value(file("FLAT"))
@@ -153,9 +211,14 @@ workflow {
     }
 
     // ── FASTQ path: full QC → trim → align → call → annotate ────────────────
-    FASTQC(input_ch)
-    TRIMMOMATIC(input_ch)
-    BWA_MEM2_ALIGN(TRIMMOMATIC.out.trimmed, resolved_ref_fasta)
+    FASTQC(reads_ch)
+    TRIMMOMATIC(reads_ch)
+
+    // Trimmomatic emits the paired channel for a pair and the single-end one
+    // otherwise, exactly one of which carries an item for any given sample.
+    trimmed_ch = TRIMMOMATIC.out.trimmed.mix(TRIMMOMATIC.out.trimmed_se)
+
+    BWA_MEM2_ALIGN(trimmed_ch, resolved_ref_fasta)
 
     if (params.caller == "somatic") {
         MUTECT2(BWA_MEM2_ALIGN.out.bam, normal_bam_ch.first(), Channel.value(resolved_ref_fasta), germline_vcf_ch.first())

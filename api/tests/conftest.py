@@ -98,6 +98,13 @@ async def client(db_session):
     app.dependency_overrides[get_db] = _override_get_db
     app.dependency_overrides[get_current_patient] = _override_get_current_patient
     # Disable rate limiting in tests
+    # `enabled` is slowapi's own switch and is the one that short-circuits the
+    # decorator. Setting `_storage = None` was the previous approach and never
+    # disabled anything; it went unnoticed because no test module had made more
+    # than UPLOAD_LIMIT's five submit calls inside a minute. The first one that
+    # did got 429s in a different file, which is a confusing way to learn that a
+    # fixture's docstring was wrong.
+    limiter.enabled = False
     limiter._storage = None  # type: ignore[assignment]
     app.state.limiter = limiter
 

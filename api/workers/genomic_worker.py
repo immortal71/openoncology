@@ -35,10 +35,17 @@ def run_genomic_pipeline(
     biopsy_s3_key: str,
     dna_s3_key: str,
     cancer_type: str,
+    dna_r2_s3_key: str | None = None,
 ):
     """
     Main genomic pipeline task.
     Runs synchronously inside the Celery worker process.
+
+    `dna_r2_s3_key` is mate 2 of a paired-end FASTQ sample and defaults to None.
+    The default is not cosmetic: tasks are `acks_late`, so a message enqueued by
+    the previous five-argument signature can still be sitting in Redis when a
+    worker running this code picks it up. Without the default that redelivery
+    raises instead of running single-end, which is what it did before.
     """
     from workers._db_sync import get_sync_session
     from models.submission import Submission, SubmissionStatus
@@ -59,9 +66,14 @@ def run_genomic_pipeline(
         with tempfile.TemporaryDirectory() as workdir:
             # 1. Download DNA file from MinIO
             dna_local = _download_from_minio(dna_s3_key, workdir)
+            dna_r2_local = (
+                _download_from_minio(dna_r2_s3_key, workdir) if dna_r2_s3_key else None
+            )
 
             # 2. Run Nextflow pipeline
-            vcf_path = _run_nextflow_pipeline(dna_local, workdir, cancer_type)
+            vcf_path = _run_nextflow_pipeline(
+                dna_local, workdir, cancer_type, reads_r2=dna_r2_local
+            )
 
             # 3. Parse VCF and annotate mutations
             mutations_data = _parse_and_annotate_vcf(vcf_path)
@@ -147,7 +159,9 @@ def _download_from_minio(s3_key: str, workdir: str) -> str:
     return local_path
 
 
-def _run_nextflow_pipeline(dna_file: str, workdir: str, cancer_type: str) -> str:
+def _run_nextflow_pipeline(
+    dna_file: str, workdir: str, cancer_type: str, reads_r2: str | None = None
+) -> str:
     """
     Execute the Nextflow pipeline. Returns path to output VCF.
     Nextflow handles: FastQC → Trimmomatic → BWA-MEM2 → GATK → OpenCRAVAT
@@ -187,6 +201,9 @@ def _run_nextflow_pipeline(dna_file: str, workdir: str, cancer_type: str) -> str
         "-work-dir", os.path.join(workdir, "work"),
         "-with-report",
     ]
+
+    if reads_r2:
+        cmd += ["--reads_r2", reads_r2]
 
     result = subprocess.run(
         cmd,

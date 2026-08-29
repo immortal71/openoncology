@@ -36,6 +36,11 @@ class Submission(Base):
     # S3/MinIO keys — never expose to client
     biopsy_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
     dna_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
+    # Mate 2 of a paired-end FASTQ submission. Null for single-end reads, and
+    # for VCF and BAM submissions, which have no mate. Nullable rather than
+    # defaulted because "this sample had no second mate" and "this sample
+    # predates the column" are different facts and only the first is knowable.
+    dna_r2_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
     vcf_s3_key: Mapped[str] = mapped_column(String(512), nullable=True)
 
     # Celery job IDs for tracking
