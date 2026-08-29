@@ -278,3 +278,63 @@ def test_workers_declare_a_grace_period(routed_queues, helm_values):
         grace = cfg.get("terminationGracePeriodSeconds")
         assert grace is not None, f"worker {queue!r} has no terminationGracePeriodSeconds"
         assert grace > 30, f"worker {queue!r} grace period {grace}s is at or below the default"
+
+
+# ── The database is backed up ────────────────────────────────────────────────
+#
+# OO-12. Nothing backed the application database up, and HIPAA_COMPLIANCE.md
+# claimed otherwise, citing WAL archiving that was never configured. Persistence
+# is not backup: losing the PVC took every submission and result with it.
+
+def test_the_chart_defines_a_database_backup(helm_values):
+    backup = HELM / "templates" / "backup-cronjob.yaml"
+    assert backup.exists(), "the chart has no database backup"
+    assert helm_values["backup"]["enabled"] is True, (
+        "a backup that must be switched on is off in the deployment that needed it"
+    )
+
+
+def test_the_backup_targets_the_application_database_not_keycloaks():
+    """
+    The chart runs two PostgreSQL instances. `{release}-postgresql` is the
+    Bitnami sub-chart the application uses; `{fullname}-postgres` is Keycloak's.
+    The compliance document previously cited the second while describing the
+    first.
+    """
+    text = (HELM / "templates" / "backup-cronjob.yaml").read_text(encoding="utf-8")
+    assert "-postgresql" in text
+    assert 'openoncology.fullname" . }}-postgres"' not in text
+
+
+def test_the_backup_fails_loudly():
+    """
+    A backup that fails quietly is worse than none, because it is believed. No
+    `|| true` on the dump or the upload, and a size floor so an empty dump is an
+    error rather than a small file.
+    """
+    text = (HELM / "templates" / "backup-cronjob.yaml").read_text(encoding="utf-8")
+    assert "set -euo pipefail" in text
+    assert "backup aborted" in text, "no size floor on the dump"
+    script = text[text.index("set -euo pipefail"):]
+    dump_line = [ln for ln in script.splitlines() if "pg_dump" in ln]
+    assert dump_line and "|| true" not in dump_line[0]
+
+
+def test_the_backup_writes_a_manifest():
+    """A restore is verified against recorded bytes, not against a file existing;
+    a zero-byte object is also a file."""
+    text = (HELM / "templates" / "backup-cronjob.yaml").read_text(encoding="utf-8")
+    assert "manifest.json" in text
+    assert '"bytes"' in text
+
+
+def test_a_restore_procedure_is_documented():
+    """
+    OO-12's acceptance requires an exercised restore. The runbook is the
+    prerequisite for that, and it states plainly that the drill has not been run.
+    """
+    runbook = REPO_ROOT / "docs" / "RUNBOOK_BACKUP_RESTORE.md"
+    assert runbook.exists()
+    text = runbook.read_text(encoding="utf-8")
+    assert "alembic_version" in text, "a restore is not verified without a schema check"
+    assert "Restore drill" in text
