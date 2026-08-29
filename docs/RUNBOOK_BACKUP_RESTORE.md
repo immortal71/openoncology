@@ -128,3 +128,10 @@ Only after the drill has been run at least once.
 - Nothing alerts on a failed backup. The CronJob fails loudly in Kubernetes, and
   Kubernetes tells nobody. `OO-16` deploys the exporters that would make
   `kube_job_failed` alertable.
+- Keycloak's database volume was resized by `OO-9`, from the application
+  database's 200Gi to its own 10Gi. `volumeClaimTemplates` is immutable on an
+  existing StatefulSet, so `helm upgrade` rejects that change against a cluster
+  where it already exists. Applying it needs a fresh install, or deleting the
+  StatefulSet with `--cascade=orphan` and recreating it. Since this database is
+  not covered by the nightly dump, export the realm first:
+  `kubectl exec <keycloak-pod> -- /opt/keycloak/bin/kc.sh export --dir /tmp/realm`.

@@ -1,3 +1,21 @@
+{{/*
+KEYCLOAK's database. Not the application's.
+
+The application uses the Bitnami `postgresql` sub-chart at
+`{{ .Release.Name }}-postgresql`, reached through `openoncology.databaseUrl`.
+This StatefulSet backs Keycloak alone: users, clients and the realm.
+
+The distinction has already caused two defects. HIPAA_COMPLIANCE.md cited this
+file as evidence of a backup for patient data, and the NetworkPolicy work nearly
+granted the application egress to this database instead of its own. Sizing and
+resources come from `keycloakDatabase` rather than from `postgresql.primary`,
+which is what OO-9 corrected.
+
+Still shared with the application's sub-chart, and not corrected here: the
+username, database name and credentials secret. Splitting those needs new
+secrets to exist before the chart can reference them, so it is a deployment
+change rather than a template one.
+*/}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -41,7 +59,7 @@ spec:
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           resources:
-            {{- toYaml .Values.postgresql.primary.resources | nindent 12 }}
+            {{- toYaml .Values.keycloakDatabase.resources | nindent 12 }}
           livenessProbe:
             exec:
               command: [pg_isready, -U, {{ .Values.postgresql.auth.username }}]
@@ -65,7 +83,7 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ .Values.postgresql.primary.persistence.size }}
+            storage: {{ .Values.keycloakDatabase.persistence.size }}
 ---
 apiVersion: v1
 kind: Service
