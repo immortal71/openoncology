@@ -21,7 +21,15 @@
 #
 # What this file relaxes is capacity and blast radius, not security.
 
+# Immutable tags. `latest` is mutable, so a pod restart can change the running
+# version and nothing records which code produced a given result. Both images
+# below were published by the `publish-images` job from commit 770ce3f.
+#
+# Bump these deliberately. Deploying becomes an explicit act of changing a tag,
+# which is also what makes a rollback a one-line revert.
 api:
+  image:
+    tag: sha-770ce3f
   replicaCount: 1
   autoscaling:
     enabled: false
@@ -40,6 +48,8 @@ api:
     enabled: false
 
 web:
+  image:
+    tag: sha-770ce3f
   replicaCount: 1
   resources:
     requests:
