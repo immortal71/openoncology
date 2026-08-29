@@ -75,16 +75,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: the somatic and RNA-seq paths, beyond what falls out of the same change
 - **Risk**: medium. This changes what the pipeline computes, so it invalidates any variant-calling measurement taken before it. Either sequence it ahead of the run in the runbook, or record which configuration produced which number.
 
-### OO-11: BWA-MEM2 rebuilds the reference index on every alignment task
-- **Why**: `BWA_MEM2_ALIGN` declares `path ref_fasta` as its only reference input, so Nextflow stages the FASTA into the task work directory and none of the index files beside it. The script then runs `bwa-mem2 index $ref_fasta`, which `pipeline/scripts/download_references.sh` puts at roughly 30 minutes and 12 GB of RAM, and the result is discarded with the work directory. Setup builds the index and the pipeline never sees it, so every sample pays the cost again and every retry pays it once more.
-- **Files**: pipeline/modules/bwa_mem2.nf, pipeline/main.nf
-- **Acceptance**:
-  - The index files are staged as inputs alongside the FASTA
-  - `bwa-mem2 index` is gone from the alignment script, or runs only when the index is genuinely absent
-  - A missing index fails with a message pointing at `download_references.sh`, rather than silently costing half an hour
-- **Out of scope**: whether to ship or cache a prebuilt index, which is a distribution decision
-- **Risk**: low
-
 ### OO-12: There is no backup of patient data, and the compliance checklist said there was
 - **Why**: Nothing in this repository backs up the application database or object storage. No `archive_mode`, `archive_command` or `wal_level`; no MinIO versioning; no `pg_dump`, pgBackRest, wal-g or Velero anywhere. The Bitnami `postgresql` sub-chart has persistence, and persistence is not backup: a deleted PVC, a bad migration or a ransomware event loses every submission, mutation and result permanently, with no recovery path. `HIPAA_COMPLIANCE.md` carried ✅ against §164.308 contingency planning, citing "PostgreSQL WAL + MinIO versioning (see `infra/helm/postgres.yaml`)", and that file is Keycloak's database rather than the application's. The claim has been corrected; the gap it was covering is this entry.
 - **Files**: infra/helm/values.yaml, infra/helm/values.production.yaml, infra/helm/templates/, docs/HIPAA_COMPLIANCE.md, docs/SETUP.md
