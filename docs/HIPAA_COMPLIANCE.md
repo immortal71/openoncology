@@ -6,12 +6,19 @@
 
 ---
 
-> **On the accuracy of this checklist.** Two rows below carried ✅ against
-> controls that were never implemented: the contingency plan cited WAL archiving
-> and MinIO versioning, neither of which is configured anywhere, and pointed at
-> the wrong database; data-at-rest integrity cited PostgreSQL checksums, which
-> are off. Both were corrected on 2026-08-29 after being checked against the
+> **On the accuracy of this checklist.** Four rows below carried ✅ against
+> controls that were never implemented. The contingency plan cited WAL archiving
+> and MinIO versioning, neither configured anywhere, and pointed at Keycloak's
+> database rather than the application's. Data-at-rest integrity cited PostgreSQL
+> checksums, which are off. The security officer row cited a CODEOWNERS file that
+> does not exist. Automatic log-off quoted session timeouts that nothing sets.
+> All four were corrected on 2026-08-29, after being checked against the
 > infrastructure rather than read.
+>
+> `api/tests/test_compliance_claims.py` now fails the build when a row claims
+> implementation and cites a path or a mechanism that is not present. The last
+> two of the four were found by that test rather than by hand, which is the
+> argument for it existing.
 >
 > A ✅ here should mean someone has verified the control in the deployed
 > configuration, not that it was intended. Anything not verified that way belongs
@@ -24,7 +31,7 @@
 
 | Control | Status | Implementation |
 |---|---|---|
-| Security Officer assigned | ✅ | Designated in CODEOWNERS |
+| Security Officer assigned | ⬜ | No CODEOWNERS file exists in this repository, at the root, under `.github/` or under `docs/`. The role is unassigned rather than assigned elsewhere. See BACKLOG.md OO-15 |
 | Risk Analysis performed | ✅ | See `docs/risk_analysis.md` |
 | Workforce training policy | ⬜ | Annual HIPAA training required for all contributors |
 | Sanction policy | ⬜ | Document disciplinary procedure for policy violations |
@@ -53,7 +60,7 @@
 |---|---|---|
 | Unique user identification | ✅ | Keycloak user UUID (`sub`) in every JWT |
 | Emergency access procedure | ⬜ | Document break-glass procedure for oncologist emergency access |
-| Automatic log-off | ✅ | Keycloak session timeout: 30 min idle / 8 hr max |
+| Automatic log-off | ⬜ | Nothing here configures `ssoSessionIdleTimeout` or `ssoSessionMaxLifespan`. Sessions run at whatever the Keycloak image defaults to, which is not the 8 hour maximum this row previously stated. Relying on an upstream default is not the same as configuring one. See BACKLOG.md OO-15 |
 | Encryption + decryption | ✅ | TLS 1.3 in transit (NGINX ingress); AES-256 at rest (cloud disk encryption) |
 
 ### 3.2 Audit Controls (§164.312(b))

@@ -118,6 +118,16 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: the substance of HIPAA compliance, which is a legal question and not a test
 - **Risk**: low
 
+### OO-15: Two governance controls the compliance guard exposed
+- **Why**: `api/tests/test_compliance_claims.py` failed against two further rows once it existed. **Security officer**: the row cited a CODEOWNERS file, and no such file exists at the root, under `.github/` or under `docs/`, so the role is unassigned rather than assigned somewhere else. **Automatic log-off**: the row quoted "30 min idle / 8 hr max" and nothing in this repository sets `ssoSessionIdleTimeout` or `ssoSessionMaxLifespan`, so sessions run at the Keycloak image's defaults, which do not match the figure quoted. Both rows are corrected; these are the gaps behind them.
+- **Files**: .github/CODEOWNERS, infra/helm/templates/keycloak.yaml, docs/HIPAA_COMPLIANCE.md
+- **Acceptance**:
+  - A CODEOWNERS file exists naming a responsible owner, or the row is rewritten to describe how the role is actually held
+  - Session lifetimes are set explicitly in the realm configuration the chart deploys, at values someone has chosen, rather than inherited
+  - Both rows return to implemented only once `test_compliance_claims.py` passes with them marked so
+- **Out of scope**: who the security officer is, which is the maintainer's decision and not a code change
+- **Risk**: low to implement. Worth noting that assigning an owner in a file is not the same as a person accepting the role, and the checklist can only ever check the first.
+
 ---
 
 ## In progress
