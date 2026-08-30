@@ -126,10 +126,13 @@ def test_the_oncologist_report_carries_the_research_use_statement(report):
     ordinary report carried none.
     """
     from services.intended_use import RESEARCH_USE_STATEMENT
-    from services.pdf_export import generate_oncologist_report_document
+    from services.pdf_export import _build_oncologist_html
 
-    body, _, _ = generate_oncologist_report_document(report)
-    text = body.decode("utf-8", "replace")
+    # Asserted on the HTML the template produces, not on the rendered bytes.
+    # Where WeasyPrint's native libraries are present, as on the CI runner, the
+    # document comes back as compressed PDF and searching it for text finds
+    # nothing. The claim is about the template's content either way.
+    text = _build_oncologist_html(report)
     assert "RESEARCH USE ONLY" in text.upper(), (
         "the printable clinician report does not say it is research output"
     )
@@ -207,9 +210,18 @@ def test_the_dockerfile_python_matches_what_ci_tests():
 
 def test_both_documents_render(report):
     """The hoisting must not have changed what the templates produce."""
-    from services.pdf_export import generate_oncologist_report_document
+    from services.pdf_export import _build_oncologist_html, _build_patient_html
 
-    body, _, _ = generate_oncologist_report_document(report)
-    text = body.decode("utf-8", "replace")
-    assert "<h2>" in text
-    assert "Section 2" in text
+    onc = _build_oncologist_html(report)
+    assert "<h2>" in onc
+    assert "Section 2" in onc
+
+    from services.patient_summary import generate_patient_summary
+
+    letter = _build_patient_html(generate_patient_summary(
+        ranked_candidates=[],
+        mutation_summary=[{"gene": "KRAS", "hgvs": "p.G12D"}],
+        cancer_type="Lung adenocarcinoma",
+        gene="KRAS",
+    ).sections)
+    assert "<h1>" in letter
