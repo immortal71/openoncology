@@ -30,6 +30,23 @@ from services.intended_use import (
 )
 
 
+
+def _enum_value(value, default: str = "") -> str:
+    """
+    The string form of a model field, unwrapping SQLAlchemy enums.
+
+    `str(SubmissionStatus.complete)` is "SubmissionStatus.complete", not
+    "complete". Every value read here arrives as an enum from the ORM and as a
+    plain string from a test fixture, and the difference was invisible until the
+    export was run against a real row: statuses fell through to "unknown" and
+    every variant was reported as uncertain significance regardless of its
+    classification.
+    """
+    if value is None:
+        return default
+    return str(getattr(value, "value", value))
+
+
 def build_diagnostic_report(
     submission: object,
     result: object,
@@ -58,7 +75,7 @@ def build_diagnostic_report(
         issued_str = str(issued)
 
     clinician_reviewed = bool(getattr(result, "oncologist_reviewed", False)) if result else False
-    status = _map_status(getattr(submission, "status", "unknown"), clinician_reviewed)
+    status = _map_status(_enum_value(getattr(submission, "status", None), "unknown"), clinician_reviewed)
 
     observation_refs = [
         {"reference": f"Observation/mutation-{m.id}"}
@@ -159,8 +176,8 @@ def build_observation(mutation: object, clinician_reviewed: bool = False) -> dic
     """
     gene = getattr(mutation, "gene", "UNKNOWN")
     hgvs = getattr(mutation, "hgvs_notation", None) or ""
-    classification = str(getattr(mutation, "classification", "uncertain"))
-    oncokb_level = str(getattr(mutation, "oncokb_level", "unknown"))
+    classification = _enum_value(getattr(mutation, "classification", None), "uncertain")
+    oncokb_level = _enum_value(getattr(mutation, "oncokb_level", None), "unknown")
     alphamissense = getattr(mutation, "alphamissense_score", None)
     is_targetable = getattr(mutation, "is_targetable", False)
     chromosome = getattr(mutation, "chromosome", None)
