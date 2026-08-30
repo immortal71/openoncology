@@ -83,7 +83,7 @@ def test_the_weasyprint_probe_treats_a_missing_library_as_unavailable(monkeypatc
     """
     import builtins
 
-    import services.pdf_export as pdf
+    from services.pdf_export import _weasyprint_available
 
     real_import = builtins.__import__
 
@@ -92,10 +92,14 @@ def test_the_weasyprint_probe_treats_a_missing_library_as_unavailable(monkeypatc
             raise OSError("cannot load library 'libgobject-2.0-0'")
         return real_import(name, *args, **kwargs)
 
-    monkeypatch.setattr(pdf, "_WEASYPRINT_AVAILABLE", None)
+    # Addressed by dotted path rather than by importing the module object, so
+    # this file uses one import style throughout. Importing the same module both
+    # as `import x` and `from x import y` is what CodeQL flags, and the cached
+    # flag has to be cleared on the module itself for the probe to re-run.
+    monkeypatch.setattr("services.pdf_export._WEASYPRINT_AVAILABLE", None)
     monkeypatch.setattr(builtins, "__import__", _raise_oserror)
 
-    assert pdf._weasyprint_available() is False, (
+    assert _weasyprint_available() is False, (
         "a missing native library still escapes the probe"
     )
 
