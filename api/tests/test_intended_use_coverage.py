@@ -211,3 +211,97 @@ async def test_intended_use_survives_a_failed_patient_summary(
     assert "patient_summary" in body["generation_errors"]
     assert body["intended_use"]["intended_use"] == "research"
     assert "RESEARCH USE ONLY" in body["intended_use"]["statement"]
+
+
+# ── The export reads ORM enums, not strings ──────────────────────────────────
+#
+# The fixtures above use plain strings for status, classification and
+# oncokb_level. SQLAlchemy hands the export enum members, and
+# `str(SubmissionStatus.complete)` is "SubmissionStatus.complete", not
+# "complete". Everything below passed against strings and was wrong against a
+# real row:
+#
+#   DiagnosticReport.status  fell through to "unknown" for every submission,
+#                            so the #131 preliminary/final distinction never
+#                            took effect at all.
+#   Observation interpretation  fell through to "Uncertain significance" for
+#                            every variant, so a likely-pathogenic targetable
+#                            KRAS variant was exported to an EMR as uncertain
+#                            while the report's own conclusionCode said
+#                            Pathogenic. The two contradicted each other.
+#
+# Found by running the API and reading the output, which no test had done.
+
+from models.mutation import MutationClassification, OncoKBLevel  # noqa: E402
+from models.submission import SubmissionStatus  # noqa: E402
+
+
+class _OrmSubmission(_Submission):
+    """As SQLAlchemy actually presents it."""
+    status = SubmissionStatus.complete
+
+
+class _OrmMutation(_Mutation):
+    classification = MutationClassification.likely_pathogenic
+    oncokb_level = OncoKBLevel.level_4
+
+
+def _orm_report(reviewed: bool = False) -> dict:
+    result = _Result()
+    result.oncologist_reviewed = reviewed
+    return build_diagnostic_report(
+        submission=_OrmSubmission(),
+        result=result,
+        mutations=[_OrmMutation()],
+        patient_id_fhir="Patient/p-1",
+    )
+
+
+def test_status_is_mapped_from_an_orm_enum():
+    """`unknown` for a completed submission is what this looked like."""
+    assert _orm_report(reviewed=False)["status"] == "preliminary"
+    assert _orm_report(reviewed=True)["status"] == "final"
+
+
+def test_a_pathogenic_variant_is_not_exported_as_uncertain():
+    """
+    The clinically significant half. A likely-pathogenic, targetable variant
+    reported to an EMR as uncertain significance understates it in the format
+    designed to be filed in a patient's chart.
+    """
+    obs = build_observation(_OrmMutation())
+    codings = [c for i in obs.get("interpretation", []) for c in i.get("coding", [])]
+    displays = [c.get("display") for c in codings]
+    assert "Uncertain significance" not in displays, (
+        f"a likely-pathogenic variant is reported as {displays}"
+    )
+    assert "Pathogenic" in displays
+
+
+def test_the_report_and_its_observations_agree():
+    """
+    conclusionCode came from a bool and was right; the interpretation came from
+    a stringified enum and was wrong, so the two disagreed on the same variant.
+    """
+    report = _orm_report()
+    obs = build_observation(_OrmMutation())
+    report_says = [c["coding"][0]["display"] for c in report.get("conclusionCode", [])]
+    obs_says = [c.get("display") for i in obs.get("interpretation", []) for c in i.get("coding", [])]
+    assert set(report_says) & set(obs_says), (
+        f"report says {report_says}, observation says {obs_says}"
+    )
+
+
+@pytest.mark.parametrize(
+    "status,expected",
+    [
+        (SubmissionStatus.queued, "registered"),
+        (SubmissionStatus.processing, "partial"),
+        (SubmissionStatus.failed, "cancelled"),
+    ],
+)
+def test_every_submission_status_maps_from_its_enum(status, expected):
+    """All of them returned `unknown`, not just the completed case."""
+    from services.fhir_export import _enum_value
+
+    assert _map_status(_enum_value(status)) == expected
