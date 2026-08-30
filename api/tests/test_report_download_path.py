@@ -153,3 +153,63 @@ def test_the_patient_letter_still_carries_its_own_disclaimer():
     from services.patient_summary import DISCLAIMER
 
     assert "NOT medical advice" in DISCLAIMER
+
+
+# ── 4. The module can be imported on the Python the image runs ───────────────
+#
+# `api/Dockerfile` is `FROM python:3.11-slim` and CI pins 3.11. A triple-quoted
+# f-string nested inside another f-string is legal on 3.12, which is what a
+# developer machine may have, and a SyntaxError on 3.11.
+#
+# pdf_export.py had nine of them, so it could not be imported in production at
+# all. Nothing in the suite imported the module and `results.py` imports it
+# lazily inside the handler, so the app started normally and only the two
+# download endpoints raised. Both had been broken for as long as the file
+# existed.
+
+# Only the same-quote family breaks on 3.11. The outer templates are delimited
+# with triple double quotes, so a nested f-string using double quotes collides
+# with them; one using single quotes does not, and several of those are
+# pre-existing and fine. Flagging them too would make this guard something
+# people disable.
+_PY311_HOSTILE = ('{f"""', '{f"')
+
+
+def test_no_nested_f_strings_in_the_report_templates():
+    """
+    Detected by pattern rather than by compiling, because the interpreter
+    running these tests may be the one that accepts them. Checking on 3.12 that
+    3.12 accepts it proves nothing about the image.
+    """
+    for name in ("pdf_export.py", "oncologist_report.py", "patient_summary.py"):
+        source = (REPO_ROOT / "api" / "services" / name).read_text(encoding="utf-8")
+        offenders = [
+            (i + 1, line.strip())
+            for i, line in enumerate(source.splitlines())
+            if any(tok in line for tok in _PY311_HOSTILE)
+        ]
+        assert not offenders, (
+            f"{name} nests an f-string inside an f-string, which is a SyntaxError "
+            f"on the Python 3.11 the Dockerfile runs: {offenders[:3]}"
+        )
+
+
+def test_the_dockerfile_python_matches_what_ci_tests():
+    """
+    The guard above is calibrated to 3.11. If the image moves and CI does not,
+    or the reverse, this is checking the wrong thing.
+    """
+    dockerfile = (REPO_ROOT / "api" / "Dockerfile").read_text(encoding="utf-8")
+    workflow = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "python:3.11" in dockerfile, "the image no longer runs 3.11"
+    assert 'python-version: "3.11"' in workflow, "CI no longer tests on 3.11"
+
+
+def test_both_documents_render(report):
+    """The hoisting must not have changed what the templates produce."""
+    from services.pdf_export import generate_oncologist_report_document
+
+    body, _, _ = generate_oncologist_report_document(report)
+    text = body.decode("utf-8", "replace")
+    assert "<h2>" in text
+    assert "Section 2" in text
