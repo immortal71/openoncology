@@ -25,6 +25,15 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+# The one statement, from the module that declares it. The oncologist report
+# footed itself "For Physician Review Only", which says who should read it and
+# not what it is. This is the artefact most likely to be printed and filed, so it
+# is the last place that should carry the weaker of the two claims. See F18.
+try:
+    from api.services.intended_use import RESEARCH_USE_STATEMENT as _RESEARCH_USE
+except ModuleNotFoundError:
+    from services.intended_use import RESEARCH_USE_STATEMENT as _RESEARCH_USE
+
 _WEASYPRINT_AVAILABLE: Optional[bool] = None  # lazy check
 
 
@@ -34,11 +43,22 @@ def _weasyprint_available() -> bool:
         try:
             import weasyprint  # noqa: F401
             _WEASYPRINT_AVAILABLE = True
-        except ImportError:
+        except (ImportError, OSError) as exc:
+            # OSError, not just ImportError. WeasyPrint is a Python package with
+            # native dependencies, and the common failure is the package being
+            # installed while libgobject, libpango or libcairo are absent. That
+            # raises OSError from ctypes, which this used to let escape, so the
+            # HTML fallback below never ran and the request returned 500.
+            #
+            # api/Dockerfile installs gcc, libpq-dev and curl and none of the
+            # GTK stack, so the deployed image takes this path too. Degrading to
+            # HTML is the designed behaviour; BACKLOG.md OO-20 covers whether the
+            # image should carry the libraries so a PDF is actually produced.
             _WEASYPRINT_AVAILABLE = False
             logger.warning(
-                "WeasyPrint not installed — PDF export will return HTML. "
-                "Install: pip install weasyprint>=60.0"
+                "WeasyPrint unusable (%s: %s) — PDF export will return HTML instead. "
+                "The Python package needs libgobject, libpango and libcairo present.",
+                type(exc).__name__, exc,
             )
     return _WEASYPRINT_AVAILABLE
 
@@ -518,6 +538,7 @@ def _build_oncologist_html(r) -> str:
   </div>
 
   <div class="footer">
+    <strong>{_RESEARCH_USE}</strong><br>
     OpenOncology Research Platform — For Physician Review Only &nbsp;|&nbsp; {date_str}
   </div>
 </body>

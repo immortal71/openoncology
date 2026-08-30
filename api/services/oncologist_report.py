@@ -226,7 +226,15 @@ def generate_oncologist_report(
     report_date:
         ISO date string; defaults to today.
     """
-    from api.ai.ranking import get_system_limitations, detect_no_strong_candidate
+    # Backend modules import as if api/ were the root, which is how the app runs
+    # in production. The bare `from api.ai...` form only resolves when the repo
+    # root is also on sys.path, which is true in the test harness and in scripts
+    # and false under uvicorn. Both spellings are tried, the way chembl.py and
+    # the other service modules already do it.
+    try:
+        from api.ai.ranking import get_system_limitations, detect_no_strong_candidate
+    except ModuleNotFoundError:
+        from ai.ranking import get_system_limitations, detect_no_strong_candidate
 
     report_date = report_date or date.today().isoformat()
     withdrawn_set: set[str] = set()
@@ -365,7 +373,10 @@ def generate_oncologist_report(
     )
 
     # ── No-strong-candidate detection ─────────────────────────────────────
-    from api.ai.ranking import DEFAULT_CONFIG as _ranking_cfg
+    try:
+        from api.ai.ranking import DEFAULT_CONFIG as _ranking_cfg
+    except ModuleNotFoundError:
+        from ai.ranking import DEFAULT_CONFIG as _ranking_cfg
     no_drug_verdict = detect_no_strong_candidate(ranked_candidates, _ranking_cfg)
 
     # ── Benchmark transparency block ───────────────────────────────────────
