@@ -421,7 +421,7 @@ jobs:
         # Skipped on pull requests, where nothing is pushed and a fork would
         # have no token with package scope.
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
