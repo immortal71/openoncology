@@ -11,7 +11,7 @@ redis==5.0.4
 python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.32
-boto3==1.43.76
+boto3==1.43.82
 requests==2.34.2          # transitive dep, pinned past PYSEC-2026-187x/2275 (floor was 2.32.4)
 httpx==0.28.1
 tenacity==9.1.4
@@ -19,20 +19,20 @@ slowapi==0.1.10
 pytest==9.1.1
 pytest-asyncio==1.4.0
 aiosqlite==0.22.1          # async sqlite driver for the in-memory test DB (api/tests/conftest.py)
-stripe==15.5.1
-resend==2.38.0            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
+stripe==15.6.0
+resend==2.42.0            # >=2.x relaxes the requests==2.31.0 pin (CVE); same Emails.send API
 python-dotenv==1.2.3
 
 # Observability
 # Pinned like everything else: an unpinned floor means CI and production can
 # resolve different versions on different days, so a green build stops being
 # evidence that the deployed set works.
-sentry-sdk[fastapi]==2.68.0
+sentry-sdk[fastapi]==2.68.1
 prometheus-fastapi-instrumentator==8.1.0
 structlog==26.1.0
 
 # Phase 3 — AI / cheminformatics
 rdkit==2026.3.5           # SMILES → SDF conversion for DiffDock inputs
-ruff==0.16.4                # linter (also used by CI)
+ruff==0.16.5                # linter (also used by CI)
 biopython==1.88            # CIF → PDB conversion for AlphaFold Server outputs
 weasyprint==69.0           # PDF export (patient letter + oncologist report)
