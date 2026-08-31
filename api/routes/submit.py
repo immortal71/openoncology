@@ -128,10 +128,20 @@ async def submit_sample(
     )
     db.add(submission)
     await db.flush()  # get submission.id before commit
+    submission_id = submission.id
+
+    # Commit BEFORE enqueueing. The worker opens its own session and looks the
+    # submission up by id, so a task that starts before this transaction commits
+    # finds nothing. That was not a narrow race: with Celery eager, which is how
+    # development runs when Redis is unreachable, apply_async executes inline and
+    # the lookup failed every time, so no submission made in development was ever
+    # processed. In production the window is small and real, and losing it is
+    # silent in all three places that could have caught it.
+    await db.commit()
 
     # Queue genomic pipeline background job
     job = run_genomic_pipeline.apply_async(
-        args=[submission.id, patient.id, biopsy_key, dna_key, cancer_type, dna_r2_key],
+        args=[submission_id, patient.id, biopsy_key, dna_key, cancer_type, dna_r2_key],
         queue="genomic",
     )
     submission.pipeline_job_id = job.id
