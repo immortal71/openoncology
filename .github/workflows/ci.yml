@@ -415,7 +415,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GHCR
         # Skipped on pull requests, where nothing is pushed and a fork would
