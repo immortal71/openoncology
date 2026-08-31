@@ -434,7 +434,7 @@ jobs:
       # provenance has to be answerable.
       - name: Compute tags
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.name }}
           tags: |
