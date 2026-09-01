@@ -78,6 +78,12 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 <!-- One entry maximum. An entry stranded here means a session died mid-work;
      /standup will surface it. -->
 
+---
+
+## In review
+
+<!-- Entry plus PR URL. Cleared by hand when merged. -->
+
 ### OO-20: The deployed image cannot render a PDF
 - **Why**: WeasyPrint is a Python package with native dependencies. `api/Dockerfile` installs `gcc`, `libpq-dev` and `curl` and none of libgobject, libpango or libcairo, so `import weasyprint` raises `OSError` in the deployed container exactly as it does on a developer Windows machine. Every oncologist report and patient letter download therefore returns HTML rather than a PDF. That is now a graceful degradation rather than a 500, which was the bug fixed alongside this, but it is still not what the endpoint is named after: the route is `oncologist-report.pdf` and it returns `text/html`.
 - **Files**: api/Dockerfile, api/requirements.txt, api/tests/test_report_download_path.py
@@ -88,11 +94,7 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: replacing WeasyPrint
 - **Risk**: low. Worth deciding rather than defaulting: a clinician who asked for a PDF and received HTML has something that prints differently and does not carry the same expectation of being a fixed record.
 
----
-
-## In review
-
-<!-- Entry plus PR URL. Cleared by hand when merged. -->
+- **PR**: https://github.com/immortal71/openoncology/pull/164
 
 ---
 
