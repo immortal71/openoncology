@@ -389,10 +389,89 @@ jobs:
   # `needs:` is kept deliberately. An image that reaches the registry without
   # passing the benchmark gate and both test suites is an image somebody can
   # deploy.
+  # OO-20. The report routes are named .pdf and fall back to HTML when
+  # WeasyPrint cannot load its native libraries. The fallback is correct and it
+  # is also silent: nothing raises, the download just changes type, and the
+  # suite cannot see it because the runner has libraries the image does not.
+  # The only place the question can be answered is inside the image.
+  pdf-rendering:
+    name: The image can render a PDF
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build the API image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: api/Dockerfile
+          push: false
+          load: true
+          tags: openoncology-api:pdf-check
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api-pdf,mode=max
+
+      - name: Render an oncologist report inside the container
+        run: |
+          set -euo pipefail
+          docker run --rm -i openoncology-api:pdf-check python - <<'PY'
+          from services.oncologist_report import generate_oncologist_report
+          from services.pdf_export import generate_oncologist_report_document
+
+          report = generate_oncologist_report(
+              ranked_candidates=[],
+              mutation_summary=[{
+                  "gene": "EGFR", "hgvs": "p.T790M",
+                  "classification": "pathogenic", "oncokb_level": "1",
+              }],
+              cancer_type="Lung adenocarcinoma",
+              qc_report=None,
+              patient_id="ci",
+          )
+          body, content_type, extension = generate_oncologist_report_document(report)
+
+          if extension != ".pdf":
+              raise SystemExit(
+                  "the image fell back to HTML. WeasyPrint could not load its "
+                  "native libraries, so a request for oncologist-report.pdf "
+                  "returns " + content_type
+              )
+          if body[:5] != b"%PDF-":
+              raise SystemExit("the .pdf produced is not a PDF")
+
+          print("rendered", len(body), "bytes of", content_type)
+          PY
+
+      # The GTK stack is not small and this is the only feature that needs it,
+      # so the cost is recorded rather than assumed. The baseline is this same
+      # Dockerfile with the added packages removed, which is the honest
+      # comparison: one line differs.
+      - name: Record what the PDF libraries cost
+        run: |
+          set -euo pipefail
+          sed '/libpango/d' api/Dockerfile > Dockerfile.baseline
+          docker build -q -f Dockerfile.baseline -t openoncology-api:baseline . > /dev/null
+          new=$(docker image inspect openoncology-api:pdf-check --format '{{.Size}}')
+          old=$(docker image inspect openoncology-api:baseline --format '{{.Size}}')
+          {
+            echo "### Image size"
+            echo ""
+            echo "| | MB |"
+            echo "|---|---|"
+            echo "| without the PDF libraries | $((old / 1024 / 1024)) |"
+            echo "| with them | $((new / 1024 / 1024)) |"
+            echo "| **added** | **$(((new - old) / 1024 / 1024))** |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "added $(((new - old) / 1024 / 1024)) MB"
+
   publish-images:
     name: Build and publish container images
     runs-on: ubuntu-latest
-    needs: [lint-frontend, test-frontend, e2e-frontend, test-backend]
+    needs: [lint-frontend, test-frontend, e2e-frontend, test-backend, pdf-rendering]
 
     permissions:
       contents: read
