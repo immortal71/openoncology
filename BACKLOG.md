@@ -141,6 +141,23 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   unsafe clinical one.
 - **Risk**: scientific / policy — this is a hazard control, not a config tidy
 
+### OO-21: VCF ingestion feeds coding notation to a lookup keyed on protein notation
+- **Why**: `_parse_and_annotate_vcf` stores `INFO/HGVS_C` as `mutations.hgvs_notation`. The evidence table is keyed on protein alterations: `_normalise_alteration("p.Thr790Met")` gives `t790m`, and `_normalise_alteration("c.2369C>T")` gives `c2369c>t`, which matches nothing. Measured directly against the shipped table:
+
+  ```
+  get_all_drugs_for_variant("EGFR", "T790M")     -> 7 drugs  ['osimertinib', 'erlotinib', 'gefitinib', ...]
+  get_all_drugs_for_variant("EGFR", "c.2369C>T") -> 0 drugs  []
+  ```
+
+  So a VCF carrying EGFR T790M, which the table knows maps to seven drugs, yields no recommendation. Submitting `samples/egfr_t790m_demo.vcf` end to end produces `recommendation_state: no_targetable_mutation`, with both EGFR and TP53 stored as `classification: uncertain`, `is_targetable: 0`, `oncokb_level: unknown`.
+
+  Three things make it look deliberate until you check. `INFO/HGVS_P` is present in the sample VCFs and is read nowhere in the application. The `mutations.hgvs_p` column existed in `0001_initial_schema` and was dropped by `a8bf7eb4833c`. And `ai_worker._hgvs_to_short(hgvs_p: str)` names its parameter for protein notation, does `hgvs_p.lstrip("p.")`, and is passed `mutation.hgvs_notation`, which holds the coding form.
+
+  This is hazard H2, an actionable variant present and not surfaced, and it is F2's shape reaching the same outcome by a different route. The benchmarks do not see it because they feed protein notation straight to the ranker and never pass through VCF ingestion, which is why the suite reports P@3 0.80 while the ingestion path returns nothing.
+- **Risk**: scientific. Changing which notation reaches the evidence table changes which drugs are recommended for every submission, so it is not an agent's call, and it wants a decision about whether to store both notations, prefer `HGVS_P`, or derive protein from coding.
+- **Files to consider**: api/workers/genomic_worker.py `_parse_and_annotate_vcf`, api/models/mutation.py, a migration restoring a protein column, api/workers/ai_worker.py `_hgvs_to_short`
+- **Worth checking alongside**: whether any real submission has ever produced a recommendation, and whether the concordance and holdout numbers were computed through ingestion or around it.
+
 ---
 
 ## Done

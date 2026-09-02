@@ -75,6 +75,7 @@ def notify_results_ready(self, submission_id: str, patient_id: str):
     from models.submission import Submission
     from models.mutation import Mutation
     from models.repurposing import RepurposingCandidate
+    from models.result import Result
     from sqlalchemy import select
 
     try:
@@ -89,12 +90,22 @@ def notify_results_ready(self, submission_id: str, patient_id: str):
                 select(Mutation).where(Mutation.submission_id == submission_id)
             ).scalars().all()
             targetable = [m for m in mutations if m.is_targetable]
+            # RepurposingCandidate keys off result_id, not submission_id: it
+            # moved to Result as its parent and this query was not updated, so
+            # every notification raised AttributeError before it could be sent.
+            # gdpr_worker.py carries the same note against the same model, which
+            # is where the correction was made the first time.
+            result_ids = [
+                rid for (rid,) in db.execute(
+                    select(Result.id).where(Result.submission_id == submission_id)
+                ).all()
+            ]
             drugs = db.execute(
                 select(RepurposingCandidate)
-                .where(RepurposingCandidate.submission_id == submission_id)
+                .where(RepurposingCandidate.result_id.in_(result_ids))
                 .order_by(RepurposingCandidate.rank_score.desc())
                 .limit(3)
-            ).scalars().all()
+            ).scalars().all() if result_ids else []
             top_drug_names = [d.drug_name for d in drugs if d.drug_name]
 
         email = _get_patient_email_from_keycloak(patient.keycloak_id)

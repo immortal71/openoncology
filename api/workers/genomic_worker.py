@@ -57,8 +57,20 @@ def run_genomic_pipeline(
     with get_sync_session() as db:
         submission = db.get(Submission, submission_id)
         if not submission:
-            logger.error(f"[genomic] Submission {submission_id} not found")
-            return
+            # Returning here marks the task succeeded, so a submission that was
+            # enqueued before its transaction committed was lost with no retry
+            # and no failure anywhere. Retry instead: the row usually appears
+            # moments later, and if it genuinely never does the task ends failed
+            # rather than pretending it did the work.
+            logger.error(
+                "[genomic] Submission %s not found; retrying in case its "
+                "transaction has not committed yet", submission_id,
+            )
+            raise self.retry(
+                exc=RuntimeError(f"submission {submission_id} not visible"),
+                countdown=10,
+                max_retries=3,
+            )
         submission.status = SubmissionStatus.processing
         db.commit()
 
@@ -144,6 +156,24 @@ def _download_from_minio(s3_key: str, workdir: str) -> str:
     import boto3
     from botocore.config import Config
     from config import settings
+
+    # services/storage.py writes uploads to the local filesystem when MinIO is
+    # unreachable in development, and this read went straight to boto3. The two
+    # halves disagreed: the API put the file on disk and the worker looked for it
+    # in S3, so no submission could be processed without MinIO running even
+    # though the upload had deliberately avoided needing it.
+    from services.storage import _local_root, _use_local_storage
+
+    if _use_local_storage():
+        source = _local_root() / settings.bucket_raw / s3_key
+        if not source.exists():
+            raise FileNotFoundError(
+                f"{source} not found. Uploads went to local storage because MinIO "
+                "was unreachable; this read expects the same layout."
+            )
+        local_path = os.path.join(workdir, os.path.basename(s3_key))
+        shutil.copyfile(source, local_path)
+        return local_path
 
     scheme = "https" if settings.minio_secure else "http"
     s3 = boto3.client(
@@ -388,6 +418,20 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
     from botocore.exceptions import ClientError
     from config import settings
 
+    key = f"{patient_id}/{submission_id}/annotated.vcf"
+
+    # Same fallback as the download above and as services/storage.py. Both S3
+    # helpers in this module went straight to boto3, so a development run that
+    # had deliberately avoided needing MinIO for the upload still could not
+    # store its result.
+    from services.storage import _local_root, _use_local_storage
+
+    if _use_local_storage():
+        dest = _local_root() / settings.bucket_vcf / key
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(vcf_path, dest)
+        return key
+
     scheme = "https" if settings.minio_secure else "http"
     s3 = boto3.client(
         "s3",
@@ -402,7 +446,6 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
     except ClientError:
         s3.create_bucket(Bucket=settings.bucket_vcf)
 
-    key = f"{patient_id}/{submission_id}/annotated.vcf"
     s3.upload_file(
         vcf_path,
         settings.bucket_vcf,
@@ -421,7 +464,7 @@ def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> 
     acks_late=True,
 )
 def sweep_stale_submissions(self):
-    """Re-queue or fail submissions that have been stuck in 'processing' > 6 hours."""
+    """Fail submissions stuck in 'queued' or 'processing' for more than 6 hours."""
     from datetime import datetime, timedelta, UTC
     from sqlalchemy import select
     from workers._db_sync import get_sync_session
@@ -431,7 +474,12 @@ def sweep_stale_submissions(self):
     with get_sync_session() as db:
         stale = db.execute(
             select(Submission).where(
-                Submission.status == SubmissionStatus.processing,
+                # queued as well as processing. A submission whose task never
+                # started stays queued forever, and the sweeper that exists to
+                # catch stuck work was looking only at work that had started.
+                Submission.status.in_(
+                    (SubmissionStatus.processing, SubmissionStatus.queued)
+                ),
                 Submission.created_at < cutoff,
             )
         ).scalars().all()
