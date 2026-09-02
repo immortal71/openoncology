@@ -229,3 +229,67 @@ def test_both_documents_render(report):
         gene="KRAS",
     ).sections)
     assert "<h1>" in letter
+
+
+# ── 5. The image the app is deployed as can render a PDF ─────────────────────
+#
+# Everything above is about the fallback behaving. This is about not needing it.
+# WeasyPrint is a Python package with native dependencies and `api/Dockerfile`
+# installed none of them, so the container took the HTML path on every request
+# to a route named `.pdf`. Nothing failed, so nothing said so.
+#
+# The assertion that settles it cannot run here, because this suite runs on a
+# machine whose libraries are not the image's. `ci.yml` builds the image and
+# renders a report inside it; these guard that that arrangement stays.
+
+_WEASYPRINT_RUNTIME_LIBS = ("libpango-1.0-0", "libpangoft2-1.0-0")
+
+
+def _dockerfile_instructions() -> str:
+    """
+    The Dockerfile with its comments removed. Searching the whole file finds the
+    comment that explains why a package is there and reports it as installed:
+    deleting the package line left the font guard green, because the paragraph
+    above it names the font.
+    """
+    text = (REPO_ROOT / "api" / "Dockerfile").read_text(encoding="utf-8")
+    return "\n".join(
+        line for line in text.splitlines() if not line.lstrip().startswith("#")
+    )
+
+
+def test_the_image_installs_what_weasyprint_loads_at_runtime():
+    dockerfile = _dockerfile_instructions()
+    missing = [lib for lib in _WEASYPRINT_RUNTIME_LIBS if lib not in dockerfile]
+    assert not missing, (
+        f"api/Dockerfile does not install {missing}, so `import weasyprint` "
+        "raises OSError in the container and every report download returns HTML "
+        "from a route named .pdf"
+    )
+
+
+def test_the_image_installs_a_font():
+    """
+    Pango lays the text out and fontconfig chooses a face. With no font in the
+    image the layout is correct and every glyph is drawn as a box: a valid PDF
+    that cannot be read.
+    """
+    assert "fonts-" in _dockerfile_instructions(), (
+        "the image installs no font, so a rendered PDF has no readable glyphs"
+    )
+
+
+def test_ci_renders_a_pdf_inside_the_image():
+    """
+    The two guards above check a package list, which is a proxy for the claim.
+    This checks that something builds the image and asks it for a PDF, because
+    an unconfirmed proxy is how the original defect survived.
+    """
+    workflow = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "pdf-rendering:" in workflow, "no CI job renders a PDF inside the image"
+
+    job = workflow[workflow.index("pdf-rendering:"):].split("publish-images:")[0]
+    assert "docker run" in job, "the job builds the image but never runs it"
+    assert "%PDF-" in job, (
+        "the job renders a document without asserting the bytes are a PDF"
+    )

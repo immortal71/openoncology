@@ -4,8 +4,17 @@ WORKDIR /app
 ENV PYTHONPATH=/app
 
 # System deps for bcrypt, asyncpg, etc.
+#
+# The pango libraries belong to WeasyPrint. Without them `import weasyprint`
+# raises OSError rather than ImportError, because the Python package installs
+# and its shared libraries do not, so every report download quietly served
+# HTML from a route named oncologist-report.pdf. WeasyPrint has not needed
+# cairo or gdk-pixbuf since v53; pango brings glib, harfbuzz and fontconfig
+# with it. fonts-dejavu-core is separate and still required: fontconfig with
+# no font installed lays the text out correctly and draws every glyph as a box.
 RUN apt-get update && apt-get install -y \
     gcc libpq-dev curl \
+    libpango-1.0-0 libpangoft2-1.0-0 fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 COPY api/requirements.txt .
