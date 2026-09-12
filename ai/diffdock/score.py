@@ -124,10 +124,13 @@ def score_binding(
         smiles: SMILES string of the ligand molecule.
         chembl_id: ChEMBL ID used for naming temp files.
         samples: Number of DiffDock sampling poses (higher = more accurate, slower).
-        pre_folded_structure: Optional folded mutant structure input.
+        pre_folded_structure: Optional pre-resolved structure input.
                      Can be a local .pdb/.cif path or a MinIO key/S3 URI.
-                     When provided, this structure is used instead of the
-                     generic EBI pre-computed PDB.
+                     Today the AI worker passes the same EBI AlphaFold DB
+                     structure this function would otherwise fetch itself, so
+                     the score is unchanged whether it is supplied or not. The
+                     parameter exists for a mutant structure from self-hosted
+                     AlphaFold 3; nothing in this repository produces one.
 
     Returns:
         Normalised confidence score (0–1), or None if DiffDock unavailable.
@@ -143,7 +146,7 @@ def score_binding(
     with tempfile.TemporaryDirectory(prefix="diffdock_") as tmpdir:
         tmp = Path(tmpdir)
 
-        # Prepare inputs — prefer mutated structure from AlphaFold Server
+        # Prepare inputs — prefer a structure the caller already resolved
         pdb_path = _materialize_folded_structure(pre_folded_structure, tmp)
         if pdb_path is None:
             pdb_path = fetch_protein_pdb(uniprot_id, tmp)
