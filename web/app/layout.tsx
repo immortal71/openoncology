@@ -60,6 +60,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        {/*
+          Deployment configuration, fetched at request time rather than compiled
+          into the bundle. See lib/runtime-config.ts for why. Blocking and in
+          <head> on purpose: every client component that reads a NEXT_PUBLIC_
+          setting expects window.__OO_ENV__ to already exist, and a deferred or
+          async script would let hydration start first.
+        */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts --
+            Synchronous is the requirement, not an oversight. The rule guards
+            against a script blocking the parser for no reason; this one has to
+            run before hydration, because every client component that reads a
+            NEXT_PUBLIC_ setting falls back to the value compiled into the
+            bundle when window.__OO_ENV__ is not there yet — silently, and to
+            the wrong hostname. next/script's beforeInteractive would express
+            the same intent through more framework machinery for a file that is
+            a few dozen bytes served from the same origin. */}
+        <script src="/env.js" />
+      </head>
       <body className={`${manrope.variable} ${plex.variable} ${jetbrainsMono.variable} font-[var(--font-plex)] bg-neutral-bg text-neutral-heading`}>
         <QueryProvider>
           <AuthProvider>

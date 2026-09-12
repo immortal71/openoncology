@@ -21,6 +21,7 @@ import {
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { DEMO_DRUG_REQUESTS, DEMO_PHARMA_COMPANIES } from "@/lib/demo-data";
+import { publicEnvOr } from "@/lib/runtime-config";
 
 const orderSchema = z.object({
   drug_spec: z.string().min(20, "Please provide a detailed drug specification").max(2000),
@@ -207,7 +208,7 @@ function OrderModal({
     setStatus("submitting");
     try {
       const token = getToken();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/marketplace/order`, {
+      const res = await fetch(`${publicEnvOr("NEXT_PUBLIC_API_URL", "http://localhost:8000")}/api/marketplace/order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

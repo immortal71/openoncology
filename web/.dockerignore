@@ -1,0 +1,13 @@
+# The build context for this image is ./web, so the repository-root
+# .dockerignore does not apply here. Without this file the whole of
+# web/node_modules was uploaded as context and then `COPY . .` in the builder
+# stage copied it straight over the node_modules installed for the image —
+# replacing Linux binaries with whatever the developer's machine had built.
+node_modules
+.next
+coverage
+playwright-report
+test-results
+tsconfig.tsbuildinfo
+.env
+.env.*

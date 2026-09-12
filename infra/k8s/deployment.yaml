@@ -74,6 +74,18 @@ spec:
                 name: openoncology-config
             - secretRef:
                 name: openoncology-secrets
+          # $(DB_PASSWORD) is only substituted in this list, and only against a
+          # variable already defined above it — which is why DB_PASSWORD is
+          # restated here rather than left to arrive through the secretRef.
+          # See the note in configmap.yaml.
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openoncology-secrets
+                  key: DB_PASSWORD
+            - name: DATABASE_URL
+              value: "postgresql+asyncpg://openoncology:$(DB_PASSWORD)@db:5432/openoncology"
           # Writable tmpfs for uvicorn temp files / PIL cache etc.
           volumeMounts:
             - name: tmp

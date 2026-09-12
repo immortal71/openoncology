@@ -28,10 +28,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CheckCircle, XCircle, ExternalLink, RefreshCw, Building2 } from "lucide-react";
 import { toast } from "sonner";
+import { publicEnvOr } from "@/lib/runtime-config";
 
 export const dynamic = "force-dynamic";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API = () => publicEnvOr("NEXT_PUBLIC_API_URL", "http://localhost:8000");
 
 interface PharmaCompany {
   id: string;
@@ -65,19 +66,19 @@ export default function AdminPharmaPage() {
 
   const applications = useQuery<PharmaCompany[]>({
     queryKey: ["pharma-applications"],
-    queryFn: () => fetchJson(`${API}/api/pharma/applications`, token!),
+    queryFn: () => fetchJson(`${API()}/api/pharma/applications`, token!),
     enabled: !!token,
   });
 
   const verified = useQuery<PharmaCompany[]>({
     queryKey: ["pharma-verified"],
-    queryFn: () => fetchJson(`${API}/api/pharma/`, token!),
+    queryFn: () => fetchJson(`${API()}/api/pharma/`, token!),
     enabled: !!token,
   });
 
   const verifyMutation = useMutation({
     mutationFn: ({ id, approved }: { id: string; approved: boolean }) =>
-      fetchJson(`${API}/api/pharma/verify/${id}`, token!, {
+      fetchJson(`${API()}/api/pharma/verify/${id}`, token!, {
         method: "POST",
         body: JSON.stringify({ approved }),
       }),
@@ -91,7 +92,7 @@ export default function AdminPharmaPage() {
 
   const onboardMutation = useMutation({
     mutationFn: (id: string) =>
-      fetchJson<{ url: string }>(`${API}/api/stripe/connect/onboard/${id}`, token!, {
+      fetchJson<{ url: string }>(`${API()}/api/stripe/connect/onboard/${id}`, token!, {
         method: "POST",
       }),
     onSuccess: ({ url }) => {
@@ -102,7 +103,7 @@ export default function AdminPharmaPage() {
 
   const refreshStatusMutation = useMutation({
     mutationFn: (id: string) =>
-      fetchJson(`${API}/api/stripe/connect/status/${id}`, token!),
+      fetchJson(`${API()}/api/stripe/connect/status/${id}`, token!),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pharma-verified"] });
       toast.success("Stripe status refreshed");

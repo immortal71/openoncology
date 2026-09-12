@@ -84,6 +84,28 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 <!-- Entry plus PR URL. Cleared by hand when merged. -->
 
+### OO-24: The deployment could not have worked, in four separate places
+- **Why**: Every manifest rendered, linted and passed kubeconform, and the deploy still could not have come up. Each defect is a value that is present and well formed and only wrong once something tries to use it, which is why nothing caught any of them.
+  - The web Deployment probed `/api/health` and the Next app served no such route. Liveness killed the container on its third 404 and readiness never admitted it to the Service, so the web tier could not start at all.
+  - `NEXT_PUBLIC_*` is a compile-time substitution and both deployment paths supplied it at runtime. The published image carried `http://localhost:8000` as the API address and `undefined` as the Keycloak one, so the deployed site called an API on the visitor's own machine and `login()` threw "Keycloak is not configured in this environment" for everybody.
+  - `DATABASE_URL` sat in the ConfigMap containing `$(DB_PASSWORD)`. Kubernetes expands `$(VAR)` in a container's own `env` entries and in its command and args, never in a key read through `envFrom`, so every pod received those seven characters as its Postgres password.
+  - Nothing migrated the schema. The API bootstraps tables only when `ENVIRONMENT` is `development`, so a fresh install met an empty database while `/ready` — which round-trips Postgres with `SELECT 1`, something an empty database answers perfectly well — reported the pods healthy.
+- **Files**: web/app/api/health/route.ts, web/app/env.js/route.ts, web/lib/runtime-config.ts, web/app/layout.tsx, web/lib/api.ts, web/lib/auth.ts, web/next.config.js, web/Dockerfile, web/.dockerignore, api/Dockerfile, docker-compose.yml, docker-compose.prod.yml, .env.production.example, .gitignore, infra/helm/templates/{migrate-job,configmap,api,workers,beat}.yaml, infra/helm/values.yaml, infra/helm/Chart.lock, infra/k8s/{configmap,deployment}.yaml, .github/workflows/ci.yml, api/tests/test_deployed_image_config.py, api/tests/test_production_compose.py, README.md, docs/RUNBOOK_STAGING_DEPLOY.md
+- **Also fixed alongside**: the web image built with `npm install` and never copied the lockfile, so the published image could contain versions no test had run against; there was no `web/.dockerignore`, so `COPY . .` copied the developer's `node_modules` over the image's; both images ran as root under uids the chart overrode; CI installed with `npm install` while the image used `npm ci`.
+- **Acceptance**:
+  - A production build compiled with no `NEXT_PUBLIC_*` set serves the values given to it at start time — verified against `.next/standalone`, not inferred
+  - `/api/health` answers 200 on the path the chart probes
+  - No ConfigMap value, or helper it includes, depends on `$(VAR)` expansion
+  - The chart migrates before new pods roll
+  - Guards fail on the pre-fix tree, not only pass on the fixed one
+  - The chart is rendered and validated locally, not only in CI — helm 3.16.2 and kubeconform, the versions ci.yml pins
+  - The production compose guards fail against docker-compose.yml, which is a real wrong input rather than a synthetic one: 18 of 22
+  - `docker compose config` resolves both files, and the API's own `Settings` accepts what the production one supplies
+- **Also delivered**: `docker-compose.prod.yml` and `.env.production.example`, a single-host deployment path. `docker-compose.yml` stays the development stack — bind mounts, `--reload`, `ENVIRONMENT=development`, Keycloak `start-dev` against a realm that does not survive a restart, and Postgres, Redis and MinIO published on every interface. The production file shares none of that: published images with a required tag, a migration that everything waits on, Keycloak on its own Postgres, and nothing bound outside 127.0.0.1. `api/tests/test_production_compose.py` asserts each of those differences, and CI resolves the file with `docker compose config`.
+- **Also fixed while verifying**: `infra/helm/Chart.lock` was never committed, so `helm dependency update` resolved `redis: 19.x.x` against whatever Bitnami had published that day — two installs of one commit could run different sub-charts, and the pod labels the NetworkPolicy selectors match are among the things Bitnami changes between them. The lock is committed, the vendored tarballs are ignored, and CI and the runbook use `helm dependency build`. Same defect as `npm install` in the web image.
+- **Out of scope**: TLS, and a backup for the single-host path. Both compose files expect a reverse proxy in front; the chart's nightly `pg_dump` CronJob has no equivalent here, and that is stated at the top of the file rather than left to be discovered during a recovery.
+- **Risk**: low for the backend and the manifests. Medium for the frontend: the runtime-config change touches how every client component resolves the API address and the Keycloak URL, so a mistake there is invisible in dev and total in production. Hence the build was run and the standalone server exercised.
+
 ### OO-20: The deployed image cannot render a PDF
 - **Why**: WeasyPrint is a Python package with native dependencies. `api/Dockerfile` installs `gcc`, `libpq-dev` and `curl` and none of libgobject, libpango or libcairo, so `import weasyprint` raises `OSError` in the deployed container exactly as it does on a developer Windows machine. Every oncologist report and patient letter download therefore returns HTML rather than a PDF. That is now a graceful degradation rather than a 500, which was the bug fixed alongside this, but it is still not what the endpoint is named after: the route is `oncologist-report.pdf` and it returns `text/html`.
 - **Files**: api/Dockerfile, api/requirements.txt, api/tests/test_report_download_path.py
@@ -95,6 +117,7 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: low. Worth deciding rather than defaulting: a clinician who asked for a PDF and received HTML has something that prints differently and does not carry the same expectation of being a fixed record.
 
 - **PR**: https://github.com/immortal71/openoncology/pull/164
+
 
 ---
 

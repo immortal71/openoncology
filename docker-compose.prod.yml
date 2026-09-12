@@ -1,0 +1,528 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# OpenOncology — production stack for a single Docker host.
+#
+# `docker-compose.yml` is the DEVELOPMENT stack and is not a smaller version of
+# this one. It bind-mounts the source over /app, runs uvicorn with --reload and
+# `next dev`, sets ENVIRONMENT=development — which turns on schema bootstrapping,
+# demo seeding, and /docs — starts Keycloak with `start-dev` against an
+# in-memory database that forgets the realm on every restart, and publishes
+# Postgres, Redis and MinIO on the host. Running it with a public IP would
+# expose all of that.
+#
+# This file is the other one. It is NOT a replacement for infra/helm, which is
+# the deployment path the repository documents and CI renders; it is for a
+# single host, where a Kubernetes cluster is more machinery than the deployment
+# warrants.
+#
+#   cp .env.production.example .env.production
+#   # fill it in — every value in it is required
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# Deliberately not here: TLS. Every published port binds to 127.0.0.1 except the
+# three the public needs, and those speak plain HTTP expecting a reverse proxy
+# (nginx, Caddy, Traefik) in front terminating TLS and forwarding to them.
+# Keycloak is configured for that with KC_PROXY_HEADERS; pointing a browser at
+# these ports directly, over the internet, sends bearer tokens in clear text.
+#
+# What this does NOT do that the chart does: no autoscaling, no pod disruption
+# budgets, no nightly database backup. `docs/RUNBOOK_BACKUP_RESTORE.md` is
+# written against the chart's CronJob; on a single host the equivalent is a cron
+# entry running `pg_dump` against the `db` service, and nothing here sets one up.
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: openoncology
+
+# ── Anchors ───────────────────────────────────────────────────────────────────
+
+# Repeated verbatim inside x-api-service below rather than merged into it.
+# Nesting a merge inside an anchored mapping depends on the parser resolving the
+# merge before it records the anchor, which is not something to find out during
+# a deploy. Five duplicated lines are the cheaper answer.
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+# Everything that runs the API image: the API, the four workers, beat and the
+# migration. One anchor rather than merging two, because `<<: [*a, *b]` is valid
+# YAML that not every parser has always accepted, and this is a file nothing in
+# this repository can run to find out.
+#
+# The tag is required rather than defaulted. `latest` is mutable, so a container
+# restart can change the running version, and this system's output is clinical
+# evidence whose provenance has to be answerable. Use the `sha-<short>` or `v*`
+# tag ci.yml published. Same reasoning as the comment on api.image.tag in
+# infra/helm/values.yaml.
+x-api-service: &api-service
+  image: ghcr.io/immortal71/openoncology/api:${IMAGE_TAG:?set IMAGE_TAG to a published tag, not latest}
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+  networks: [internal]
+
+# Everything the API and every Celery worker read. Kept in one place because a
+# worker that disagrees with the API about the database or the object store
+# fails asynchronously, which is the hardest kind of disagreement to notice.
+x-api-env: &api-env
+  ENVIRONMENT: production
+  SECRET_KEY: ${SECRET_KEY:?required — python -c "import secrets; print(secrets.token_hex(32))"}
+  DATABASE_URL: postgresql+asyncpg://openoncology:${DB_PASSWORD:?required}@db:5432/openoncology
+  REDIS_URL: redis://redis:6379/0
+  MINIO_ENDPOINT: storage:9000
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?required}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?required — the literal "password" is refused in production}
+  MINIO_SECURE: "false"
+  # The API dials Keycloak over the internal network, while the tokens it
+  # verifies were signed with the public hostname. Without KEYCLOAK_ISSUER the
+  # expected issuer is derived from KEYCLOAK_URL and no real token matches it.
+  KEYCLOAK_URL: http://keycloak:8080
+  KEYCLOAK_ISSUER: ${PUBLIC_KEYCLOAK_URL:?required}/realms/openoncology
+  KEYCLOAK_REALM: openoncology
+  KEYCLOAK_CLIENT_ID: openoncology-api
+  # Not automatic. Keycloak puts the client id in `azp` and "account" in `aud`
+  # unless an audience mapper says otherwise, and the API refuses to boot in
+  # production without this set. docs/RUNBOOK_STAGING_DEPLOY.md step 4.4.
+  KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE:?required — add an audience mapper to the client}
+  # A JSON list, and it must not contain localhost: main.py raises on startup if
+  # it does, because a production origin list that trusts localhost trusts any
+  # page a victim is persuaded to run locally.
+  CORS_ALLOW_ORIGINS: '["${PUBLIC_WEB_URL:?required}"]'
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  RESEND_API_KEY: ${RESEND_API_KEY:-}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  ONCOKB_API_TOKEN: ${ONCOKB_API_TOKEN:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+# Workers and beat wait for the schema, exactly as the API does. A Celery worker
+# that starts against an empty database does not fail visibly: it consumes a
+# task, raises, and the task is retried.
+x-after-migrate: &after-migrate
+  db:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
+  migrate:
+    condition: service_completed_successfully
+
+services:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Schema migration. Runs once, and everything that touches the database waits
+  # for it to exit 0.
+  #
+  # This is the piece the chart was missing entirely: the API creates tables
+  # only when ENVIRONMENT is `development`, so without this the stack comes up
+  # against an empty database and answers 500 from every route that reads one,
+  # while /health and /ready both report it fine.
+  # ───────────────────────────────────────────────────────────────────────────
+  migrate:
+    <<: *api-service
+    command: alembic upgrade head
+    environment:
+      <<: *api-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # FastAPI backend. Behind the reverse proxy at PUBLIC_API_URL.
+  # ───────────────────────────────────────────────────────────────────────────
+  api:
+    <<: *api-service
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      <<: *api-env
+    depends_on:
+      <<: *after-migrate
+      storage:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Next.js frontend. The runtime stage — the standalone server, no source
+  # mount, no dev server.
+  #
+  # The NEXT_PUBLIC_ values below are read at request time and served to the
+  # browser by app/env.js/route.ts. They are NOT compiled into the image; a
+  # build-time substitution would have frozen them at `docker build`, when none
+  # of these hostnames existed. See web/lib/runtime-config.ts.
+  # ───────────────────────────────────────────────────────────────────────────
+  web:
+    <<: *logging
+    image: ghcr.io/immortal71/openoncology/web:${IMAGE_TAG:?set IMAGE_TAG to a published tag, not latest}
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:?required}
+      NEXT_PUBLIC_KEYCLOAK_URL: ${PUBLIC_KEYCLOAK_URL:?required}
+      NEXT_PUBLIC_KEYCLOAK_REALM: openoncology
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: openoncology-web
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks: [internal]
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Celery workers. One per queue in api/workers/__init__.py task_routes — a
+  # routed queue with no consumer here accumulates in Redis unexecuted while
+  # every producer sees a successful enqueue.
+  #
+  # stop_grace_period is per queue and matches the chart's
+  # terminationGracePeriodSeconds. SIGTERM is a warm shutdown for Celery only if
+  # something waits for it; tasks are acks_late, so one killed at the deadline is
+  # redelivered and restarts from the beginning, repeating any side effect it had
+  # already performed.
+  # ───────────────────────────────────────────────────────────────────────────
+  worker-genomic:
+    <<: *api-service
+    command: celery -A workers.genomic_worker worker --loglevel=info -Q genomic
+    environment:
+      <<: *api-env
+    depends_on:
+      <<: *after-migrate
+      storage:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.genomic_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    stop_grace_period: 900s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  worker-ai:
+    <<: *api-service
+    command: celery -A workers.ai_worker worker --loglevel=info -Q ai
+    environment:
+      <<: *api-env
+    depends_on:
+      <<: *after-migrate
+      storage:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.ai_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    stop_grace_period: 600s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  worker-notify:
+    <<: *api-service
+    command: celery -A workers.notify_worker worker --loglevel=info -Q notify
+    environment:
+      <<: *api-env
+    depends_on:
+      <<: *after-migrate
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.notify_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    stop_grace_period: 120s
+
+  # Erasure requests from DELETE /api/me, and the daily retention sweep. Deletion
+  # is a GDPR obligation with a deadline attached; when this queue had no
+  # consumer, the API told patients their data would be gone within 30 days and
+  # the task sat in Redis.
+  worker-gdpr:
+    <<: *api-service
+    command: celery -A workers.gdpr_worker worker --loglevel=info -Q gdpr
+    environment:
+      <<: *api-env
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?required}
+    depends_on:
+      <<: *after-migrate
+      storage:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "celery", "-A", "workers.gdpr_worker", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    stop_grace_period: 300s
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Celery Beat. Exactly one, and never scale it: two beats against one schedule
+  # enqueue every periodic task twice, which for the retention sweep means two
+  # concurrent deletion passes over the same rows.
+  # ───────────────────────────────────────────────────────────────────────────
+  beat:
+    <<: *api-service
+    command: celery -A workers beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      <<: *api-env
+    depends_on:
+      <<: *after-migrate
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Datastores. None of these publishes a port: they are reachable only from the
+  # compose network. The development stack publishes all three, which is what
+  # makes it a development stack.
+  # ───────────────────────────────────────────────────────────────────────────
+  db:
+    <<: *logging
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: openoncology
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?required}
+      POSTGRES_DB: openoncology
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openoncology -d openoncology"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [internal]
+    restart: unless-stopped
+    stop_grace_period: 60s
+
+  # Keycloak's database, separate from the application's. The chart runs two for
+  # the same reason: they hold unrelated data, are sized differently, and a
+  # restore of one must not touch the other.
+  keycloak-db:
+    <<: *logging
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD:?required}
+      POSTGRES_DB: keycloak
+    volumes:
+      - keycloak_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [internal]
+    restart: unless-stopped
+    stop_grace_period: 60s
+
+  redis:
+    <<: *logging
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [internal]
+    restart: unless-stopped
+
+  storage:
+    <<: *logging
+    # Pinned. An object store that changes version on a container restart is not
+    # one you can reason about, which is why the chart pins it too.
+    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    command: server /data --console-address ':9001'
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?required}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?required}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [internal]
+    restart: unless-stopped
+    # Console only, and only from the host. Nothing serves presigned URLs, so
+    # no browser ever talks to this directly.
+    ports:
+      - "127.0.0.1:9001:9001"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Keycloak. `start`, not `start-dev`: the dev command runs an in-memory
+  # database that discards the realm — every user, client and mapper — on
+  # restart, and disables hostname and HTTPS checks.
+  #
+  # KC_HOSTNAME must be the address the browser uses. Keycloak signs its issuer
+  # claim with it, and the API compares that claim against KEYCLOAK_ISSUER above;
+  # get them out of step and every request is a 401 with nothing in the log
+  # explaining why.
+  # ───────────────────────────────────────────────────────────────────────────
+  keycloak:
+    <<: *logging
+    image: quay.io/keycloak/keycloak:24.0
+    command: start
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:?required}
+      KC_HOSTNAME_URL: ${PUBLIC_KEYCLOAK_URL:?required}
+      KC_HOSTNAME_ADMIN_URL: ${PUBLIC_KEYCLOAK_URL:?required}
+      # TLS terminates at the reverse proxy, so Keycloak sees plain HTTP and has
+      # to be told to trust the forwarded headers. Without this it builds its
+      # redirect URLs from the internal address and the login loop never closes.
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?required}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q 'UP'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    networks: [internal]
+    restart: unless-stopped
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Observability. Every one of these binds to 127.0.0.1: reach them over an SSH
+  # tunnel, not over the internet. Flower in particular lists task arguments,
+  # which for this system means patient identifiers.
+  # ───────────────────────────────────────────────────────────────────────────
+  redis-exporter:
+    <<: *logging
+    image: oliver006/redis_exporter:v1.62.0
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      # One per Celery queue. redis_key_size for these keys is the queue depth,
+      # which for `gdpr` is how many erasure requests are waiting.
+      REDIS_EXPORTER_CHECK_KEYS: genomic,ai,notify,gdpr
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+  celery-exporter:
+    <<: *logging
+    image: danihodovic/celery-exporter:0.10.5
+    environment:
+      CE_BROKER_URL: redis://redis:6379/0
+      CE_ACCEPT_CONTENT: '["json"]'
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+  db-exporter:
+    <<: *logging
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_URI: db:5432/openoncology?sslmode=disable
+      DATA_SOURCE_USER: openoncology
+      DATA_SOURCE_PASS: ${DB_PASSWORD:?required}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+  prometheus:
+    <<: *logging
+    image: prom/prometheus:v2.53.1
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/alerts:/etc/prometheus/alerts:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    networks: [internal]
+    restart: unless-stopped
+
+  grafana:
+    <<: *logging
+    image: grafana/grafana:11.1.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?required}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3001:3000"
+    depends_on:
+      - prometheus
+    networks: [internal]
+    restart: unless-stopped
+
+  flower:
+    <<: *logging
+    image: mher/flower:2.0
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      FLOWER_BASIC_AUTH: ${FLOWER_USER:-admin}:${FLOWER_PASSWORD:?required}
+    ports:
+      - "127.0.0.1:5555:5555"
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks: [internal]
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  keycloak_db_data:
+  redis_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  internal:
+    driver: bridge

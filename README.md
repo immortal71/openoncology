@@ -105,6 +105,33 @@ docker-compose up --build
 
 **No Docker?** See [docs/SETUP.md](docs/SETUP.md) for local Python + Node.js setup, environment variables, and Windows-specific steps.
 
+> **This is the development stack.** `docker-compose.yml` mounts the source into
+> the containers, runs the API with `--reload` and the frontend with `next dev`,
+> sets `ENVIRONMENT=development` — which bootstraps the schema, seeds demo data
+> and serves `/docs` — starts Keycloak with `start-dev` against a database that
+> forgets the realm on restart, and publishes Postgres, Redis and MinIO on every
+> interface. Do not run it on a host with a public address.
+
+---
+
+## Deploying
+
+Two supported paths, and neither is the quick start above.
+
+| | |
+|---|---|
+| **Kubernetes** | `infra/helm`. The path CI renders and validates on every PR. [docs/RUNBOOK_STAGING_DEPLOY.md](docs/RUNBOOK_STAGING_DEPLOY.md) walks the first install: secrets, the Keycloak realm and the audience mapper people miss. |
+| **A single host** | `docker-compose.prod.yml` with `.env.production`. No source mounts, no reload, migrations run before anything queries the database, and nothing but the reverse proxy's three ports leaves the host. |
+
+```bash
+cp .env.production.example .env.production
+# fill it in — every value in it is required, and there are no working defaults
+docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+Both expect a reverse proxy terminating TLS in front of them. Neither creates
+the Keycloak realm for you.
+
 ---
 
 ## AI Pipeline

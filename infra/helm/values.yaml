@@ -88,6 +88,34 @@ web:
     NEXT_PUBLIC_KEYCLOAK_REALM: openoncology
     NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: openoncology-web
 
+# ── Schema migrations ─────────────────────────────────────────────────────────
+# `alembic upgrade head`, run as a Helm hook before each upgrade and after each
+# install. Nothing had ever created the schema in Kubernetes: the API only
+# bootstraps tables when ENVIRONMENT is "development", and the chart ran no
+# migration, so a fresh install served 500s from every route that touched a
+# table while both probes reported the pod healthy.
+#
+# On by default. A migration step that has to be switched on is one that is off
+# in the deployment that needed it, and the symptom — a Ready pod that errors on
+# every request — does not look like a missing migration.
+migrations:
+  enabled: true
+  # Retries of the whole Job, not of the wait loop below.
+  backoffLimit: 3
+  # Kept long enough that the log naming the failing revision outlives the Job.
+  ttlSecondsAfterFinished: 86400
+  # Five seconds apart, so 60 attempts is five minutes. On a fresh install this
+  # covers the postgresql sub-chart's StatefulSet coming up, which is what the
+  # wait is for.
+  waitForDatabaseAttempts: 60
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
 # ── Celery Workers ────────────────────────────────────────────────────────────
 # One entry per Celery queue. The key is the queue name and the worker module
 # both — `workers.<key>_worker`, consuming `-Q <key>` — so a queue that

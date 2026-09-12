@@ -1,4 +1,11 @@
 .env
+# `.env` alone does not match `.env.production`, which is what
+# docker-compose.prod.yml reads and the one file in this repository that holds
+# a real production SECRET_KEY and database password. The negations keep the
+# two committed examples visible.
+.env.*
+!.env.example
+!.env.production.example
 __pycache__/
 *.pyc
 *.pyo
@@ -121,3 +128,11 @@ validation_results/cache/
 
 .claude/
 loop.ps1
+
+# Vendored Helm sub-charts. `helm dependency build` fetches them from the
+# versions Chart.lock pins, so the tarballs are a build artifact. Chart.lock
+# itself IS committed: without it, `dependency update` resolves "19.x.x" to
+# whatever Bitnami published most recently, and two deploys of the same commit
+# can run different Redis charts. The pod labels that the NetworkPolicy
+# selectors match have changed between those versions before.
+infra/helm/charts/

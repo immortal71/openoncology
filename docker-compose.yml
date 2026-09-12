@@ -6,6 +6,12 @@ services:
     build:
       context: ./web
       dockerfile: Dockerfile
+      # The `dev` stage, not the final one. This service bind-mounts the source
+      # over /app for hot reload, and the runtime stage now ships only the
+      # standalone server and the modules it traces — no `next` CLI, no
+      # devDependencies — so the mount would shadow a tree that cannot run
+      # `next dev`. `dev` carries the full node_modules and nothing else.
+      target: dev
     ports:
       - "3000:3000"
     environment:
@@ -20,13 +26,14 @@ services:
     depends_on:
       - api
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
     networks:
       - openoncology
+    command: npm run dev
 
   # ─────────────────────────────────────────────
   # FastAPI Backend  →  http://localhost:8000

@@ -27,8 +27,11 @@ jobs:
         with:
           node-version: "20"
 
+      # `npm ci`, matching web/Dockerfile. With `npm install` here and in the
+      # image, CI resolved one set of versions and the published image resolved
+      # another — a green run said nothing about what was shipped.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: TypeScript type-check
         run: npx tsc --noEmit
@@ -51,8 +54,11 @@ jobs:
         with:
           node-version: "20"
 
+      # `npm ci`, matching web/Dockerfile. With `npm install` here and in the
+      # image, CI resolved one set of versions and the published image resolved
+      # another — a green run said nothing about what was shipped.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Vitest with coverage
         run: npm run test:coverage
@@ -79,8 +85,11 @@ jobs:
         with:
           node-version: "20"
 
+      # `npm ci`, matching web/Dockerfile. With `npm install` here and in the
+      # image, CI resolved one set of versions and the published image resolved
+      # another — a green run said nothing about what was shipped.
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
@@ -274,10 +283,21 @@ jobs:
       # returned kubeconform's exit code. A job that renders nothing and passes
       # is worse than no job, so the render below writes to a file, runs under
       # pipefail, and has to produce resources before anything is validated.
+      # `build`, not `update`. `update` re-resolves the version ranges in
+      # Chart.yaml against whatever Bitnami has published today — "19.x.x"
+      # matches every 19.x release — so the chart CI validated need not be the
+      # chart anyone deploys. `build` installs exactly what Chart.lock pins and
+      # fails if the lock and Chart.yaml disagree. Same reasoning as `npm ci` in
+      # the frontend jobs.
+      #
+      # To take a new sub-chart version: run `helm dependency update infra/helm`
+      # locally and commit the changed Chart.lock, deliberately. Check the pod
+      # labels first — the NetworkPolicy selectors in values.yaml match them,
+      # and Bitnami has changed them between versions.
       - name: Fetch chart dependencies
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm dependency update infra/helm
+          helm dependency build infra/helm
 
       - name: Render and validate the chart against the Kubernetes schema
         shell: bash
@@ -313,7 +333,100 @@ jobs:
           check 'KEYCLOAK_AUDIENCE'    'the audience production requires is wired'
           check 'kind: PodDisruptionBudget' 'the API has a disruption budget'
           check 'terminationGracePeriodSeconds' 'shutdown is given a grace period'
+          check 'alembic upgrade head' 'the schema is migrated on deploy'
           exit $fail
+
+      # Where the application's environment is assembled, which grep is the
+      # wrong tool for. Kubernetes substitutes $(VAR) in a container's own `env`
+      # entries and in its command and args, and NOWHERE ELSE: a ConfigMap key
+      # read through `envFrom` is passed through byte for byte. DATABASE_URL sat
+      # in the ConfigMap containing $(DB_PASSWORD), so every pod in the cluster
+      # received those characters as its literal Postgres password.
+      #
+      # The first version of this step was `grep -A40 'kind: ConfigMap'`, and it
+      # failed on the fixed chart: 40 lines runs off the end of a document into
+      # the next one, and the redis sub-chart mounts ConfigMaps full of shell
+      # scripts whose $(...) is ordinary command substitution and no business of
+      # this check. So it reads the documents, and looks only at the ConfigMaps
+      # something actually loads through envFrom.
+      #
+      # Inline rather than a helper under scripts/, which the PreToolUse guard
+      # covers and is not a path to add tooling to casually. Same reasoning as
+      # the network policy step above.
+      - name: Check how the application environment is assembled
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - rendered.yaml <<'CHECK'
+          import re, sys, yaml
+
+          REFERENCE = re.compile(r"\$\([A-Za-z_][A-Za-z0-9_]*\)")
+          WORKLOADS = ("Deployment", "StatefulSet", "DaemonSet", "Job", "CronJob")
+
+          docs = [d for d in yaml.safe_load_all(open(sys.argv[1])) if d]
+
+          def pod_spec(doc):
+              if doc["kind"] == "CronJob":
+                  return doc["spec"]["jobTemplate"]["spec"]["template"]["spec"]
+              return doc["spec"]["template"]["spec"]
+
+          def containers(spec):
+              return (spec.get("containers") or []) + (spec.get("initContainers") or [])
+
+          configmaps = {
+              d["metadata"]["name"]: (d.get("data") or {})
+              for d in docs if d.get("kind") == "ConfigMap"
+          }
+
+          consumed = set()
+          for d in docs:
+              if d.get("kind") not in WORKLOADS:
+                  continue
+              for c in containers(pod_spec(d)):
+                  for source in c.get("envFrom") or []:
+                      ref = source.get("configMapRef")
+                      if ref:
+                          consumed.add(ref["name"])
+
+          assert consumed, "no ConfigMap is loaded through envFrom; this check has drifted"
+
+          offenders = []
+          for name in sorted(consumed):
+              for key, value in configmaps.get(name, {}).items():
+                  if isinstance(value, str) and REFERENCE.search(value):
+                      offenders.append(f"{name}.{key} = {value}")
+
+          if offenders:
+              print("These are read through envFrom, which does NOT expand $(VAR).")
+              print("The value arrives as literal text. Move it to the container's env:")
+              for line in offenders:
+                  print("  " + line)
+              sys.exit(1)
+          print(f"ok: {len(consumed)} envFrom ConfigMap(s), none depend on expansion")
+
+          # The other half. DATABASE_URL has to exist, and after the variable it
+          # embeds: expansion resolves against entries already defined earlier in
+          # the same list, so the order is load-bearing.
+          seen = 0
+          for d in docs:
+              if d.get("kind") not in WORKLOADS:
+                  continue
+              for c in containers(pod_spec(d)):
+                  names = [e["name"] for e in (c.get("env") or [])]
+                  if "DATABASE_URL" not in names:
+                      continue
+                  seen += 1
+                  where = f"{d['kind']}/{d['metadata']['name']}/{c['name']}"
+                  assert "DB_PASSWORD" in names, f"{where} sets DATABASE_URL and no DB_PASSWORD"
+                  assert names.index("DB_PASSWORD") < names.index("DATABASE_URL"), (
+                      f"{where} defines DATABASE_URL before DB_PASSWORD, so it expands to nothing"
+                  )
+                  value = next(e for e in c["env"] if e["name"] == "DATABASE_URL")["value"]
+                  assert "$(DB_PASSWORD)" in value, f"{where} DATABASE_URL interpolates nothing"
+
+          assert seen, "nothing in the release sets DATABASE_URL; the API cannot reach Postgres"
+          print(f"ok: {seen} container(s) build DATABASE_URL after the password it interpolates")
+          CHECK
 
       # NetworkPolicies are off by default, so the render above never sees them.
       # A policy that fails to render, or whose podSelector matches no pod the
@@ -373,8 +486,39 @@ jobs:
           kubeconform -strict -summary -ignore-missing-schemas \
             -kubernetes-version 1.29.0 infra/k8s/
 
-      - name: Validate docker-compose
+      - name: Validate docker-compose (development)
         run: docker compose -f docker-compose.yml config --quiet
+
+      # The production stack. Every required variable uses `${VAR:?}`, so this
+      # step doubles as a check that the list below is the complete set: add a
+      # required variable to the compose file and forget it here, and this fails
+      # rather than the deployment. The values are placeholders — `config` does
+      # not connect to anything.
+      #
+      # IMAGE_TAG is deliberately not defaulted in the compose file. `latest` is
+      # mutable, and a container restart that changes the running version is not
+      # something this system's output can tolerate.
+      - name: Validate docker-compose (production)
+        env:
+          IMAGE_TAG: sha-0000000
+          PUBLIC_WEB_URL: https://example.org
+          PUBLIC_API_URL: https://api.example.org
+          PUBLIC_KEYCLOAK_URL: https://auth.example.org
+          SECRET_KEY: ci-placeholder-not-a-real-key
+          DB_PASSWORD: ci-placeholder
+          KC_DB_PASSWORD: ci-placeholder
+          MINIO_ACCESS_KEY: ci-placeholder
+          MINIO_SECRET_KEY: ci-placeholder
+          KEYCLOAK_AUDIENCE: openoncology-api
+          KEYCLOAK_ADMIN_PASSWORD: ci-placeholder
+          GRAFANA_PASSWORD: ci-placeholder
+          FLOWER_PASSWORD: ci-placeholder
+        run: docker compose -f docker-compose.prod.yml config --quiet
+        # `config` resolves the file; it does not read it. The properties that
+        # separate the production stack from the development one — no bind
+        # mount, no --reload, no datastore on a public interface, nothing
+        # touching the database before the migration — are asserted in
+        # api/tests/test_production_compose.py, which the backend job runs.
 
   # ── Container images ──────────────────────────────────────────────────────
   # Until this job existed, CI built both images and discarded them. Nothing in

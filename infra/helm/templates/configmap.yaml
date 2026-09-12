@@ -20,7 +20,12 @@ data:
   MINIO_BUCKET_RAW: {{ .Values.api.env.MINIO_BUCKET_RAW | quote }}
   MINIO_BUCKET_VCF: {{ .Values.api.env.MINIO_BUCKET_VCF | quote }}
   MINIO_BUCKET_REPORTS: {{ .Values.api.env.MINIO_BUCKET_REPORTS | quote }}
-  DATABASE_URL: {{ include "openoncology.databaseUrl" . | quote }}
+  # DATABASE_URL is deliberately NOT here. It embeds $(DB_PASSWORD), and
+  # Kubernetes does not expand $(VAR) in ConfigMap keys consumed through
+  # `envFrom` — only in a container's own `env` entries. From here it reached
+  # every pod as the literal seven characters, and Postgres rejected the lot.
+  # It is built in the `env` block of api.yaml, workers.yaml, beat.yaml and
+  # migrate-job.yaml, immediately after the DB_PASSWORD entry it refers to.
   REDIS_URL: {{ include "openoncology.redisUrl" . | quote }}
   # Next.js public vars
   NEXT_PUBLIC_API_URL: {{ printf "https://%s" .Values.ingress.hosts.api | quote }}

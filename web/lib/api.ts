@@ -3,7 +3,12 @@
  * All calls include the Keycloak Bearer token from session storage.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { publicEnvOr } from "@/lib/runtime-config";
+
+// Resolved per call, not once at import. The value is injected at runtime by
+// app/env.js/route.ts, and a module-level constant would capture whatever was
+// compiled into the bundle before that script ever ran.
+const apiUrl = () => publicEnvOr("NEXT_PUBLIC_API_URL", "http://localhost:8000");
 const REQUEST_TIMEOUT_MS = 15000;
 
 function getToken(): string | null {
@@ -12,7 +17,8 @@ function getToken(): string | null {
   if (token) return token;
 
   // Local development fallback when Keycloak is not running.
-  const isLocalApi = API_URL.includes("localhost") || API_URL.includes("127.0.0.1");
+  const url = apiUrl();
+  const isLocalApi = url.includes("localhost") || url.includes("127.0.0.1");
   const isLocalHost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
   if (isLocalApi && isLocalHost) {
     sessionStorage.setItem("kc_token", "demo-local-token");
@@ -37,7 +43,7 @@ async function request<T>(
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${apiUrl()}${path}`, {
       ...options,
       headers,
       signal: controller.signal,
@@ -76,7 +82,7 @@ async function requestBlob(path: string, options: RequestInit = {}): Promise<Blo
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, { ...options, headers, signal: controller.signal });
+    res = await fetch(`${apiUrl()}${path}`, { ...options, headers, signal: controller.signal });
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error(`Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s`);
