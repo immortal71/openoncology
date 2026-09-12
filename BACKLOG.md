@@ -84,18 +84,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 <!-- Entry plus PR URL. Cleared by hand when merged. -->
 
-### OO-20: The deployed image cannot render a PDF
-- **Why**: WeasyPrint is a Python package with native dependencies. `api/Dockerfile` installs `gcc`, `libpq-dev` and `curl` and none of libgobject, libpango or libcairo, so `import weasyprint` raises `OSError` in the deployed container exactly as it does on a developer Windows machine. Every oncologist report and patient letter download therefore returns HTML rather than a PDF. That is now a graceful degradation rather than a 500, which was the bug fixed alongside this, but it is still not what the endpoint is named after: the route is `oncologist-report.pdf` and it returns `text/html`.
-- **Files**: api/Dockerfile, api/requirements.txt, api/tests/test_report_download_path.py
-- **Acceptance**:
-  - The image carries the libraries WeasyPrint needs, or the endpoint and its documentation stop describing themselves as PDF
-  - A test asserts the container can produce a PDF, run where those libraries exist rather than on a developer machine
-  - The added image size is recorded, since the GTK stack is not small and this is the only feature that needs it
-- **Out of scope**: replacing WeasyPrint
-- **Risk**: low. Worth deciding rather than defaulting: a clinician who asked for a PDF and received HTML has something that prints differently and does not carry the same expectation of being a fixed record.
-
-- **PR**: https://github.com/immortal71/openoncology/pull/164
-
 ---
 
 ## Needs human decision
@@ -182,6 +170,23 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 
 <!-- Merged entries, newest first. Trim periodically. -->
+
+### OO-20: The deployed image renders a PDF
+Merged in [#164](https://github.com/immortal71/openoncology/pull/164). `api/Dockerfile`
+installed gcc, libpq-dev and curl and none of WeasyPrint's native dependencies, so
+`import weasyprint` raised OSError in the container and every oncologist report and
+patient letter fell back to HTML. The route is named `oncologist-report.pdf` and it
+returned `text/html`, at a 200, without saying so.
+
+Pango brings glib, harfbuzz and fontconfig with it; cairo and gdk-pixbuf have not been
+needed since WeasyPrint v53. `fonts-dejavu-core` is separate and still required, because
+fontconfig with no font installed lays the text out correctly and draws every glyph as a
+box.
+
+The suite could not have caught this: it runs where those libraries are present, so every
+assertion about PDF generation passed while the image took the other branch. ci.yml now
+builds the image, renders a report inside it, and fails unless the bytes are a PDF;
+`publish-images` depends on that job, so an image that cannot render one is not published.
 
 ### OO-15: Session lifetimes applied; security officer still unassigned
 Half closed in [#148](https://github.com/immortal71/openoncology/pull/148). A
