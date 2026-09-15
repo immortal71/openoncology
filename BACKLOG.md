@@ -105,6 +105,22 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
 
+### OO-22: Run the variant-calling gate on this pipeline (roadmap 2.1)
+- **Why**: The single blocking clinical gate that needs no partner, IRB or regulator, and the cheapest item left on the critical path. `REGULATORY_FRAMEWORK.md` 3.1 wants sensitivity >= 99% and PPV >= 95% against an orthogonal truth set. The only measurement in the repository is of a *published NIST call set*, correctly recorded as `satisfies_regulatory_gate_3_1: false`.
+- **Blocked on a host, not on code.** Needs ~32 GB RAM, 8-16 vCPU, 150 GB disk, and `nextflow`, `java`, `bwa-mem2`, `gatk`, `samtools`. A developer workstation does not qualify: the BWA-MEM2 index build alone wants 12 GB.
+- **Pre-flight done 2026-09-07**, so a rented host starts from a known-good position:
+  - All five downloads verified live: GIAB truth VCF (0.15 GB), its index, the confident BED, GRCh38 primary assembly (0.82 GB), dbSNP 151 (15.23 GB).
+  - The `<HG002_GRCh38.bam>` placeholder in the runbook is resolved to a real URL, and it is the BGIseq 2x150 100x run — the same dataset the existing reference figure used, which is what makes the comparison like for like.
+  - **That BAM is 390 GB**, against the runbook's own 150 GB disk budget, so route A as previously written could not have been followed. The server supports range requests and a `.bai` exists, so `samtools` streams the region instead: **8.86 GB**, measured from the index (chr20 is reference 19, bytes 367,105,864,800 to 376,620,505,623), not estimated from chromosome length. The real bins and the pseudo-bin agree.
+  - Two late-failing traps written down: `samtools` must be built with libcurl, and the BAM uses `chr20` naming across 595 references.
+- **Acceptance**:
+  - `scripts/validate_variant_calling.py` run with `--from-repo-pipeline` against output of `pipeline/main.nf`, scope chr20 in the NIST confident regions
+  - Route A (BAM in, caller measured) first, then route B, with the gap between them recorded — that gap is the cost of the single-end FASTQ path
+  - `--query-label` states what was measured; route A is not end-to-end accuracy and must not be described as such
+  - The result is compared against `variant_calling_reference_gatk4.json`, which is stock GATK4 at 95.82% sensitivity — under the 99% gate
+- **Out of scope**: the two known pipeline limitations the runbook documents (single-end FASTQ handling, BWA-MEM2 index rebuilt per task). Both change what route B means; neither blocks the measurement.
+- **Risk**: scientific. This produces a number that goes into a regulatory gate, and `validation_results/**` is guard-protected. A human runs it and records it; an agent must not.
+
 ### OO-7: Decide whether `civic_supplement_enabled` should default to True
 - **Why**: Asked as "how do we raise the benchmark", and the measurements already
   in the repository answer it in a way that rules ranking work out. In

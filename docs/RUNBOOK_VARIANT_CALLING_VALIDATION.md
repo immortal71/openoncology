@@ -77,6 +77,11 @@ this document:
 A spot or preemptible instance is fine; Nextflow resumes with `-resume`. The
 chr20 column is the one this runbook is built around.
 
+The 150 GB assumes the chr20 alignment is **streamed** from GIAB rather than
+downloaded whole; the published BAM is 390 GB on its own. Route A below has the
+detail. Roughly: 25 GB of references, 9 GB for the chr20 BAM, the rest work
+directory and headroom.
+
 ---
 
 ## Step 1: references
@@ -136,19 +141,52 @@ configuration, on properly paired alignments, and sidesteps both limitations
 above. What it measures is the caller and its filters, which is the substance of
 the 3.1 gate.
 
-Source data is under the GIAB release the harness already points at:
+The alignment to use, resolved rather than left as a placeholder:
 
 ```
-https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/
+https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/\
+HG002_NA24385_son/NIST_BGIseq_2x150bp_100x/GRCh38/\
+HG002_GRCh38_BGIseq-2x150-100x_NIST_20211126.bam
 ```
+
+This is the BGIseq 2x150 100x run, which is the same dataset the existing
+reference figure in `validation_results/variant_calling_reference_gatk4.json`
+was made from. That is deliberate: the comparison this runbook is built around
+is only like for like if the input data matches, not merely the chromosome.
 
 The truth set itself is fetched automatically into `validation_results/cache/`,
 so this step is only about the alignment.
 
+**Do not download it.** It is **390 GB**, against the 150 GB this runbook
+budgets for the whole chr20 route. Following the previous version of this step
+literally — fetch the BAM, then subset it — cannot succeed on the host specified
+above.
+
+Stream the region instead. The server sends `Accept-Ranges: bytes` and answers
+`206`, and a `.bai` sits beside the BAM, so `samtools` range-requests only the
+blocks it needs:
+
 ```bash
-samtools view -b -h <HG002_GRCh38.bam> chr20 > HG002.chr20.bam
+BAM=https://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/AshkenazimTrio/HG002_NA24385_son/NIST_BGIseq_2x150bp_100x/GRCh38/HG002_GRCh38_BGIseq-2x150-100x_NIST_20211126.bam
+
+samtools view -b -h "$BAM" chr20 > HG002.chr20.bam
 samtools index HG002.chr20.bam
 ```
+
+That pulls **8.86 GB**, measured from the BAI rather than estimated: chr20 is
+reference index 19 and occupies bytes 367,105,864,800 to 376,620,505,623, which
+is 2.27% of the file against 1.98% of the assembly by length. Both the real bins
+and the pseudo-bin's `(ref_beg, ref_end)` agree on the figure.
+
+Two things to have right before running it, because both fail late:
+
+- `samtools` needs to have been built with libcurl. `samtools --version` lists
+  HTSlib's features; without `libcurl` in that list it will treat the URL as a
+  filename and report that the file does not exist.
+- Check the contig naming in the BAM header (`samtools view -H "$BAM" | head`).
+  This file uses `chr20` across 595 references including alts and decoys. A
+  reference FASTA using `20` will not match it, and the harness's `--chrom`
+  normalises the prefix for scoring but the aligner and caller do not.
 
 ```bash
 cd pipeline
