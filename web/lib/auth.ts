@@ -7,6 +7,8 @@
  * lib/api.ts can read it without importing this module.
  */
 
+import { publicEnv, publicEnvOr } from "@/lib/runtime-config";
+
 export interface KeycloakUser {
   sub: string;
   email: string;
@@ -31,7 +33,7 @@ const DEMO_USER: KeycloakUser = {
 
 function isDemoMode(): boolean {
   if (typeof window === "undefined") return false;
-  return process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "1";
+  return publicEnv("NEXT_PUBLIC_ENABLE_DEMO_AUTH") === "1";
 }
 
 // ─── Lazy-loaded Keycloak instance ────────────────────────────────────────────
@@ -42,9 +44,9 @@ async function getKeycloak() {
   if (_kc) return _kc;
   const Keycloak = (await import("keycloak-js")).default;
   _kc = new Keycloak({
-    url: process.env.NEXT_PUBLIC_KEYCLOAK_URL ?? "http://localhost:8080",
-    realm: process.env.NEXT_PUBLIC_KEYCLOAK_REALM ?? "openoncology",
-    clientId: process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ?? "openoncology-web",
+    url: publicEnvOr("NEXT_PUBLIC_KEYCLOAK_URL", "http://localhost:8080"),
+    realm: publicEnvOr("NEXT_PUBLIC_KEYCLOAK_REALM", "openoncology"),
+    clientId: publicEnvOr("NEXT_PUBLIC_KEYCLOAK_CLIENT_ID", "openoncology-web"),
   });
   return _kc;
 }
@@ -62,7 +64,7 @@ export async function initAuth(): Promise<AuthState> {
     return { authenticated: true, token: DEMO_TOKEN, user: DEMO_USER };
   }
 
-  const keycloakUrl = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
+  const keycloakUrl = publicEnv("NEXT_PUBLIC_KEYCLOAK_URL");
   if (!keycloakUrl) {
     return { authenticated: false, token: null, user: null };
   }
@@ -108,7 +110,7 @@ export async function login() {
     return;
   }
 
-  if (!process.env.NEXT_PUBLIC_KEYCLOAK_URL) {
+  if (!publicEnv("NEXT_PUBLIC_KEYCLOAK_URL")) {
     throw new Error("Keycloak is not configured in this environment.");
   }
 

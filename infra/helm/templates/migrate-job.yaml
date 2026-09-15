@@ -1,0 +1,140 @@
+{{/*
+`alembic upgrade head`, as a Helm hook.
+
+Nothing in either deployment path had ever created the schema. The API only
+bootstraps tables when ENVIRONMENT is `development` (api/main.py, guarded by
+`bootstrap_schema_in_dev` so that dev cannot hide migration drift), and the
+chart ran no migration of its own — so a fresh install came up against an empty
+database, passed both probes, and returned 500 from every route that touched a
+table. `/ready` round-trips Postgres with `SELECT 1`, which an empty database
+answers perfectly well, so readiness reported the pod healthy throughout.
+
+Hooked on post-install and pre-upgrade rather than pre-install, for two reasons
+that both come down to what exists when the hook runs:
+
+  * On a fresh install the postgresql sub-chart's StatefulSet is a regular
+    resource, created after pre-install hooks. A pre-install migration would
+    have nothing to connect to.
+  * env.py imports `config.settings`, and Settings validates on construction —
+    in a hardened environment it refuses to build without SECRET_KEY,
+    MINIO_SECRET_KEY and KEYCLOAK_AUDIENCE. So this Job needs the same ConfigMap
+    and Secret the API does, and the ConfigMap is likewise a regular resource.
+
+On upgrade it runs before the new pods roll, which is the ordering that matters:
+new code against an old schema is the failure this prevents. On install the API
+Deployment already exists while the Job runs, so there is a window where routes
+return errors. It is bounded by the Job and it is visible, which is the better
+of the two directions.
+
+`helm upgrade --wait` blocks on the hook, so a migration that fails fails the
+release rather than letting a rollout proceed past it.
+*/}}
+{{- if .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "openoncology.fullname" . }}-migrate
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "openoncology.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrate
+  annotations:
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    # The Job name is fixed, and a Job's pod template is immutable, so the
+    # previous release's Job has to go before this one can be created.
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: {{ .Values.migrations.backoffLimit }}
+  # Without this a failed migration's pods are garbage-collected on the cluster's
+  # own schedule, and the log saying which revision failed goes with them.
+  ttlSecondsAfterFinished: {{ .Values.migrations.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels:
+        {{- include "openoncology.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migrate
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "openoncology.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: migrate
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          # Postgres is still starting during a fresh install, so the wait is
+          # part of the job rather than a reason for it to fail. `alembic
+          # current` is the probe because it is the same connection path the
+          # upgrade uses — a TCP check would pass against a Postgres that has
+          # not yet created the database.
+          #
+          # No $(...) command substitution anywhere in this script, on purpose.
+          # Kubernetes performs its own $(VAR) expansion over args before the
+          # shell ever sees them; the two syntaxes collide, and which one wins
+          # is not something to discover during a release. Plain $VAR reads and
+          # $((arithmetic)) are untouched by it.
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              attempt=0
+              until alembic current >/dev/null 2>&1; do
+                attempt=$((attempt + 1))
+                if [ "$attempt" -gt {{ .Values.migrations.waitForDatabaseAttempts }} ]; then
+                  echo "the database did not become reachable; last error follows"
+                  alembic current
+                  exit 1
+                fi
+                echo "waiting for the database (attempt $attempt)"
+                sleep 5
+              done
+              echo "--- before ---"
+              alembic current
+              alembic upgrade head
+              echo "--- after ---"
+              alembic current
+          envFrom:
+            - configMapRef:
+                name: {{ include "openoncology.fullname" . }}-config
+            - secretRef:
+                name: {{ .Values.api.secretRef }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openoncology-pg-secret
+                  key: password
+            # Assembled here rather than in the ConfigMap, and it has to stay
+            # here. Kubernetes expands $(VAR) in `env` values and in a
+            # container's command and args, and NOWHERE ELSE — a ConfigMap key
+            # consumed through `envFrom` is passed through byte for byte.
+            #
+            # DATABASE_URL lived in the ConfigMap with $(DB_PASSWORD) in it, so
+            # every pod in the cluster received that text as its literal
+            # password and Postgres refused all of them. The API's readiness
+            # probe reported it (/ready round-trips the database), and nothing
+            # else did: helm lint, kubeconform and the rendered-output checks
+            # all pass on a string that is only wrong once something tries to
+            # connect with it.
+            #
+            # DB_PASSWORD must be declared before this entry. Expansion resolves
+            # against the variables already defined in the list, in order.
+            - name: DATABASE_URL
+              value: {{ include "openoncology.databaseUrl" . | quote }}
+          resources:
+            {{- toYaml .Values.migrations.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+{{- end }}

@@ -35,10 +35,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PlusCircle, Share2, Zap, XCircle, Megaphone } from "lucide-react";
 import { toast } from "sonner";
+import { publicEnvOr } from "@/lib/runtime-config";
 
 export const dynamic = "force-dynamic";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API = () => publicEnvOr("NEXT_PUBLIC_API_URL", "http://localhost:8000");
 
 type CampaignStatus = "draft" | "active" | "closed" | "complete";
 
@@ -132,13 +133,13 @@ export default function DashboardCampaignsPage() {
   // The API returns all campaigns for the authed user via GET /api/crowdfund/?mine=true
   const campaigns = useQuery<Campaign[]>({
     queryKey: ["my-campaigns"],
-    queryFn: () => fetchJson(`${API}/api/crowdfund/?mine=true`, token!),
+    queryFn: () => fetchJson(`${API()}/api/crowdfund/?mine=true`, token!),
     enabled: !!token,
   });
 
   const createMutation = useMutation({
     mutationFn: (data: CreateForm) =>
-      fetchJson<Campaign>(`${API}/api/crowdfund/`, token!, {
+      fetchJson<Campaign>(`${API()}/api/crowdfund/`, token!, {
         method: "POST",
         body: JSON.stringify(data),
       }),
@@ -153,7 +154,7 @@ export default function DashboardCampaignsPage() {
 
   const activateMutation = useMutation({
     mutationFn: (slug: string) =>
-      fetchJson(`${API}/api/crowdfund/${slug}/activate`, token!, { method: "POST" }),
+      fetchJson(`${API()}/api/crowdfund/${slug}/activate`, token!, { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-campaigns"] });
       toast.success("Campaign is now live!");
@@ -163,7 +164,7 @@ export default function DashboardCampaignsPage() {
 
   const closeMutation = useMutation({
     mutationFn: (slug: string) =>
-      fetchJson(`${API}/api/crowdfund/${slug}/close`, token!, { method: "POST" }),
+      fetchJson(`${API()}/api/crowdfund/${slug}/close`, token!, { method: "POST" }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-campaigns"] });
       toast.success("Campaign closed.");

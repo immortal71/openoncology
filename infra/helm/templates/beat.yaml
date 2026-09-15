@@ -68,6 +68,23 @@ spec:
                 secretKeyRef:
                   name: openoncology-pg-secret
                   key: password
+            # Assembled here rather than in the ConfigMap, and it has to stay
+            # here. Kubernetes expands $(VAR) in `env` values and in a
+            # container's command and args, and NOWHERE ELSE — a ConfigMap key
+            # consumed through `envFrom` is passed through byte for byte.
+            #
+            # DATABASE_URL lived in the ConfigMap with $(DB_PASSWORD) in it, so
+            # every pod in the cluster received that text as its literal
+            # password and Postgres refused all of them. The API's readiness
+            # probe reported it (/ready round-trips the database), and nothing
+            # else did: helm lint, kubeconform and the rendered-output checks
+            # all pass on a string that is only wrong once something tries to
+            # connect with it.
+            #
+            # DB_PASSWORD must be declared before this entry. Expansion resolves
+            # against the variables already defined in the list, in order.
+            - name: DATABASE_URL
+              value: {{ include "openoncology.databaseUrl" . | quote }}
           resources:
             {{- toYaml .Values.beat.resources | nindent 12 }}
           securityContext:

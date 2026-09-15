@@ -5,7 +5,11 @@ metadata:
   namespace: openoncology
 data:
   ENVIRONMENT: "production"
-  DATABASE_URL: "postgresql+asyncpg://openoncology:$(DB_PASSWORD)@db:5432/openoncology"
+  # DATABASE_URL is NOT here. It embeds $(DB_PASSWORD), and Kubernetes expands
+  # $(VAR) only in a container's own `env` entries and in its command and args —
+  # never in a ConfigMap key read through `envFrom`. From here it arrived at the
+  # API as those seven literal characters and Postgres rejected every
+  # connection. It is assembled in deployment.yaml's `env` block instead.
   REDIS_URL: "redis://redis:6379/0"
   MINIO_ENDPOINT: "storage:9000"
   MINIO_SECURE: "false"

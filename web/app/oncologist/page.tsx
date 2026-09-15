@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ShieldCheck, AlertTriangle, Clock, CheckCircle, User } from "lucide-react";
+import { publicEnvOr } from "@/lib/runtime-config";
 
 interface PendingResult {
   submission_id: string;
@@ -20,7 +21,7 @@ interface ReviewPayload {
   notes: string;
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "";
+const API = () => publicEnvOr("NEXT_PUBLIC_API_URL", "");
 
 function authHeaders(): Record<string, string> {
   const token = getToken();
@@ -28,13 +29,13 @@ function authHeaders(): Record<string, string> {
 }
 
 async function fetchPending(): Promise<PendingResult[]> {
-  const res = await fetch(`${API}/api/oncologist/pending`, { headers: authHeaders() });
+  const res = await fetch(`${API()}/api/oncologist/pending`, { headers: authHeaders() });
   if (!res.ok) throw new Error("Unauthorized or unavailable");
   return res.json();
 }
 
 async function submitReview(payload: ReviewPayload) {
-  const res = await fetch(`${API}/api/oncologist/review`, {
+  const res = await fetch(`${API()}/api/oncologist/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(payload),

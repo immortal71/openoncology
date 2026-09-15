@@ -10,8 +10,9 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { DEMO_CROWDFUND, DEMO_ID } from "@/lib/demo-data";
+import { publicEnvOr } from "@/lib/runtime-config";
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "");
+const stripePromise = loadStripe(publicEnvOr("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", ""));
 
 function ProgressBar({ percent }: { percent: number }) {
   return (
@@ -71,7 +72,7 @@ function DonateForm({
     try {
       const token = getToken();
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/crowdfund/${slug}/donate`,
+        `${publicEnvOr("NEXT_PUBLIC_API_URL", "http://localhost:8000")}/api/crowdfund/${slug}/donate`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },

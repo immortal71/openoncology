@@ -169,13 +169,26 @@ python -c "import base64,json,sys; p=sys.argv[1].split('.')[1]; print(json.loads
 ## Step 5: install
 
 ```bash
-helm dependency update infra/helm
+helm dependency build infra/helm   # the versions Chart.lock pins
 
 helm upgrade --install openoncology-staging ./infra/helm \
   --namespace openoncology-staging \
   -f infra/helm/values.yaml \
   -f infra/helm/values.staging.yaml
 ```
+
+The install now creates the schema. A `-migrate` Job runs `alembic upgrade head`
+as a hook: post-install on a first install, pre-upgrade on every one after, so
+new pods never roll against an old schema. Before it existed the chart created
+no tables at all — the API only bootstraps them when `ENVIRONMENT` is
+`development` — and a fresh install served 500s from every route that touched a
+table while both probes called the pods healthy, because `/ready` round-trips
+Postgres with `SELECT 1` and an empty database answers that perfectly well.
+
+On a first install the Job waits up to five minutes for the postgresql
+sub-chart to accept connections, so expect it to sit in `Running` for a while.
+Pass `--wait` if you want helm to block on it rather than returning while it
+works.
 
 Watch it come up:
 
@@ -188,6 +201,13 @@ kubectl -n openoncology-staging get pods -w
 ## Step 6: what to check, in this order
 
 Each of these is a control added recently that has never executed.
+
+**The schema was created.** Check this first; everything downstream queries it.
+The Job prints the revision before and after.
+
+```
+kubectl -n openoncology-staging logs job/openoncology-staging-openoncology-migrate
+```
 
 **Pods start and the API is ready.** Readiness is `/ready`, which round-trips
 Postgres and Redis, so a Ready pod means both are reachable.
@@ -275,6 +295,8 @@ Most likely, in rough order:
 | Uploads fail | MinIO credentials do not match between the two secrets |
 | Backup job fails | `mc-host-url` wrong, or MinIO not yet ready |
 | Pods pending | No StorageClass, or the volumes exceed the cluster's capacity |
+| Ready pods, 500 on every route that reads data | The migration Job failed. Read its log |
+| The site loads but calls `localhost:8000` | `/env.js` is not being served; the browser console says so |
 
 Record what actually broke. An install that revealed three misconfigurations is
 a successful staging deploy, and the list is worth more than a clean run.
