@@ -84,18 +84,6 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 <!-- Entry plus PR URL. Cleared by hand when merged. -->
 
-### OO-20: The deployed image cannot render a PDF
-- **Why**: WeasyPrint is a Python package with native dependencies. `api/Dockerfile` installs `gcc`, `libpq-dev` and `curl` and none of libgobject, libpango or libcairo, so `import weasyprint` raises `OSError` in the deployed container exactly as it does on a developer Windows machine. Every oncologist report and patient letter download therefore returns HTML rather than a PDF. That is now a graceful degradation rather than a 500, which was the bug fixed alongside this, but it is still not what the endpoint is named after: the route is `oncologist-report.pdf` and it returns `text/html`.
-- **Files**: api/Dockerfile, api/requirements.txt, api/tests/test_report_download_path.py
-- **Acceptance**:
-  - The image carries the libraries WeasyPrint needs, or the endpoint and its documentation stop describing themselves as PDF
-  - A test asserts the container can produce a PDF, run where those libraries exist rather than on a developer machine
-  - The added image size is recorded, since the GTK stack is not small and this is the only feature that needs it
-- **Out of scope**: replacing WeasyPrint
-- **Risk**: low. Worth deciding rather than defaulting: a clinician who asked for a PDF and received HTML has something that prints differently and does not carry the same expectation of being a fixed record.
-
-- **PR**: https://github.com/immortal71/openoncology/pull/164
-
 ---
 
 ## Needs human decision
@@ -104,6 +92,22 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      BLOCKs, mis-scoped entries, and anything the planner marked
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
+
+### OO-22: Run the variant-calling gate on this pipeline (roadmap 2.1)
+- **Why**: The single blocking clinical gate that needs no partner, IRB or regulator, and the cheapest item left on the critical path. `REGULATORY_FRAMEWORK.md` 3.1 wants sensitivity >= 99% and PPV >= 95% against an orthogonal truth set. The only measurement in the repository is of a *published NIST call set*, correctly recorded as `satisfies_regulatory_gate_3_1: false`.
+- **Blocked on a host, not on code.** Needs ~32 GB RAM, 8-16 vCPU, 150 GB disk, and `nextflow`, `java`, `bwa-mem2`, `gatk`, `samtools`. A developer workstation does not qualify: the BWA-MEM2 index build alone wants 12 GB.
+- **Pre-flight done 2026-09-07**, so a rented host starts from a known-good position:
+  - All five downloads verified live: GIAB truth VCF (0.15 GB), its index, the confident BED, GRCh38 primary assembly (0.82 GB), dbSNP 151 (15.23 GB).
+  - The `<HG002_GRCh38.bam>` placeholder in the runbook is resolved to a real URL, and it is the BGIseq 2x150 100x run — the same dataset the existing reference figure used, which is what makes the comparison like for like.
+  - **That BAM is 390 GB**, against the runbook's own 150 GB disk budget, so route A as previously written could not have been followed. The server supports range requests and a `.bai` exists, so `samtools` streams the region instead: **8.86 GB**, measured from the index (chr20 is reference 19, bytes 367,105,864,800 to 376,620,505,623), not estimated from chromosome length. The real bins and the pseudo-bin agree.
+  - Two late-failing traps written down: `samtools` must be built with libcurl, and the BAM uses `chr20` naming across 595 references.
+- **Acceptance**:
+  - `scripts/validate_variant_calling.py` run with `--from-repo-pipeline` against output of `pipeline/main.nf`, scope chr20 in the NIST confident regions
+  - Route A (BAM in, caller measured) first, then route B, with the gap between them recorded — that gap is the cost of the single-end FASTQ path
+  - `--query-label` states what was measured; route A is not end-to-end accuracy and must not be described as such
+  - The result is compared against `variant_calling_reference_gatk4.json`, which is stock GATK4 at 95.82% sensitivity — under the 99% gate
+- **Out of scope**: the two known pipeline limitations the runbook documents (single-end FASTQ handling, BWA-MEM2 index rebuilt per task). Both change what route B means; neither blocks the measurement.
+- **Risk**: scientific. This produces a number that goes into a regulatory gate, and `validation_results/**` is guard-protected. A human runs it and records it; an agent must not.
 
 ### OO-7: Decide whether `civic_supplement_enabled` should default to True
 - **Why**: Asked as "how do we raise the benchmark", and the measurements already
@@ -166,6 +170,23 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 
 <!-- Merged entries, newest first. Trim periodically. -->
+
+### OO-20: The deployed image renders a PDF
+Merged in [#164](https://github.com/immortal71/openoncology/pull/164). `api/Dockerfile`
+installed gcc, libpq-dev and curl and none of WeasyPrint's native dependencies, so
+`import weasyprint` raised OSError in the container and every oncologist report and
+patient letter fell back to HTML. The route is named `oncologist-report.pdf` and it
+returned `text/html`, at a 200, without saying so.
+
+Pango brings glib, harfbuzz and fontconfig with it; cairo and gdk-pixbuf have not been
+needed since WeasyPrint v53. `fonts-dejavu-core` is separate and still required, because
+fontconfig with no font installed lays the text out correctly and draws every glyph as a
+box.
+
+The suite could not have caught this: it runs where those libraries are present, so every
+assertion about PDF generation passed while the image took the other branch. ci.yml now
+builds the image, renders a report inside it, and fails unless the bytes are a PDF;
+`publish-images` depends on that job, so an image that cannot render one is not published.
 
 ### OO-15: Session lifetimes applied; security officer still unassigned
 Half closed in [#148](https://github.com/immortal71/openoncology/pull/148). A
