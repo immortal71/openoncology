@@ -146,6 +146,14 @@ configured in this repository, at any commit, on any branch.**
   requests are simply sent unauthenticated; if the server returns 401/403, the function
   logs a warning and returns `None`, and callers fall back to wild-type EBI structures
   (per the module's own docstring).
+> **Superseded 2026-09-12.** The finding below stands; its explanation was incomplete.
+> `ALPHAFOLD_API_KEY` was never set because no such credential exists: AlphaFold Server
+> has no public submission API and issues no keys, so `https://alphafoldserver.com/api/fold`
+> could not have worked under any configuration. Its output terms also forbid feeding
+> results to a docking tool, which is what DiffDock is. That client has been removed;
+> `ai/services/alphafold.py` now reads the EBI AlphaFold DB, which is what the pipeline
+> was effectively using all along via DiffDock's own fallback. Tracked as OO-23.
+
 - `git log --all -p -S "ALPHAFOLD_API_KEY"` across the entire history and all branches
   returns only the code that *reads* the variable — never a commit that *sets* it to a
   real value anywhere (`.env`, `.env.example`, CI config, or otherwise).
