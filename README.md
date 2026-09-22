@@ -159,7 +159,7 @@ graph TB
 
     subgraph AI_Stack["🤖 AI / ML Stack"]
         AM["AlphaMissense<br/>pathogenicity score"]
-        AF["AlphaFold Server<br/>protein structure"]
+        AF["AlphaFold DB<br/>wild-type structure"]
         DD["DiffDock<br/>protein–ligand docking"]
         LLM["GPT-4o<br/>plain-English summary"]
     end
@@ -307,11 +307,11 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | Area | Details |
 |:-----|:--------|
 | **Genomics pipeline** | Nextflow · FastQC · Trimmomatic · BWA-MEM2 · GATK · OpenCRAVAT · GRCh38 |
-| **AI scoring** | AlphaMissense (3.6 GB SQLite) · AlphaFold Server · DiffDock · GPT-4o |
+| **AI scoring** | AlphaMissense (3.6 GB SQLite) · AlphaFold DB (wild-type) · DiffDock · GPT-4o |
 | **Drug evidence** | OpenTargets GraphQL · ChEMBL REST · OncoKB · ClinVar · CIViC · COSMIC v3.1 · cBioPortal |
 | **Ranking** | DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Phase 10% |
 | **Custom drug discovery** | Target-specific discovery brief · ChEMBL lead molecules · Ro5 oral-exposure scoring · scaffold/fragment library · medicinal-chemistry handoff notes |
-| **Custom drug worker** | Async Celery worker · AlphaFold mutation-structure generation · DrugRequest job status polling |
+| **Custom drug worker** | Async Celery worker · AlphaFold DB reference structure · DrugRequest job status polling |
 | **Marketplace** | Stripe Connect Express — pharma KYC, competitive bids, escrow, automatic payout |
 | **Crowdfunding** | Milestone webhooks at 25/50/75/100% · Stripe Elements · direct transfer to pharma |
 | **Auth & access** | Keycloak OIDC/OAuth2 · roles: patient · oncologist · admin |
@@ -344,7 +344,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Database** | PostgreSQL 16 · Alembic migrations (12 tables) |
 | **Storage & Auth** | MinIO (AES-256) · Keycloak OIDC/OAuth2 |
 | **Genomics** | Nextflow · FastQC · BWA-MEM2 · GATK · OpenCRAVAT |
-| **AI / ML** | AlphaMissense · AlphaFold Server · DiffDock · GPT-4o |
+| **AI / ML** | AlphaMissense · AlphaFold DB · DiffDock · GPT-4o |
 | **Drug Databases** | OpenTargets GraphQL · ChEMBL REST · COSMIC v3.1 · OncoKB · ClinVar · CIViC |
 | **Custom Drug Discovery** | `drug_discovery.py` service · `custom_drug_worker` Celery task · Ro5 oral-exposure scoring · ChEMBL lead pipeline |
 | **Payments** | Stripe Connect Express (KYC + escrow + competitive bidding) |

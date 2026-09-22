@@ -1,32 +1,48 @@
-"""AlphaFold Server API client.
+"""AlphaFold Protein Structure Database client.
 
-Public API (four functions):
-  get_uniprot_sequence(gene_name)               → str           (raises ValueError if not found)
-  apply_mutation(sequence, hgvs)                → str           (returns unchanged seq for unknown notation)
-  fold_sequence(sequence, submission_id, gene)  → str | None    (MinIO key for .cif)
-  cif_to_pdb(cif_bytes, submission_id, gene)    → str | None    (MinIO key for .pdb)
+Public API (three functions):
+  get_uniprot_sequence(gene_name)                        → str         (raises ValueError if not found)
+  apply_mutation(sequence, hgvs)                         → str         (returns unchanged seq for unknown notation)
+  fetch_reference_structure(uniprot_id, sid, gene)       → str | None  (MinIO key for .pdb)
 
 Workflow inside the AI worker:
-  1. get_uniprot_sequence("EGFR")              → canonical protein sequence
-  2. apply_mutation(seq, "p.L858R")            → mutated sequence
-  3. fold_sequence(mutated_seq, sid, gene)     → MinIO path for .cif
-  4. s3.get_object(Bucket=..., Key=cif_path)["Body"].read()  → raw .cif bytes
-  5. cif_to_pdb(cif_bytes, sid, gene)          → MinIO path for .pdb
-  6. Pass PDB MinIO path to DiffDock
+  1. _gene_to_uniprot("EGFR")                        → P00533
+  2. fetch_reference_structure("P00533", sid, "EGFR") → MinIO path for .pdb
+  3. Pass PDB MinIO path to DiffDock
 
-fold_sequence and cif_to_pdb return None on any failure so DiffDock
-can fall back to the EBI pre-computed wild-type structure.
+THE STRUCTURES THIS RETURNS ARE WILD-TYPE, NOT MUTATION-SPECIFIC.
+
+AlphaFold DB serves one pre-computed prediction per UniProt accession: the
+canonical sequence, folded once, with no variant applied. Folding a mutated
+sequence needs AlphaFold 3 inference, which this module does not do and this
+repository has never done. Two routes exist and neither is wired here:
+
+  - AlphaFold Server (alphafoldserver.com) has no public submission API, issues
+    no API keys, and its output terms forbid use "in connection with any
+    automated system that predicts the binding or interaction of the protein
+    with ligands or peptides, including, but not limited to, Glide or AutoDock".
+    Feeding its output to DiffDock is that prohibited use, so this module does
+    not call it. An earlier version of this file POSTed to an invented
+    /api/fold endpoint behind an ALPHAFOLD_API_KEY that could never be issued;
+    it returned None on every call and DiffDock silently fell back to the EBI
+    structure, which is what the pipeline has always actually scored against.
+
+  - Self-hosted AlphaFold 3 (google-deepmind/alphafold3) carries no docking
+    restriction but is non-commercial-only and needs approved weights plus GPU
+    inference. That is the route to real mutant structures; see BACKLOG.md.
+
+apply_mutation is kept because sequence-level mutant output is still used for
+reporting, not because anything folds its result.
+
+fetch_reference_structure returns None on any failure, so DiffDock falls back
+to fetching the same EBI structure itself (ai/diffdock/prepare_inputs.py).
 """
 from __future__ import annotations
 
-import asyncio
-import base64
 import io
 import logging
-import os
 import re
 import sys
-import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -36,18 +52,7 @@ logger = logging.getLogger(__name__)
 
 BUCKET = "openoncology-vcf"
 UNIPROT_URL = "https://rest.uniprot.org/uniprotkb/search"
-ALPHAFOLD_URL = "https://alphafoldserver.com/api"
-_POLL_INTERVAL = 30   # seconds between polls
-_MAX_POLLS = 60       # 30 min maximum
-
-
-def _alphafold_headers() -> dict[str, str]:
-    """Build AlphaFold request headers with optional bearer auth."""
-    token = os.getenv("ALPHAFOLD_API_KEY", "").strip()
-    headers = {"Content-Type": "application/json"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    return headers
+AFDB_PREDICTION_URL = "https://alphafold.ebi.ac.uk/api/prediction/{uniprot_id}"
 
 
 def _get_s3_client():
@@ -138,145 +143,60 @@ def apply_mutation(sequence: str, hgvs: str) -> str:
     return sequence
 
 
-# ── 3. Fold sequence via AlphaFold Server ────────────────────────────────────
+# ── 3. Reference structure from AlphaFold DB ─────────────────────────────────
 
-async def fold_sequence(sequence: str, submission_id: str, gene: str) -> Optional[str]:
-    """Submit *sequence* to AlphaFold Server, poll until done, save .cif to MinIO.
+async def fetch_reference_structure(
+    uniprot_id: str, submission_id: str, gene: str
+) -> Optional[str]:
+    """Download the AlphaFold DB structure for *uniprot_id* and store it in MinIO.
 
-    POST https://alphafoldserver.com/api/fold
-    Body: {"sequences": [{"proteinChain": {"sequence": ..., "count": 1}}]}
+    Queries the prediction API for the current pdbUrl rather than guessing a
+    model version suffix, for the reason given in
+    ai/diffdock/prepare_inputs.py: AlphaFold DB reprocesses entries under new
+    versions and a hardcoded _v4 would silently 404 forever.
 
-    Polls GET /api/fold/{job_id} every 30 s.  When status is "done" reads
-    data["cifContent"] (base64-encoded or raw CIF text) and stores it at:
-      structures/{submission_id}/{gene}.cif  in bucket BUCKET.
+    The structure is wild-type. See the module docstring.
 
-    Returns the MinIO key on success, or None on any failure.
+    Saves to structures/{submission_id}/{gene}.pdb in bucket BUCKET and returns
+    the key, or None on any failure.
     """
-    payload = {
-        "name": f"{gene}_{submission_id}"[:50],
-        "modelSeeds": [],
-        "sequences": [
-            {"proteinChain": {"sequence": sequence, "count": 1}}
-        ],
-    }
-
-    # ── Submit job ────────────────────────────────────────────────────────
     try:
-        async with httpx.AsyncClient(timeout=30) as client:
-            resp = await client.post(
-                f"{ALPHAFOLD_URL}/fold",
-                json=payload,
-                headers=_alphafold_headers(),
-            )
-            if resp.status_code in (401, 403):
-                logger.warning("[alphafold] Server requires auth — skipping AlphaFold")
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+            resp = await client.get(AFDB_PREDICTION_URL.format(uniprot_id=uniprot_id))
+            if resp.status_code in (400, 404):
+                logger.info(
+                    "[alphafold] No AlphaFold DB entry for %s (HTTP %d)",
+                    uniprot_id,
+                    resp.status_code,
+                )
                 return None
             resp.raise_for_status()
-            data = resp.json()
-            job_id = data.get("jobId") or data.get("id")
-            if not job_id:
-                logger.warning("[alphafold] No job ID in response: %s", data)
+            entries = resp.json()
+            if not entries:
+                logger.info("[alphafold] No AlphaFold DB entry for %s", uniprot_id)
                 return None
-            logger.info("[alphafold] Job submitted: %s", job_id)
+
+            pdb_url = entries[0]["pdbUrl"]
+            logger.info("[alphafold] Fetching %s structure: %s", gene, pdb_url)
+            pdb_resp = await client.get(pdb_url)
+            pdb_resp.raise_for_status()
+            pdb_bytes = pdb_resp.content
     except Exception as exc:
-        logger.warning("[alphafold] Submission failed: %s", exc)
+        logger.warning("[alphafold] AlphaFold DB fetch failed for %s: %s", uniprot_id, exc)
         return None
 
-    # ── Poll until done ───────────────────────────────────────────────────
-    cif_content: Optional[str] = None
     try:
-        async with httpx.AsyncClient(timeout=20) as client:
-            for _ in range(_MAX_POLLS):
-                await asyncio.sleep(_POLL_INTERVAL)
-                try:
-                    resp = await client.get(f"{ALPHAFOLD_URL}/fold/{job_id}")
-                    resp.raise_for_status()
-                    data = resp.json()
-                    status = (data.get("status") or "").lower()
-                    logger.debug("[alphafold] Job %s status: %s", job_id, status)
-                    if status in ("done", "complete", "completed"):
-                        cif_content = data.get("cifContent")
-                        break
-                    if status in ("error", "failed", "cancelled"):
-                        logger.warning("[alphafold] Job %s ended with status: %s", job_id, status)
-                        return None
-                except Exception as poll_exc:
-                    logger.warning("[alphafold] Poll error for %s: %s", job_id, poll_exc)
-            else:
-                logger.warning("[alphafold] Job %s timed out after %d polls", job_id, _MAX_POLLS)
-                return None
-    except Exception as exc:
-        logger.warning("[alphafold] Polling loop failed: %s", exc)
-        return None
-
-    if not cif_content:
-        logger.warning("[alphafold] No cifContent in response for job %s", job_id)
-        return None
-
-    # ── Upload CIF to MinIO ───────────────────────────────────────────────
-    try:
-        try:
-            cif_bytes = base64.b64decode(cif_content)
-        except Exception:
-            cif_bytes = cif_content.encode("utf-8")
-        minio_key = f"structures/{submission_id}/{gene}.cif"
+        minio_key = f"structures/{submission_id}/{gene}.pdb"
         s3 = _get_s3_client()
         s3.put_object(
             Bucket=BUCKET,
             Key=minio_key,
-            Body=io.BytesIO(cif_bytes),
-            ContentType="chemical/x-cif",
+            Body=io.BytesIO(pdb_bytes),
+            ContentType="chemical/x-pdb",
             ServerSideEncryption="AES256",
         )
-        logger.info("[alphafold] CIF saved to MinIO: %s", minio_key)
+        logger.info("[alphafold] PDB saved to MinIO: %s", minio_key)
         return minio_key
     except Exception as exc:
         logger.warning("[alphafold] MinIO upload failed: %s", exc)
         return None
-
-
-# ── 4. CIF → PDB conversion ──────────────────────────────────────────────────
-
-def cif_to_pdb(cif_bytes: bytes, submission_id: str, gene: str) -> Optional[str]:
-    """Convert raw *cif_bytes* to PDB format via BioPython and upload to MinIO.
-
-    Uploads to structures/{submission_id}/{gene}.pdb in bucket BUCKET.
-    Returns the MinIO key on success, or None on any failure.
-    """
-    try:
-        from Bio.PDB import MMCIFParser, PDBIO
-    except ImportError:
-        logger.warning("[alphafold] biopython not installed — cannot convert CIF to PDB")
-        return None
-
-    pdb_key = f"structures/{submission_id}/{gene}.pdb"
-    with tempfile.TemporaryDirectory(prefix="alphafold_") as tmpdir:
-        cif_local = Path(tmpdir) / f"{gene}.cif"
-        pdb_local = Path(tmpdir) / f"{gene}.pdb"
-
-        cif_local.write_bytes(cif_bytes)
-        try:
-            parser = MMCIFParser(QUIET=True)
-            structure = parser.get_structure("protein", str(cif_local))
-            io_writer = PDBIO()
-            io_writer.set_structure(structure)
-            io_writer.save(str(pdb_local))
-        except Exception as exc:
-            logger.warning("[alphafold] CIF→PDB conversion failed: %s", exc)
-            return None
-
-        try:
-            pdb_data = pdb_local.read_bytes()
-            s3 = _get_s3_client()
-            s3.put_object(
-                Bucket=BUCKET,
-                Key=pdb_key,
-                Body=io.BytesIO(pdb_data),
-                ContentType="chemical/x-pdb",
-                ServerSideEncryption="AES256",
-            )
-            logger.info("[alphafold] PDB saved to MinIO: %s", pdb_key)
-            return pdb_key
-        except Exception as exc:
-            logger.warning("[alphafold] PDB upload failed: %s", exc)
-            return None

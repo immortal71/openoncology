@@ -30,46 +30,39 @@ def _run_async(coro):
         return future.result()
 
 
-async def _ensure_mutation_structure(
+async def _ensure_reference_structure(
     target_gene: str,
     mutation_hgvs: list[str],
     submission_id: str | None,
     existing_path: str | None,
 ) -> str | None:
+    """Resolve a wild-type AlphaFold DB structure for *target_gene*.
+
+    The mutation list gates whether a structure is fetched at all; it does not
+    shape the structure, which is the canonical fold for the accession. See the
+    ai/services/alphafold.py docstring.
+    """
     if existing_path:
         return existing_path
     if not mutation_hgvs or not submission_id:
         return None
 
     try:
-        from ai.services.alphafold import (
-            get_uniprot_sequence,
-            apply_mutation,
-            fold_sequence,
-            cif_to_pdb,
-        )
-        from services.storage import _get_s3
+        from ai.services.alphafold import fetch_reference_structure
+        from workers.ai_worker import _gene_to_uniprot
     except ModuleNotFoundError:
-        logger.warning("[custom-drug] AlphaFold service package unavailable; continuing without mutation-specific structure")
+        logger.warning("[custom-drug] AlphaFold service package unavailable; continuing without a reference structure")
         return None
 
-    variant = mutation_hgvs[0]
-    short_variant = variant.replace("p.", "") if variant else None
-    if not short_variant:
+    uniprot_id = _gene_to_uniprot(target_gene)
+    if not uniprot_id:
+        logger.info("[custom-drug] No UniProt accession for %s; continuing without a structure", target_gene)
         return None
 
     try:
-        canonical = await get_uniprot_sequence(target_gene)
-        mutated = apply_mutation(canonical, variant)
-        cif_key = await fold_sequence(mutated, submission_id, target_gene)
-        if not cif_key:
-            return None
-
-        s3 = _get_s3()
-        cif_bytes = s3.get_object(Bucket="openoncology-vcf", Key=cif_key)["Body"].read()
-        return cif_to_pdb(cif_bytes, submission_id, target_gene)
+        return await fetch_reference_structure(uniprot_id, submission_id, target_gene)
     except Exception as exc:
-        logger.warning("[custom-drug] AlphaFold structure generation failed, continuing without folded structure: %s", exc)
+        logger.warning("[custom-drug] AlphaFold DB fetch failed, continuing without a structure: %s", exc)
         return None
 
 
@@ -152,7 +145,7 @@ def build_custom_drug_brief(self, drug_request_id: str):
                         break
 
             structure_path = _run_async(
-                _ensure_mutation_structure(
+                _ensure_reference_structure(
                     target_gene=target_gene,
                     mutation_hgvs=mutation_hgvs,
                     submission_id=submission.id if submission else None,

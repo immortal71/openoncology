@@ -138,6 +138,43 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   benchmark's 0.8009; whichever way this goes, both numbers should move together
   or the gap needs explaining.
 
+### OO-23: Mutation-specific structures need self-hosted AlphaFold 3, or the claim goes
+- **Why**: `ai/services/alphafold.py` POSTed to `https://alphafoldserver.com/api/fold`
+  behind an `ALPHAFOLD_API_KEY`. Verified 2026-09-12: that endpoint is not a
+  documented API, AlphaFold Server issues no keys, and the only official
+  programmatic AlphaFold interface is the EBI database of pre-computed folds.
+  The call therefore returned None on every invocation and DiffDock silently
+  fell back to the EBI wild-type structure, which is what every benchmark in
+  this repository has actually scored against. That path is now removed and the
+  EBI fetch is explicit, so the code no longer implies a capability it lacks.
+
+  What is NOT resolved is the capability itself. Structures are wild-type, so
+  `binding_score` cannot distinguish a mutant pocket from a canonical one, and
+  the preprint's 178/185 AlphaFold completion figure still has no mechanism in
+  this repository that could have produced it.
+
+  Two constraints shape the only remaining route. AlphaFold Server's output
+  terms forbid use "in connection with any automated system that predicts the
+  binding or interaction of the protein with ligands or peptides, including,
+  but not limited to, Glide or AutoDock" — DiffDock is exactly that, so the
+  hosted service is not merely unavailable, it is prohibited for this use.
+  Self-hosted AlphaFold 3 (google-deepmind/alphafold3) carries no such docking
+  restriction but is non-commercial-only and needs approved weights plus GPU
+  inference. Maintainer confirmed 2026-09-12 that this deployment is
+  non-commercial research, which keeps that route open — but it sits beside a
+  Stripe Connect marketplace and a crowdfunding module, and if either becomes
+  commercial activity the weights licence is breached.
+- **Risk**: scientific — changing the structure source changes `binding_score`,
+  which carries 15% of the ranking composite. Nothing here may be enabled
+  without re-running the hard gate and the holdout, and without deciding first
+  whether the marketplace makes this a commercial deployment.
+- **Evidence to weigh**: `ai/services/alphafold.py` module docstring,
+  `docs/PAPER_VS_CURRENT_STATE.md` Â§2.2, AlphaFold 3 `OUTPUT_TERMS_OF_USE.md`
+  vs. the AlphaFold Server output terms (they differ on docking; this is
+  google-deepmind/alphafold3 issue #340). Note that `DIFFDOCK_DIR` is still
+  absent, so `binding_score` is None today regardless and the 15% weight is
+  redistributed rather than scored as zero.
+
 ### OO-8: `require_current_evidence` must be True before any clinical deployment
 - **Why**: `api/config.py` says so in its own comment — "It MUST be True for any
   clinical deployment" — and it defaults False, correctly, because this is

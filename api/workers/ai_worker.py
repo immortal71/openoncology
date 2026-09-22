@@ -1179,35 +1179,25 @@ def _query_repurposing_candidates(
                     },
                 )
 
-        # ── AlphaFold: sequence → mutated structure ──────────────────────────
+        # ── AlphaFold DB: reference structure for DiffDock ───────────────────
+        # Wild-type, not mutation-specific. DiffDock resolves the same structure
+        # itself when this returns None, so the score is unchanged either way;
+        # fetching it here is what puts a citable path on the mutation record.
         pre_folded_pdb_key = None
         uniprot_id = _gene_to_uniprot(gene)
-        if protein_variant:
+        if protein_variant and uniprot_id:
             try:
-                from ai.services.alphafold import (
-                    get_uniprot_sequence,
-                    apply_mutation,
-                    fold_sequence,
-                    cif_to_pdb,
+                from ai.services.alphafold import fetch_reference_structure
+
+                pre_folded_pdb_key = await fetch_reference_structure(
+                    uniprot_id, submission_id, gene
                 )
-                canonical_seq = await get_uniprot_sequence(gene)
-                mutated_seq = apply_mutation(canonical_seq, protein_variant)
-                cif_path = await fold_sequence(mutated_seq, submission_id, gene)
-                if cif_path:
-                    from services.storage import _get_s3
-                    s3 = _get_s3()
-                    cif_bytes = s3.get_object(
-                        Bucket="openoncology-vcf", Key=cif_path
-                    )["Body"].read()
-                    pre_folded_pdb_key = cif_to_pdb(cif_bytes, submission_id, gene)
-                    if pre_folded_pdb_key:
-                        logger.info("[alphafold] PDB ready for DiffDock: %s", pre_folded_pdb_key)
-                    else:
-                        logger.warning("[alphafold] CIF→PDB failed — DiffDock using EBI structure")
+                if pre_folded_pdb_key:
+                    logger.info("[alphafold] PDB ready for DiffDock: %s", pre_folded_pdb_key)
                 else:
-                    logger.info("[alphafold] Server unavailable — DiffDock will use EBI structure")
+                    logger.info("[alphafold] No DB entry — DiffDock will fetch its own structure")
             except Exception as af_exc:
-                logger.warning("[alphafold] Fold pipeline failed: %s", af_exc)
+                logger.warning("[alphafold] Structure fetch failed: %s", af_exc)
 
         merged_drugs = list(candidate_bank.values())
 

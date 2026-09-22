@@ -180,8 +180,11 @@ npm run dev
   - Keycloak auth server
   - **These are all included in docker-compose.yml**
 
-- **AlphaFold API**: Requires `ALPHAFOLD_API_KEY` to be set and DiffDock to be installed
-  (`DIFFDOCK_DIR`) for mutation-specific structure scoring. When either is missing, the
+- **AlphaFold API**: Superseded 2026-09-12. `ALPHAFOLD_API_KEY` was never a real credential
+  — AlphaFold Server issues none and has no submission API — so the setting is gone and
+  `ai/services/alphafold.py` now reads the EBI AlphaFold DB directly. Structures are
+  wild-type by construction; mutation-specific scoring needs self-hosted AlphaFold 3 and
+  remains unimplemented. DiffDock still requires `DIFFDOCK_DIR`. When it is missing, the
   real pipeline (`ai/services/alphafold.py`, `ai/diffdock/score.py`) degrades gracefully
   to wild-type EBI structure / no binding score — it does **not** fabricate data. Note:
   `api/mock_api.py` (previously referenced here) is an unrelated standalone local-dev
