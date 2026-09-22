@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { saveOrderToLocalStorage } from "@/lib/orders";
@@ -32,17 +32,19 @@ type TrialRow = {
 	drugs?: string[];
 };
 
-export default function ResultsPage({ params }: { params: { id: string } }) {
+export default function ResultsPage() {
+	const routeParams = useParams<{ id: string }>();
+	const id = Array.isArray(routeParams?.id) ? routeParams.id[0] : (routeParams?.id ?? "");
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
+	const isDemo = searchParams.get("demo") === "true" || id === DEMO_ID;
 	const [customBusy, setCustomBusy] = useState(false);
 	const [customError, setCustomError] = useState<string | null>(null);
 	const [nearbyOpen, setNearbyOpen] = useState(false);
 
 	const { data, isLoading, isError, error } = useQuery<any>({
-		queryKey: ["results", params.id],
-		queryFn: () => isDemo ? Promise.resolve(DEMO_RESULTS as typeof DEMO_RESULTS & Record<string, unknown>) : api.getResults(params.id),
+		queryKey: ["results", id],
+		queryFn: () => isDemo ? Promise.resolve(DEMO_RESULTS as typeof DEMO_RESULTS & Record<string, unknown>) : api.getResults(id),
 		refetchInterval: (query) => {
 			if (isDemo) return false;
 			const status = (query.state.data as { status?: string } | undefined)?.status;
@@ -53,7 +55,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 
 	const normalizedStatus = (data?.status || "").toLowerCase();
 	const isComplete = ["complete", "completed", "done"].includes(normalizedStatus) || !data?.status;
-	const resultId = data?.result_id || data?.submission_id || params.id;
+	const resultId = data?.result_id || data?.submission_id || id;
 
 	const repurposingQuery = useQuery<any>({
 		queryKey: ["repurposing", resultId],
@@ -162,7 +164,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 	const patientExplanation: string = patientSummary?.explanation || data.plain_language_summary || data.summary || "";
 	const patientWhatNext: string[] = patientSummary?.what_next || [];
 
-	const pdfBase = `/api/results/${params.id}`;
+	const pdfBase = `/api/results/${id}`;
 
 	return (
 		<main className="min-h-screen py-8 px-4">
@@ -174,7 +176,7 @@ export default function ResultsPage({ params }: { params: { id: string } }) {
 						<div>
 							<h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Your Results Summary</h1>
 							<p className="text-sm text-gray-500 mt-1">
-								{data.cancer_type} · Submission {params.id.slice(0, 8)}
+								{data.cancer_type} · Submission {id.slice(0, 8)}
 							</p>
 							<p className="text-sm text-cyan-800 mt-3 font-medium">
 								Start here: download your simple letter first, then share the doctor report.

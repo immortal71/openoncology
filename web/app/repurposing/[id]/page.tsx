@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { FlaskConical, CheckCircle, AlertTriangle, ExternalLink, ShoppingCart } from "lucide-react";
 import Link from "next/link";
@@ -24,13 +24,15 @@ function ScoreBar({ value }: { value: number | null }) {
   );
 }
 
-export default function RepurposingPage({ params }: { params: { id: string } }) {
+export default function RepurposingPage() {
+  const routeParams = useParams<{ id: string }>();
+  const id = Array.isArray(routeParams?.id) ? routeParams.id[0] : (routeParams?.id ?? "");
   const searchParams = useSearchParams();
-  const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
+  const isDemo = searchParams.get("demo") === "true" || id === DEMO_ID;
 
   const { data, isLoading, error } = useQuery<any>({
-    queryKey: ["repurposing", params.id],
-    queryFn: () => isDemo ? Promise.resolve(DEMO_REPURPOSING) : api.getRepurposing(params.id),
+    queryKey: ["repurposing", id],
+    queryFn: () => isDemo ? Promise.resolve(DEMO_REPURPOSING) : api.getRepurposing(id),
   });
 
   if (isLoading) {

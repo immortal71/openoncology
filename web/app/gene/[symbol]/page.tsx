@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 
 interface TopMutation {
   protein_change: string;
@@ -59,8 +60,10 @@ function classColor(cls: string): string {
   return CLASSIFICATION_COLORS[cls] ?? CLASSIFICATION_COLORS['default'];
 }
 
-export default function GenePage({ params }: { params: { symbol: string } }) {
-  const gene = params.symbol.toUpperCase();
+export default function GenePage() {
+  const routeParams = useParams<{ symbol: string }>();
+  const symbol = Array.isArray(routeParams?.symbol) ? routeParams.symbol[0] : routeParams?.symbol;
+  const gene = (symbol ?? '').toUpperCase();
   const [summary, setSummary] = useState<GeneSummary | null>(null);
   const [lollipop, setLollipop] = useState<LollipopData | null>(null);
   const [loading, setLoading] = useState(true);
