@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Heart, Users, Target, Share2, CheckCircle } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -174,15 +174,17 @@ function DonateForm({
   );
 }
 
-export default function CrowdfundPage({ params }: { params: { id: string } }) {
+export default function CrowdfundPage() {
+  const routeParams = useParams<{ id: string }>();
+  const id = Array.isArray(routeParams?.id) ? routeParams.id[0] : (routeParams?.id ?? "");
   const searchParams = useSearchParams();
-  const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
+  const isDemo = searchParams.get("demo") === "true" || id === DEMO_ID;
   const [donated, setDonated] = useState(false);
   const [showDonate, setShowDonate] = useState(false);
 
   const { data, isLoading, refetch } = useQuery<any>({
-    queryKey: ["campaign", params.id],
-    queryFn: () => isDemo ? Promise.resolve(DEMO_CROWDFUND) : api.getCampaign(params.id),
+    queryKey: ["campaign", id],
+    queryFn: () => isDemo ? Promise.resolve(DEMO_CROWDFUND) : api.getCampaign(id),
   });
 
   const handleShare = () => {
@@ -298,7 +300,7 @@ export default function CrowdfundPage({ params }: { params: { id: string } }) {
             >
               <h3 className="font-bold text-slate-900 dark:text-slate-100 mb-4">Make a donation</h3>
               <DonateForm
-                slug={params.id}
+                slug={id}
                 campaignTitle={data.title}
                 onSuccess={() => { setDonated(true); refetch(); setShowDonate(false); }}
               />
