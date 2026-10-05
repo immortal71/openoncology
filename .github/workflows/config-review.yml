@@ -35,7 +35,7 @@ jobs:
       # Pinned by commit, and the CLI by exact version, so neither can change
       # under you. Dependabot bumps the SHA; flecto-version below is bumped by
       # hand alongside it.
-      - uses: myselfsiddharth/Flecto@9a13df72949b177a457e9a9576cc24f2fb47bbaf # v4.2.0
+      - uses: myselfsiddharth/Flecto@277615d8c2a1cfce35e597edfe1c65ea93d010fc # v4.3.0
         with:
           targets: |
             infra/helm/values*.yaml
@@ -46,4 +46,4 @@ jobs:
           # than failing for want of a baseline.
           new-files: added
           fail-on: ""
-          flecto-version: "4.2.0"
+          flecto-version: "4.3.0"
