@@ -164,6 +164,37 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Files to consider**: api/workers/genomic_worker.py `_parse_and_annotate_vcf`, api/models/mutation.py, a migration restoring a protein column, api/workers/ai_worker.py `_hgvs_to_short`
 - **Worth checking alongside**: whether any real submission has ever produced a recommendation, and whether the concordance and holdout numbers were computed through ingestion or around it.
 
+### OO-25: The concordance pilot blames timing for misses that timing does not explain
+- **Why**: `docs/REAL_PATIENT_CONCORDANCE_PILOT_2026-07-28.md` explains the low concordance mainly as temporal mismatch (about 11 VHL patients scored against records that predate belzutifan) plus passenger genes. Rescoring all 69 patients against HemOncKB V54 (2026-08-28), asking what was valid for that cancer, in that setting, in the year each patient was first treated, does not support the timing half:
+
+  | Era-aware label | Patients | Pilot label |
+  |---|---|---|
+  | MATCH, received the pick | 8 | 7 EXACT, 1 CLASS |
+  | ERA_VALID, valid then but not received | 2 | MISS |
+  | NOT_YET_AVAILABLE, valid today, not then | 4 | MISS |
+  | MISS, not valid for that cancer and setting even today | 39 | 38 MISS, 1 CLASS |
+  | NO_PREDICTION | 16 | NO_PREDICTION |
+
+  Timing accounts for at most 4 patients, and cleanly for 2. Of the 11 VHL patients, 9 were at a first-line metastatic decision; belzutifan is still not a first-line option for sporadic clear cell RCC (FDA 2023-12-14 requires prior PD-1/PD-L1 and VEGF-TKI, LITESPARK-005), and the 2021-08-13 approval is for germline von Hippel-Lindau disease, not the somatic VHL mutations in TCGA-KIRC. The 2 that hold up (TCGA-CZ-4861, TCGA-CJ-5676) were in a curative setting, and belzutifan with pembrolizumab became adjuvant-approved on 2026-06-12 (LITESPARK-022), as a combination. The doc's description of belzutifan as "the objectively correct, current, FDA-approved drug for VHL-driven RCC" overstates both approvals.
+
+  The 6 MATCHes in breast are TP53 patients given generic platinum/anthracycline picks that were in their regimen, which is concordance with routine chemotherapy rather than evidence the mutation-driven ranking works.
+- **Risk**: scientific. This changes a reported claim about the system's accuracy and, if adopted, the concordance metric itself. The pilot doc and `validation_results/**` are a human's call, and `scripts/**` is guard-protected.
+- **Decisions needed**:
+  - Correct the pilot doc's temporal-mismatch section, or annotate it with the rescoring
+  - Whether era-aware labels (valid then / valid now / never valid) become part of the concordance benchmark, and if so, where the HemOncKB snapshot lives given its CC BY-NC-SA 4.0 licence
+  - Whether imputed treatment intent is acceptable: 44 of 69 settings are imputed from M1 stage or progressive/recurrent disease status, 14 are unknown and scored leniently
+- **Evidence to weigh**: the analysis lives outside the repository in `openoncology-era/` (`era_score.py`, `era_scores_pilot69.csv`, `era_scores_pilot69_picks.csv`, `RESULTS_pilot69.md`, `RESULTS_vhl11.md`). TCGA timelines come from the GDC API. HemOncKB covers 128 of the 193 drugs patients actually received. Dr. Warner (HemOnc) suggested the relevance-by-year approach and noted TCGA's missing intent can be worked around or imputed; a review call is planned once results are in.
+
+### OO-26: The ranker recommends by gene, ignoring cancer type, line of therapy and alteration type
+- **Why**: The 39 era-aware MISSes in OO-25 are wrong for that cancer and setting today, not just then, and they share four causes:
+  - **Gene-to-drug across cancer types.** Avapritinib for KIT/PDGFRA/CBL, sonidegib for PTCH1/SMO, alpelisib for PIK3CA and afatinib for EGFR in kidney cancer; afatinib for EGFR in glioblastoma; cisplatin in colorectal. None has evidence for that cancer in HemOncKB.
+  - **No line or intent.** Belzutifan ranks first for VHL kidney cancer at a first-line metastatic decision, where it is not indicated.
+  - **Alteration type ignored.** Alectinib and brigatinib for an ALK point mutation (H1475Q) when both need an ALK fusion; adagrasib for KRAS G12V when it is G12C-only; cetuximab and panitumumab for a KRAS-mutant colorectal cancer that their FDA labels exclude; somatic VHL treated as germline VHL disease.
+  - **Non-oncology drugs in the top 3.** Atenolol, alfuzosin, fenofibrate, ascorbic acid, balsalazide, acetyldigitoxin, glycerol phenylbutyrate. Abarelix, withdrawn from the US market in 2006, ranked for a patient treated in 2013.
+- **Risk**: scientific. Every fix here changes which drugs are recommended, through `api/ai/**` and `_LEVEL_TABLE` / `_CANCER_CONTEXT_OVERRIDES` in `api/services/oncokb_evidence.py`.
+- **Decisions needed**: whether cancer-type gating applies to Tier 1 and Tier 2 alike; whether the ranker takes line of therapy and intent as inputs at all; how fusion-only and variant-specific indications are encoded; whether non-oncology repurposing candidates may appear in a top 3 shown to a clinician.
+- **Worth checking alongside**: OO-21, since the concordance numbers here were computed from protein notation and never passed through VCF ingestion.
+
 ---
 
 ## Done
