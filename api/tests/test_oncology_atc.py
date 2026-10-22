@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from services.oncology_atc import (  # noqa: E402
+    parent_name,
     partition_candidates,
     should_exclude,
 )
@@ -27,6 +28,20 @@ NON_ONCOLOGY = [
 ONCOLOGY = [
     "IMATINIB", "OLAPARIB", "TAMOXIFEN", "SUNITINIB", "PAZOPANIB",
     "CAPMATINIB", "SORAFENIB", "TRASTUZUMAB", "EVEROLIMUS", "OSIMERTINIB",
+]
+
+# The same pilot output as DGIdb/OpenTargets actually spelled it. The names
+# above are the parent molecules; these salt and formulation forms missed the
+# cache, came back unknown, and were kept.
+NON_ONCOLOGY_SALT_FORMS = [
+    "ALFUZOSIN HYDROCHLORIDE", "DOXAZOSIN MESYLATE", "BALSALAZIDE DISODIUM",
+    "FENOFIBRATE MICRONIZED",
+]
+
+ONCOLOGY_SALT_FORMS = [
+    "AFATINIB DIMALEATE", "ALECTINIB HYDROCHLORIDE", "DOXORUBICIN HYDROCHLORIDE",
+    "DASATINIB ANHYDROUS", "COPANLISIB HYDROCHLORIDE", "SUNITINIB MALATE",
+    "SORAFENIB TOSYLATE",
 ]
 
 
@@ -54,6 +69,29 @@ class TestOncologyGate:
         assert len(keep) + len(dropped) == len(candidates)
         assert {c["drug_name"] for c in dropped} == set(NON_ONCOLOGY)
         assert {c["drug_name"] for c in keep} == set(ONCOLOGY)
+
+    def test_salt_forms_of_non_oncology_drugs_are_excluded(self):
+        for drug in NON_ONCOLOGY_SALT_FORMS:
+            assert should_exclude(drug, allow_network=False), drug
+
+    def test_salt_forms_of_oncology_drugs_are_classified_and_kept(self):
+        keep, dropped = partition_candidates(
+            [{"drug_name": n} for n in ONCOLOGY_SALT_FORMS], allow_network=False,
+        )
+        assert dropped == []
+        for candidate in keep:
+            assert candidate["oncology_relevant"] is True, candidate["drug_name"]
+
+    def test_parent_name_strips_only_trailing_salt_words(self):
+        assert parent_name("ALFUZOSIN HYDROCHLORIDE") == "alfuzosin"
+        assert parent_name("Sorafenib  Tosylate") == "sorafenib"
+        assert parent_name("ASCORBIC ACID") == "ascorbic acid"
+        assert parent_name("GLYCEROL PHENYLBUTYRATE") == "glycerol phenylbutyrate"
+        assert parent_name("SODIUM") == "sodium"
+        assert parent_name("SODIUM THIOSULFATE") == "sodium thiosulfate"
+
+    def test_unknown_parent_stays_unknown(self):
+        assert not should_exclude("NOT-A-REAL-DRUG-XYZ HYDROCHLORIDE", allow_network=False)
 
     def test_partition_annotates_candidates(self):
         keep, dropped = partition_candidates(

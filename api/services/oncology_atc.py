@@ -107,6 +107,29 @@ def normalise(name: str) -> str:
     return " ".join((name or "").strip().lower().split())
 
 
+# Salt and formulation words that DGIdb/OpenTargets append to a drug name. The
+# cache is keyed by the parent molecule, so "ALFUZOSIN HYDROCHLORIDE",
+# "DOXAZOSIN MESYLATE", "BALSALAZIDE DISODIUM" and "FENOFIBRATE MICRONIZED"
+# from the concordance pilot all missed it, came back unknown, and were kept.
+# Only trailing words are stripped, and only after the full name misses.
+_SALT_SUFFIXES = frozenset({
+    "hydrochloride", "dihydrochloride", "hydrobromide", "mesylate",
+    "dimesylate", "maleate", "dimaleate", "sodium", "disodium", "potassium",
+    "calcium", "magnesium", "tosylate", "ditosylate", "malate", "acetate",
+    "citrate", "phosphate", "sulfate", "besylate", "fumarate", "tartrate",
+    "succinate", "hyclate", "anhydrous", "micronized", "hydrate",
+    "monohydrate", "dihydrate", "trihydrate",
+})
+
+
+def parent_name(name: str) -> str:
+    """Normalised name with trailing salt and formulation words removed."""
+    words = normalise(name).split()
+    while len(words) > 1 and words[-1] in _SALT_SUFFIXES:
+        words.pop()
+    return " ".join(words)
+
+
 def atc_codes(drug_name: str, *, allow_network: bool = True) -> list[str]:
     """ATC codes for a drug. Empty list means unknown, not 'no codes exist'."""
     key = normalise(drug_name)
@@ -116,6 +139,9 @@ def atc_codes(drug_name: str, *, allow_network: bool = True) -> list[str]:
     cache = _load_cache()
     if key in cache:
         return cache[key]
+    parent = parent_name(key)
+    if parent != key and parent in cache:
+        return cache[parent]
     if not allow_network:
         return []
 

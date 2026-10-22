@@ -194,6 +194,11 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: scientific. Every fix here changes which drugs are recommended, through `api/ai/**` and `_LEVEL_TABLE` / `_CANCER_CONTEXT_OVERRIDES` in `api/services/oncokb_evidence.py`.
 - **Decisions needed**: whether cancer-type gating applies to Tier 1 and Tier 2 alike; whether the ranker takes line of therapy and intent as inputs at all; how fusion-only and variant-specific indications are encoded; whether non-oncology repurposing candidates may appear in a top 3 shown to a clinician.
 - **Worth checking alongside**: OO-21, since the concordance numbers here were computed from protein notation and never passed through VCF ingestion.
+- **Progress on non-oncology drugs (2026-10-22)**:
+  - The production Tier 2 path already drops them through `services/oncology_atc.py` (added 2026-08-12, after the pilot). `scripts/concordance_pilot_run_pipeline.py` `run_tier2` never calls that gate, so the pilot's top 3s overstate what the app shows. Wiring it in touches `scripts/**` and changes the pilot's reported numbers, so it is a human call.
+  - The gate missed salt forms, because the ATC cache is keyed by parent molecule. `atc_codes()` now retries with trailing salt and formulation words stripped, after the full name misses. That removes alfuzosin hydrochloride, doxazosin mesylate, balsalazide disodium and fenofibrate micronized, and classifies afatinib dimaleate, doxorubicin hydrochloride and similar as oncology. Hard gate unchanged.
+  - Still getting through: meclofenamate sodium (the cache has `meclofenamic acid`, not `meclofenamate`; the fix is a cache entry in `validation_results/atc_cache.json`, which is protected), capromab (a diagnostic imaging agent with no ATC in the cache), and abarelix (L02, so it passes, but withdrawn from the US market in 2006; needs a withdrawn-drug check).
+  - Salt forms of one drug still take separate top-3 slots (afatinib and afatinib dimaleate, alectinib and alectinib hydrochloride). `parent_name()` makes deduplicating them straightforward, but that changes ranking output.
 
 ---
 
