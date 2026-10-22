@@ -180,7 +180,7 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   The 6 MATCHes in breast are TP53 patients given generic platinum/anthracycline picks that were in their regimen, which is concordance with routine chemotherapy rather than evidence the mutation-driven ranking works.
 - **Risk**: scientific. This changes a reported claim about the system's accuracy and, if adopted, the concordance metric itself. The pilot doc and `validation_results/**` are a human's call, and `scripts/**` is guard-protected.
 - **Decisions needed**:
-  - Correct the pilot doc's temporal-mismatch section, or annotate it with the rescoring
+  - ~~Correct the pilot doc's temporal-mismatch section, or annotate it with the rescoring~~ Done 2026-10-22: corrected in place with a dated notice, and the rescoring summarised in the doc's "Era-aware rescoring" section; the raw results table is unchanged
   - Whether era-aware labels (valid then / valid now / never valid) become part of the concordance benchmark, and if so, where the HemOncKB snapshot lives given its CC BY-NC-SA 4.0 licence
   - Whether imputed treatment intent is acceptable: 44 of 69 settings are imputed from M1 stage or progressive/recurrent disease status, 14 are unknown and scored leniently
 - **Evidence to weigh**: the analysis lives outside the repository in `openoncology-era/` (`era_score.py`, `era_scores_pilot69.csv`, `era_scores_pilot69_picks.csv`, `RESULTS_pilot69.md`, `RESULTS_vhl11.md`). TCGA timelines come from the GDC API. HemOncKB covers 128 of the 193 drugs patients actually received. Dr. Warner (HemOnc) suggested the relevance-by-year approach and noted TCGA's missing intent can be worked around or imputed; a review call is planned once results are in.

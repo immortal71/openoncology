@@ -7,6 +7,16 @@ constructed run using a different (smaller, mutation-and-drug-verified)
 patient set and calling the pipeline's ranking functions directly rather than
 reading from a pre-built labels file.
 
+> **Correction (2026-10-22).** This write-up originally put most of the
+> pilot's misses down to temporal mismatch, centred on about 11 VHL
+> kidney-cancer patients scored against records that predate belzutifan.
+> An era-aware rescoring against HemOncKB V54 does not support that: timing
+> explains at most 4 misses, and only 2 cleanly. Most of the misses are
+> wrong for that cancer and setting today too. The affected claims are
+> corrected in place below and the rescoring is summarised in
+> [Era-aware rescoring](#era-aware-rescoring-2026-10-22). The raw results
+> table is unchanged. Tracked as OO-25 in `BACKLOG.md`.
+
 ## What this tests
 
 For a set of real, de-identified TCGA cancer patients, each with (a) a real
@@ -279,18 +289,25 @@ worse (see that section for the concrete example). That was rejected as a
 ## Why the raw topline number is low, and why the "fair subset" is *not* higher
 
 The raw 15.1% Exact Top-3 number is real and is not being explained away
-here. But it is worth understanding *why* it's low before drawing a
-"the algorithm is inaccurate" conclusion from it, because the two largest
-contributing factors are properties of this pilot's dataset, not defects
-in the ranking logic:
+here. This section originally argued that the two largest contributing
+factors were properties of this pilot's dataset rather than defects in the
+ranking logic. The first of those does not hold up (see the correction at
+the top and [Era-aware rescoring](#era-aware-rescoring-2026-10-22)):
 
-1. **Temporal mismatch (≈11 patients).** The pipeline recommends
-   `belzutifan` for essentially every VHL-mutated kidney-cancer patient —
-   which is the objectively correct, current, FDA-approved drug for
-   VHL-driven RCC. These are scored as MISS only because belzutifan wasn't
-   approved until 2021, and most of these TCGA records predate that by
-   years. No amount of ranking-algorithm improvement fixes "recommends a
-   drug that didn't exist yet when this historical patient was treated."
+1. **Temporal mismatch (corrected: at most 4 patients, not ≈11).** The
+   pipeline recommends `belzutifan` for every VHL-mutated kidney-cancer
+   patient. This section originally called that "the objectively correct,
+   current, FDA-approved drug for VHL-driven RCC" and scored the misses as
+   timing alone. That overstates both approvals. The 2021-08-13 approval is
+   for germline von Hippel-Lindau disease, not the somatic VHL mutations in
+   TCGA-KIRC. The 2023-12-14 approval for advanced RCC requires prior
+   PD-1/PD-L1 and VEGF-TKI therapy (LITESPARK-005). 9 of the 11 VHL
+   patients were at a first-line metastatic decision, where belzutifan is
+   still not an option for sporadic clear cell RCC, so those picks are
+   wrong today, not early. The 2 in a curative setting (`TCGA-CZ-4861`,
+   `TCGA-CJ-5676`) are fairly "ahead of their time": belzutifan with
+   pembrolizumab became adjuvant-approved on 2026-06-12 (LITESPARK-022),
+   though as a combination, and CZ-4861's treatment was neoadjuvant.
 2. **Passenger-gene-only patients (≈38 patients).** For many patients, the
    only mutation available in this dataset (see "Multi-mutation patients"
    above) is not a real cancer driver (e.g. `ARHGAP5`, `BCL6`, `SCARB1`,
@@ -318,32 +335,36 @@ patients all show this same handful of drugs). This is the signature of
 **era-standard-of-care treatment**, not gene-targeted treatment: real
 kidney-cancer oncology practice in this dataset's time period used the
 same small set of anti-angiogenic drugs for most patients, largely
-independent of secondary sequencing findings. The pipeline, correctly,
-recommends the *mechanistically matched* drug for each gene (everolimus
-for MTOR, alpelisib for PIK3CA, imatinib for KIT) — which is real,
-clinically sound, targeted-therapy logic — but it will not match
+independent of secondary sequencing findings. The pipeline recommends the
+*mechanistically matched* drug for each gene (everolimus for MTOR,
+alpelisib for PIK3CA, imatinib for KIT), so it will not match
 standard-of-care prescribing that wasn't driven by that gene in the first
-place.
+place. This section originally called that "clinically sound,
+targeted-therapy logic". The rescoring does not support it: most of these
+picks have no evidence in kidney cancer in HemOncKB at all (avapritinib for
+KIT/PDGFRA/CBL, sonidegib for PTCH1/SMO, alpelisib for PIK3CA, afatinib
+for EGFR), so they are wrong for that cancer today, not just
+era-mismatched. Mapping a gene to a drug without regard to cancer type is a
+ranker defect, tracked as OO-26.
 
 **We deliberately did not "fix" this by weighting the ranking algorithm
-toward cancer-type standard-of-care drugs.** Concretely: doing so would
-mean a real VHL-mutated kidney-cancer patient today would be pushed toward
-generic Sunitinib instead of belzutifan (the correct, current, targeted
-option) purely because that matches more rows in this historical TCGA
-snapshot. That is not an accuracy improvement — it is tuning the algorithm
-to this specific answer key at the cost of making real future
-recommendations worse. We judged that trade to not be worth taking, and
-did not make it.
+toward cancer-type standard-of-care drugs.** That still stands as a
+decision about tuning to this answer key. The example originally given for
+it, that such weighting would push a VHL-mutated kidney-cancer patient
+toward sunitinib "instead of belzutifan (the correct, current, targeted
+option)", does not: at a first-line metastatic decision, belzutifan is not
+the correct current option either (see point 1 above).
+
+## Known limitations
 
 - **Small, non-random sample.** 69 patients, concentrated in two cohorts
   (breast/TP53 and kidney/VHL). Not a validated clinical benchmark; a pilot.
 - **One mutation per patient, not the full mutational profile.** Several
   patients had other mutations on record that were not submitted; the real
   oncologist decision may have been driven by a mutation not tested here.
-- **Real-world treatment dates are unknown per-patient in this dataset** —
-  some drugs the pipeline recommends (e.g. belzutifan, approved 2021) may
-  not have existed yet when an older TCGA patient was actually treated.
-  This run does not adjust for that.
+- **This run does not adjust for treatment year.** The
+  [era-aware rescoring](#era-aware-rescoring-2026-10-22) below does, using
+  GDC treatment timelines, and finds that timing explains few of the misses.
 - **Tier 2 "approved" filtering is broad** — it can surface any FDA-approved
   drug with a gene-interaction record (including general chemotherapy),
   not only mechanism-matched targeted therapy.
@@ -352,6 +373,73 @@ did not make it.
   scoring — only the drug-ranking half, using already-called mutations.
 - **No statistical testing performed** (confidence intervals, significance)
   given the sample size and cohort concentration.
+
+## Era-aware rescoring (2026-10-22)
+
+All 69 patients were rescored against HemOncKB V54 (2026-08-28), asking
+whether each pick had evidence for that cancer, in that setting, by the
+year the patient was first treated. Evidence is an FDA approval, or a trial
+arm that was the control arm or won on its primary endpoint, dated by first
+publication. Biomarker-tied evidence counts only when the patient's
+mutation fits it (alectinib needs an ALK fusion, adagrasib needs KRAS
+G12C, the 2021 belzutifan approval needs germline VHL disease). FDA label
+restrictions and market withdrawals make a pick a miss. The best of a
+patient's three picks decides the label. Treatment year and setting come
+from GDC timelines.
+
+| Era-aware label | Patients | Pilot label |
+|---|---|---|
+| MATCH, received the pick | 8 | 7 EXACT, 1 CLASS |
+| ERA_VALID, valid then but not received | 2 | MISS |
+| NOT_YET_AVAILABLE, valid today, not then | 4 | MISS |
+| MISS, not valid for that cancer and setting even today | 39 | 38 MISS, 1 CLASS |
+| NO_PREDICTION | 16 | NO_PREDICTION |
+
+Of the 53 patients with a prediction, 10 got a pick that was correct or
+defensible at the time, 4 got one that is defensible today but wasn't
+then, and 39 (74%) got picks that are wrong for that cancer and setting
+even today.
+
+The 6 that moved from MISS:
+
+- **`TCGA-A3-3347`, `TCGA-CZ-5464`:** temsirolimus, FDA-approved for kidney
+  cancer in May 2007, and both were treated after that. ERA_VALID.
+- **`TCGA-CZ-4861`, `TCGA-CJ-5676`:** belzutifan, curative setting,
+  adjuvant approval with pembrolizumab in June 2026. NOT_YET_AVAILABLE,
+  with the combination and neoadjuvant caveats in point 1 above.
+- **`TCGA-CJ-4644`, `TCGA-CJ-5679`:** everolimus first line, supported only
+  by CLEAR (2021), where it is given with lenvatinib. NOT_YET_AVAILABLE,
+  and the weakest of the six.
+
+The 39 misses share four causes, tracked as OO-26: gene-to-drug mapping
+across cancer types, no notion of line of therapy or intent, alteration
+type ignored (ALK point mutation treated as a fusion, KRAS G12V given a
+G12C-only drug, anti-EGFR antibodies for KRAS-mutant colorectal cancer,
+somatic VHL treated as germline VHL disease), and non-oncology drugs in the
+top 3 (atenolol, alfuzosin, fenofibrate, ascorbic acid, balsalazide,
+acetyldigitoxin, glycerol phenylbutyrate, and abarelix, withdrawn from the
+US market in 2006, for a patient treated in 2013).
+
+The 8 matches need a caveat too: 6 are breast cancer patients with TP53
+mutations given generic platinum or anthracycline picks that were in their
+regimen. That is concordance with routine chemotherapy, not evidence that
+the mutation-driven ranking works.
+
+Caveats on the rescoring:
+
+- **Setting is mostly imputed.** 10 patients have a recorded adjuvant or
+  neoadjuvant setting. 44 are imputed as non-curative first line from M1
+  stage or progressive/recurrent disease. 15 are unknown, and for those any
+  setting is accepted, which is lenient.
+- **KB coverage.** HemOncKB has evidence for 128 of the 193 drugs patients
+  actually received.
+- **Combinations.** A single-drug pick gets credit from combination
+  evidence.
+- **Not modelled.** Prior-therapy requirements, geography and drug access.
+  Only FDA approvals are used.
+- **Not reproducible from this repository yet.** The scoring script and
+  outputs live outside the repo, and whether a HemOncKB snapshot can be
+  committed under its CC BY-NC-SA 4.0 licence is an open decision in OO-25.
 
 ## Reproducing this run
 
