@@ -208,6 +208,68 @@ class TestExistingBehaviourIsPreserved:
         assert _parse_and_annotate_vcf(vcf) == []
 
 
+class TestProteinNotationReachesTheLookup:
+    """The evidence table is keyed on protein changes. See OO-21.
+
+    The parser stored INFO/HGVS_C, so EGFR T790M arrived as c.2369C>T and
+    matched nothing, and the samples/real/ VCFs, which carry only HGVS=L858R,
+    arrived with no notation at all. Every VCF submission ended in
+    no_targetable_mutation while the benchmarks, which feed protein notation
+    straight to the ranker, never noticed.
+    """
+
+    def test_hgvs_p_is_preferred_and_coding_is_kept(self, tmp_path):
+        vcf = _write(
+            tmp_path,
+            "7\t55181378\t.\tC\tT\t.\tPASS\t"
+            "GENE=EGFR;HGVS_C=c.2369C>T;HGVS_P=p.Thr790Met\n",
+            header=_HEADER_NO_SAMPLE,
+        )
+        mutation = _parse_and_annotate_vcf(vcf)[0]
+        assert mutation["hgvs"] == "p.Thr790Met"
+        assert mutation["hgvs_p"] == "p.Thr790Met"
+        assert mutation["hgvs_c"] == "c.2369C>T"
+
+    def test_plain_hgvs_field_is_read_as_protein(self, tmp_path):
+        vcf = _write(
+            tmp_path, "7\t55191822\t.\tT\tG\t.\tPASS\tGENE=EGFR;HGVS=L858R\n",
+            header=_HEADER_NO_SAMPLE,
+        )
+        assert _parse_and_annotate_vcf(vcf)[0]["hgvs"] == "L858R"
+
+    def test_missing_protein_falls_back_to_coding(self, tmp_path):
+        vcf = _write(
+            tmp_path, "17\t7674243\t.\tA\tC\t.\tPASS\tGENE=TP53;HGVS_C=c.503A>C;HGVS_P=.\n",
+            header=_HEADER_NO_SAMPLE,
+        )
+        mutation = _parse_and_annotate_vcf(vcf)[0]
+        assert mutation["hgvs"] == "c.503A>C"
+        assert mutation["hgvs_p"] is None
+
+    def test_isoform_list_takes_the_first_entry(self, tmp_path):
+        vcf = _write(
+            tmp_path,
+            "17\t7675109\t.\tA\tC\t.\tPASS\tGENE=TP53;HGVS_C=c.503A>C;HGVS_P=H168P, H129P\n",
+            header=_HEADER_NO_SAMPLE,
+        )
+        assert _parse_and_annotate_vcf(vcf)[0]["hgvs"] == "H168P"
+
+    @pytest.mark.parametrize(
+        "vcf_path, gene, expected_drug",
+        [
+            ("samples/egfr_t790m_demo.vcf", "EGFR", "osimertinib"),
+            ("samples/real/pt005_egfr_l858r_lung_adenocarcinoma.vcf", "EGFR", "osimertinib"),
+        ],
+    )
+    def test_shipped_vcfs_reach_the_evidence_table(self, vcf_path, gene, expected_drug):
+        from services.oncokb_evidence import get_all_drugs_for_variant
+
+        mutations = _parse_and_annotate_vcf(str(_REPO_ROOT / vcf_path))
+        hgvs = next(m["hgvs"] for m in mutations if m["gene"] == gene)
+        drugs = get_all_drugs_for_variant(gene, hgvs)
+        assert expected_drug in {d.lower() for d in drugs}, (hgvs, drugs)
+
+
 class TestSampleQCCheckpoint:
     """Sample QC was implemented, validated, and never invoked. See F10.
 

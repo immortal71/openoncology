@@ -163,6 +163,10 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: scientific. Changing which notation reaches the evidence table changes which drugs are recommended for every submission, so it is not an agent's call, and it wants a decision about whether to store both notations, prefer `HGVS_P`, or derive protein from coding.
 - **Files to consider**: api/workers/genomic_worker.py `_parse_and_annotate_vcf`, api/models/mutation.py, a migration restoring a protein column, api/workers/ai_worker.py `_hgvs_to_short`
 - **Worth checking alongside**: whether any real submission has ever produced a recommendation, and whether the concordance and holdout numbers were computed through ingestion or around it.
+- **Decided and done (2026-10-22): prefer protein notation.** `_parse_and_annotate_vcf` now reads `HGVS_P`, then the plain `HGVS` field the `samples/real/` VCFs use (`HGVS=L858R`), and falls back to `HGVS_C` only when neither is present, with a warning that the lookup will not match it. `HGVS_C` is kept as `hgvs_c` and stored in the existing `codon_change` column, so no migration. A comma-separated isoform list takes its first entry. Deriving protein from coding (option B) was not done.
+  - Before this, the `samples/real/` patient VCFs reached the lookup with no notation at all, since they carry neither `HGVS_C` nor `HGVS_P`.
+  - `test_shipped_vcfs_reach_the_evidence_table` now runs `samples/egfr_t790m_demo.vcf` and a real L858R VCF through the parser into the evidence table. The five hotspot tests in `test_vcf_real_data.py` that asserted coding notation in `hgvs` now read `hgvs_c`.
+  - **Still blocking an end-to-end recommendation**: see OO-27.
 
 ### OO-25: The concordance pilot blames timing for misses that timing does not explain
 - **Why**: `docs/REAL_PATIENT_CONCORDANCE_PILOT_2026-07-28.md` explains the low concordance mainly as temporal mismatch (about 11 VHL patients scored against records that predate belzutifan) plus passenger genes. Rescoring all 69 patients against HemOncKB V54 (2026-08-28), asking what was valid for that cancer, in that setting, in the year each patient was first treated, does not support the timing half:
@@ -199,6 +203,12 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - The gate missed salt forms, because the ATC cache is keyed by parent molecule. `atc_codes()` now retries with trailing salt and formulation words stripped, after the full name misses. That removes alfuzosin hydrochloride, doxazosin mesylate, balsalazide disodium and fenofibrate micronized, and classifies afatinib dimaleate, doxorubicin hydrochloride and similar as oncology. Hard gate unchanged.
   - Still getting through: meclofenamate sodium (the cache has `meclofenamic acid`, not `meclofenamate`; the fix is a cache entry in `validation_results/atc_cache.json`, which is protected), capromab (a diagnostic imaging agent with no ATC in the cache), and abarelix (L02, so it passes, but withdrawn from the US market in 2006; needs a withdrawn-drug check).
   - Salt forms of one drug still take separate top-3 slots (afatinib and afatinib dimaleate, alectinib and alectinib hydrochloride). `parent_name()` makes deduplicating them straightforward, but that changes ranking output.
+
+### OO-27: Without an OncoKB token, the worker marks every VCF variant untargetable
+- **Why**: Step 2 of `ai_worker.run_ai_analysis` decides targetability only through `_query_oncokb_with_status`, which calls the live OncoKB API and returns `(None, not_attempted)` when `ONCOKB_API_TOKEN` is unset. No variant becomes targetable, so Step 4 never runs and every submission ends in `no_targetable_mutation`, even with OO-21's notation fixed. The curated `_LEVEL_TABLE`, which CLAUDE.md calls a supported mode rather than a degraded one, is consulted later in `_apply_candidate_pool_policy` but never at the targetability gate. The benchmarks call `get_all_drugs_for_variant_live` directly, which does fall back to the table, so they never see this.
+- **Risk**: scientific. Letting the static table decide targetability changes which submissions get recommendations at all.
+- **Decisions needed**: whether Step 2 falls back to `get_all_drugs_for_variant_live` (which already merges live and static) when no token is set; which table levels count as targetable (today LEVEL_1, 2 and 3A from the live API); and how the report marks that the static table, not live OncoKB, served the result.
+- **Files to consider**: api/workers/ai_worker.py `_query_oncokb_with_status` and Step 2 of `run_ai_analysis`, api/services/oncokb_evidence.py
 
 ---
 

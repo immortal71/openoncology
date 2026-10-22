@@ -82,7 +82,7 @@ class TestHotspotVcf:
         """TP53 R175H (p.R175H) is the most common cancer hotspot — must appear."""
         _require(_VCF_HOTSPOTS)
         result = _parse_and_annotate_vcf(str(_VCF_HOTSPOTS))
-        tp53_hgvs = [m["hgvs"] for m in result if m["gene"] == "TP53"]
+        tp53_hgvs = [m["hgvs_c"] for m in result if m["gene"] == "TP53"]
         assert any("524G>A" in (h or "") for h in tp53_hgvs), \
             "TP53 c.524G>A (R175H) not found in hotspot VCF"
 
@@ -90,7 +90,7 @@ class TestHotspotVcf:
         """KRAS G12D (c.35G>A) — most common pancreatic/colorectal hotspot."""
         _require(_VCF_HOTSPOTS)
         result = _parse_and_annotate_vcf(str(_VCF_HOTSPOTS))
-        kras_hgvs = [m["hgvs"] for m in result if m["gene"] == "KRAS"]
+        kras_hgvs = [m["hgvs_c"] for m in result if m["gene"] == "KRAS"]
         assert any("35G>A" in (h or "") for h in kras_hgvs), \
             "KRAS c.35G>A (G12D) not found in hotspot VCF"
 
@@ -98,7 +98,7 @@ class TestHotspotVcf:
         """EGFR L858R (c.2573T>G) — most common lung cancer EGFR hotspot."""
         _require(_VCF_HOTSPOTS)
         result = _parse_and_annotate_vcf(str(_VCF_HOTSPOTS))
-        egfr_hgvs = [m["hgvs"] for m in result if m["gene"] == "EGFR"]
+        egfr_hgvs = [m["hgvs_c"] for m in result if m["gene"] == "EGFR"]
         assert any("2573T>G" in (h or "") for h in egfr_hgvs), \
             "EGFR c.2573T>G (L858R) not found in hotspot VCF"
 
@@ -106,7 +106,7 @@ class TestHotspotVcf:
         """BRAF V600E (c.1799T>A) — canonical melanoma/colorectal hotspot."""
         _require(_VCF_HOTSPOTS)
         result = _parse_and_annotate_vcf(str(_VCF_HOTSPOTS))
-        braf_hgvs = [m["hgvs"] for m in result if m["gene"] == "BRAF"]
+        braf_hgvs = [m["hgvs_c"] for m in result if m["gene"] == "BRAF"]
         assert any("1799T>A" in (h or "") for h in braf_hgvs), \
             "BRAF c.1799T>A (V600E) not found in hotspot VCF"
 
@@ -114,7 +114,7 @@ class TestHotspotVcf:
         """PIK3CA H1047R (c.3140A>G) — most common breast cancer hotspot."""
         _require(_VCF_HOTSPOTS)
         result = _parse_and_annotate_vcf(str(_VCF_HOTSPOTS))
-        pik3ca_hgvs = [m["hgvs"] for m in result if m["gene"] == "PIK3CA"]
+        pik3ca_hgvs = [m["hgvs_c"] for m in result if m["gene"] == "PIK3CA"]
         assert any("3140A>G" in (h or "") for h in pik3ca_hgvs), \
             "PIK3CA c.3140A>G (H1047R) not found in hotspot VCF"
 

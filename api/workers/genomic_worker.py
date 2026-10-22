@@ -108,6 +108,7 @@ def run_genomic_pipeline(
                         submission_id=submission_id,
                         gene=m.get("gene", "UNKNOWN"),
                         hgvs_notation=m.get("hgvs"),
+                        codon_change=(m.get("hgvs_c") or "")[:64] or None,
                         mutation_type=m.get("mutation_type"),
                         chromosome=m.get("chrom"),
                         position=m.get("pos"),
@@ -387,6 +388,14 @@ def _parse_and_annotate_vcf(vcf_path: str, include_filtered: bool = False) -> li
             )
 
             vaf, depth = _extract_vaf_and_depth(parts)
+            hgvs_c = _info_value(info_dict, "HGVS_C")
+            hgvs_p = _info_value(info_dict, "HGVS_P") or _info_value(info_dict, "HGVS")
+            if hgvs_c and not hgvs_p:
+                logger.warning(
+                    "[vcf] %s:%s has coding notation %s but no protein change; "
+                    "the evidence lookup is keyed on protein and will not match it",
+                    chrom, pos, hgvs_c,
+                )
 
             # A multi-allelic record describes several distinct variants.
             for allele in (a.strip() for a in alt.split(",")):
@@ -398,7 +407,9 @@ def _parse_and_annotate_vcf(vcf_path: str, include_filtered: bool = False) -> li
                     "ref": ref,
                     "alt": allele,
                     "gene": info_dict.get("GENE", "UNKNOWN"),
-                    "hgvs": info_dict.get("HGVS_C"),
+                    "hgvs": hgvs_p or hgvs_c,
+                    "hgvs_p": hgvs_p,
+                    "hgvs_c": hgvs_c,
                     "mutation_type": info_dict.get("SO", "unknown"),
                     "clinvar_id": info_dict.get("CLINVAR_ID"),
                     "cosmic_id": info_dict.get("COSMIC_ID"),
@@ -409,6 +420,16 @@ def _parse_and_annotate_vcf(vcf_path: str, include_filtered: bool = False) -> li
                 })
 
     return mutations
+
+
+def _info_value(info_dict: dict, key: str) -> str | None:
+    """One INFO value, with "." and empty treated as absent.
+
+    Annotators that report every transcript give a comma-separated list
+    ("H168P, H129P"); the first entry is taken, matching the first transcript.
+    """
+    value = (info_dict.get(key) or "").split(",")[0].strip()
+    return value if value and value != "." else None
 
 
 def _upload_vcf_to_minio(vcf_path: str, patient_id: str, submission_id: str) -> str:
