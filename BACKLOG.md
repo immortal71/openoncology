@@ -217,6 +217,11 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: scientific. Letting the static table decide targetability changes which submissions get recommendations at all.
 - **Decisions needed**: whether Step 2 falls back to `get_all_drugs_for_variant_live` (which already merges live and static) when no token is set; which table levels count as targetable (today LEVEL_1, 2 and 3A from the live API); and how the report marks that the static table, not live OncoKB, served the result.
 - **Files to consider**: api/workers/ai_worker.py `_query_oncokb_with_status` and Step 2 of `run_ai_analysis`, api/services/oncokb_evidence.py
+- **Decided and done (2026-10-23): fall back to the live-plus-static lookup when there is no token.** `_query_oncokb_with_status` now calls `_query_static_table`, which asks `get_all_drugs_for_variant_live` with the submission's cancer type and returns the same shape as a live answer. Targetable levels are unchanged (1, 2, 3A). Both Step 2 and the repurposing step's OncoKB call use it.
+  - The variant records `evidence_lookup_status = static_table`, a new value (migration 0018, Postgres `ALTER TYPE ... ADD VALUE`), and the report prints "Actionability from the built-in evidence table, not live OncoKB". The result-level `evidence_provenance` already recorded which table answered and its date.
+  - A variant with no protein change is not looked up and stays `not_attempted`, so the table's gene-level fallback cannot mark every variant in a gene targetable. A table with no entry is a checked negative, not a failure.
+  - Probed with no token: EGFR T790M from `samples/egfr_t790m_demo.vcf` becomes LEVEL_1 targetable with osimertinib; TP53 R175H, EGFR A597P, KRAS G12V and ALK H1475Q stay untargetable. Hard gate unchanged.
+  - Not done: a token that is set but failing (`unavailable`) still gets no fallback, so a network outage stays visible as a failed lookup rather than quietly switching source. Migration 0018 was not run against Postgres locally (no Postgres here); CI's `alembic upgrade head` on postgres:16 is its first real run.
 
 ---
 

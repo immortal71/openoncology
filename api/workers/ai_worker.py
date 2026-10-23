@@ -99,7 +99,7 @@ def run_ai_analysis(
             oncokb_lookup_failures: list[str] = []
             for mutation in mutations:
                 oncokb_data, lookup_status = _query_oncokb_with_status(
-                    mutation.gene, mutation.hgvs_notation
+                    mutation.gene, mutation.hgvs_notation, cancer_type
                 )
                 # Stamped whatever the outcome, so a reader can tell which
                 # specific gene was not checked rather than inferring it from a
@@ -793,35 +793,37 @@ def _gene_to_uniprot(gene: str) -> str | None:
     return None
 
 
-def _query_oncokb(gene: str, hgvs: str | None) -> dict | None:
+def _query_oncokb(
+    gene: str, hgvs: str | None, cancer_type: str | None = None
+) -> dict | None:
     """Query OncoKB for a clinical actionability level.
 
     Kept returning `dict | None` so existing callers are unaffected. Callers
     that need to tell "no evidence" apart from "could not ask" should use
     _query_oncokb_with_status instead (risk_analysis.md F3).
     """
-    data, _status = _query_oncokb_with_status(gene, hgvs)
+    data, _status = _query_oncokb_with_status(gene, hgvs, cancer_type)
     return data
 
 
 def _query_oncokb_with_status(
-    gene: str, hgvs: str | None
+    gene: str, hgvs: str | None, cancer_type: str | None = None
 ) -> "tuple[dict | None, EvidenceLookupStatus]":
     """Query OncoKB and report whether the question could be asked at all.
 
-    Returns the annotation and the lookup status. A missing token and a failed
-    request both yield no data, but they are different facts about the report:
-    the first is a deployment that never configured evidence, the second is a
-    source that was reachable in principle and was not reached this time.
-    Requires a free academic API token from oncokb.org.
+    Returns the annotation and the lookup status. With a token, the live API
+    answers, and a failed request is `unavailable`: a source that was reachable
+    in principle and was not reached this time. Without a token the curated
+    static table answers and the status says so (OO-27); before that, nothing
+    answered and every submission ended in no_targetable_mutation.
+    Requires a free academic API token from oncokb.org for the live path.
     """
     import httpx
     from config import settings
     from models.mutation import EvidenceLookupStatus
 
     if not settings.oncokb_api_token:
-        logger.warning("[oncokb] No API token configured — skipping")
-        return None, EvidenceLookupStatus.not_attempted
+        return _query_static_table(gene, hgvs, cancer_type)
 
     try:
         resp = httpx.get(
@@ -844,6 +846,44 @@ def _query_oncokb_with_status(
     except Exception as exc:
         logger.warning(f"[oncokb] Query failed: {exc}")
         return None, EvidenceLookupStatus.unavailable
+
+
+def _query_static_table(
+    gene: str, hgvs: str | None, cancer_type: str | None = None
+) -> "tuple[dict | None, EvidenceLookupStatus]":
+    """Actionability from the curated table, for deployments with no token.
+
+    Same shape as the live answer, so Step 2 treats both alike. A variant with
+    no protein change is not looked up: the table falls back to gene level, and
+    that would mark every variant in the gene targetable. A table with no entry
+    for the variant is a checked negative, not a failure.
+    """
+    from models.mutation import EvidenceLookupStatus
+
+    if not hgvs:
+        return None, EvidenceLookupStatus.not_attempted
+    try:
+        from services.oncokb_evidence import get_all_drugs_for_variant_live
+
+        table = get_all_drugs_for_variant_live(gene, hgvs, cancer_type=cancer_type) or {}
+    except Exception as exc:
+        logger.warning("[oncokb] static table lookup failed for %s %s: %s", gene, hgvs, exc)
+        return None, EvidenceLookupStatus.unavailable
+
+    def _best(levels: list[str]) -> str | None:
+        return max(levels, key=lambda lvl: _ONCOKB_LEVEL_ORDER.get(lvl, 0), default=None)
+
+    levels = {drug: str(level).upper() for drug, level in table.items()}
+    sensitive = [lvl for lvl in levels.values() if not lvl.startswith("LEVEL_R")]
+    resistance = [lvl for lvl in levels.values() if lvl.startswith("LEVEL_R")]
+    best_sensitive, best_resistance = _best(sensitive), _best(resistance)
+    return {
+        "level": _to_oncokb_level(best_sensitive or best_resistance),
+        "sensitive_level": _to_oncokb_level(best_sensitive),
+        "resistance_level": _to_oncokb_level(best_resistance),
+        "treatments": sorted(d for d, lvl in levels.items() if not lvl.startswith("LEVEL_R")),
+        "lookup_ok": True,
+    }, EvidenceLookupStatus.static_table
 
 
 def _to_oncokb_level(raw: object) -> "OncoKBLevel":
@@ -1120,7 +1160,7 @@ def _query_repurposing_candidates(
         # ── Source 3: CIViC / OncoKB supplemental names ──────────────────────
         variant_name = _hgvs_to_short(hgvs) if hgvs else None
         civic_evidence = await get_civic_evidence(gene, variant_name) if variant_name else None
-        oncokb_annotation = _query_oncokb(gene, hgvs)
+        oncokb_annotation = _query_oncokb(gene, hgvs, cancer_type)
 
         candidate_bank: dict[str, dict] = {}
 

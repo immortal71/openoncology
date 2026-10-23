@@ -25,9 +25,9 @@ from services.oncologist_report import generate_oncologist_report  # noqa: E402
 
 
 class TestStatusEnum:
-    def test_three_distinct_states(self):
+    def test_four_distinct_states(self):
         values = {s.value for s in EvidenceLookupStatus}
-        assert values == {"ok", "not_attempted", "unavailable"}
+        assert values == {"ok", "static_table", "not_attempted", "unavailable"}
 
     def test_failure_states_are_not_equal_to_ok(self):
         assert EvidenceLookupStatus.unavailable != EvidenceLookupStatus.ok
@@ -37,14 +37,47 @@ class TestStatusEnum:
 class TestWorkerRecordsStatus:
     """_query_oncokb_with_status must distinguish the two ways of failing."""
 
-    def test_missing_token_is_not_attempted(self, monkeypatch):
+    def test_missing_token_falls_back_to_the_static_table(self, monkeypatch):
+        """OO-27. With no token, targetability used to be decided by nobody, so
+        every VCF ended in no_targetable_mutation. The curated table answers now,
+        and says so."""
+        from models.mutation import OncoKBLevel
         import workers.ai_worker as w
 
         class _S:
             oncokb_api_token = ""
 
         monkeypatch.setitem(sys.modules, "config", type("m", (), {"settings": _S})())
-        data, status = w._query_oncokb_with_status("EGFR", "p.L858R")
+        monkeypatch.delenv("ONCOKB_API_TOKEN", raising=False)
+        data, status = w._query_oncokb_with_status("EGFR", "p.Thr790Met")
+        assert status is EvidenceLookupStatus.static_table
+        assert data["level"] is OncoKBLevel.level_1
+        assert "osimertinib" in {t.lower() for t in data["treatments"]}
+
+    def test_static_table_with_no_entry_is_checked_not_failed(self, monkeypatch):
+        from models.mutation import OncoKBLevel
+        import workers.ai_worker as w
+
+        class _S:
+            oncokb_api_token = ""
+
+        monkeypatch.setitem(sys.modules, "config", type("m", (), {"settings": _S})())
+        monkeypatch.delenv("ONCOKB_API_TOKEN", raising=False)
+        data, status = w._query_oncokb_with_status("NOTAGENE1", "p.A1V")
+        assert status is EvidenceLookupStatus.static_table
+        assert data["level"] is OncoKBLevel.unknown
+        assert data["treatments"] == []
+
+    def test_missing_token_and_notation_is_not_attempted(self, monkeypatch):
+        """No protein change means there is nothing to look up. A gene-level
+        answer would mark every variant in the gene targetable."""
+        import workers.ai_worker as w
+
+        class _S:
+            oncokb_api_token = ""
+
+        monkeypatch.setitem(sys.modules, "config", type("m", (), {"settings": _S})())
+        data, status = w._query_oncokb_with_status("EGFR", None)
         assert data is None
         assert status is EvidenceLookupStatus.not_attempted
 
@@ -74,7 +107,9 @@ class TestWorkerRecordsStatus:
             oncokb_api_token = ""
 
         monkeypatch.setitem(sys.modules, "config", type("m", (), {"settings": _S})())
-        assert w._query_oncokb("EGFR", "p.L858R") is None
+        monkeypatch.delenv("ONCOKB_API_TOKEN", raising=False)
+        assert isinstance(w._query_oncokb("EGFR", "p.L858R"), dict)
+        assert w._query_oncokb("EGFR", None) is None
 
 
 class TestReportRendersTheDistinction:
@@ -103,6 +138,12 @@ class TestReportRendersTheDistinction:
     def test_never_queried_is_flagged_distinctly(self):
         text = self._report("not_attempted").plain_text or ""
         assert "never queried" in text
+        assert "lookup FAILED" not in text
+
+    def test_static_table_lookup_is_flagged_distinctly(self):
+        text = self._report("static_table").plain_text or ""
+        assert "built-in evidence table" in text
+        assert "never queried" not in text
         assert "lookup FAILED" not in text
 
     def test_successful_lookup_is_not_annotated(self):
