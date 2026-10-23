@@ -1710,7 +1710,12 @@ def _render_plain_text(r: OncologistReport) -> str:
             elif lookup == "not_attempted":
                 lines.append(
                     "    !! Actionability was never queried for this gene "
-                    "(no evidence source configured). Treat as unassessed."
+                    "(no protein change to look up). Treat as unassessed."
+                )
+            elif lookup == "static_table":
+                lines.append(
+                    "    -- Actionability from the built-in evidence table, not "
+                    "live OncoKB. See evidence provenance for its date."
                 )
             elif lookup is None:
                 lines.append(

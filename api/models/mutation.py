@@ -32,7 +32,8 @@ class EvidenceLookupStatus(str, enum.Enum):
     """
 
     ok = "ok"                        # evidence source answered
-    not_attempted = "not_attempted"  # no OncoKB token configured
+    static_table = "static_table"    # no OncoKB token; the curated table answered
+    not_attempted = "not_attempted"  # nothing to look up (no protein change)
     unavailable = "unavailable"      # network error, rate limit, API failure
 
 
