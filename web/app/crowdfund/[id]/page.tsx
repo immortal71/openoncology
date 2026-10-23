@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -174,7 +174,8 @@ function DonateForm({
   );
 }
 
-export default function CrowdfundPage({ params }: { params: { id: string } }) {
+export default function CrowdfundPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
   const [donated, setDonated] = useState(false);

@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -24,7 +25,8 @@ function ScoreBar({ value }: { value: number | null }) {
   );
 }
 
-export default function RepurposingPage({ params }: { params: { id: string } }) {
+export default function RepurposingPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const searchParams = useSearchParams();
   const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
 

@@ -30,8 +30,8 @@ import time
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
 import httpx
+import jwt
 
 from config import settings
 from middleware.rate_limit import limiter, AUTH_LIMIT
@@ -145,13 +145,21 @@ def _select_key(jwks: dict, kid: str | None) -> dict | None:
 
 
 def _decode_options() -> dict:
+    # `verify_iat` is off because PyJWT rejects an `iat` even one second in the
+    # future, so any clock skew between Keycloak and this host would refuse
+    # freshly minted tokens. `exp` and `nbf` carry the validity window.
+    #
+    # With an audience configured, a token that has no `aud` claim at all is
+    # rejected. python-jose let that case through, which left the audience check
+    # open to any realm token minted without the claim.
     return {
         "verify_signature": True,
         "verify_aud": bool((settings.keycloak_audience or "").strip()),
         "verify_iss": True,
         "verify_exp": True,
         "verify_nbf": True,
-        "require_exp": True,
+        "verify_iat": False,
+        "require": ["exp"],
     }
 
 
@@ -181,7 +189,7 @@ async def get_current_patient(
 
     try:
         kid = jwt.get_unverified_header(token).get("kid")
-    except JWTError as exc:
+    except jwt.PyJWTError as exc:
         raise _unauthorized() from exc
 
     key = _select_key(await _get_jwks(), kid)
@@ -197,13 +205,13 @@ async def get_current_patient(
     try:
         return jwt.decode(
             token,
-            key,
+            jwt.PyJWK(key),
             algorithms=_ALLOWED_ALGORITHMS,
             issuer=_issuer(),
             audience=(settings.keycloak_audience or "").strip() or None,
             options=_decode_options(),
         )
-    except JWTError as exc:
+    except jwt.PyJWTError as exc:
         raise _unauthorized() from exc
 
 

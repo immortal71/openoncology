@@ -46,7 +46,7 @@ Patient submits sample (VCF / biopsy report)
 
 | File / dir | Purpose |
 |-----------|---------|
-| `app/` | Next.js 14 App Router pages |
+| `app/` | Next.js 15 App Router pages |
 | `app/results/[id]/page.tsx` | Main results view — ranked drugs, evidence, repurposing |
 | `app/explore/page.tsx` | Explore known variants and drugs |
 | `components/CombinationTable.tsx` | Combination therapy display |
