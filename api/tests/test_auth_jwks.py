@@ -13,10 +13,11 @@ network: the JWKS fetch is stubbed and asserted on directly.
 import time
 
 import httpx
+import jwt
 import pytest
-from jose import jwt
-from jose.constants import ALGORITHMS
-from jose.utils import long_to_base64
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from jwt.utils import to_base64url_uint
 
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
@@ -27,31 +28,21 @@ from routes import auth
 ISSUER = "https://id.example.org/realms/openoncology"
 AUDIENCE = "openoncology-api"
 
-# Keys are generated once per seed and reused. python-jose runs on whichever
-# backend is installed, and on the pure-Python `rsa` one a 2048-bit keygen costs
-# about three seconds, which is worth paying four times rather than twenty.
+# Keys are generated once per seed and reused, so each distinct key costs one
+# 2048-bit keygen rather than one per test.
 _KEY_CACHE: dict[str, tuple[str, int, int]] = {}
 
 
 def _generate_rsa() -> tuple[str, int, int]:
-    """Return (private_pem, n, e) using whichever RSA backend is available."""
-    try:
-        from cryptography.hazmat.primitives import serialization
-        from cryptography.hazmat.primitives.asymmetric import rsa as c_rsa
-
-        private = c_rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        pem = private.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.PKCS8,
-            encryption_algorithm=serialization.NoEncryption(),
-        ).decode()
-        numbers = private.public_key().public_numbers()
-        return pem, numbers.n, numbers.e
-    except ImportError:
-        import rsa as pure_rsa
-
-        public, private = pure_rsa.newkeys(2048)
-        return private.save_pkcs1("PEM").decode(), public.n, public.e
+    """Return (private_pem, n, e) for a fresh 2048-bit RSA key."""
+    private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pem = private.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    ).decode()
+    numbers = private.public_key().public_numbers()
+    return pem, numbers.n, numbers.e
 
 
 def _keypair(kid: str, seed: str | None = None):
@@ -71,8 +62,8 @@ def _keypair(kid: str, seed: str | None = None):
         "kid": kid,
         "alg": "RS256",
         "use": "sig",
-        "n": long_to_base64(n).decode(),
-        "e": long_to_base64(e).decode(),
+        "n": to_base64url_uint(n).decode(),
+        "e": to_base64url_uint(e).decode(),
     }
     return pem, jwk
 
@@ -90,7 +81,7 @@ def _token(pem: str, kid: str, **overrides) -> str:
         "realm_access": {"roles": ["patient"]},
     }
     claims.update(overrides)
-    return jwt.encode(claims, pem, algorithm=ALGORITHMS.RS256, headers={"kid": kid})
+    return jwt.encode(claims, pem, algorithm="RS256", headers={"kid": kid})
 
 
 def _credentials(token: str) -> HTTPAuthorizationCredentials:
@@ -217,6 +208,43 @@ async def test_expired_token_is_rejected(realm):
     assert exc.value.status_code == 401
 
 
+async def test_token_without_an_audience_claim_is_rejected(realm):
+    """
+    python-jose skipped the audience check entirely when the token carried no
+    `aud`, so a realm token minted without the claim passed. It must not.
+    """
+    now = int(time.time())
+    token = jwt.encode(
+        {"sub": "patient-1", "iss": ISSUER, "iat": now, "exp": now + 300},
+        realm["pem"],
+        algorithm="RS256",
+        headers={"kid": "key-1"},
+    )
+    with pytest.raises(HTTPException) as exc:
+        await auth.get_current_patient(_credentials(token))
+    assert exc.value.status_code == 401
+
+
+async def test_issued_at_slightly_in_the_future_is_accepted(realm):
+    """Keycloak's clock running a little ahead of ours must not refuse new tokens."""
+    token = _token(realm["pem"], "key-1", iat=int(time.time()) + 30)
+    payload = await auth.get_current_patient(_credentials(token))
+    assert payload["sub"] == "patient-1"
+
+
+async def test_token_without_an_expiry_is_rejected(realm):
+    now = int(time.time())
+    token = jwt.encode(
+        {"sub": "patient-1", "iss": ISSUER, "aud": AUDIENCE, "iat": now},
+        realm["pem"],
+        algorithm="RS256",
+        headers={"kid": "key-1"},
+    )
+    with pytest.raises(HTTPException) as exc:
+        await auth.get_current_patient(_credentials(token))
+    assert exc.value.status_code == 401
+
+
 async def test_token_signed_by_an_unrelated_key_is_rejected(realm):
     """Same `kid` as the realm's key, different private key behind it."""
     stranger_pem, _ = _keypair("key-1", seed="stranger")
@@ -243,7 +271,7 @@ async def test_symmetric_algorithm_is_not_accepted(realm):
     forged = jwt.encode(
         {"sub": "patient-1", "iss": ISSUER, "aud": AUDIENCE, "iat": now, "exp": now + 300},
         realm["jwk"]["n"],
-        algorithm=ALGORITHMS.HS256,
+        algorithm="HS256",
         headers={"kid": "key-1"},
     )
     with pytest.raises(HTTPException) as exc:
@@ -268,7 +296,7 @@ async def test_kidless_token_is_ambiguous_when_the_realm_publishes_two_keys(real
     token = jwt.encode(
         {"sub": "patient-1", "iss": ISSUER, "aud": AUDIENCE, "iat": now, "exp": now + 300},
         realm["pem"],
-        algorithm=ALGORITHMS.RS256,
+        algorithm="RS256",
     )
     with pytest.raises(HTTPException) as exc:
         await auth.get_current_patient(_credentials(token))

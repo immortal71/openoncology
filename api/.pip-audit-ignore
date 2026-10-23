@@ -8,11 +8,6 @@
 # requests via a resend bump). The entries below are the ones that cannot be
 # fixed by a safe, isolated version bump right now.
 
-# ── ecdsa 0.19.2 — no fix version published ────────────────────────────────────
-# Minerva timing side-channel; upstream has no released fix. Transitive via
-# python-jose[cryptography]. Re-check upstream each quarter.
-PYSEC-2026-1325
-
 # ── pytest 8.2.0 — dev/test-only, fix is a breaking major (9.0.3) ──────────────
 # Not shipped in the runtime image; only used in CI. Deferred until the suite is
 # validated against pytest 9.x. Tracked as follow-up.
