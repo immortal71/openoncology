@@ -17,7 +17,7 @@
 </p>
 <p>
   <img src="https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11"/>
-  <img src="https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14"/>
+  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 15"/>
   <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/HIPAA-Compliant-6366f1?style=for-the-badge" alt="HIPAA Compliant"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready"/>
@@ -140,7 +140,7 @@ Legacy composite scoring remains the current baseline (DiffDock 30% + OpenTarget
 ```mermaid
 graph TB
     subgraph Client["🌐 Browser / Mobile"]
-        WEB["Next.js 14 App<br/>TypeScript · Tailwind · Framer Motion"]
+        WEB["Next.js 15 App<br/>TypeScript · Tailwind · Framer Motion"]
     end
 
     subgraph Gateway["⚙️ API Gateway"]
@@ -339,7 +339,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 
 | Layer | Technologies |
 |:------|:------------|
-| **Frontend** | Next.js 14 · TypeScript · Tailwind CSS · Framer Motion · React Query |
+| **Frontend** | Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · React Query |
 | **Backend** | FastAPI · SQLAlchemy 2 async · Celery · Redis |
 | **Database** | PostgreSQL 16 · Alembic migrations (12 tables) |
 | **Storage & Auth** | MinIO (AES-256) · Keycloak OIDC/OAuth2 |

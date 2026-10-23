@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { use, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -32,7 +32,8 @@ type TrialRow = {
 	drugs?: string[];
 };
 
-export default function ResultsPage({ params }: { params: { id: string } }) {
+export default function ResultsPage(props: { params: Promise<{ id: string }> }) {
+	const params = use(props.params);
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;

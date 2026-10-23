@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 OpenOncology ranks cancer drugs against a patient's mutation profile. A VCF goes in;
 a ranked list of approved drugs, repurposing candidates, or a custom-discovery brief
-comes out. Three parts: a FastAPI backend (`api/`), a Next.js 14 frontend (`web/`),
+comes out. Three parts: a FastAPI backend (`api/`), a Next.js 15 frontend (`web/`),
 and a Nextflow genomics pipeline (`pipeline/`). Celery workers chain
 `genomic_worker` to `ai_worker` to `notify_worker`; Postgres, Redis, and MinIO back them.
 
@@ -161,8 +161,8 @@ live API, which is a supported mode, not a degraded one.
 
 ## Frontend
 
-Next.js 14 App Router. `web/lib/api.ts` is the typed client; `web/lib/demo-data.ts`
-carries the KRAS G12C demo case.
+Next.js 15 App Router on React 19. `web/lib/api.ts` is the typed client;
+`web/lib/demo-data.ts` carries the KRAS G12C demo case.
 
 Demo mode (`NEXT_PUBLIC_ENABLE_DEMO_AUTH=1`) bypasses Keycloak and serves that demo
 case from local data, so Playwright E2E needs no backend, database, or auth server.
