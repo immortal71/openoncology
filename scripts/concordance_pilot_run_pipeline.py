@@ -72,7 +72,27 @@ def _pick_variant(mutations: list[dict]) -> dict | None:
     return pool[0] if pool else None
 
 
-def run_tier1(gene: str, variant: str, cancer_type: str) -> list[dict]:
+GATE = {"on": False, "settings": {}}
+
+
+def _indication_gate(candidates: list[dict], gene: str, variant: str, cancer_type: str,
+                     patient_id: str | None) -> list[dict]:
+    """Optional OO-26 indication gate, off unless --indication-gate is passed."""
+    if not GATE["on"]:
+        return candidates
+    from services.indication_gate import partition_candidates
+    setting = GATE["settings"].get(patient_id or "", {})
+    kept, dropped = partition_candidates(
+        candidates, gene, variant, cancer_type,
+        line_of_therapy=setting.get("line_of_therapy"),
+        intent=setting.get("intent"),
+    )
+    for d in dropped:
+        print(f"\n    withheld {d.get('drug_name')}: {d.get('indication_exclusion')}", end="")
+    return kept
+
+
+def run_tier1(gene: str, variant: str, cancer_type: str, patient_id: str | None = None) -> list[dict]:
     evidence = get_all_drugs_for_variant_live(gene, variant, cancer_type=cancer_type, alphamissense_score=1.0)
     if not evidence:
         return []
@@ -87,10 +107,11 @@ def run_tier1(gene: str, variant: str, cancer_type: str) -> list[dict]:
             "max_phase": 4,
             "opentargets_score": 0.8 if "LEVEL_1" in str(level) else (0.6 if "LEVEL_2" in str(level) else 0.4),
         })
-    return rank_candidates(candidates)
+    candidates = _indication_gate(candidates, gene, variant, cancer_type, patient_id)
+    return rank_candidates(candidates) if candidates else []
 
 
-def run_tier2(gene: str, variant: str, cancer_type: str) -> list[dict]:
+def run_tier2(gene: str, variant: str, cancer_type: str, patient_id: str | None = None) -> list[dict]:
     from services.opentargets import get_target_id, get_drugs_for_target
     from services.dgidb import get_interactions as get_dgidb_interactions
 
@@ -110,14 +131,30 @@ def run_tier2(gene: str, variant: str, cancer_type: str) -> list[dict]:
         seen.add(name)
         if d.get("is_approved") or d.get("max_phase") == 4:
             approved.append(d)
+    approved = _indication_gate(approved, gene, variant, cancer_type, patient_id)
     return rank_candidates(approved) if approved else []
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", default=os.path.dirname(os.path.abspath(__file__)))
+    parser.add_argument(
+        "--indication-gate", action="store_true",
+        help="Apply services/indication_gate.py to both tiers (OO-26). Off by default, "
+             "so the published pilot numbers reproduce unchanged.",
+    )
+    parser.add_argument(
+        "--settings",
+        help="JSON mapping patient_id to {\"line_of_therapy\": int, \"intent\": str}, "
+             "used by the indication gate for line-dependent indications such as belzutifan in RCC.",
+    )
+    parser.add_argument("--out", default=None, help="Results path (defaults to concordance_run_results.json)")
     args = parser.parse_args()
     base = args.data_dir
+    GATE["on"] = args.indication_gate
+    if args.settings:
+        with open(args.settings) as sf:
+            GATE["settings"] = json.load(sf)
 
     # Load the 26 original-cohort patients
     with open(os.path.join(base, "candidate_patients.json")) as f:
@@ -178,12 +215,12 @@ def main():
 
         print(f"[{i}/{len(all_patients)}] {p['patient_id']} ({p['cohort']}) {gene} {variant} ... ", end="", flush=True)
         try:
-            tier1 = run_tier1(gene, variant, p['cancer_type'])
+            tier1 = run_tier1(gene, variant, p['cancer_type'], p["patient_id"])
             if tier1:
                 tier = "TIER1_FDA_APPROVED"
                 top3 = [d["drug_name"] for d in tier1[:3]]
             else:
-                tier2 = run_tier2(gene, variant, p["cancer_type"])
+                tier2 = run_tier2(gene, variant, p["cancer_type"], p["patient_id"])
                 if tier2:
                     tier = "TIER2_REPURPOSING"
                     top3 = [d["drug_name"] for d in tier2[:3]]
@@ -203,7 +240,7 @@ def main():
             "pipeline_top3": top3,
         })
 
-    out_path = os.path.join(base, "concordance_run_results.json")
+    out_path = args.out or os.path.join(base, "concordance_run_results.json")
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved {len(results)} results to {out_path}")
