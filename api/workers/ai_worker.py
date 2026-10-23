@@ -51,6 +51,8 @@ def run_ai_analysis(
     patient_id: str,
     vcf_s3_key: str,
     cancer_type: str,
+    line_of_therapy: int | None = None,
+    treatment_intent: str | None = None,
 ):
     from workers._db_sync import get_sync_session
     from models.submission import Submission, SubmissionStatus
@@ -176,6 +178,25 @@ def run_ai_analysis(
             drugs = _apply_candidate_pool_policy(
                 drugs, target_gene, top_variant, top_mutation.alphamissense_score
             )
+
+            # Indication gate (OO-26). Both tiers hand out a gene's drugs
+            # whatever the cancer and whatever the alteration. Drop a drug only
+            # on positive evidence that its label does not cover this gene,
+            # alteration, cancer or line; keep what it withholds for the report.
+            try:
+                from services.indication_gate import partition_candidates as _indication_partition
+
+                drugs, not_indicated = _indication_partition(
+                    drugs,
+                    target_gene,
+                    top_variant or "",
+                    cancer_type,
+                    line_of_therapy=line_of_therapy,
+                    intent=treatment_intent,
+                )
+                excluded_candidates = list(excluded_candidates) + not_indicated
+            except Exception as exc:  # noqa: BLE001 - never fail a case on the gate
+                logger.warning("[ai] indication gate unavailable (%s); unfiltered", exc)
 
             # Score each drug using the composite ranking algorithm
             from ai.ranking import rank_candidates
@@ -332,7 +353,8 @@ def run_ai_analysis(
                 {
                     "drug_name": d.get("drug_name"),
                     "atc_codes": d.get("atc_codes") or [],
-                    "reason": "not classified as an oncology therapy (WHO ATC L01/L02)",
+                    "reason": d.get("indication_exclusion")
+                    or "not classified as an oncology therapy (WHO ATC L01/L02)",
                 }
                 for d in excluded_candidates
                 if d.get("drug_name")
@@ -1329,13 +1351,24 @@ def _generate_summary(mutations, targetable, repurposing, excluded=None) -> str:
             "We completed the drug search and did not find an approved cancer "
             "therapy matching these mutations.",
         ]
-        if excluded:
+        not_oncology = [d for d in excluded if not d.get("indication_exclusion")]
+        not_indicated = [d for d in excluded if d.get("indication_exclusion")]
+        if not_oncology:
             names = ", ".join(
-                d.get("drug_name") for d in excluded[:3] if d.get("drug_name")
+                d.get("drug_name") for d in not_oncology[:3] if d.get("drug_name")
             )
             parts.append(
-                f"{len(excluded)} drug(s) that interact with these genes were set "
+                f"{len(not_oncology)} drug(s) that interact with these genes were set "
                 f"aside because they are not cancer treatments ({names})."
+            )
+        if not_indicated:
+            names = ", ".join(
+                d.get("drug_name") for d in not_indicated[:3] if d.get("drug_name")
+            )
+            parts.append(
+                f"{len(not_indicated)} cancer drug(s) were set aside because their "
+                f"approval does not cover this mutation, cancer type or line of "
+                f"therapy ({names})."
             )
         parts.append(
             "Clinical trials and custom drug discovery may still apply. "
