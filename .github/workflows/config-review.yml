@@ -1,0 +1,49 @@
+name: Config review
+
+# Posts one comment on the pull request saying, in plain English, what a change
+# to the deployment config actually does: which keys changed, from what to
+# what, and anything risky (an unpinned image, a privileged container, a
+# credential in a ConfigMap).
+#
+# Advisory only: `fail-on: ""` means it comments and never fails the build.
+# Once the comments have earned trust, set `fail-on: policy,error` to block
+# merges on findings.
+#
+# It reads the files; it never runs helm, kubectl, or anything in the repo.
+
+on:
+  pull_request:
+    paths:
+      - "infra/helm/values*.yaml"
+      - "infra/k8s/**"
+      - "docker-compose.yml"
+      - ".github/workflows/config-review.yml"
+
+permissions:
+  contents: read
+  pull-requests: write # to post and update the comment
+
+jobs:
+  config-review:
+    name: Config review (Flecto)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # the base commit is the baseline
+
+      # Pinned by commit, and the CLI by exact version, so neither can change
+      # under you. Dependabot bumps the SHA; flecto-version below is bumped by
+      # hand alongside it.
+      - uses: myselfsiddharth/Flecto@277615d8c2a1cfce35e597edfe1c65ea93d010fc # v4.3.0
+        with:
+          targets: |
+            infra/helm/values*.yaml
+            infra/k8s/*.yaml
+            docker-compose.yml
+          policies: default,kubernetes,compose
+          # A PR that adds a values file or manifest reports it as new rather
+          # than failing for want of a baseline.
+          new-files: added
+          fail-on: ""
+          flecto-version: "4.3.0"
