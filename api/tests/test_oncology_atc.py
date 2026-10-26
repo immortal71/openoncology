@@ -101,3 +101,50 @@ class TestOncologyGate:
         assert keep[0]["oncology_relevant"] is True
         assert any(c.startswith("L01") for c in keep[0]["atc_codes"])
         assert dropped[0]["oncology_relevant"] is False
+
+
+class TestCytotoxicExclusion:
+    """OO-28: classical chemotherapy is not a mutation match.
+
+    In the 2026-07-28 pilot every TP53 patient was offered these three from a
+    DGIdb gene interaction, and 7 of the pilot's 8 hits were these drugs
+    coinciding with chemotherapy the patient happened to receive.
+    """
+
+    TP53_PILOT_PICKS = ["CISPLATIN", "DOXORUBICIN HYDROCHLORIDE", "CARBOPLATIN"]
+    TARGETED = ["OLAPARIB", "SUNITINIB MALATE", "TRASTUZUMAB", "TAMOXIFEN", "AFATINIB DIMALEATE"]
+
+    def test_tp53_pilot_chemotherapy_is_dropped_when_asked(self):
+        kept, dropped = partition_candidates(
+            [{"drug_name": d} for d in self.TP53_PILOT_PICKS],
+            allow_network=False, drop_cytotoxic=True,
+        )
+        assert kept == []
+        assert {d["drug_name"] for d in dropped} == set(self.TP53_PILOT_PICKS)
+        assert all("cytotoxic" in d["indication_exclusion"] for d in dropped)
+
+    def test_targeted_and_endocrine_drugs_are_kept(self):
+        kept, dropped = partition_candidates(
+            [{"drug_name": d} for d in self.TARGETED],
+            allow_network=False, drop_cytotoxic=True,
+        )
+        assert dropped == []
+
+    def test_chemotherapy_kept_without_the_flag(self):
+        kept, dropped = partition_candidates(
+            [{"drug_name": d} for d in self.TP53_PILOT_PICKS], allow_network=False,
+        )
+        assert dropped == []
+
+    def test_chemotherapy_with_curated_variant_evidence_is_kept(self):
+        kept, dropped = partition_candidates(
+            [{"drug_name": "CISPLATIN", "evidence_sources": ["CIViC", "ChEMBL"]}],
+            allow_network=False, drop_cytotoxic=True,
+        )
+        assert [d["drug_name"] for d in kept] == ["CISPLATIN"]
+
+    def test_unknown_drug_is_not_treated_as_chemotherapy(self):
+        kept, _ = partition_candidates(
+            [{"drug_name": "NOT A REAL DRUG XYZ"}], allow_network=False, drop_cytotoxic=True,
+        )
+        assert len(kept) == 1
