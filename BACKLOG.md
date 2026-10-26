@@ -223,6 +223,22 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - Probed with no token: EGFR T790M from `samples/egfr_t790m_demo.vcf` becomes LEVEL_1 targetable with osimertinib; TP53 R175H, EGFR A597P, KRAS G12V and ALK H1475Q stay untargetable. Hard gate unchanged.
   - Not done: a token that is set but failing (`unavailable`) still gets no fallback, so a network outage stays visible as a failed lookup rather than quietly switching source. Migration 0018 was not run against Postgres locally (no Postgres here); CI's `alembic upgrade head` on postgres:16 is its first real run.
 
+### OO-29: A MSK-CHORD benchmark that can actually measure mutation matching
+- **Why**: The 69-patient TCGA pilot cannot measure a mutation ranker: most patients received chemotherapy chosen by cancer type, and 45 of 69 had kidney cancer treated without genomic guidance. MSK-CHORD (Nature 2024) has 24,950 patients with IMPACT panel data, treatment timelines, and modern targeted-drug use. This replaces the pilot as the mutation-matching benchmark.
+- **Done (2026-10-26), on branch `fix/oo-29-mskchord-benchmark`, not merged**:
+  - `scripts/mskchord/fetch_mskchord.py` pulls the 5,377 MSK-CHORD patients who received a targeted therapy, plus their mutations and discrete CNAs for 56 actionable genes, via the cBioPortal API and the datahub timeline tables.
+  - `scripts/mskchord/targeted_drug_targets.py` is the per-drug map of the alterations that justify each targeted drug under its FDA label (EGFR TKIs → any EGFR mutation, sotorasib → KRAS G12C, trastuzumab → ERBB2 amplification, PARP inhibitors → BRCA/HRR). This is the ground truth; the ranker does not substitute it.
+  - `scripts/mskchord/score_mskchord.py` reports ground-truth coverage and, with `--results`, the ranker's top-3 hit rate on the benchmarkable subset.
+  - `validation_results/msk_chord_targeted_cohort.json` is the pre-fetched cohort as of 2026-10-26.
+- **Numbers (2026-10-26)**:
+  - 5,190 patients with targeted-therapy events + alteration data.
+  - **2,222 benchmarkable** (alteration matches the drug they received under its label).
+  - 473 unevaluable (fusion-only drugs; the SV endpoint is not pulled here).
+  - 2,495 miss (CDK4/6 inhibitors, mTOR inhibitors and similar receptor-driven drugs; correctly outside the mutation ranker's scope).
+  - Per-drug coverage of the benchmarkable set: osimertinib 1035/1058, erlotinib 461/493, alpelisib 209/230, sotorasib 92/98, encorafenib 83/86, trametinib 83/126, dabrafenib 74/87, dacomitinib 43/43.
+- **Decisions needed**: whether to add structural variants (would make ~400 more patients benchmarkable); and the final ranker-run against this cohort has to happen where OncoKB and CIViC are reachable.
+- **Follow-ups**: `scripts/mskchord/README.md` for the reproduction command and known limits.
+
 ---
 
 ## Done
