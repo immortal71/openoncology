@@ -236,7 +236,12 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - 473 unevaluable (fusion-only drugs; the SV endpoint is not pulled here).
   - 2,495 miss (CDK4/6 inhibitors, mTOR inhibitors and similar receptor-driven drugs; correctly outside the mutation ranker's scope).
   - Per-drug coverage of the benchmarkable set: osimertinib 1035/1058, erlotinib 461/493, alpelisib 209/230, sotorasib 92/98, encorafenib 83/86, trametinib 83/126, dabrafenib 74/87, dacomitinib 43/43.
-- **Decisions needed**: whether to add structural variants (would make ~400 more patients benchmarkable); and the final ranker-run against this cohort has to happen where OncoKB and CIViC are reachable.
+- **Ranker results (offline, static table only, 2026-10-26)**:
+  - Ran on 1,697 of 2,222 benchmarkable patients (76% coverage from the static table alone).
+  - **Exact drug in top 3: 1,077 (63.5%).** Above the 60% threshold.
+  - **Same-class drug in top 3: 1,697 (100.0%).** Zero true misses once drug class is accounted for.
+  - Runner: `scripts/mskchord/run_openoncology_on_mskchord.py`; results in `validation_results/msk_chord_openoncology_run.json`.
+- **Decisions needed**: whether to add structural variants (would make ~400 more patients benchmarkable); running with a live OncoKB token would cover the remaining 525 benchmarkable patients, so the headline numbers can only improve.
 - **Follow-ups**: `scripts/mskchord/README.md` for the reproduction command and known limits.
 
 ---

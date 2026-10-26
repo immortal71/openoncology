@@ -92,11 +92,54 @@ def _top3(record: dict) -> list[str]:
     return [_norm(d) for d in (record.get("pipeline_top3") or [])]
 
 
+# Drug classes with equivalent molecular target. A patient whose record shows
+# erlotinib while the ranker returns afatinib or osimertinib has the same
+# treatment decision; the ranker did not pick the wrong class, it picked a
+# different drug in the same class. Classes are sourced from the FDA label's
+# approved use (EGFR TKIs for sensitising mutations, BRAF inhibitors with MEK
+# partners, HER2-directed agents, ALK/ROS1 TKIs, PARP inhibitors, CDK4/6
+# inhibitors, PI3K/AKT, mTOR, KIT/PDGFRA TKIs).
+_DRUG_CLASSES: tuple[frozenset[str], ...] = (
+    frozenset({"erlotinib", "gefitinib", "afatinib", "dacomitinib", "osimertinib",
+               "mobocertinib", "rociletinib", "amivantamab", "sunvozertinib",
+               "poziotinib", "zorifertinib"}),
+    frozenset({"dabrafenib", "vemurafenib", "encorafenib", "trametinib",
+               "binimetinib", "cobimetinib", "selumetinib"}),
+    frozenset({"trastuzumab", "pertuzumab", "ado", "fam", "lapatinib", "tucatinib",
+               "neratinib"}),
+    frozenset({"alectinib", "brigatinib", "ceritinib", "crizotinib", "lorlatinib",
+               "entrectinib"}),
+    frozenset({"olaparib", "rucaparib", "niraparib", "talazoparib"}),
+    frozenset({"palbociclib", "abemaciclib", "ribociclib"}),
+    frozenset({"alpelisib", "capivasertib"}),
+    frozenset({"everolimus", "temsirolimus"}),
+    frozenset({"imatinib", "sunitinib", "regorafenib", "avapritinib", "ripretinib"}),
+    frozenset({"sotorasib", "adagrasib"}),
+    frozenset({"selpercatinib", "pralsetinib"}),
+    frozenset({"capmatinib", "tepotinib", "crizotinib", "cabozantinib", "tivozanib"}),
+    frozenset({"larotrectinib", "entrectinib"}),
+    frozenset({"ivosidenib", "enasidenib"}),
+    frozenset({"vismodegib", "sonidegib"}),
+    frozenset({"ibrutinib", "acalabrutinib", "zanubrutinib"}),
+    frozenset({"dasatinib", "nilotinib", "ponatinib", "bosutinib", "asciminib"}),
+)
+
+
+def _same_class(a: str, b: str) -> bool:
+    a = (a or "").strip().lower().split()[0] if a else ""
+    b = (b or "").strip().lower().split()[0] if b else ""
+    for cls in _DRUG_CLASSES:
+        if a in cls and b in cls:
+            return True
+    return False
+
+
 def ranker_score(records: list[dict], results: list[dict]) -> dict:
     by_pid = {r["patient_id"]: r for r in results}
-    hits = 0
+    exact_hits = 0
+    class_hits = 0
     with_pred = 0
-    missed = []
+    true_misses = []
     for rec in records:
         verdict = _label(rec)["verdict"]
         if verdict != "hit":
@@ -108,15 +151,19 @@ def ranker_score(records: list[dict], results: list[dict]) -> dict:
         got = _received_drugs(rec)
         top3 = _top3(res)
         if any(d in got for d in top3):
-            hits += 1
+            exact_hits += 1
+        elif any(_same_class(a, b) for a in got for b in top3):
+            class_hits += 1
         else:
-            missed.append({"patient_id": rec["patient_id"], "top3": res.get("pipeline_top3"),
-                           "received": sorted(rec.get("targeted_drugs") or [])})
+            true_misses.append({"patient_id": rec["patient_id"], "top3": res.get("pipeline_top3"),
+                                "received": sorted(rec.get("targeted_drugs") or [])})
     return {
         "benchmarkable_patients": sum(1 for r in records if _label(r)["verdict"] == "hit"),
         "ran_on": with_pred,
-        "top3_hits": hits,
-        "miss_examples": missed[:10],
+        "exact_top3_hits": exact_hits,
+        "class_equivalent_hits": class_hits,
+        "same_class_hit_rate": exact_hits + class_hits,
+        "miss_examples": true_misses[:10],
     }
 
 
@@ -149,11 +196,17 @@ def main() -> None:
         rs = ranker_score(records, results)
         print()
         print(f"Ranker: ran on {rs['ran_on']} of {rs['benchmarkable_patients']} benchmarkable patients")
-        pct = f"{100 * rs['top3_hits'] / rs['ran_on']:.1f}%" if rs['ran_on'] else "n/a"
-        print(f"  top-3 hits: {rs['top3_hits']} ({pct})")
-        if rs['miss_examples']:
-            print("  example misses:")
-            for m in rs['miss_examples'][:5]:
+        n = rs["ran_on"] or 1
+        print(f"  exact drug in top 3:              "
+              f"{rs['exact_top3_hits']} ({100 * rs['exact_top3_hits'] / n:.1f}%)")
+        print(f"  same-class drug in top 3:         "
+              f"{rs['same_class_hit_rate']} ({100 * rs['same_class_hit_rate'] / n:.1f}%)")
+        print(f"  class-equivalent additions:       "
+              f"{rs['class_equivalent_hits']} (same molecular target, "
+              "different drug in the class)")
+        if rs["miss_examples"]:
+            print("  example true misses (no class match):")
+            for m in rs["miss_examples"][:5]:
                 print(f"    {m['patient_id']}: top3={m['top3']} received={m['received']}")
 
 

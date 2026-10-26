@@ -55,13 +55,28 @@ and `pipeline_top3` (a list of drug names), the same shape
 
 ## As of 2026-10-26
 
+Ground-truth cohort:
+
 ```
-Cohort: 5,190 patients
+5,190 patients with targeted-therapy events + alteration data
   benchmarkable: 2,222 (an alteration matches the drug under its label)
   unevaluable (fusion-only, SV endpoint not pulled): 473
   no qualifying alteration for any received drug: 2,495
-    (mostly CDK4/6 inhibitors, mTOR inhibitors — receptor-driven)
 ```
+
+OpenOncology ranker against the benchmarkable subset, using the committed
+static evidence table (no OncoKB token, no external APIs):
+
+```
+Ranker: ran on 1,697 of 2,222 benchmarkable patients
+  exact drug in top 3:        1,077 (63.5%)
+  same-class drug in top 3:   1,697 (100.0%)
+```
+
+The remaining 525 benchmarkable patients had no static-table entry for their
+exact (gene, variant) pair; most are HER2 amplifications and EGFR variants
+outside the hotspot set. Running with a live OncoKB token on this cohort is
+the next step.
 
 Per-drug coverage of the benchmarkable set:
 
