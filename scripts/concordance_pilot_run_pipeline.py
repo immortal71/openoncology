@@ -72,7 +72,20 @@ def _pick_variant(mutations: list[dict]) -> dict | None:
     return pool[0] if pool else None
 
 
-GATE = {"on": False, "settings": {}}
+GATE = {"on": False, "settings": {}, "chemo_filter": False}
+
+
+def _repurposing_filter(candidates: list[dict]) -> list[dict]:
+    """Optional OO-28 filter on the gene-to-drug pool, as the app applies it:
+    drop non-oncology drugs and classical chemotherapy (WHO ATC, offline cache)."""
+    if not GATE["chemo_filter"]:
+        return candidates
+    from services.oncology_atc import partition_candidates
+    kept, dropped = partition_candidates(candidates, allow_network=False, drop_cytotoxic=True)
+    for d in dropped:
+        reason = d.get("indication_exclusion") or "not an oncology therapy (ATC)"
+        print(f"\n    withheld {d.get('drug_name')}: {reason}", end="")
+    return kept
 
 
 def _indication_gate(candidates: list[dict], gene: str, variant: str, cancer_type: str,
@@ -131,6 +144,7 @@ def run_tier2(gene: str, variant: str, cancer_type: str, patient_id: str | None 
         seen.add(name)
         if d.get("is_approved") or d.get("max_phase") == 4:
             approved.append(d)
+    approved = _repurposing_filter(approved)
     approved = _indication_gate(approved, gene, variant, cancer_type, patient_id)
     return rank_candidates(approved) if approved else []
 
@@ -148,10 +162,21 @@ def main():
         help="JSON mapping patient_id to {\"line_of_therapy\": int, \"intent\": str}, "
              "used by the indication gate for line-dependent indications such as belzutifan in RCC.",
     )
+    parser.add_argument(
+        "--chemo-filter", action="store_true",
+        help="Apply the app's oncology ATC filter to the gene-to-drug tier, including the "
+             "OO-28 cytotoxic exclusion. Off by default so published numbers reproduce.",
+    )
+    parser.add_argument(
+        "--standard-of-care", action="store_true",
+        help="Also record services/standard_of_care.py options per patient (OO-28). "
+             "Stored in a separate field; never merged into pipeline_top3.",
+    )
     parser.add_argument("--out", default=None, help="Results path (defaults to concordance_run_results.json)")
     args = parser.parse_args()
     base = args.data_dir
     GATE["on"] = args.indication_gate
+    GATE["chemo_filter"] = args.chemo_filter
     if args.settings:
         with open(args.settings) as sf:
             GATE["settings"] = json.load(sf)
@@ -234,11 +259,15 @@ def main():
         else:
             print(f"{tier} -> {top3}")
 
-        results.append({
+        row = {
             **p,
             "pipeline_tier": tier,
             "pipeline_top3": top3,
-        })
+        }
+        if args.standard_of_care:
+            from services.standard_of_care import report as soc_report
+            row["standard_of_care"] = soc_report(p["cancer_type"])
+        results.append(row)
 
     out_path = args.out or os.path.join(base, "concordance_run_results.json")
     with open(out_path, "w") as f:

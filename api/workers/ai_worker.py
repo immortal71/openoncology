@@ -1328,7 +1328,7 @@ def _query_repurposing_candidates(
             from services.oncology_atc import partition_candidates
 
             fda_approved_candidates, non_oncology = partition_candidates(
-                fda_approved_candidates, allow_network=False
+                fda_approved_candidates, allow_network=False, drop_cytotoxic=True
             )
             if non_oncology:
                 logger.info(

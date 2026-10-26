@@ -223,6 +223,17 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - Probed with no token: EGFR T790M from `samples/egfr_t790m_demo.vcf` becomes LEVEL_1 targetable with osimertinib; TP53 R175H, EGFR A597P, KRAS G12V and ALK H1475Q stay untargetable. Hard gate unchanged.
   - Not done: a token that is set but failing (`unavailable`) still gets no fallback, so a network outage stays visible as a failed lookup rather than quietly switching source. Migration 0018 was not run against Postgres locally (no Postgres here); CI's `alembic upgrade head` on postgres:16 is its first real run.
 
+### OO-28: The pilot's 15% is mostly chemotherapy coincidence, and the cohort cannot test mutation matching
+- **Why**: Of the pilot's 8 top-3 hits, 7 are TP53 patients for whom the gene-to-drug tier offered cisplatin, doxorubicin and carboplatin (DGIdb gene interactions), matching chemotherapy the patient received. Only 1 hit (erlotinib for EGFR T751_E758del in lung adenocarcinoma) is a mutation match. Also, 45 of 69 patients are TCGA-KIRC. They received sunitinib, sorafenib, pazopanib, temsirolimus, everolimus or bevacizumab, chosen by cancer type, so a mutation ranker cannot match them (0 of 38). PRAD patients received androgen deprivation (0 of 1).
+- **Risk**: scientific. Changes which drugs reach a clinician, and changes the reported pilot numbers.
+- **Done (2026-10-26), on branch `fix/oo-28-noise-and-standard-of-care`, not merged**:
+  - `services/oncology_atc.partition_candidates(..., drop_cytotoxic=True)` drops classical chemotherapy (ATC L01A-L01D, L01XA) from the gene-to-drug pool. A chemotherapy named by CIViC or OncoKB evidence for the variant is kept. Wired into `ai_worker._query_repurposing_candidates`, and into the pilot runner behind `--chemo-filter` (which also applies the app's non-oncology ATC filter that `run_tier2` never called).
+  - `services/standard_of_care.py`: per-cancer standard treatments, reported separately and never merged into the ranking. Most are FDA-label based; three regimens are marked `basis="guideline"`. Checked against openFDA label text on 2026-10-26; eight drugs had no openFDA label and are unverified (listed in the module). `REVIEW_STATUS` says it is a draft pending oncologist review. The pilot runner records it behind `--standard-of-care`.
+  - `scripts/score_concordance_pilot.py` scores a results file and splits hits into gene-matched and chemotherapy coincidence, plus standard-of-care coverage. Published file: 8/53, 1 gene-matched, 7 coincidence. With the gate and the chemo filter applied to the stored top 3s: 1 hit of 32 patients with a pick.
+  - Standard-of-care coverage is 68 of 69, but that number checks the menu, not a decision. It must not be presented as accuracy.
+- **Decisions needed**: whether the standard-of-care section goes into the app (needs a `Result` column, a migration and UI); who reviews the table; and which cohort replaces this one for measuring mutation matching. It should be patients who received a targeted drug matched to an actionable alteration. One option is MSK-CHORD on cBioPortal, which has treatment timelines.
+- **Not changed**: hard gate PASS (P@3 0.801, Hit@3 1.0, FP 0). api tests 1,406 pass, ai tests 42 pass.
+
 ---
 
 ## Done

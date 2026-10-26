@@ -206,17 +206,54 @@ def should_exclude(drug_name: str, *, allow_network: bool = True) -> bool:
     return not any(c.upper().startswith(_ONCOLOGY_ATC_PREFIXES) for c in codes)
 
 
+# Classical cytotoxic chemotherapy (OO-28). These kill dividing cells; none is
+# selected by a tumour mutation. DGIdb records "interactions" between them and
+# genes such as TP53 (expression, resistance or toxicity studies), and the
+# gene-to-drug repurposing tier turned those into recommendations: in the
+# 2026-07-28 concordance pilot every TP53 patient was offered cisplatin,
+# doxorubicin and carboplatin, and 7 of the pilot's 8 "hits" were those
+# chemotherapies coinciding with the chemo the patient happened to receive.
+#   L01A alkylating agents, L01B antimetabolites, L01C plant alkaloids,
+#   L01D cytotoxic antibiotics, L01XA platinum compounds.
+# Targeted classes (L01E kinase inhibitors, L01F antibodies, L01XK PARP
+# inhibitors) and endocrine therapy (L02) are unaffected.
+_CYTOTOXIC_ATC_PREFIXES = ("L01A", "L01B", "L01C", "L01D", "L01XA")
+
+CYTOTOXIC_REASON = (
+    "cytotoxic chemotherapy (WHO ATC L01A-L01D, L01XA): not selected by a tumour "
+    "mutation, so not a gene-matched recommendation"
+)
+
+
+def is_untargeted_cytotoxic(drug_name: str, *, allow_network: bool = True) -> bool:
+    """True when every ATC code on record is classical cytotoxic chemotherapy.
+
+    A drug that also carries a targeted or endocrine code is not dropped, and
+    an unknown drug (no codes) is not dropped either.
+    """
+    codes = atc_codes(drug_name, allow_network=allow_network)
+    if not codes:
+        return False
+    return all(c.upper().startswith(_CYTOTOXIC_ATC_PREFIXES) for c in codes)
+
+
 def partition_candidates(
     candidates: Iterable[dict[str, Any]],
     *,
     name_key: str = "drug_name",
     allow_network: bool = True,
+    drop_cytotoxic: bool = False,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Split candidates into (oncology_relevant, excluded).
 
     Excluded candidates are returned rather than discarded so a caller can show
     them under a separate, clearly-labelled heading instead of silently
     dropping evidence. They must not be mixed into the ranked recommendations.
+
+    ``drop_cytotoxic`` also excludes classical chemotherapy from the
+    gene-to-drug repurposing pool, where a chemo "match" is not evidence about
+    the mutation. Candidates whose ``evidence_sources`` include CIViC or OncoKB
+    are kept.
     """
     keep: list[dict[str, Any]] = []
     dropped: list[dict[str, Any]] = []
@@ -233,6 +270,19 @@ def partition_candidates(
             "oncology_relevant": oncology,
             "atc_classified": bool(codes),
         }
+        # A chemotherapy named by curated variant-level evidence (CIViC or
+        # OncoKB) is kept: that evidence is about this alteration, not a bare
+        # gene interaction.
+        curated = bool({"CIViC", "OncoKB"} & set(candidate.get("evidence_sources") or []))
+        if (
+            drop_cytotoxic
+            and not exclude
+            and not curated
+            and codes
+            and all(c.upper().startswith(_CYTOTOXIC_ATC_PREFIXES) for c in codes)
+        ):
+            exclude = True
+            annotated["indication_exclusion"] = CYTOTOXIC_REASON
         (dropped if exclude else keep).append(annotated)
     if dropped:
         logger.info(
