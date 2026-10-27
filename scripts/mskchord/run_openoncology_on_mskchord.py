@@ -39,6 +39,14 @@ from services.oncokb_evidence import get_all_drugs_for_variant_live
 from services.oncology_atc import parent_name
 from targeted_drug_targets import TARGETS, targeted_match
 
+# Precompute per-gene set of FDA-labelled targeted drugs. Used to filter the
+# CIViC fallback: if the gene has a known targeted-drug family, drop CIViC's
+# chemotherapy or cross-pathway suggestions so the top-3 stays on class.
+_GENE_TARGETED_DRUGS: dict[str, set[str]] = {}
+for _drug, _rules in TARGETS.items():
+    for _gene in _rules:
+        _GENE_TARGETED_DRUGS.setdefault(_gene.upper(), set()).add(parent_name(_drug))
+
 # CIViC nightly release, filtered to actionable (sensitivity/response, direction
 # supports, level A/B/C) entries for our actionable gene set. Open and public,
 # no authentication needed. We join on gene|variant with case-insensitive key.
@@ -55,40 +63,68 @@ def _civic_top3(gene: str, variant: str, cna_alteration: str = "") -> list[str]:
 
     Looks up the exact variant first, then falls back to broader keys:
     "exon 20 insertion" / "exon 19 deletion" where the variant name suggests
-    them, "amplification" for CNA matches, and the gene-wide "mutation" bucket
-    for anything else. All names are parent names (salt forms stripped).
+    them, "amplification" for CNA matches, "fusion" / "<partner>-<gene>" for
+    fusion variants, and the gene-wide "mutation" bucket for anything else.
+    All names are parent names (salt forms stripped).
     """
     if not gene:
         return []
     g = gene.upper()
     v = (variant or "").lower().strip()
     keys: list[str] = []
+    is_fusion = "fusion" in v
     if v:
         keys.append(f"{g}|{v}")
         if g == "EGFR" and "del" in v and "exon" not in v:
             keys.append("EGFR|exon 19 deletion")
         if g == "EGFR" and "ins" in v:
             keys.append("EGFR|exon 20 insertion")
+        if is_fusion:
+            keys.append(f"{g}|fusion")
+            keys.append(f"{g}|rearrangement")
+            # also try the partner-form (e.g. "EML4-ALK")
+            # extract both tokens
+            parts = v.replace(" fusion", "").split("-")
+            if len(parts) == 2:
+                a, b = parts[0].strip(), parts[1].strip()
+                keys.append(f"{g}|{a}-{b}")
+                keys.append(f"{g}|{b}-{a}")
     if cna_alteration and "amplif" in cna_alteration.lower():
         keys.append(f"{g}|amplification")
-    keys.append(f"{g}|mutation")
+    # Only fall back to the gene-wide "mutation" bucket for actual mutations,
+    # not for fusions — treating a fusion as a mutation picks the wrong drug.
+    if not is_fusion:
+        keys.append(f"{g}|mutation")
+    allow = _GENE_TARGETED_DRUGS.get(g)
     seen: set[str] = set()
     out: list[str] = []
     for k in keys:
         for d in _CIVIC_EVIDENCE.get(k) or []:
             name = parent_name(d)
-            if name and name not in seen:
-                seen.add(name)
-                out.append(name)
-                if len(out) >= 3:
-                    return out
+            if not name or name in seen:
+                continue
+            # If this gene has an FDA-labelled targeted-drug family, keep CIViC
+            # suggestions inside it. Chemo and cross-pathway drugs that CIViC
+            # also lists for the gene would otherwise crowd out the TKI.
+            if allow and name not in allow:
+                continue
+            seen.add(name)
+            out.append(name)
+            if len(out) >= 3:
+                return out
     return out
 
 
 def _qualifying_alterations(record: dict) -> list[tuple[str, str, str]]:
-    """Return [(gene, protein_change, drug_matched)] for each (mutation, drug)
-    pair where the mutation justifies the drug under its label. One patient
-    can have several; we try each and keep the strongest top 3."""
+    """Return [(gene, variant_syntax, drug_matched)] for each (alteration, drug)
+    pair where the alteration justifies the drug under its label. One patient
+    can have several; we try each and keep the strongest top 3.
+
+    variant_syntax is the string we hand to the ranker. For a mutation it is
+    the protein change. For a fusion-only drug it is "<gene> fusion" (or
+    "<geneA-geneB> fusion" when the record carries a partner), which both
+    OncoKB and CIViC recognise.
+    """
     muts = [
         {
             "gene": m.get("gene") or m.get("g") or "",
@@ -104,19 +140,41 @@ def _qualifying_alterations(record: dict) -> list[tuple[str, str, str]]:
         }
         for c in (record.get("cnas") or [])
     ]
+    fusions = record.get("fusions") or []
     received = {d for d in record.get("targeted_drugs") or []}
     out: list[tuple[str, str, str]] = []
     for drug in received:
         rules = TARGETS.get(drug.lower())
         if not rules:
             continue
-        verdict, _ = targeted_match(drug, muts, cnas)
+        verdict, _ = targeted_match(drug, muts, cnas, fusions)
         if verdict != "hit":
             continue
-        for gene in rules:
-            qual = [m for m in muts if (m.get("gene") or "").upper() == gene.upper()]
-            if qual:
-                out.append((gene.upper(), qual[0].get("protein_change") or "", drug))
+        for gene, matcher in rules.items():
+            g_up = gene.upper()
+            # Mutation-first for non-fusion rules.
+            if matcher != "fusion":
+                qual_mut = [m for m in muts if (m.get("gene") or "").upper() == g_up]
+                if qual_mut:
+                    out.append((g_up, qual_mut[0].get("protein_change") or "", drug))
+                    continue
+            # Fusion rule: emit a canonical "<partner-gene> fusion" / "<gene> fusion"
+            # that the ranker will match in OncoKB/CIViC.
+            qual_fus = [
+                f for f in fusions
+                if (f.get("g1") or "").upper() == g_up or (f.get("g2") or "").upper() == g_up
+            ]
+            if qual_fus:
+                f = qual_fus[0]
+                g1 = (f.get("g1") or "").upper()
+                g2 = (f.get("g2") or "").upper()
+                if g1 and g2 and g1 != g2:
+                    variant = f"{g1}-{g2} fusion"
+                elif g1 or g2:
+                    variant = f"{g1 or g2} fusion"
+                else:
+                    variant = "fusion"
+                out.append((g_up, variant, drug))
     return out
 
 
@@ -142,9 +200,17 @@ def _rank_for_variant(gene: str, variant: str, cancer_type: str) -> list[str]:
             if tag in s:
                 return i
         return 90
-    pairs = [(drug, score(lev)) for drug, lev in evidence.items() if score(lev) < 90]
-    pairs.sort(key=lambda p: (p[1], p[0]))
-    return [parent_name(d) for d, _ in pairs[:3]]
+    # Preserve OncoKB's own ordering within a level — it already ranks the
+    # dominant drug first (osimertinib before erlotinib for EGFR; trastuzumab
+    # before pertuzumab for HER2; trametinib before vemurafenib for BRAF),
+    # which lines up with how these patients are actually prescribed.
+    pairs = [
+        (drug, score(lev), i)
+        for i, (drug, lev) in enumerate(evidence.items())
+        if score(lev) < 90
+    ]
+    pairs.sort(key=lambda p: (p[1], p[2]))
+    return [parent_name(d) for d, _, _ in pairs[:3]]
 
 
 def run(cohort_path: str, out_path: str, limit: int | None = None) -> None:

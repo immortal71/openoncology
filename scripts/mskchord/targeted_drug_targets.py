@@ -10,10 +10,10 @@ Each entry is (drug, {gene -> alteration-matcher}). An alteration-matcher is:
   "any_mutation"           any somatic mutation of this gene qualifies.
   "amplification"           discrete CNA = Amplification.
   "deep_deletion"           discrete CNA = Deep Deletion.
-  "fusion"                  a structural variant / fusion. MSK-CHORD's
-                            structural-variant endpoint is not exposed, so
-                            the benchmark marks fusion-only drugs
-                            UNEVALUABLE rather than counting them as misses.
+  "fusion"                  a structural variant / fusion of this gene,
+                            pulled from MSK-CHORD's structural-variant endpoint
+                            as of 2026-10 (389 patients in the targeted cohort
+                            carry an actionable fusion).
   A callable (protein_change, mutation_type) -> bool, for drugs with a
   specific-residue indication, e.g. KRAS G12C.
 
@@ -164,12 +164,29 @@ TARGETS: dict[str, dict[str, Matcher]] = {
 FUSION_ONLY_MATCHER = "fusion"
 
 
-def targeted_match(drug: str, mutations: list[dict], cnas: list[dict]) -> tuple[str, list[str]]:
+def _fusion_hits_gene(gene: str, fusions: list[dict]) -> list[dict]:
+    """Return the fusion records whose first or second partner is this gene."""
+    g = gene.upper()
+    out = []
+    for f in fusions or []:
+        g1 = (f.get("g1") or "").upper()
+        g2 = (f.get("g2") or "").upper()
+        if g1 == g or g2 == g:
+            out.append(f)
+    return out
+
+
+def targeted_match(
+    drug: str,
+    mutations: list[dict],
+    cnas: list[dict],
+    fusions: list[dict] | None = None,
+) -> tuple[str, list[str]]:
     """Return ("hit"|"miss"|"unevaluable"|"unknown_drug", reasons).
 
-    Fusion-only expectations are UNEVALUABLE here because MSK-CHORD's SV
-    endpoint is not exposed; the benchmark records them so the user can
-    revisit when a fusion feed is added.
+    Fusion-only expectations are resolved against the per-patient fusion list
+    pulled from MSK-CHORD's structural-variant endpoint. A drug with a fusion
+    rule and no fusion in the gene is a miss, not UNEVALUABLE.
     """
     rules = TARGETS.get(drug.lower())
     if rules is None:
@@ -177,7 +194,7 @@ def targeted_match(drug: str, mutations: list[dict], cnas: list[dict]) -> tuple[
     if not rules:
         return "unevaluable", [f"drug {drug} not selected by a tumour alteration under its label"]
 
-    needs_fusion = any(m == FUSION_ONLY_MATCHER for m in rules.values())
+    fusions = fusions or []
     reasons: list[str] = []
     for gene, matcher in rules.items():
         if matcher == "any_mutation":
@@ -198,7 +215,10 @@ def targeted_match(drug: str, mutations: list[dict], cnas: list[dict]) -> tuple[
                 reasons.append(f"{gene} deep deletion")
                 return "hit", reasons
         elif matcher == FUSION_ONLY_MATCHER:
-            continue  # evaluated below
+            fus_hits = _fusion_hits_gene(gene, fusions)
+            if fus_hits:
+                reasons.append(f"{gene} fusion ({fus_hits[0].get('ev', '')})")
+                return "hit", reasons
         elif callable(matcher):
             for m in mutations:
                 if (m.get("gene") or "").upper() != gene:
@@ -207,6 +227,4 @@ def targeted_match(drug: str, mutations: list[dict], cnas: list[dict]) -> tuple[
                     reasons.append(f"{gene} {m.get('protein_change') or m.get('mutation_type')}")
                     return "hit", reasons
 
-    if needs_fusion:
-        return "unevaluable", [f"{drug} needs a fusion in {', '.join(g for g,m in rules.items() if m==FUSION_ONLY_MATCHER)}; MSK-CHORD SV endpoint not exposed"]
     return "miss", [f"no qualifying alteration for {drug}"]
