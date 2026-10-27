@@ -65,18 +65,24 @@ Ground-truth cohort:
 ```
 
 OpenOncology ranker against the benchmarkable subset, using the committed
-static evidence table (no OncoKB token, no external APIs):
+static evidence table plus a CIViC nightly-release fallback for variants the
+static table does not know (open and public, no auth):
 
 ```
-Ranker: ran on 1,697 of 2,222 benchmarkable patients
-  exact drug in top 3:        1,077 (63.5%)
-  same-class drug in top 3:   1,697 (100.0%)
+Ranker: ran on 1,960 of 2,222 benchmarkable patients
+  exact drug in top 3:        1,217 (62.1%)
+  same-class drug in top 3:   1,899 (96.9%)
 ```
 
-The remaining 525 benchmarkable patients had no static-table entry for their
-exact (gene, variant) pair; most are HER2 amplifications and EGFR variants
-outside the hotspot set. Running with a live OncoKB token on this cohort is
-the next step.
+Static-only run (1,697 patients) was 63.5% exact and 100% same-class; adding
+the CIViC fallback brought in 263 more patients at slightly lower precision,
+raising coverage from 76% to 88% of the benchmarkable set. The 262 patients
+still without a prediction are either rare variants not in CIViC or
+alteration types the fetcher does not pull (fusions).
+
+CIViC data file: `validation_results/civic_actionable_evidence.json`,
+derived from the nightly `AcceptedClinicalEvidenceSummaries.tsv` release at
+https://civicdb.org/releases/main.
 
 Per-drug coverage of the benchmarkable set:
 

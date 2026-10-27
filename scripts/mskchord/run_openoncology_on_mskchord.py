@@ -39,6 +39,51 @@ from services.oncokb_evidence import get_all_drugs_for_variant_live
 from services.oncology_atc import parent_name
 from targeted_drug_targets import TARGETS, targeted_match
 
+# CIViC nightly release, filtered to actionable (sensitivity/response, direction
+# supports, level A/B/C) entries for our actionable gene set. Open and public,
+# no authentication needed. We join on gene|variant with case-insensitive key.
+_CIVIC_PATH = os.path.join(_REPO, "validation_results", "civic_actionable_evidence.json")
+try:
+    with open(_CIVIC_PATH) as _fh:
+        _CIVIC_EVIDENCE: dict[str, list[str]] = json.load(_fh)
+except FileNotFoundError:
+    _CIVIC_EVIDENCE = {}
+
+
+def _civic_top3(gene: str, variant: str, cna_alteration: str = "") -> list[str]:
+    """Return CIViC-backed top 3 drugs for this (gene, variant), lower-cased.
+
+    Looks up the exact variant first, then falls back to broader keys:
+    "exon 20 insertion" / "exon 19 deletion" where the variant name suggests
+    them, "amplification" for CNA matches, and the gene-wide "mutation" bucket
+    for anything else. All names are parent names (salt forms stripped).
+    """
+    if not gene:
+        return []
+    g = gene.upper()
+    v = (variant or "").lower().strip()
+    keys: list[str] = []
+    if v:
+        keys.append(f"{g}|{v}")
+        if g == "EGFR" and "del" in v and "exon" not in v:
+            keys.append("EGFR|exon 19 deletion")
+        if g == "EGFR" and "ins" in v:
+            keys.append("EGFR|exon 20 insertion")
+    if cna_alteration and "amplif" in cna_alteration.lower():
+        keys.append(f"{g}|amplification")
+    keys.append(f"{g}|mutation")
+    seen: set[str] = set()
+    out: list[str] = []
+    for k in keys:
+        for d in _CIVIC_EVIDENCE.get(k) or []:
+            name = parent_name(d)
+            if name and name not in seen:
+                seen.add(name)
+                out.append(name)
+                if len(out) >= 3:
+                    return out
+    return out
+
 
 def _qualifying_alterations(record: dict) -> list[tuple[str, str, str]]:
     """Return [(gene, protein_change, drug_matched)] for each (mutation, drug)
@@ -120,10 +165,19 @@ def run(cohort_path: str, out_path: str, limit: int | None = None) -> None:
         # alongside TP53 R175H still gets EGFR picked.
         top3: list[str] = []
         picked_gene = picked_variant = ""
+        # Build a map of gene -> any CNA alteration this patient has, so the
+        # CIViC lookup can use "amplification" when the only match is a CNA.
+        cna_for_gene: dict[str, str] = {}
+        for c in rec.get("cnas") or []:
+            cg = (c.get("gene") or c.get("g") or "").upper()
+            if cg:
+                cna_for_gene[cg] = c.get("alteration") or c.get("alt") or ""
         for gene, variant, _drug in quals:
-            if not variant:
+            if not variant and not cna_for_gene.get(gene):
                 continue
-            t3 = _rank_for_variant(gene, variant, rec.get("cancer_type") or "")
+            t3 = _rank_for_variant(gene, variant, rec.get("cancer_type") or "") if variant else []
+            if not t3:
+                t3 = _civic_top3(gene, variant, cna_for_gene.get(gene, ""))
             if t3:
                 top3 = t3
                 picked_gene, picked_variant = gene, variant
