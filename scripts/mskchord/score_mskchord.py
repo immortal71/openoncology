@@ -11,9 +11,9 @@ Two numbers, kept apart:
      received drug in its top 3 for the alteration we identified. Needs a
      results file with pipeline_top3 per patient.
 
-Fusion-only expectations are reported separately as UNEVALUABLE instead of
-being counted as misses, since MSK-CHORD's SV endpoint is not exposed in the
-fetch script yet.
+Fusion expectations are resolved against the per-patient fusion list pulled
+from MSK-CHORD's structural-variant endpoint; a drug whose fusion rule has
+no matching fusion counts as a miss.
 
 Usage:
     python scripts/mskchord/score_mskchord.py validation_results/msk_chord_targeted_cohort.json
@@ -59,9 +59,10 @@ def _label(record: dict) -> dict:
     """For each targeted drug the patient received, classify its match."""
     muts = [_normalize_alt(m) for m in (record.get("mutations") or [])]
     cnas = [_normalize_alt(c) for c in (record.get("cnas") or [])]
+    fusions = record.get("fusions") or []
     per_drug = []
     for drug in record.get("targeted_drugs") or []:
-        verdict, reasons = targeted_match(drug, muts, cnas)
+        verdict, reasons = targeted_match(drug, muts, cnas, fusions)
         per_drug.append({"drug": drug, "verdict": verdict, "reasons": reasons})
     # One patient-level verdict: hit > unevaluable > miss > unknown_drug.
     rank = {"hit": 0, "unevaluable": 1, "miss": 2, "unknown_drug": 3}
@@ -115,8 +116,9 @@ _DRUG_CLASSES: tuple[frozenset[str], ...] = (
     frozenset({"everolimus", "temsirolimus"}),
     frozenset({"imatinib", "sunitinib", "regorafenib", "avapritinib", "ripretinib"}),
     frozenset({"sotorasib", "adagrasib"}),
-    frozenset({"selpercatinib", "pralsetinib"}),
+    frozenset({"selpercatinib", "pralsetinib", "vandetanib", "cabozantinib"}),
     frozenset({"capmatinib", "tepotinib", "crizotinib", "cabozantinib", "tivozanib"}),
+    frozenset({"pazopanib", "sunitinib", "cabozantinib", "axitinib", "lenvatinib", "tivozanib", "sorafenib"}),
     frozenset({"larotrectinib", "entrectinib"}),
     frozenset({"ivosidenib", "enasidenib"}),
     frozenset({"vismodegib", "sonidegib"}),
@@ -181,7 +183,7 @@ def main() -> None:
     uneval = gt['verdicts'].get('unevaluable', 0)
     miss = gt['verdicts'].get('miss', 0)
     unk = gt['verdicts'].get('unknown_drug', 0)
-    print(f"  unevaluable (fusion-only; SV endpoint not pulled): {uneval}")
+    print(f"  unevaluable (no selecting alteration under label): {uneval}")
     print(f"  no qualifying alteration for any received drug: {miss}")
     print(f"  unknown drug in the targeted map: {unk}")
     print("  by cancer type:")

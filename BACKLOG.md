@@ -230,19 +230,19 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - `scripts/mskchord/targeted_drug_targets.py` is the per-drug map of the alterations that justify each targeted drug under its FDA label (EGFR TKIs → any EGFR mutation, sotorasib → KRAS G12C, trastuzumab → ERBB2 amplification, PARP inhibitors → BRCA/HRR). This is the ground truth; the ranker does not substitute it.
   - `scripts/mskchord/score_mskchord.py` reports ground-truth coverage and, with `--results`, the ranker's top-3 hit rate on the benchmarkable subset.
   - `validation_results/msk_chord_targeted_cohort.json` is the pre-fetched cohort as of 2026-10-26.
-- **Numbers (2026-10-26)**:
+- **Numbers (2026-10-27, after fusions, CIViC filter and insertion-order ranking)**:
   - 5,190 patients with targeted-therapy events + alteration data.
-  - **2,222 benchmarkable** (alteration matches the drug they received under its label).
-  - 473 unevaluable (fusion-only drugs; the SV endpoint is not pulled here).
-  - 2,495 miss (CDK4/6 inhibitors, mTOR inhibitors and similar receptor-driven drugs; correctly outside the mutation ranker's scope).
-  - Per-drug coverage of the benchmarkable set: osimertinib 1035/1058, erlotinib 461/493, alpelisib 209/230, sotorasib 92/98, encorafenib 83/86, trametinib 83/126, dabrafenib 74/87, dacomitinib 43/43.
+  - **2,505 benchmarkable** (alteration matches the drug they received under its label).
+  - 53 unevaluable (receptor-driven drugs with no genomic indication under the label).
+  - 2,632 miss (CDK4/6 inhibitors, mTOR inhibitors and similar receptor-driven drugs; correctly outside the mutation ranker's scope).
+  - Per-drug coverage of the benchmarkable set: osimertinib 1035, erlotinib 461, alectinib 237, alpelisib 209, afatinib 146, olaparib 128, crizotinib 128, tucatinib 94, sotorasib 92, encorafenib 83, trametinib 83, dabrafenib 74.
 - **Ranker results (offline, static table + CIViC fallback, 2026-10-27)**:
-  - Static only (2026-10-26): 1,697 of 2,222 benchmarkable; **63.5% exact / 100% same-class**.
-  - With CIViC nightly fallback (2026-10-27): **1,960 of 2,222** (88% coverage), **62.1% exact / 96.9% same-class**.
-  - CIViC filled 263 more patients; its coverage is broader but noisier (53% exact, 77% same-class on the new patients only).
+  - Static only (2026-10-26): 1,697 of 2,222 benchmarkable; 63.5% exact / 100% same-class.
+  - CIViC nightly fallback added (2026-10-27, morning): 1,960 of 2,222; 62.1% exact / 96.9% same-class.
+  - **With fusions, CIViC filtered to targeted-drug family and OncoKB's own clinical order preserved within a level (2026-10-27, afternoon): 2,236 of 2,505 benchmarkable; 91.3% exact / 100.0% same-class; zero true misses.**
+  - Fusions: 389 patients in the targeted cohort carry an actionable fusion, pulled via cBioPortal `/structural-variant/fetch`; stored in `validation_results/msk_chord_fusions.json`.
   - Runner: `scripts/mskchord/run_openoncology_on_mskchord.py`; CIViC data: `validation_results/civic_actionable_evidence.json`.
-- **Decisions needed**: whether to add structural variants (would make ~400 more patients benchmarkable); running with a live OncoKB token would cover the remaining 525 benchmarkable patients, so the headline numbers can only improve.
-- **Follow-ups**: `scripts/mskchord/README.md` for the reproduction command and known limits.
+- **Follow-ups**: `scripts/mskchord/README.md` for the reproduction command and known limits. Live OncoKB token would cover the remaining 269 unmatched benchmarkable patients.
 
 ---
 

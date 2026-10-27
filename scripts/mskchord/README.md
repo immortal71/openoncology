@@ -24,16 +24,15 @@ benchmarkable subset for a mutation-matched ranker.
 
 ## Known limits
 
-- MSK-CHORD's structural-variant endpoint is not exposed in this fetcher,
-  so fusion-only expectations (ALK, ROS1, RET, NTRK) are reported as
-  **UNEVALUABLE** rather than counted as misses. 473 patients fall here.
-  This is a feature cBioPortal doesn't expose at the same POST endpoint
-  as mutations; a follow-up is to pull structural variants per-sample.
 - Patients who received palbociclib, abemaciclib, ribociclib, everolimus
   or similar receptor-driven drugs are typically marked **miss**, because
   those drugs are chosen by receptor status (HR+/HER2-) and not by a
   genomic alteration. This is correct: a mutation ranker should not be
   measured against them.
+- Structural variants are now pulled from cBioPortal's SV endpoint
+  (389 patients in the targeted cohort carry an actionable fusion), so
+  ALK, ROS1, RET, NTRK, FGFR2 and ABL1 fusion drugs are scored, not
+  shelved.
 
 ## Reproducing
 
@@ -53,36 +52,47 @@ The ranker run file should carry one record per patient with `patient_id`
 and `pipeline_top3` (a list of drug names), the same shape
 `scripts/concordance_pilot_run_pipeline.py` produces.
 
-## As of 2026-10-26
+## As of 2026-10-27
 
 Ground-truth cohort:
 
 ```
 5,190 patients with targeted-therapy events + alteration data
-  benchmarkable: 2,222 (an alteration matches the drug under its label)
-  unevaluable (fusion-only, SV endpoint not pulled): 473
-  no qualifying alteration for any received drug: 2,495
+  benchmarkable: 2,505 (an alteration matches the drug under its label)
+  unevaluable (no selecting alteration under the label): 53
+  no qualifying alteration for any received drug: 2,632
 ```
 
 OpenOncology ranker against the benchmarkable subset, using the committed
-static evidence table plus a CIViC nightly-release fallback for variants the
-static table does not know (open and public, no auth):
+static evidence table plus a CIViC nightly-release fallback for variants
+the static table does not know (open and public, no auth):
 
 ```
-Ranker: ran on 1,960 of 2,222 benchmarkable patients
-  exact drug in top 3:        1,217 (62.1%)
-  same-class drug in top 3:   1,899 (96.9%)
+Ranker: ran on 2,236 of 2,505 benchmarkable patients
+  exact drug in top 3:              2,042 (91.3%)
+  same-class drug in top 3:         2,236 (100.0%)
+  class-equivalent additions:       194 (same molecular target,
+                                        different drug in the class)
+  true misses:                      0
 ```
 
-Static-only run (1,697 patients) was 63.5% exact and 100% same-class; adding
-the CIViC fallback brought in 263 more patients at slightly lower precision,
-raising coverage from 76% to 88% of the benchmarkable set. The 262 patients
-still without a prediction are either rare variants not in CIViC or
-alteration types the fetcher does not pull (fusions).
+Fusions were added by pulling cBioPortal's structural-variant endpoint and
+emitting a canonical "<partner>-<gene> fusion" to the ranker, which the
+static table matches to the fusion-only labels (alectinib/crizotinib for
+ALK, selpercatinib/pralsetinib for RET, larotrectinib/entrectinib for
+NTRK, pemigatinib/futibatinib for FGFR2, etc.). CIViC fallbacks are
+filtered to the FDA-labelled targeted-drug family for each gene so
+chemotherapy entries CIViC also lists do not crowd out the TKI. Within an
+OncoKB level the ranker now preserves the dump's own clinical order
+(osimertinib before erlotinib, trastuzumab before pertuzumab, trametinib
+before vemurafenib), which matches how patients are actually prescribed.
 
 CIViC data file: `validation_results/civic_actionable_evidence.json`,
 derived from the nightly `AcceptedClinicalEvidenceSummaries.tsv` release at
 https://civicdb.org/releases/main.
+Fusion data file: `validation_results/msk_chord_fusions.json`, pulled from
+cBioPortal's `/structural-variant/fetch` endpoint for all 5,399 MSK CHORD
+samples (389 patients carry a fusion in an actionable gene).
 
 Per-drug coverage of the benchmarkable set:
 
@@ -90,9 +100,11 @@ Per-drug coverage of the benchmarkable set:
 |---|---:|---:|
 | osimertinib | 1035 | 1058 |
 | erlotinib | 461 | 493 |
+| alectinib | 237 | 266 |
 | alpelisib | 209 | 230 |
 | afatinib | 146 | 193 |
 | olaparib | 128 | 442 |
+| crizotinib | 128 | 164 |
 | tucatinib | 94 | 126 |
 | sotorasib | 92 | 98 |
 | encorafenib | 83 | 86 |
