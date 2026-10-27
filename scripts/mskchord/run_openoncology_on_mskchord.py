@@ -158,6 +158,25 @@ def _qualifying_alterations(record: dict) -> list[tuple[str, str, str]]:
                 if qual_mut:
                     out.append((g_up, qual_mut[0].get("protein_change") or "", drug))
                     continue
+                # CNA path: a HER2 amplification or CDKN2A deep deletion is the
+                # justifying alteration on its own; emit a variant string the
+                # ranker will match against the amplification / deep-deletion key.
+                if matcher in ("amplification", "deep_deletion"):
+                    qual_cna = [
+                        c for c in cnas
+                        if (c.get("gene") or "").upper() == g_up
+                        and (
+                            (matcher == "amplification"
+                             and (c.get("alteration") or "").lower().startswith("amplif"))
+                            or (matcher == "deep_deletion"
+                                and "deep" in (c.get("alteration") or "").lower()
+                                and "del" in (c.get("alteration") or "").lower())
+                        )
+                    ]
+                    if qual_cna:
+                        variant = "amplification" if matcher == "amplification" else "deep deletion"
+                        out.append((g_up, variant, drug))
+                        continue
             # Fusion rule: emit a canonical "<partner-gene> fusion" / "<gene> fusion"
             # that the ranker will match in OncoKB/CIViC.
             qual_fus = [

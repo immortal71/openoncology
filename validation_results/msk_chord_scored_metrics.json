@@ -1,0 +1,55 @@
+{
+  "benchmarkable": 2505,
+  "ran_on": 2466,
+  "top1_exact": 1740,
+  "top1_class": 2454,
+  "top3_exact": 2094,
+  "top3_class": 2466,
+  "coverage_pct": 98.44311377245509,
+  "top1_exact_pct_ran_on": 70.55961070559611,
+  "top1_class_pct_ran_on": 99.51338199513383,
+  "top3_exact_pct_ran_on": 84.91484184914842,
+  "top3_class_pct_ran_on": 100.0,
+  "top3_exact_pct_fair": 83.59281437125749,
+  "top3_class_pct_fair": 98.44311377245509,
+  "oncokb_baseline": {
+    "ran_on": 2151,
+    "t3_exact": 1845,
+    "t3_class": 2151,
+    "t3_exact_pct_ran_on": 85.77405857740585,
+    "t3_exact_pct_fair": 73.65269461077844,
+    "t3_class_pct_fair": 85.86826347305389
+  },
+  "per_cancer": [
+    {
+      "cancer_type": "Non-Small Cell Lung Cancer",
+      "n": 1710,
+      "top3_exact": 1569,
+      "top3_class": 1710
+    },
+    {
+      "cancer_type": "Breast Cancer",
+      "n": 507,
+      "top3_exact": 325,
+      "top3_class": 507
+    },
+    {
+      "cancer_type": "Colorectal Cancer",
+      "n": 136,
+      "top3_exact": 92,
+      "top3_class": 136
+    },
+    {
+      "cancer_type": "Prostate Cancer",
+      "n": 69,
+      "top3_exact": 69,
+      "top3_class": 69
+    },
+    {
+      "cancer_type": "Pancreatic Cancer",
+      "n": 44,
+      "top3_exact": 39,
+      "top3_class": 44
+    }
+  ]
+}

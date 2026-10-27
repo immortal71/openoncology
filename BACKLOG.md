@@ -239,10 +239,14 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Ranker results (offline, static table + CIViC fallback, 2026-10-27)**:
   - Static only (2026-10-26): 1,697 of 2,222 benchmarkable; 63.5% exact / 100% same-class.
   - CIViC nightly fallback added (2026-10-27, morning): 1,960 of 2,222; 62.1% exact / 96.9% same-class.
-  - **With fusions, CIViC filtered to targeted-drug family and OncoKB's own clinical order preserved within a level (2026-10-27, afternoon): 2,236 of 2,505 benchmarkable; 91.3% exact / 100.0% same-class; zero true misses.**
+  - With fusions + CIViC target-filter + preserved OncoKB clinical order (2026-10-27, afternoon): 2,236 of 2,505 benchmarkable; 91.3% exact / 100.0% same-class on ran-on.
+  - **With CNA path (ERBB2 amplification, CDKN2A deep deletion) wired into the qualifying-alteration emitter (2026-10-27, evening): 2,466 of 2,505 benchmarkable (98.4% coverage); 84.9% top-3 exact / 100.0% top-3 same-class on ran-on; 70.6% top-1 exact / 99.5% top-1 same-class.**
+  - Head-to-head vs an OncoKB-only baseline (same scorer, same cohort, same qualifying-alteration logic, only the CIViC fallback stripped): coverage 85.9% → 98.4% (+12.6 pp); top-3 exact 73.7% → 83.6% (+9.9 pp); top-3 class 85.9% → 98.4% (+12.6 pp).
   - Fusions: 389 patients in the targeted cohort carry an actionable fusion, pulled via cBioPortal `/structural-variant/fetch`; stored in `validation_results/msk_chord_fusions.json`.
-  - Runner: `scripts/mskchord/run_openoncology_on_mskchord.py`; CIViC data: `validation_results/civic_actionable_evidence.json`.
-- **Follow-ups**: `scripts/mskchord/README.md` for the reproduction command and known limits. Live OncoKB token would cover the remaining 269 unmatched benchmarkable patients.
+  - Runner: `scripts/mskchord/run_openoncology_on_mskchord.py`; CIViC data: `validation_results/civic_actionable_evidence.json`; metrics dump: `validation_results/msk_chord_scored_metrics.json`.
+- **Preprint**: `preprints/msk_chord_benchmark.md` is a Research-Square-ready 3-page tech note describing the cohort, scorer, head-to-head and per-cancer breakdown. Not yet submitted.
+- **Known residual limit**: the ranker is not line-of-therapy aware. The 221 ERBB2-amp breast patients on later-line HER2 drugs (lapatinib, neratinib, tucatinib, trastuzumab emtansine) correctly match on class (100%) but miss on exact drug because OncoKB ranks trastuzumab/pertuzumab first. This is the chief driver of breast-cancer top-3 exact being 64% while class is 100%. A follow-up could rank by first-vs-later line.
+- **Follow-ups**: live OncoKB token would cover the remaining 39 unmatched benchmarkable patients (mostly rare TSC1/TSC2 missense).
 
 ---
 
