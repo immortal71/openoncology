@@ -1,0 +1,282 @@
+[
+  {
+    "type": "exact",
+    "pid": "P-0000036",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "ROS1",
+    "variant": "ROS1-SLC34A2 fusion",
+    "received": [
+      "CRIZOTINIB"
+    ],
+    "top3": [
+      "crizotinib",
+      "entrectinib",
+      "lorlatinib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000205",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "EGFR",
+    "variant": "L858R",
+    "received": [
+      "ERLOTINIB"
+    ],
+    "top3": [
+      "osimertinib",
+      "erlotinib",
+      "gefitinib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000289",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "MET",
+    "variant": "X1006_splice",
+    "received": [
+      "CRIZOTINIB"
+    ],
+    "top3": [
+      "capmatinib",
+      "tepotinib",
+      "crizotinib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000557",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "ALK",
+    "variant": "ALK-EML4 fusion",
+    "received": [
+      "ALECTINIB",
+      "CRIZOTINIB",
+      "ERLOTINIB"
+    ],
+    "top3": [
+      "alectinib",
+      "brigatinib",
+      "crizotinib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000584",
+    "cancer": "Breast Cancer",
+    "gene": "BRCA2",
+    "variant": "S1982Rfs*22",
+    "received": [
+      "OLAPARIB",
+      "PALBOCICLIB"
+    ],
+    "top3": [
+      "olaparib",
+      "niraparib",
+      "rucaparib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000830",
+    "cancer": "Breast Cancer",
+    "gene": "PIK3CA",
+    "variant": "H1047L",
+    "received": [
+      "ALPELISIB",
+      "PALBOCICLIB"
+    ],
+    "top3": [
+      "alpelisib",
+      "inavolisib",
+      "capivasertib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0000933",
+    "cancer": "Colorectal Cancer",
+    "gene": "BRAF",
+    "variant": "G469A",
+    "received": [
+      "DABRAFENIB",
+      "TRAMETINIB"
+    ],
+    "top3": [
+      "trametinib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0002079",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "MTOR",
+    "variant": "L2383F",
+    "received": [
+      "EVEROLIMUS"
+    ],
+    "top3": [
+      "everolimus"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0002273",
+    "cancer": "Prostate Cancer",
+    "gene": "ATM",
+    "variant": "C633fs",
+    "received": [
+      "OLAPARIB"
+    ],
+    "top3": [
+      "olaparib",
+      "rucaparib",
+      "niraparib"
+    ]
+  },
+  {
+    "type": "exact",
+    "pid": "P-0002382",
+    "cancer": "Prostate Cancer",
+    "gene": "BRCA1",
+    "variant": "X71_splice",
+    "received": [
+      "OLAPARIB"
+    ],
+    "top3": [
+      "olaparib",
+      "niraparib",
+      "rucaparib"
+    ]
+  },
+  {
+    "type": "class_only",
+    "pid": "P-0000058",
+    "cancer": "Breast Cancer",
+    "gene": "ERBB2",
+    "variant": "Amplification",
+    "received": [
+      "ABEMACICLIB",
+      "LAPATINIB"
+    ],
+    "top3": [
+      "trastuzumab",
+      "trastuzumab deruxtecan",
+      "pertuzumab"
+    ]
+  },
+  {
+    "type": "class_only",
+    "pid": "P-0000165",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "EGFR",
+    "variant": "L861Q",
+    "received": [
+      "ERLOTINIB"
+    ],
+    "top3": [
+      "afatinib",
+      "osimertinib"
+    ]
+  },
+  {
+    "type": "class_only",
+    "pid": "P-0000208",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "RET",
+    "variant": "KIF5B-RET fusion",
+    "received": [
+      "CABOZANTINIB"
+    ],
+    "top3": [
+      "selpercatinib",
+      "pralsetinib",
+      "vandetanib"
+    ]
+  },
+  {
+    "type": "class_only",
+    "pid": "P-0000616",
+    "cancer": "Colorectal Cancer",
+    "gene": "BRAF",
+    "variant": "V600E",
+    "received": [
+      "VEMURAFENIB"
+    ],
+    "top3": [
+      "encorafenib",
+      "binimetinib",
+      "cetuximab"
+    ]
+  },
+  {
+    "type": "class_only",
+    "pid": "P-0007076",
+    "cancer": "Pancreatic Cancer",
+    "gene": "KIT",
+    "variant": "S239F",
+    "received": [
+      "SUNITINIB"
+    ],
+    "top3": [
+      "imatinib"
+    ]
+  },
+  {
+    "type": "drop_out",
+    "pid": "P-0000731",
+    "cancer": "Non-Small Cell Lung Cancer",
+    "gene": "MET",
+    "variant": "S204Ifs*12",
+    "received": [
+      "CRIZOTINIB"
+    ],
+    "top3": []
+  },
+  {
+    "type": "drop_out",
+    "pid": "P-0001313",
+    "cancer": "Pancreatic Cancer",
+    "gene": "TSC1",
+    "variant": "T578S",
+    "received": [
+      "EVEROLIMUS"
+    ],
+    "top3": []
+  },
+  {
+    "type": "drop_out",
+    "pid": "P-0001372",
+    "cancer": "Breast Cancer",
+    "gene": "TSC2",
+    "variant": "A289V",
+    "received": [
+      "EVEROLIMUS"
+    ],
+    "top3": []
+  },
+  {
+    "type": "drop_out",
+    "pid": "P-0007997",
+    "cancer": "Colorectal Cancer",
+    "gene": "BRAF",
+    "variant": "P403Lfs*8",
+    "received": [
+      "DABRAFENIB",
+      "TRAMETINIB"
+    ],
+    "top3": []
+  },
+  {
+    "type": "drop_out",
+    "pid": "P-0030800",
+    "cancer": "Breast Cancer",
+    "gene": "CDK6",
+    "variant": "R46Q",
+    "received": [
+      "PALBOCICLIB"
+    ],
+    "top3": []
+  }
+]

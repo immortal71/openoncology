@@ -65,15 +65,25 @@ Ground-truth cohort:
 
 OpenOncology ranker against the benchmarkable subset, using the committed
 static evidence table plus a CIViC nightly-release fallback for variants
-the static table does not know (open and public, no auth):
+the static table does not know (open and public, no auth), with CNA and
+fusion lookups wired into the qualifying-alteration path:
 
 ```
-Ranker: ran on 2,236 of 2,505 benchmarkable patients
-  exact drug in top 3:              2,042 (91.3%)
-  same-class drug in top 3:         2,236 (100.0%)
-  class-equivalent additions:       194 (same molecular target,
-                                        different drug in the class)
+Ranker: ran on 2,466 of 2,505 benchmarkable patients (98.4% coverage)
+  top-1 exact drug matched:         1,740 (70.6%)
+  top-1 same-class:                 2,454 (99.5%)
+  top-3 exact drug in top three:    2,094 (84.9%)
+  top-3 same-class in top three:    2,466 (100.0%)
+  fair-bound top-3 exact
+    (counting 39 no-prediction as misses):  83.6%
   true misses:                      0
+
+Head-to-head vs an OncoKB-only baseline (ranker with CIViC fallback and
+target-class filtering stripped out), scored on the same 2,505 benchmarkable
+patients:
+  coverage        OncoKB-only  85.9%   OpenOncology  98.4%   lift +12.6 pp
+  top-3 exact     OncoKB-only  73.7%   OpenOncology  83.6%   lift  +9.9 pp
+  top-3 class     OncoKB-only  85.9%   OpenOncology  98.4%   lift +12.6 pp
 ```
 
 Fusions were added by pulling cBioPortal's structural-variant endpoint and
