@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenOncology on 2,505 real cancer patients</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14202b;--mute:#5b6773;--line:#e2e6ea;--bg:#f7f6f2;--card:#fff;--acc:#0f6e5c;--acc2:#c2552d;--soft:#e6f2ee;--warn:#fbeee6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:40px 24px 64px}
+.kick{font:500 12px "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+h1{font:600 clamp(28px,4vw,40px)/1.15 "IBM Plex Serif",serif;margin:8px 0 12px;max-width:780px}
+.lede{color:var(--mute);max-width:720px;font-size:16.5px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:28px 0 10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.stat b{display:block;font:600 34px/1 "IBM Plex Serif",serif;color:var(--ink)}
+.stat span{display:block;color:var(--mute);font-size:13px;margin-top:8px}
+.stat.hi b{color:var(--acc)}
+.h2h{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0 34px}
+.h2h h2,.sec h2{font:600 19px "IBM Plex Serif",serif;margin:0 0 4px}
+.h2h p{color:var(--mute);margin:0 0 16px;font-size:14px}
+.row{display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:center;margin:10px 0}
+.row .lab{font-size:14px}
+.bars div{height:22px;border-radius:5px;display:flex;align-items:center;padding:0 8px;font:500 12px "IBM Plex Mono",monospace;margin:3px 0;white-space:nowrap}
+.b1{background:#dfe3e7;color:var(--ink)}.b2{background:var(--acc);color:#fff}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--mute);margin-top:12px}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 13px;font:500 13px "IBM Plex Sans";cursor:pointer;color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.case{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.case .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.pid{font:400 12px "IBM Plex Mono",monospace;color:var(--mute)}
+.tag{font:500 11px "IBM Plex Mono",monospace;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.tag.exact{background:var(--soft);color:var(--acc)}.tag.class{background:var(--warn);color:var(--acc2)}
+.ca{font-weight:600;margin:6px 0 2px}.var{font:500 14px "IBM Plex Mono",monospace;color:var(--ink)}
+.lbl{font-size:12px;color:var(--mute);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+ol{margin:0;padding:0;list-style:none}ol li{display:flex;justify-content:space-between;gap:8px;padding:6px 8px;border-radius:6px;font-size:14px}
+ol li:nth-child(odd){background:#f6f7f8}ol li.m{background:var(--soft);font-weight:600}
+ol li em{font:400 12px "IBM Plex Mono",monospace;font-style:normal;color:var(--mute)}
+.rec{font-size:14px}
+.sec{margin-top:40px}.sec p{color:var(--mute);max-width:760px}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--mute);font-size:13px}
+a{color:var(--acc)}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<div class="kick">OpenOncology · retrospective benchmark</div>
+<h1>Which drug would it suggest? Checked against what 2,505 real patients received.</h1>
+<p class="lede">OpenOncology reads a tumor's mutations, copy number changes and gene fusions and ranks the targeted drugs that have evidence for them. We ran it on every patient in Memorial Sloan Kettering's public MSK CHORD cohort (Nature 2024) whose targeted drug matched their tumor under its FDA label, and compared its top three to the drug they were actually given.</p>
+<div class="stats">
+<div class="stat"><b>2,505</b><span>benchmarkable patients, from 5,190 who received a targeted drug</span></div>
+<div class="stat"><b>98.4%</b><span>got a prediction (2,466 patients)</span></div>
+<div class="stat hi"><b>100%</b><span>right drug class in the top three, of those scored</span></div>
+<div class="stat hi"><b>84.9%</b><span>exact drug received in the top three</span></div>
+<div class="stat"><b>70.6%</b><span>exact drug ranked first</span></div>
+</div>
+<div class="h2h"><h2>Combining sources beats one source</h2>
+<p>Same ranker, same 2,505 patients, using OncoKB data alone versus combined with CIViC. Percent of all 2,505.</p>
+<div id="bars"></div>
+<div class="legend"><span><i style="background:#dfe3e7"></i>OncoKB data only</span><span><i style="background:var(--acc)"></i>OpenOncology</span></div></div>
+<div class="sec" style="margin-top:0"><h2>Real cases from the run</h2>
+<p>Each card is one de-identified MSK CHORD patient: the alteration that qualified them, the drug they received, and OpenOncology's top three with the evidence level behind each drug. Green rows match the drug received. "Same class" cases picked a drug of the right class, but not the one the patient got.</p></div>
+<div class="controls" id="f1"></div><div class="controls" id="f2" style="margin-top:-8px"></div>
+<div class="grid" id="grid"></div>
+<div class="sec"><h2>What this does and does not show</h2>
+<p>It measures agreement with what a leading cancer centre prescribed under the FDA label. It does not prove the best treatment for any patient. It is retrospective, on a US cohort, and the ranker does not yet account for line of therapy, which explains most breast cancer misses: patients given a later-line HER2 drug after trastuzumab. An oncologist reviews every result. Not for treatment decisions.</p></div>
+<footer>Code, cohort filter, scorer and both runs: <a href="https://github.com/immortal71/openoncology/tree/main/scripts/mskchord">github.com/immortal71/openoncology</a> · Data: MSK CHORD via cBioPortal (Jee et al., Nature 2024, <a href="https://doi.org/10.1038/s41586-024-08167-5">doi:10.1038/s41586-024-08167-5</a>) · Evidence: OncoKB levels, CIViC · Built by Aashish Kharel, Kathmandu</footer>
+</div>
+<script>
+const CASES=[{"pid": "P-0045468", "cancer": "Non-Small Cell Lung Cancer", "gene": "EGFR", "variant": "L861Q", "received": ["osimertinib"], "top3": [{"drug": "afatinib", "level": "Level 2"}, {"drug": "osimertinib", "level": "Level 2"}], "status": "exact"}, {"pid": "P-0017941", "cancer": "Breast Cancer", "gene": "PIK3CA", "variant": "E545K", "received": ["alpelisib", "palbociclib"], "top3": [{"drug": "alpelisib", "level": "Level 1"}, {"drug": "inavolisib", "level": "Level 1"}, {"drug": "capivasertib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0034850", "cancer": "Breast Cancer", "gene": "ERBB2", "variant": "amplification", "received": ["tucatinib"], "top3": [{"drug": "trastuzumab", "level": "Level 1"}, {"drug": "trastuzumab deruxtecan", "level": "Level 1"}, {"drug": "pertuzumab", "level": "Level 1"}], "status": "class"}, {"pid": "P-0005321", "cancer": "Non-Small Cell Lung Cancer", "gene": "ALK", "variant": "ALK-EML4 fusion", "received": ["alectinib"], "top3": [{"drug": "alectinib", "level": "Level 1"}, {"drug": "brigatinib", "level": "Level 1"}, {"drug": "crizotinib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0004743", "cancer": "Non-Small Cell Lung Cancer", "gene": "EGFR", "variant": "L747_A750delinsP", "received": ["afatinib"], "top3": [{"drug": "osimertinib", "level": "Level 1"}, {"drug": "erlotinib", "level": "Level 1"}, {"drug": "gefitinib", "level": "Level 1"}], "status": "class"}, {"pid": "P-0072998", "cancer": "Non-Small Cell Lung Cancer", "gene": "KRAS", "variant": "G12C", "received": ["sotorasib"], "top3": [{"drug": "sotorasib", "level": "Level 1"}, {"drug": "adagrasib", "level": "Level 1"}, {"drug": "divarasib", "level": "Level 3A"}], "status": "exact"}, {"pid": "P-0031522", "cancer": "Colorectal Cancer", "gene": "BRAF", "variant": "V600E", "received": ["encorafenib"], "top3": [{"drug": "encorafenib", "level": "Level 1"}, {"drug": "binimetinib", "level": "Level 1"}, {"drug": "cetuximab", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0049640", "cancer": "Non-Small Cell Lung Cancer", "gene": "ROS1", "variant": "CD74-ROS1 fusion", "received": ["crizotinib", "entrectinib", "lorlatinib"], "top3": [{"drug": "crizotinib", "level": "Level 1"}, {"drug": "entrectinib", "level": "Level 1"}, {"drug": "lorlatinib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0036746", "cancer": "Non-Small Cell Lung Cancer", "gene": "MET", "variant": "X963_splice", "received": ["cabozantinib", "crizotinib", "tepotinib"], "top3": [{"drug": "capmatinib", "level": "Level 1"}, {"drug": "tepotinib", "level": "Level 1"}, {"drug": "crizotinib", "level": "Level 2"}], "status": "exact"}, {"pid": "P-0005897", "cancer": "Non-Small Cell Lung Cancer", "gene": "BRAF", "variant": "V600E", "received": ["dabrafenib", "trametinib"], "top3": [{"drug": "trametinib", "level": "Level 1"}, {"drug": "encorafenib", "level": "Level 1"}, {"drug": "binimetinib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0049369", "cancer": "Breast Cancer", "gene": "CDKN2A", "variant": "deep deletion", "received": ["palbociclib"], "top3": [{"drug": "palbociclib", "level": "Level 3"}], "status": "exact"}, {"pid": "P-0019782", "cancer": "Prostate Cancer", "gene": "BRCA2", "variant": "X2479_splice", "received": ["rucaparib"], "top3": [{"drug": "olaparib", "level": "Level 1"}, {"drug": "niraparib", "level": "Level 1"}, {"drug": "rucaparib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0001424", "cancer": "Colorectal Cancer", "gene": "BRAF", "variant": "V600E", "received": ["dabrafenib", "trametinib"], "top3": [{"drug": "encorafenib", "level": "Level 1"}, {"drug": "binimetinib", "level": "Level 1"}, {"drug": "cetuximab", "level": "Level 1"}], "status": "class"}, {"pid": "P-0021879", "cancer": "Non-Small Cell Lung Cancer", "gene": "RET", "variant": "KIF5B-RET fusion", "received": ["selpercatinib"], "top3": [{"drug": "selpercatinib", "level": "Level 1"}, {"drug": "pralsetinib", "level": "Level 1"}, {"drug": "vandetanib", "level": "Level 2"}], "status": "exact"}, {"pid": "P-0049763", "cancer": "Pancreatic Cancer", "gene": "BRCA2", "variant": "P1088Lfs*16", "received": ["olaparib"], "top3": [{"drug": "olaparib", "level": "Level 1"}, {"drug": "niraparib", "level": "Level 1"}, {"drug": "rucaparib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0060393", "cancer": "Breast Cancer", "gene": "BRCA2", "variant": "S942Ffs*12", "received": ["olaparib"], "top3": [{"drug": "olaparib", "level": "Level 1"}, {"drug": "niraparib", "level": "Level 1"}, {"drug": "rucaparib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0009989", "cancer": "Prostate Cancer", "gene": "ATM", "variant": "C2835F", "received": ["olaparib"], "top3": [{"drug": "olaparib", "level": "CIViC"}, {"drug": "rucaparib", "level": "CIViC"}], "status": "exact"}, {"pid": "P-0017311", "cancer": "Breast Cancer", "gene": "BRCA1", "variant": "X1778_splice", "received": ["olaparib"], "top3": [{"drug": "olaparib", "level": "Level 1"}, {"drug": "niraparib", "level": "Level 1"}, {"drug": "rucaparib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0000252", "cancer": "Non-Small Cell Lung Cancer", "gene": "RET", "variant": "CUBN-RET fusion", "received": ["cabozantinib"], "top3": [{"drug": "selpercatinib", "level": "Level 1"}, {"drug": "pralsetinib", "level": "Level 1"}, {"drug": "vandetanib", "level": "Level 2"}], "status": "class"}, {"pid": "P-0061028", "cancer": "Breast Cancer", "gene": "MTOR", "variant": "X2456_splice", "received": ["everolimus", "palbociclib"], "top3": [{"drug": "everolimus", "level": "CIViC"}], "status": "exact"}, {"pid": "P-0086553", "cancer": "Breast Cancer", "gene": "CDKN2A", "variant": "deep deletion", "received": ["abemaciclib"], "top3": [{"drug": "palbociclib", "level": "Level 3"}], "status": "class"}, {"pid": "P-0002382", "cancer": "Prostate Cancer", "gene": "BRCA1", "variant": "X71_splice", "received": ["olaparib"], "top3": [{"drug": "olaparib", "level": "Level 1"}, {"drug": "niraparib", "level": "Level 1"}, {"drug": "rucaparib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0086434", "cancer": "Pancreatic Cancer", "gene": "BRAF", "variant": "V600E", "received": ["dabrafenib", "trametinib"], "top3": [{"drug": "trametinib", "level": "Level 1"}, {"drug": "encorafenib", "level": "Level 1"}, {"drug": "binimetinib", "level": "Level 1"}], "status": "exact"}, {"pid": "P-0055839", "cancer": "Colorectal Cancer", "gene": "PDGFRA", "variant": "S1042T", "received": ["regorafenib"], "top3": [{"drug": "imatinib", "level": "CIViC"}], "status": "class"}];
+const H2H=[["Patients with a prediction",85.9,98.4],["Exact drug in top three",73.7,83.6],["Same class in top three",85.9,98.4]];
+document.getElementById('bars').innerHTML=H2H.map(([l,a,b])=>`<div class="row"><div class="lab">${l}</div><div class="bars"><div class="b1" style="width:${a}%">${a}%</div><div class="b2" style="width:${b}%">${b}%</div></div></div>`).join('');
+const short=c=>c.replace(' Cancer','').replace('Non-Small Cell Lung','Lung (NSCLC)');
+let fc='All',fs='All';
+const cancers=['All',...new Set(CASES.map(c=>short(c.cancer)))];
+function chips(id,opts,get,set,labels){const el=document.getElementById(id);el.innerHTML=opts.map(o=>`<button class="chip" aria-pressed="${o===get()}" data-v="${o}">${labels?labels[o]:o}</button>`).join('');el.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(!v)return;set(v);render()}}
+function render(){chips('f1',cancers,()=>fc,v=>fc=v);chips('f2',['All','exact','class'],()=>fs,v=>fs=v,{All:'All outcomes',exact:'Exact match',class:'Same class only'});
+const list=CASES.filter(c=>(fc==='All'||short(c.cancer)===fc)&&(fs==='All'||c.status===fs));
+document.getElementById('grid').innerHTML=list.map(c=>`<div class="case"><div class="top"><span class="pid">${c.pid}</span><span class="tag ${c.status}">${c.status==='exact'?'Exact match':'Same class'}</span></div>
+<div class="ca">${short(c.cancer)} · ${c.gene}</div><div class="var">${c.variant}</div>
+<div class="lbl">Received</div><div class="rec">${c.received.join(' + ')}</div>
+<div class="lbl">OpenOncology top three</div><ol>${c.top3.map(t=>`<li class="${c.received.includes(t.drug.toLowerCase())?'m':''}"><span>${t.drug}</span><em>${t.level}</em></li>`).join('')}</ol></div>`).join('')||'<p>No cases for this filter.</p>'}
+render();
+</script></body></html>
