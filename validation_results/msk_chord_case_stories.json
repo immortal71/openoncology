@@ -1,0 +1,253 @@
+{
+  "drop_out_summary": {
+    "count": 269,
+    "top_genes": {},
+    "top_variant_classes": {},
+    "examples": []
+  },
+  "fusion_wins": {
+    "count": 295,
+    "examples": [
+      {
+        "pid": "P-0000036",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-SLC34A2",
+        "ev": "Antisense fusion",
+        "drug": "crizotinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0000289",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "TACC3-FGFR3",
+        "ev": "Protein fusion: mid-exon (FGFR3-TACC3)",
+        "drug": "crizotinib",
+        "top3": [
+          "capmatinib",
+          "tepotinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0000557",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "erlotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0000732",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0000840",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-CD74",
+        "ev": "Protein fusion: in frame (CD74-ROS1)",
+        "drug": "lorlatinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0001437",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-CD74",
+        "ev": "Protein fusion: out of frame (CD74-ROS1)",
+        "drug": "crizotinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0001532",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "lorlatinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0001811",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0001840",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "SDC4-ROS1",
+        "ev": "Protein fusion: in frame (SDC4-ROS1)",
+        "drug": "crizotinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0002117",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "CLIP4-ALK",
+        "ev": "Antisense fusion",
+        "drug": "erlotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0002613",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0002707",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-CD74",
+        "ev": "Protein fusion: in frame (ROS1-CD74)",
+        "drug": "cabozantinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0002877",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-CD74",
+        "ev": "Protein fusion: in frame (CD74-ROS1)",
+        "drug": "crizotinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0002890",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "PBDC1-FGFR3",
+        "ev": "FGFR3-CXorf26 fusion",
+        "drug": "erlotinib",
+        "top3": [
+          "osimertinib",
+          "erlotinib",
+          "gefitinib"
+        ]
+      },
+      {
+        "pid": "P-0002912",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ROS1-CD74",
+        "ev": "Protein fusion: in frame (ROS1-CD74)",
+        "drug": "crizotinib",
+        "top3": [
+          "crizotinib",
+          "entrectinib",
+          "lorlatinib"
+        ]
+      },
+      {
+        "pid": "P-0003206",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: mid-exon (EML4-ALK)",
+        "drug": "brigatinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0003297",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "brigatinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0003383",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0003446",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      },
+      {
+        "pid": "P-0003913",
+        "cancer": "Non-Small Cell Lung Cancer",
+        "fusion": "ALK-EML4",
+        "ev": "Protein fusion: in frame (EML4-ALK)",
+        "drug": "crizotinib",
+        "top3": [
+          "alectinib",
+          "brigatinib",
+          "crizotinib"
+        ]
+      }
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 # OpenOncology
 
-**Free AI-powered personalized cancer drug analysis — no insurance, no subscription, no gatekeeping.**
+**An open-source tumor board: it reads a tumor's mutations and ranks the targeted drugs with evidence for them, with the source shown for every drug.**
 
 <p>
   <a href="https://github.com/immortal71/openoncology/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"/></a>
@@ -19,7 +19,6 @@
   <img src="https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11"/>
   <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 15"/>
   <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/HIPAA-Compliant-6366f1?style=for-the-badge" alt="HIPAA Compliant"/>
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready"/>
   <img src="https://img.shields.io/badge/Hard%20Gate%20P@3-0.822-22c55e?style=for-the-badge" alt="Hard Gate P@3 0.822"/>
 </p>
@@ -30,7 +29,21 @@
 
 ## What is OpenOncology?
 
-OpenOncology is a free, open-source AI platform that analyses a patient's cancer mutation profile and returns a ranked list of approved drugs, repurposing candidates, and — when no match exists — a custom drug discovery brief generated from live ChEMBL and OpenTargets evidence. Designed for patients and oncologists who cannot access expensive genomic advisory services, everything runs self-hosted under an MIT licence with no API key required for core functionality. Custom drug leads are automatically published to a pharma marketplace where manufacturers bid on synthesis, and an integrated crowdfunding module removes cost as a barrier when needed.
+OpenOncology reads a tumor's genetic report (mutations, copy number changes and gene fusions) and returns the targeted drugs that have evidence for them, ranked, with the evidence level and source next to each drug. It combines open knowledge bases (OncoKB levels, CIViC, ClinVar) and ranks the drugs for a whole patient at once, so a hospital without a molecular tumor board can see the same evidence a board would. It is a research and decision-support tool: an oncologist reviews every result. The code is MIT licensed and runs on the hospital's own servers.
+
+## Benchmark on real patients (MSK CHORD)
+
+Tested on the MSK CHORD cohort (Memorial Sloan Kettering, Nature 2024). Of 5,190 patients who received a targeted drug, 2,505 had an alteration that matches that drug under its FDA label. On those 2,505:
+
+| Metric | OncoKB data only | OpenOncology |
+|:--|--:|--:|
+| Patients with a prediction | 85.9% | 98.4% |
+| Exact drug the patient received, in top three | 73.7% | 83.6% |
+| Same drug class, in top three | 85.9% | 98.4% |
+
+Among the 2,466 patients it made a prediction for: same class in top three 100%, exact drug in top three 84.9%, exact drug at rank one 70.6%. Limits: this measures agreement with FDA labels, not proof of the best treatment; it is retrospective, on a US cohort, and does not model line of therapy. Reproduce it with [`scripts/mskchord/`](scripts/mskchord/README.md). An earlier 100% oncologist-agreement figure was circular and has been retracted: see [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).
+
+> The repository also contains experimental modules (custom drug discovery briefs, a pharma marketplace and a crowdfunding module). They are research prototypes, are not part of the benchmark, and are not offered to patients.
 
 ---
 
@@ -41,31 +54,6 @@ OpenOncology is a free, open-source AI platform that analyses a patient's cancer
 > **Oncologist review is required before any treatment decision.** This platform surfaces evidence to support a molecular tumour board conversation — it does not replace one. Results should be treated as a structured evidence summary, not a prescription.
 >
 > This software has not been submitted for FDA clearance or CE marking. It is not a registered clinical decision support system.
-
----
-
-## Patient Journey
-
-```mermaid
-flowchart TD
-    A(["🧬 Patient submits sample\nBiopsy + germline DNA test"]) --> B
-    B["⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT"]
-    B --> C{Targeted mutation found?}
-    C -- No --> D(["👨‍⚕️ General medicine"])
-    C -- Yes --> E["🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL"]
-    C -- Yes --> F(["💊 General medicine\nin the meantime"])
-    E --> G{"Existing drug near-match?\nDrug repurposing search"}
-    G -- Yes --> H(["✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment"])
-    H --> M(["🏥 Patient receives treatment"])
-    G -- No --> I["🧪 Option 2: Custom drug discovery\nPlatform builds target brief from OpenTargets + ChEMBL"]
-    I --> I2["🔬 Discovery brief generated\nLead molecules · Ro5 scoring · AlphaFold structure"]
-    I2 --> J["🏭 Pharma marketplace\nManufacturers receive brief and bid on synthesis"]
-    J --> N{Can patient afford it?}
-    N -- Yes --> K(["🔬 Custom medicine manufactured\nPatient-specific mutation"])
-    N -- No --> L(["❤️ Crowdfund module\nRaise funds for custom drug"])
-    L --> K
-    K --> M
-```
 
 ---
 
@@ -146,7 +134,7 @@ graph TB
     subgraph Gateway["⚙️ API Gateway"]
         API["FastAPI<br/>12 route modules · JWT auth"]
         RL["Rate Limiter<br/>SlowAPI · Redis-backed"]
-        AUDIT["HIPAA Audit Log<br/>every PHI access"]
+        AUDIT["Audit log<br/>every PHI access"]
     end
 
     subgraph Workers["🔄 Celery Workers"]
@@ -312,10 +300,10 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Ranking** | DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Phase 10% |
 | **Custom drug discovery** | Target-specific discovery brief · ChEMBL lead molecules · Ro5 oral-exposure scoring · scaffold/fragment library · medicinal-chemistry handoff notes |
 | **Custom drug worker** | Async Celery worker · AlphaFold mutation-structure generation · DrugRequest job status polling |
-| **Marketplace** | Stripe Connect Express — pharma KYC, competitive bids, escrow, automatic payout |
-| **Crowdfunding** | Milestone webhooks at 25/50/75/100% · Stripe Elements · direct transfer to pharma |
+| **Marketplace (experimental)** | Stripe Connect Express prototype, not offered to users |
+| **Crowdfunding (experimental)** | Stripe Elements prototype, not offered to users |
 | **Auth & access** | Keycloak OIDC/OAuth2 · roles: patient · oncologist · admin |
-| **Compliance** | HIPAA §164.308/310/312 · GDPR Art. 17 erasure + Art. 20 export · audit middleware |
+| **Privacy controls** | Audit logging, data erasure and export endpoints, designed with HIPAA and GDPR in mind (not certified) |
 | **Security CI** | Weekly: pip-audit · npm audit · Bandit · Semgrep OWASP · ZAP baseline · Trivy |
 
 ---
@@ -330,7 +318,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | [docs/REPURPOSING_ALGORITHM.md](docs/REPURPOSING_ALGORITHM.md) | Repurposing scoring, comparison with DGIdb / DrugBank / OpenTargets |
 | [docs/BENCHMARK.md](docs/BENCHMARK.md) | Pre-paper vs post-paper benchmark split, metric definitions, change log |
 | [docs/METHODS.md](docs/METHODS.md) | Full scientific methods |
-| [docs/HIPAA_COMPLIANCE.md](docs/HIPAA_COMPLIANCE.md) | HIPAA §164 implementation details |
+| [docs/HIPAA_COMPLIANCE.md](docs/HIPAA_COMPLIANCE.md) | Privacy controls mapped to HIPAA §164 (not a certification) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to add evidence, run benchmarks, submit PRs |
 
 ---
@@ -359,8 +347,8 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Phase 1** | ✅ | Infrastructure · FastAPI · Next.js · Nextflow pipeline |
 | **Phase 2** | ✅ | Real mutation detection · OncoKB/ClinVar/CIViC · Oncologist portal |
 | **Phase 3** | ✅ | AlphaMissense · AlphaFold · DiffDock · Drug ranking algorithm |
-| **Phase 4** | ✅ | Pharma marketplace · Stripe Connect · Crowdfunding module |
-| **Phase 5** | ✅ | Kubernetes/Helm deploy · HIPAA/GDPR compliance · Security CI |
+| **Phase 4** | 🧪 | Experimental: pharma marketplace and crowdfunding prototypes |
+| **Phase 5** | ✅ | Kubernetes/Helm deploy · privacy controls · Security CI |
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
 | **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
 | **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
@@ -376,7 +364,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Authentication** | Keycloak OIDC/OAuth2 · Role-based: `patient` · `oncologist` · `admin` |
 | **Encryption in transit** | TLS 1.3 enforced · HSTS headers in production ingress |
 | **Encryption at rest** | AES-256 on MinIO · PostgreSQL WAL encrypted |
-| **HIPAA Audit Logging** | `AuditMiddleware` logs every PHI access: user, path, IP, duration |
+| **Audit logging** | `AuditMiddleware` logs every PHI access: user, path, IP, duration |
 | **Rate Limiting** | Redis-backed SlowAPI (120 req/min · strict limits on auth + upload) |
 | **GDPR Compliance** | `GET /api/me/export` (Art. 20) · `DELETE /api/me` cascade erasure (Art. 17) |
 | **Automated Security Scanning** | Weekly CI: `pip-audit` · `npm audit` · Bandit SAST · Semgrep OWASP · ZAP baseline · Trivy |
