@@ -4,7 +4,7 @@
 Independent researcher, Kathmandu, Nepal <br>
 aashish@oncopurpose.com · ORCID 0009-0001-1785-8228 · github.com/immortal71/openoncology
 
-**Date:** 2026-10-27 · **Version:** v1 · **Status:** preprint, not peer reviewed
+**Date:** 2026-11-01 · **Version:** v1 · **Status:** preprint, not peer reviewed
 
 ## Abstract
 
@@ -68,7 +68,7 @@ As a lower bound counting the 39 benchmarkable patients with no prediction as mi
 | Prostate Cancer | 69 | 100.0 % | 100.0 % |
 | Pancreatic Cancer | 44 | 88.6 % | 100.0 % |
 
-Breast cancer top-3 exact looks low beside its 100 % class rate. The reason is specific: 221 of the 507 breast-cancer patients received a later-line HER2 agent (lapatinib, neratinib, tucatinib, or ado-trastuzumab emtansine) for ERBB2-amplified tumors, after progressing on trastuzumab. OncoKB ranks trastuzumab, pertuzumab and trastuzumab-deruxtecan first for ERBB2 amplification, so our top three is clinically correct for a first-line decision but does not match the drug a progression patient actually received. The ranker is not currently line-of-therapy aware. Colorectal is weaker for a related reason: encorafenib + cetuximab is prescribed as a pair, and the ranker surfaces a BRAF inhibitor without the partner.
+Breast cancer top-3 exact looks low beside its 100 % class rate. The reason is specific: 180 of the 507 scored breast-cancer patients are ERBB2-amplified patients whose label-matched drug was a later-line HER2 agent (lapatinib, neratinib, tucatinib, or ado-trastuzumab emtansine), and these account for 170 of the 182 breast exact misses. OncoKB ranks trastuzumab, pertuzumab and trastuzumab deruxtecan first for ERBB2 amplification, so our top three fits a first-line decision but not the drug given after progression. The ranker is not currently line-of-therapy aware. Colorectal shows a related time effect: 28 of the 44 colorectal exact misses are BRAF-mutant patients who received dabrafenib with trametinib, vemurafenib, or cobimetinib with vemurafenib, while the ranker returns encorafenib with binimetinib and cetuximab, the regimen on the current label. A further 5 are PDGFRA patients who received regorafenib, which is not selected by a PDGFRA alteration.
 
 ### 3.3 Head-to-head: ranker versus OncoKB alone
 
@@ -116,7 +116,7 @@ All computation runs on a single commodity machine (<1 minute end to end for the
 
 ## 6. Acknowledgements
 
-MSK CHORD is a project of Memorial Sloan Kettering Cancer Center; the data was made public via cBioPortal under the terms stated at the project page. CIViC is maintained by the McDonnell Genome Institute at Washington University. OncoKB is maintained by Memorial Sloan Kettering. OpenOncology is independent work; no funding or institutional affiliation is being claimed. Dr. Jeremy Warner, Dr. Obi Griffith, Dr. Malachi Griffith and Dr. Benjamin Haibe-Kains have discussed earlier iterations of OpenOncology and I am grateful for their time; the content of this preprint is my own and should not be read as an endorsement by any of them.
+MSK CHORD is a project of Memorial Sloan Kettering Cancer Center; the data was made public via cBioPortal under the terms stated at the project page. CIViC is maintained by the McDonnell Genome Institute at Washington University. OncoKB is maintained by Memorial Sloan Kettering. OpenOncology is independent work; no funding or institutional affiliation is being claimed. Dr. Jeremy Warner gave feedback on cancer indication and treatment-line checks in an earlier iteration of OpenOncology, and I am grateful for his time. The content of this preprint is my own and should not be read as an endorsement.
 
 ## References
 
@@ -128,7 +128,7 @@ MSK CHORD is a project of Memorial Sloan Kettering Cancer Center; the data was m
 
 [4] Griffith M, Spies NC, Krysiak K, et al. CIViC is a community knowledgebase for expert crowdsourcing the clinical interpretation of variants in cancer. *Nat Genet* 2017; 49: 170-174.
 
-[5] Jee J, Fong C, Pichotta K, et al. Automated real-world data integration improves cancer outcome prediction. *Nature* 2024; 636: 728-736 (MSK CHORD).
+[5] Jee J, Fong C, Pichotta K, et al. Automated real-world data integration improves cancer outcome prediction. *Nature* 2024; 636(8043): 728-736. doi:10.1038/s41586-024-08167-5 (MSK CHORD).
 
 ---
 
