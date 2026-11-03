@@ -443,6 +443,4 @@ OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical r
 [📄 Methods](docs/METHODS.md) &nbsp;·&nbsp;
 [📊 Benchmark](docs/BENCHMARK.md)
 
-[![Star History Chart](https://api.star-history.com/svg?repos=immortal71/openoncology&type=Date)](https://star-history.com/#immortal71/openoncology&Date)
-
 </div>
