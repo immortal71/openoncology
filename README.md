@@ -57,6 +57,33 @@ Among the 2,466 patients it made a prediction for: same class in top three 100%,
 
 ---
 
+## Patient Journey
+
+```mermaid
+flowchart TD
+    A(["🧬 Patient submits sample\nBiopsy + germline DNA test"]) --> B
+    B["⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT"]
+    B --> C{Targeted mutation found?}
+    C -- No --> D(["👨‍⚕️ General medicine"])
+    C -- Yes --> E["🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL"]
+    C -- Yes --> F(["💊 General medicine\nin the meantime"])
+    E --> G{"Existing drug near-match?\nDrug repurposing search"}
+    G -- Yes --> H(["✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment"])
+    H --> M(["🏥 Patient receives treatment"])
+    G -- No --> I["🧪 Option 2: Custom drug discovery\nPlatform builds target brief from OpenTargets + ChEMBL"]
+    I --> I2["🔬 Discovery brief generated\nLead molecules · Ro5 scoring · AlphaFold structure"]
+    I2 --> J["🏭 Pharma marketplace\nManufacturers receive brief and bid on synthesis"]
+    J --> N{Can patient afford it?}
+    N -- Yes --> K(["🔬 Custom medicine manufactured\nPatient-specific mutation"])
+    N -- No --> L(["❤️ Crowdfund module\nRaise funds for custom drug"])
+    L --> K
+    K --> M
+```
+
+> The marketplace and crowdfund steps (right branch) are the experimental modules described above — research prototypes, not yet offered to patients. Today, a patient-facing run ends at the FDA-approved match, the repurposing candidate, or the discovery brief; manufacturing and funding are the roadmap for that branch.
+
+---
+
 ## ✅ What this platform does and does not do
 
 | ✅ Does | ❌ Does not |
@@ -313,6 +340,8 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | Document | Contents |
 |:---------|:--------|
 | [docs/SETUP.md](docs/SETUP.md) | Full setup: Python, Node.js, Docker, env vars, troubleshooting, Windows |
+| [docs/DEPLOY_VERCEL_DEMO.md](docs/DEPLOY_VERCEL_DEMO.md) | Deploying the public demo frontend to Vercel |
+| [docs/RUNBOOK_STAGING_DEPLOY.md](docs/RUNBOOK_STAGING_DEPLOY.md) | Full-stack staging deploy on Kubernetes (Postgres, MinIO, Keycloak, Celery) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System components, data flow, worker roles, database schema |
 | [docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) | FDA vs repurposed vs custom — three-tier decision tree |
 | [docs/REPURPOSING_ALGORITHM.md](docs/REPURPOSING_ALGORITHM.md) | Repurposing scoring, comparison with DGIdb / DrugBank / OpenTargets |
@@ -410,7 +439,6 @@ OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical r
 
 [⭐ Star this repo](https://github.com/immortal71/openoncology) &nbsp;·&nbsp;
 [🐛 Report a bug](https://github.com/immortal71/openoncology/issues/new?template=bug_report.md) &nbsp;·&nbsp;
-[💬 Start a discussion](https://github.com/immortal71/openoncology/discussions) &nbsp;·&nbsp;
 [📖 Setup guide](docs/SETUP.md) &nbsp;·&nbsp;
 [📄 Methods](docs/METHODS.md) &nbsp;·&nbsp;
 [📊 Benchmark](docs/BENCHMARK.md)
