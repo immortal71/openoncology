@@ -57,6 +57,33 @@ Among the 2,466 patients it made a prediction for: same class in top three 100%,
 
 ---
 
+## Patient Journey
+
+```mermaid
+flowchart TD
+    A(["🧬 Patient submits sample\nBiopsy + germline DNA test"]) --> B
+    B["⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT"]
+    B --> C{Targeted mutation found?}
+    C -- No --> D(["👨‍⚕️ General medicine"])
+    C -- Yes --> E["🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL"]
+    C -- Yes --> F(["💊 General medicine\nin the meantime"])
+    E --> G{"Existing drug near-match?\nDrug repurposing search"}
+    G -- Yes --> H(["✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment"])
+    H --> M(["🏥 Patient receives treatment"])
+    G -- No --> I["🧪 Option 2: Custom drug discovery\nPlatform builds target brief from OpenTargets + ChEMBL"]
+    I --> I2["🔬 Discovery brief generated\nLead molecules · Ro5 scoring · AlphaFold structure"]
+    I2 --> J["🏭 Pharma marketplace\nManufacturers receive brief and bid on synthesis"]
+    J --> N{Can patient afford it?}
+    N -- Yes --> K(["🔬 Custom medicine manufactured\nPatient-specific mutation"])
+    N -- No --> L(["❤️ Crowdfund module\nRaise funds for custom drug"])
+    L --> K
+    K --> M
+```
+
+> The marketplace and crowdfund steps (right branch) are the experimental modules described above — research prototypes, not yet offered to patients. Today, a patient-facing run ends at the FDA-approved match, the repurposing candidate, or the discovery brief; manufacturing and funding are the roadmap for that branch.
+
+---
+
 ## ✅ What this platform does and does not do
 
 | ✅ Does | ❌ Does not |
