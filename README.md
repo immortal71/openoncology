@@ -49,9 +49,9 @@ Among the 2,466 patients it made a prediction for: same class in top three 100%,
 
 ## ⚠️ For Clinicians & Patients
 
-> **All drug rankings are sourced from FDA-approved evidence (OncoKB Levels 1–2, ClinVar, CIViC) and ranked against those tiers. Every recommendation that appears in the top-3 output is a real, named, approved therapy with a clinical evidence reference. No outputs are fabricated or hallucinated from the ranking engine.**
+> **All drug rankings are sourced from FDA-approved evidence (OncoKB Levels 1-2, ClinVar, CIViC) and ranked against those tiers. Every recommendation that appears in the top-3 output is a real, named, approved therapy with a clinical evidence reference. No outputs are fabricated or hallucinated from the ranking engine.**
 >
-> **Oncologist review is required before any treatment decision.** This platform surfaces evidence to support a molecular tumour board conversation — it does not replace one. Results should be treated as a structured evidence summary, not a prescription.
+> **Oncologist review is required before any treatment decision.** This platform surfaces evidence to support a molecular tumour board conversation. It does not replace one. Results should be treated as a structured evidence summary, not a prescription.
 >
 > This software has not been submitted for FDA clearance or CE marking. It is not a registered clinical decision support system.
 
@@ -80,7 +80,7 @@ flowchart TD
     K --> M
 ```
 
-> The marketplace and crowdfund steps (right branch) are the experimental modules described above — research prototypes, not yet offered to patients. Today, a patient-facing run ends at the FDA-approved match, the repurposing candidate, or the discovery brief; manufacturing and funding are the roadmap for that branch.
+> The marketplace and crowdfund steps (right branch) are the experimental modules described above: research prototypes, not yet offered to patients. Today, a patient-facing run ends at the FDA-approved match, the repurposing candidate, or the discovery brief. Manufacturing and funding are the roadmap for that branch.
 
 ---
 
@@ -95,7 +95,7 @@ flowchart TD
 | Escalate to custom drug discovery when no approved option matches | Bypass regulatory approval for any intervention |
 | Produce a blinded, reproducible benchmark score for scientific scrutiny | Claim peer review or regulatory clearance |
 
-> **On custom drug discovery:** When no repurposed drug matches, the platform generates a target-specific discovery brief from ChEMBL and OpenTargets evidence. These are early-stage research leads — not clinical candidates. Any compound emerging from this path requires full preclinical and clinical development before patient use.
+> **On custom drug discovery:** When no repurposed drug matches, the platform generates a target-specific discovery brief from ChEMBL and OpenTargets evidence. These are early-stage research leads, not clinical candidates. Any compound emerging from this path requires full preclinical and clinical development before patient use.
 
 ---
 
@@ -113,10 +113,10 @@ docker-compose up --build
 | API | http://localhost:8000 |
 | API docs | http://localhost:8000/docs |
 
-> **OncoKB token setup (optional — improves Tier 1 coverage):**
+> **OncoKB token setup (optional, improves Tier 1 coverage):**
 > 1. Register for a free academic token at https://oncokb.org/account/register
 > 2. Set `ONCOKB_API_TOKEN=<your-token>` in `.env`
-> 3. Without the token the pipeline uses a curated static evidence table (111 actionable genes, 335 gene/variant pairs as of 2026-07-20 — see `api/services/oncokb_evidence.py`)
+> 3. Without the token the pipeline uses a curated static evidence table (111 actionable genes, 335 gene/variant pairs as of 2026-07-20; see `api/services/oncokb_evidence.py`)
 
 **No Docker?** See [docs/SETUP.md](docs/SETUP.md) for local Python + Node.js setup, environment variables, and Windows-specific steps.
 
@@ -228,12 +228,12 @@ OpenOncology exposes four output surfaces, each with a different scientific cont
 
 Benchmarking is designed to reward correctness, specificity, and honest abstention rather than forced coverage. Every benchmark case follows one contract with expected positive labels, explicitly disallowed labels, tumor context, and surface type. This makes it possible to measure both retrieval quality and whether unsafe or unsupported options were correctly excluded.
 
-### PRE-PUBLICATION — Blinded 50-case oncologist holdout
+### PRE-PUBLICATION: Blinded 50-case oncologist holdout
 
 > These numbers are **frozen**. They are the exact values reported in the preprint and cannot be retroactively changed.
 
 Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11`
-(OncoKB static fallback · no live CIViC · offline mode — see `validation_results/holdout_50_metrics.json`):
+(OncoKB static fallback · no live CIViC · offline mode; see `validation_results/holdout_50_metrics.json`):
 
 | Metric | Result | Meaning |
 |:-------|:-------|:--------|
@@ -246,7 +246,7 @@ Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11
 
 Holdout covers 40 sensitivity cases (16 single-drug, 24 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`; exact per-case scoring in `blind_review_key_scoring.json`.
 
-### POST-PUBLICATION — Ongoing hard clinical gate (main branch)
+### POST-PUBLICATION: Ongoing hard clinical gate (main branch)
 
 > These numbers reflect **current ongoing development** after the paper was published. Updated whenever the gate is run. Last run: 2026-05-29.
 
@@ -255,10 +255,10 @@ Holdout covers 40 sensitivity cases (16 single-drug, 24 multi-drug) and 10 negat
 | **Standard P@3** | **0.8222** (≈ 0.822) | ≥ 0.65 | ✅ PASS |
 | **Hit@3** | **100.0%** | ≥ 90% | ✅ PASS |
 | **False positives** | **0** | ≤ 0 | ✅ PASS |
-| Cases | 83 total | — | 75 sensitivity + 8 negative controls |
+| Cases | 83 total | N/A | 75 sensitivity + 8 negative controls |
 
 ```bash
-python scripts/hard_benchmark_gate.py   # verify yourself — artifact: hard_benchmark_results.json
+python scripts/hard_benchmark_gate.py   # verify yourself (artifact: hard_benchmark_results.json)
 ```
 
 Full methodology, metric definitions, and change log: [docs/BENCHMARK.md](docs/BENCHMARK.md)
@@ -343,7 +343,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | [docs/DEPLOY_VERCEL_DEMO.md](docs/DEPLOY_VERCEL_DEMO.md) | Deploying the public demo frontend to Vercel |
 | [docs/RUNBOOK_STAGING_DEPLOY.md](docs/RUNBOOK_STAGING_DEPLOY.md) | Full-stack staging deploy on Kubernetes (Postgres, MinIO, Keycloak, Celery) |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System components, data flow, worker roles, database schema |
-| [docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) | FDA vs repurposed vs custom — three-tier decision tree |
+| [docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) | FDA vs repurposed vs custom: three-tier decision tree |
 | [docs/REPURPOSING_ALGORITHM.md](docs/REPURPOSING_ALGORITHM.md) | Repurposing scoring, comparison with DGIdb / DrugBank / OpenTargets |
 | [docs/BENCHMARK.md](docs/BENCHMARK.md) | Pre-paper vs post-paper benchmark split, metric definitions, change log |
 | [docs/METHODS.md](docs/METHODS.md) | Full scientific methods |
@@ -380,7 +380,7 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Phase 5** | ✅ | Kubernetes/Helm deploy · privacy controls · Security CI |
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
 | **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
-| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
+| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current, see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
 | **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
 | **v2** | 🔜 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
 
