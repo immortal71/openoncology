@@ -4,6 +4,11 @@ This document explains exactly what the algorithm does when it encounters an
 FDA-approved drug, a non-FDA-but-usable drug, or falls back to custom drug
 discovery. It is the reference for contributors working on the ranking engine.
 
+**Scope note.** Tier 1 and Tier 2 are the current product — what README.md
+benchmarks and what is pitched externally as evidence-based drug matching.
+Tier 3 (custom drug discovery, marketplace, crowdfunding) is implemented but
+research-stage; see README.md's "Where this stands today" note.
+
 ---
 
 ## Overview: The Three-Tier Decision Tree

@@ -1,5 +1,13 @@
 # System Architecture — OpenOncology
 
+**Scope note.** This document describes every component in the codebase,
+marketplace and crowdfunding routes included. The product currently
+benchmarked and brought to market is the evidence-matching pipeline below:
+patient data in, genomic pipeline, AI/evidence layer, ranked drugs out.
+Marketplace, crowdfunding and custom drug discovery are implemented and
+covered by CI, but are a separate research-stage track, not the current
+product — see README.md.
+
 ---
 
 ## High-level overview
