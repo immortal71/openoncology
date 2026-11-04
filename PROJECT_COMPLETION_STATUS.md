@@ -13,6 +13,13 @@
 > the end of this file is the accurate summary. Treat any "production-ready" or "no
 > further changes required" language below as historical and superseded.
 
+> **Product scope vs. engineering scope.** Everything below describes what exists in
+> this codebase, including the marketplace and crowdfunding routes. The product actively
+> benchmarked and brought to market is narrower: evidence-based drug matching against
+> approved therapies (see README.md). Marketplace, crowdfunding and custom drug discovery
+> are implemented and pass their own tests, but are a separate research-stage track —
+> not part of the current product or the externally stated near-term roadmap.
+
 ---
 
 ## ✅ What Works
@@ -52,8 +59,8 @@
   - `/submit` — Genomic data upload with progress tracking
   - `/results/[id]` — Live result polling + mutation table + drug repurposing
   - `/repurposing/[resultId]` — Full drug candidate list
-  - `/marketplace/*` — Pharma requests & bidding
-  - `/campaign/[slug]` — Crowdfunding details
+  - `/marketplace/*` — Pharma requests & bidding (research prototype, not current product)
+  - `/campaign/[slug]` — Crowdfunding details (research prototype, not current product)
   - `/oncologist/*` — Review interface (if authenticated as oncologist)
 - ✅ **Authentication**: Keycloak provider + middleware route guards
 - ✅ **Form validation**: Zod schemas for submissions
@@ -86,8 +93,8 @@
 | **Upload genomic data** | ✅ | `submit.py` route + file handling + Vue component |
 | **AI-powered mutation analysis** | ✅ | `ai_worker.py` with AlphaMissense integration |
 | **Find repurposed drugs** | ✅ | `repurposing.py` + OpenTargets + ChEMBL scoring |
-| **Raise funds via campaigns** | ✅ | `campaign.py` + crowdfund routes + Stripe integration |
-| **Pharma marketplace** | ✅ | Drug requests + bidding + payment flow |
+| **Raise funds via campaigns** (research prototype, not current product) | ✅ | `campaign.py` + crowdfund routes + Stripe integration |
+| **Pharma marketplace** (research prototype, not current product) | ✅ | Drug requests + bidding + payment flow |
 | **Oncologist review** | ✅ | `oncologist.py` route + authenticated flows |
 | **GDPR compliance** | ✅ | `gdpr.py` endpoint + `gdpr_worker` for deletion |
 | **Rate limiting** | ✅ | SlowAPI decorators on `/auth`, `/submit`, `/upload` |
