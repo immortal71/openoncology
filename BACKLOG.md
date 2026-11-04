@@ -93,6 +93,13 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
 
+### OO-23: PAPER.md title/abstract frame discovery as co-equal to evidence matching; YC pitch does not
+- **Why**: Asked (2026-11-04) to check the GitHub docs against the YC W27 application for drift. README.md has now been edited to lead with evidence matching as the current product and mark custom drug discovery/marketplace/crowdfunding as a separate research-stage track (see the "Where this stands today" line under "What is OpenOncology?" and the Roadmap table). PAPER.md cannot be brought into line the same way: its title is "...Evidence-Based Drug Matching **and** De Novo Custom Drug Discovery...", giving the two equal billing, and it mirrors an already-published Research Square DOI abstract (10.21203/rs.3.rs-9707913/v1) that the file itself flags as not to be silently edited.
+- **Files**: PAPER.md (guard-protected, do not route around the hook)
+- **The actual decision**: whether the gap between "paper describes a two-stage evidence+discovery platform" and "YC pitch and current README describe an evidence-matching product with discovery as a future research track" needs anything — an explicit erratum/scope note on Research Square, a line added to PAPER.md's existing "Version Note" by hand, or nothing, since a published preprint describing a broader research agenda than today's productized scope is not unusual and may not need correcting.
+- **Out of scope**: editing PAPER.md's title, abstract, or citation block — none of that should change without the same erratum process already used for the dedup-bug and circularity retractions in this file.
+- **Risk**: scientific. Touches a published DOI's framing.
+
 ### OO-22: Run the variant-calling gate on this pipeline (roadmap 2.1)
 - **Why**: The single blocking clinical gate that needs no partner, IRB or regulator, and the cheapest item left on the critical path. `REGULATORY_FRAMEWORK.md` 3.1 wants sensitivity >= 99% and PPV >= 95% against an orthogonal truth set. The only measurement in the repository is of a *published NIST call set*, correctly recorded as `satisfies_regulatory_gate_3_1: false`.
 - **Blocked on a host, not on code.** Needs ~32 GB RAM, 8-16 vCPU, 150 GB disk, and `nextflow`, `java`, `bwa-mem2`, `gatk`, `samtools`. A developer workstation does not qualify: the BWA-MEM2 index build alone wants 12 GB.

@@ -31,6 +31,8 @@
 
 OpenOncology reads a tumor's genetic report (mutations, copy number changes and gene fusions) and returns the targeted drugs that have evidence for them, ranked, with the evidence level and source next to each drug. It combines open knowledge bases (OncoKB levels, CIViC, ClinVar) and ranks the drugs for a whole patient at once, so a hospital without a molecular tumor board can see the same evidence a board would. It is a research and decision-support tool: an oncologist reviews every result. The code is MIT licensed and runs on the hospital's own servers.
 
+**Where this stands today.** The product under active benchmark is the evidence-matching step above: approved and guideline-linked drugs for a patient's mutations, ranked and cited against FDA-approved evidence. The custom drug discovery, marketplace and crowdfunding modules described later in this README live in the codebase and run in CI, but they are a separate, research-stage track — not what a hospital or lab deploys today, and not reflected in the benchmark numbers below. The near-term roadmap item is a drug availability and affordability layer next to the evidence (see [Roadmap](#roadmap)), not drug discovery.
+
 ## Benchmark on real patients (MSK CHORD)
 
 Tested on the MSK CHORD cohort (Memorial Sloan Kettering, Nature 2024). Of 5,190 patients who received a targeted drug, 2,505 had an alteration that matches that drug under its FDA label. On those 2,505:
@@ -298,8 +300,8 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **AI scoring** | AlphaMissense (3.6 GB SQLite) · AlphaFold Server · DiffDock · GPT-4o |
 | **Drug evidence** | OpenTargets GraphQL · ChEMBL REST · OncoKB · ClinVar · CIViC · COSMIC v3.1 · cBioPortal |
 | **Ranking** | DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Phase 10% |
-| **Custom drug discovery** | Target-specific discovery brief · ChEMBL lead molecules · Ro5 oral-exposure scoring · scaffold/fragment library · medicinal-chemistry handoff notes |
-| **Custom drug worker** | Async Celery worker · AlphaFold mutation-structure generation · DrugRequest job status polling |
+| **Custom drug discovery (research-stage)** | Target-specific discovery brief · ChEMBL lead molecules · Ro5 oral-exposure scoring · scaffold/fragment library · medicinal-chemistry handoff notes |
+| **Custom drug worker (research-stage)** | Async Celery worker · AlphaFold mutation-structure generation · DrugRequest job status polling |
 | **Marketplace (experimental)** | Stripe Connect Express prototype, not offered to users |
 | **Crowdfunding (experimental)** | Stripe Elements prototype, not offered to users |
 | **Auth & access** | Keycloak OIDC/OAuth2 · roles: patient · oncologist · admin |
@@ -352,8 +354,9 @@ For oncologist concordance stats and plain-language interpretation see [docs/ONC
 | **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
 | **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
 | **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
+| **Phase 5.8** | 🔜 | Drug availability, access and affordability data layer — what a tumor board weighs alongside evidence |
 | **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
-| **v2** | 🔜 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
+| **v2 (research direction, unscheduled)** | 🔭 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
 
 ---
 
