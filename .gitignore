@@ -13,6 +13,9 @@ venv/
 # Next.js
 web/node_modules/
 web/.next/
+
+# Vercel CLI project link (local machine state, not shared config)
+.vercel
 web/out/
 
 # Nextflow
