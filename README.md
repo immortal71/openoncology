@@ -10,6 +10,12 @@ Open-source drug evidence matching for sequencing labs and oncologists.
 
 *Presentation mockup using current demonstration content. The layout differs from the running app; scores are illustrative. [Watch with playback controls](docs/assets/showcase-demo.mp4) · [Static view](docs/assets/showcase-poster.png)*
 
+> **A note on interface updates**
+>
+> We regularly try new layouts and workflows to make OpenOncology easier to use. The website, screenshots and README visuals may temporarily differ: sometimes a frontend change ships before its documentation, and sometimes a design preview appears here before it reaches the app. Sorry for any confusion while we bring them into sync.
+>
+> We aim to update feature documentation alongside the code and label planned features clearly. If you notice a mismatch or prefer one interface over another, [email us at aashish@oncopurpose.com](mailto:aashish@oncopurpose.com). Tell us which version you saw and what would make it easier to use.
+
 OpenOncology assembles a ranked drug shortlist and evidence annotations from tumor genomic findings. The initial focus is sequencing labs that need oncology interpretation support; hospitals without molecular tumor boards come next.
 
 The repository is a research prototype. Results require oncologist review. The [current product scope](docs/PRODUCT_SCOPE.md) explains what works today and what remains in development.
