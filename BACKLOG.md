@@ -11,6 +11,7 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 ## Ready
 
 ### Frontend documentation note, November 5
+- Placement follow-up: moved the interface-update note to the closing Build with us section, below the contribution links. Wording unchanged.
 - Added a README note explaining temporary differences between frontend experiments, website visuals and documentation. Feature documentation should track implementation, with planned features labelled. Invites mismatch reports and design feedback through the existing maintainer email. Documentation only; no feature, ranking or benchmark changes.
 - Publication: [PR #216](https://github.com/immortal71/openoncology/pull/216). README media audit and diff checks passed; merging remains manual.
 
