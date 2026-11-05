@@ -1,40 +1,33 @@
-# Documentation media
+# Repository media
 
-The README uses a static product screenshot for orientation and one short animation to demonstrate evidence review. Diagrams explain the workflow; they do not substitute for screenshots of the software.
+The README uses a presentation mockup to explain evidence review. Its workbench composition draws on [Hoppscotch](https://github.com/hoppscotch/hoppscotch). The styled components come from [HeroUI 2.8.10](https://v2.heroui.com/docs/components/listbox): selectable Listbox rows, circular Avatar rank markers, Chip status pills, Tabs, Accordion, Breadcrumbs and Button. Cursor motion is adapted from [RemotionUI](https://github.com/riaz37/remotion-ui). The palette uses Radix Slate neutrals, white surfaces, graphite text and a Blue accent. Amber marks the off-label status. Only the selected drug receives a filled background; the other candidates remain open list rows.
 
-## Current assets
+## Current showcase
 
-| Asset | Use | Source |
-|:--|:--|:--|
-| `assets/readme-banner.svg` | README identity | Original vector artwork using the frontend's DNA mark |
-| `assets/evidence-review.jpg` | Main product screenshot | Production build, KRAS G12C demonstration workspace |
-| `assets/evidence-review.gif` | Expand a candidate and read its evidence | Captured closed/open UI states, assembled into a seven-second loop |
-| `assets/frontend-home.jpg` | Frontend overview | Production build, homepage |
-| `assets/case-workflow.svg` | Intended lab-to-oncologist workflow | Original vector diagram |
+| Asset | Purpose |
+| --- | --- |
+| `assets/showcase-demo.gif` | Ten-second loop: inspect source annotations, select Adagrasib, return to the opening view |
+| `assets/showcase-demo.mp4` | Higher-quality version with playback controls in a video viewer |
+| `assets/showcase-poster.png` | Static view of the same presentation |
 
-The screenshots show demonstration data. Scores and evidence labels are illustrative frontend output, not newly calculated benchmark results. The GIF is an edited sequence of actual UI captures, not a continuous recording or a live clinical run. No patient uploads or clinical sessions are included.
+The content comes from the current demonstration fixtures in `web/lib/demo-data.ts`. The layout differs from the running app and is labelled as a presentation mockup. The list explicitly labels Rank 1 (Sotorasib), Rank 2 (Adagrasib) and Rank 3 (Osimertinib), matching the existing demonstration order. Numeric demo scores are displayed separately. Rank 3 retains its different-indication warning; its position does not make it a validated match. Scores and source labels are illustrative demo output. The animation does not run a genomic pipeline, retrieve live evidence or demonstrate clinical validity.
 
-## Refresh screenshots
+Earlier screenshots and diagrams remain for existing links. The showcase caption identifies which visuals are presentation mockups.
 
-Build the frontend with `NEXT_PUBLIC_ENABLE_DEMO_AUTH=1`, then run the production server. Open `/workspace?demo=true`, select **Drug Results**, and expand a candidate. Keep the demonstration label visible in the overview screenshot. Production mode avoids the development toolbar.
+## Production notes
 
-Use a readable browser window, capture the application rather than the desktop, and check the result at the width GitHub will display it. Keep source references and labels legible. Caption the image and describe its purpose in alt text. Capture the homepage only after content has finished loading.
+The showcase is a 1280 x 740 Remotion composition at 30 frames per second. The GIF uses every second frame, giving 15 frames per second. Settled intervals remain still, the cursor lands at the active controls, and the final transition returns to the opening view. No blur, vignette or colour tint is applied.
 
-Keep static diagrams as SVGs so text stays sharp. Store final assets here and keep raw recordings, capture frames and temporary palettes outside the tracked repository.
+The [editable source package](assets/showcase-source.zip) includes the composition, styles, loop-reset still, pinned direct dependencies and upstream MIT notices. Raw captures and editing files stay outside the tracked repository. Preserve library notices when moving or publishing copied source.
 
-## Make a short GIF from a video
+The separately captured current frontend is a content reference, not the source of the mockup's layout. A recording and a presentation mockup should always be captioned differently.
 
-Choose one action. For evidence review, show the candidate list, expand one candidate, hold the evidence long enough to read, and end cleanly. A six-to-eight-second clip is usually enough. Use a static screenshot beside or before the animation so readers do not need to watch it to understand the product.
+## Refresh and review
 
-With FFmpeg available, create a palette and apply it to the same trimmed clip:
+1. Check names, mechanisms and source labels against the current demo fixtures. Do not invent clinical claims to fill the design.
+2. Keep the presentation label visible. Use a recording caption only for footage of the running frontend.
+3. Inspect candidate selection, evidence, source annotations and the loop boundary. A poster alone does not verify motion.
+4. Compare GIF text quality and file size at GitHub's rendered width.
+5. Check light and dark backgrounds, provide a static alternative, and keep papers and methods accessible as ordinary Markdown links.
 
-```bash
-ffmpeg -ss 0 -t 7 -i demo.mp4 -vf "fps=12,scale=930:-1:flags=lanczos,palettegen=stats_mode=diff" palette.png
-ffmpeg -ss 0 -t 7 -i demo.mp4 -i palette.png -lavfi "fps=12,scale=930:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=sierra2_4a" -loop 0 evidence-review.gif
-```
-
-Compare a smaller-width version with the full-width version. Prefer the smallest file that keeps the text readable. Lower frame rate helps with slow interface changes; it does not fix text that is too small. Avoid animating long page scrolls, loading screens or the entire upload pipeline.
-
-## Review before publishing
-
-Check that the captured version matches the proposed code, demonstration data is clearly identified, and visible labels support the accompanying claims. Review both static images and the animation. Keep the README's scientific scope statement linked to the full evaluation methods.
+GitHub displays GIFs in README images. The MP4 and poster links provide alternatives for playback controls or no motion. The local review page includes controls and a static-view option; GitHub playback still needs verification after publication.

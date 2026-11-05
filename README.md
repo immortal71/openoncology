@@ -1,70 +1,60 @@
-<p align="center">
-  <img src="docs/assets/readme-banner.svg" alt="OpenOncology: drug evidence for labs and oncologists" width="100%">
-</p>
-
 # OpenOncology
 
-OpenOncology helps interpret tumor genomic findings by assembling a ranked drug shortlist with evidence sources for an oncologist to review.
+Open-source drug evidence matching for sequencing labs and oncologists.
 
-<p>
-  <a href="https://github.com/immortal71/openoncology/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"/></a>
-  <a href="https://github.com/immortal71/openoncology/actions/workflows/codeql.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/codeql.yml?branch=main&style=for-the-badge&logo=github&logoColor=white&label=CodeQL" alt="CodeQL"/></a>
-  <img src="https://img.shields.io/badge/coverage-%E2%89%A552%25-22c55e?style=for-the-badge" alt="Backend coverage >= 52%"/>
-  <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
-</p>
+[![CI](https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=flat&label=CI)](https://github.com/immortal71/openoncology/actions/workflows/ci.yml) ![Backend coverage >= 52%](https://img.shields.io/badge/coverage-%E2%89%A552%25-0F6E56?style=flat) [![MIT License](https://img.shields.io/badge/License-MIT-0F6E56?style=flat)](https://github.com/immortal71/openoncology/blob/main/LICENSE)
 
-[Demo](https://immortal71.github.io/openoncology/) · [Documentation](docs/README.md) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md)
+[Explore cases](https://immortal71.github.io/openoncology/) · [Documentation](docs/README.md) · [Papers](#papers) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md)
 
-![OpenOncology drug-results workspace with a demonstration KRAS G12C case and an expanded evidence panel](docs/assets/evidence-review.jpg)
+![Presentation mockup showing Rank 1, Rank 2 and Rank 3, source annotations and evidence review](docs/assets/showcase-demo.gif)
 
-*Actual frontend, demonstration data. The displayed scores are illustrative demo output.*
+*Presentation mockup using current demonstration content. The layout differs from the running app; scores are illustrative. [Watch with playback controls](docs/assets/showcase-demo.mp4) · [Static view](docs/assets/showcase-poster.png)*
 
-## Why it exists
+OpenOncology assembles a ranked drug shortlist and evidence annotations from tumor genomic findings. The initial focus is sequencing labs that need oncology interpretation support; hospitals without molecular tumor boards come next.
 
-A tumor's genetic findings do not explain which treatment evidence matters for a patient. That interpretation takes specialist time, and many hospitals do not have a molecular tumor board.
+The repository is a research prototype. Results require oncologist review. The [current product scope](docs/PRODUCT_SCOPE.md) explains what works today and what remains in development.
 
-Our first target customers are sequencing labs that already produce genomic reports but need oncology interpretation support. Hospitals without molecular tumor boards come next. Initial clinical evaluation is planned in Nepal, where drug access and cost are central to the problem.
+## Papers
 
-## What the product does
+**Retrospective benchmark on 2,505 MSK CHORD patients**
 
-- Looks up drug evidence for genomic findings and cancer context.
-- Ranks candidate drugs and provides evidence annotations and source references.
-- Produces a report for an oncologist to review, including gaps in the available information.
-- Supports self-hosting with publicly available code.
+*A retrospective benchmark of an open-source oncology drug ranker on 2,505 MSK CHORD patients.*
 
-The repository is a research prototype. A hosted offering, local availability and affordability data, and site validation are planned. No paying customers or hospital deployments are reported. See [product scope](docs/PRODUCT_SCOPE.md) for implementation details and current limits.
+[Read the preprint](https://www.researchsquare.com/article/rs-11584932/v1) · [DOI: 10.21203/rs.3.rs-11584932/v1](https://doi.org/10.21203/rs.3.rs-11584932/v1) · [Repository manuscript](preprints/msk_chord_benchmark.md)
 
-## How a case moves through the workflow
+This study evaluates a separate evidence-lookup runner using alterations selected from received treatments. It does not evaluate the complete application workflow or establish clinical benefit.
 
-![Lab genomic findings become an evidence report for oncologist review and discussion with the patient](docs/assets/case-workflow.svg)
+**Original framework paper**
 
-The current prototype accepts genomic files, including VCF. A complete lab integration remains in development. The clinical team checks the result against the patient's diagnosis and treatment history; a missing match remains a gap for expert review. See the [case walkthrough](docs/PATIENT_WALKTHROUGH.md).
+*OpenOncology: An Open-Source Framework for Evidence-Based Drug Matching and De Novo Custom Drug Discovery in Precision Oncology.*
 
-## Review the evidence
+[Read the preprint](https://www.researchsquare.com/article/rs-9707913/v1) · [DOI: 10.21203/rs.3.rs-9707913/v1](https://doi.org/10.21203/rs.3.rs-9707913/v1) · [Corrections and reconciliation](docs/PAPER_VS_CURRENT_STATE.md)
 
-Expand a candidate to read its mechanism and evidence annotations. This short loop uses actual captures of the demonstration workspace.
+The original paper describes the broader research agenda. Its discovery work is separate from the initial lab offering. Both works are preprints; see the [research guide](docs/RESEARCH.md) for their context and corrections.
 
-![Seven-second demonstration: expand Sotorasib to inspect the evidence panel, pause to read, then return to the candidate list](docs/assets/evidence-review.gif)
+## Review a case
 
-[Static evidence-review view](docs/assets/evidence-review.jpg) · [Media and capture details](docs/MEDIA.md)
+1. Supply genomic findings and cancer context.
+2. Inspect candidate drugs, evidence annotations and missing information.
+3. Have an oncologist interpret the report against diagnosis and treatment history.
+
+The prototype accepts genomic files including VCF. A complete lab integration remains in development. The [case walkthrough](docs/PATIENT_WALKTHROUGH.md) follows the handoff from a lab to the clinical team.
 
 ## Evaluation
 
-The current MSK CHORD evaluation uses a retrospective cohort from Memorial Sloan Kettering. The committed results cover 2,505 patients selected under the benchmark's drug-to-alteration rules.
+The saved MSK CHORD experiment contains 2,505 selected patients:
 
 | Measure | Result |
-|:--|--:|
+| --- | ---: |
 | Patients with a prediction | 2,466 / 2,505 (98.4%) |
-| Exact drug received in the top three, all selected patients | 2,094 / 2,505 (83.6%) |
-| Exact drug received in the top three, patients with a prediction | 2,094 / 2,466 (84.9%) |
+| Exact received drug in the top three, all selected patients | 2,094 / 2,505 (83.6%) |
+| Exact received drug in the top three, patients with a prediction | 2,094 / 2,466 (84.9%) |
 
-This evaluates evidence lookup using alterations selected from received treatments. It does not validate the complete application workflow or establish clinical benefit. The [evaluation reference](docs/BENCHMARK.md#msk-chord-evidence-lookup-benchmark) explains the protocol, baseline and limits; the [research guide](docs/RESEARCH.md) separates this work from historical studies.
+[Protocol, baseline and limitations](docs/BENCHMARK.md#msk-chord-evidence-lookup-benchmark) · [Historical evaluations](docs/RESEARCH.md)
 
-## Getting started
+## Run locally
 
-For a quick look at saved research cases, open the [case explorer](https://immortal71.github.io/openoncology/). It displays benchmark outputs, not a hosted clinical service.
-
-To run the stack locally, install Docker with Compose, clone the repository and prepare the environment file:
+Install Docker with Compose, then clone the repository and prepare its configuration:
 
 ```bash
 git clone https://github.com/immortal71/openoncology.git
@@ -78,34 +68,20 @@ Review the credentials and service settings in the [setup guide](docs/SETUP.md#4
 docker compose up --build
 ```
 
-The web app runs at [localhost:3000](http://localhost:3000); the API reference is at [localhost:8000/docs](http://localhost:8000/docs). Setup also covers local Python/Node.js development, evidence credentials and Windows instructions. The [Vercel guide](docs/DEPLOY_VERCEL_DEMO.md) covers the demo frontend.
+Open the web app at `http://localhost:3000` and the API reference at `http://localhost:8000/docs`. The setup guide also covers Windows and development without Docker.
 
-## Architecture and development
+## What comes next
 
-| Component | Stack |
-|:--|:--|
-| Web workspace | Next.js, React, TypeScript |
-| API and reports | Python, FastAPI |
-| Background processing | Celery, Redis |
-| Storage | PostgreSQL, MinIO |
-| Genomic preprocessing | Nextflow |
+The next priorities are a hosted lab evaluation workspace, stronger integration of genomic findings, local drug availability and affordability data, and independent oncologist review. Initial clinical evaluation is planned in Nepal.
 
-Source is organised under [`web/`](web/), [`api/`](api/) and [`pipeline/`](pipeline/). [Architecture](docs/ARCHITECTURE.md) covers components and data flow; [methods](docs/METHODS.md) describes the application ranker. The CHORD experiment uses a separate lookup runner.
+Hospital expansion depends on validation of the lab workflow and evaluation at each site. Multi-omics, federated learning and discovery research remain longer-term directions without a committed schedule.
 
-Contributors can run `make help`, `make lint` and `make test` in a POSIX shell, including Git Bash on Windows. See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup, separate Python test suites and scientific-review requirements. Bug reports and contributions belong in [GitHub issues](https://github.com/immortal71/openoncology/issues) and pull requests.
+[Vision](VISION.md) · [Roadmap](docs/ROADMAP.md)
 
-## Future expansion
+## Build with us
 
-The next product work is a hosted evaluation workspace for labs, stronger integration of genomic findings, and local drug availability and affordability beside the evidence. Independent oncologist review and prospective evaluation will guide deployment.
+The stack uses Next.js, FastAPI, Celery, PostgreSQL, MinIO and Nextflow. Start with the [architecture guide](docs/ARCHITECTURE.md) or [contribution guide](CONTRIBUTING.md).
 
-After validation of the initial lab workflow, the plan is to offer hospitals a hosted workspace with support and validation at each site. Evaluation in Nepal will help establish what needs to change for resource-limited settings.
+[Report an issue](https://github.com/immortal71/openoncology/issues) · [Code of conduct](CODE_OF_CONDUCT.md) · [MIT license](LICENSE)
 
-Multi-omics, federated learning, mobile access and discovery research are longer-term directions without a committed schedule. Discovery briefs, marketplace and crowdfunding code remain separate experiments. They are outside the initial offering and do not establish a path to manufacture a patient-specific treatment.
-
-Read the [Vision](VISION.md) and [expansion roadmap](docs/ROADMAP.md) for the direction, priorities and evidence needed before moving forward.
-
-## License and intended use
-
-The code is available under the [MIT license](LICENSE). Evidence databases have their own access and licensing terms.
-
-OpenOncology is research-use software. Every result requires independent review by a qualified oncologist. It has not been submitted for FDA clearance or CE marking. Clinical deployment requires site validation and an appropriate regulatory assessment.
+Backend coverage gate: **≥52%**. Evidence databases have separate access and licensing terms. Clinical deployment requires site validation and an appropriate regulatory assessment.

@@ -4,6 +4,8 @@ OpenOncology's current product is an evidence-interpretation workflow for labs a
 
 ## Current MSK CHORD evaluation
 
+[Research Square preprint](https://www.researchsquare.com/article/rs-11584932/v1) · [doi:10.21203/rs.3.rs-11584932/v1](https://doi.org/10.21203/rs.3.rs-11584932/v1).
+
 [A retrospective benchmark of an open-source oncology drug ranker on 2,505 MSK CHORD patients](../preprints/msk_chord_benchmark.md) describes the saved evidence-lookup experiment. The committed outputs include 2,466 predictions and 2,094 exact top-three hits across 2,505 selected patients.
 
 The experiment selects qualifying alterations using received treatments and applies evidence-level ordering. It does not run the full application ranker. Shared target-map filtering, broad alteration rules and inconsistent baseline descriptions limit what can be concluded. The [benchmark reference](BENCHMARK.md#msk-chord-evidence-lookup-benchmark) gives the protocol details and caveats.
