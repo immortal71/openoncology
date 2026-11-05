@@ -1,17 +1,16 @@
-# Drug Decision Logic — OpenOncology
+# Drug decision logic
 
-This document explains exactly what the algorithm does when it encounters an
-FDA-approved drug, a non-FDA-but-usable drug, or falls back to custom drug
-discovery. It is the reference for contributors working on the ranking engine.
+This reference describes the application's evidence categories and the separate discovery-brief prototype. The initial product is a ranked evidence report for labs and oncologists. A clinician reviews the findings and decides next steps. See [product scope](PRODUCT_SCOPE.md).
 
-**Scope note.** Tier 1 and Tier 2 are the current product — what README.md
-benchmarks and what is pitched externally as evidence-based drug matching.
-Tier 3 (custom drug discovery, marketplace, crowdfunding) is implemented but
-research-stage; see README.md's "Where this stands today" note.
+The CHORD experiment uses a separate evidence-level lookup runner. Its headline results do not validate every tier or the complete composite-ranking workflow described below.
+
+The application has cancer-context and alteration checks, with limited treatment-line rules. Normal submissions do not supply treatment line to the worker. The primary candidate path starts with the first targetable mutation, so this should not be read as comprehensive ranking across the whole patient profile.
+
+Tier 3 is a research brief. Marketplace, manufacture and crowdfunding are outside the initial offering; the diagram below is a catalogue of prototype branches, not a path to patient treatment.
 
 ---
 
-## Overview: The Three-Tier Decision Tree
+## Prototype branches and evidence categories
 
 ```
 Variant detected
@@ -43,7 +42,7 @@ Variant detected
 ┌──────────────────────────────────────────────────────┐
 │  Tier 3 — Custom drug discovery (v1: brief only)     │
 │  Generate target brief from ChEMBL + OpenTargets     │
-│  Pharma marketplace → synthesis → crowdfund path     │
+│  Separate research module; outside the lab offering  │
 └──────────────────────────────────────────────────────┘
        └─ Return discovery_brief with drug_tier="custom_discovery"
            UI shows "Custom Drug Discovery" section

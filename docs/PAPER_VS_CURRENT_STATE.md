@@ -1,4 +1,9 @@
-# Paper vs. Current Repository State — Reconciliation Record
+# Paper and repository reconciliation record
+
+For the current product and implementation status, see [PRODUCT_SCOPE.md](PRODUCT_SCOPE.md). The historical preprint describes a broader evidence-matching and discovery research agenda. That scope differs from the initial lab interpretation offering. The CHORD benchmark is a separate experiment; its limits are in [BENCHMARK.md](BENCHMARK.md#msk-chord-evidence-lookup-benchmark).
+
+The findings below are a dated reconciliation record. They preserve publication discrepancies for explicit review rather than silently changing the published title, abstract or results. Statements below about what the README currently leads with are historical observations; use the current README for product positioning.
+
 
 **Preprint**: "OpenOncology: An Open-Source Framework for Evidence-Based Drug Matching and
 De Novo Custom Drug Discovery in Precision Oncology"

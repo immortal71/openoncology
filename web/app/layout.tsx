@@ -43,12 +43,12 @@ const jetbrainsMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "OpenOncology — Precision Cancer Medicine for Everyone",
+  title: "OpenOncology | Drug evidence for labs and oncologists",
   description:
-    "Upload your genomic data. Get AI-powered mutation analysis. Find repurposed drugs. Raise funds for treatment. Free and open source.",
+    "Open-source tumor evidence matching for sequencing labs and hospitals without molecular tumor boards. Research prototype; oncologist review required.",
   openGraph: {
     title: "OpenOncology",
-    description: "Open-source precision cancer medicine platform",
+    description: "Drug evidence for labs and oncologists. Research prototype; oncologist review required.",
     type: "website",
   },
 };

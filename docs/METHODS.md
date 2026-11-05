@@ -1,7 +1,9 @@
 # OpenOncology — Methods Overview
 
 > **Status**: Research prototype. Methods have not been peer-reviewed.  
-> **Version**: May 2026
+> **Configuration checked**: November 5, 2026
+
+The methods below describe the application composite ranker and research modules. The CHORD results use a separate evidence-lookup runner; see [benchmark scope](BENCHMARK.md#msk-chord-evidence-lookup-benchmark). [Product scope](PRODUCT_SCOPE.md) lists current integration limits and planned work.
 
 ## Table of Contents
 
@@ -63,9 +65,9 @@ Default weights $(w_i)$:
 
 | Source | Weight | Rationale |
 |---|---|---|
-| DiffDock binding | 0.25 | Direct binding affinity signal; highest clinical relevance when available |
-| OncoKB | 0.25 | Curated clinical evidence; Level 1 = FDA-approved for this exact context |
-| OpenTargets | 0.20 | Genome-wide genetic + somatic association evidence |
+| DiffDock binding | 0.15 | Optional structural binding signal |
+| OncoKB | 0.40 | Variant-specific clinical actionability |
+| OpenTargets | 0.15 | Target-disease association evidence |
 | AlphaMissense | 0.10 | Variant-level pathogenicity; informs disease relevance of the target |
 | ClinicalPhase | 0.10 | Development stage proxy for safety and activity data availability |
 | CIViC | 0.10 | Community-curated clinical variant interpretation |

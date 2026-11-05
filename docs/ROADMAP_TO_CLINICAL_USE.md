@@ -1,5 +1,18 @@
 # Roadmap to clinical use
 
+## Product priorities, November 2026
+
+The first planned customer is a sequencing lab that needs treatment-evidence interpretation. Hospitals without molecular tumor boards follow. Current priorities are a hosted evaluation workspace, lab workflow integration, local drug availability and affordability, and independent clinical review with prospective evaluation in Nepal. No paying customers or hospital deployments are reported.
+
+The prototype still needs patient-wide candidate integration, verified copy-number/fusion handling through the normal upload path, and treatment-line collection and handoff. The CHORD lookup experiment does not establish these capabilities. See [product scope](PRODUCT_SCOPE.md) and [benchmark limits](BENCHMARK.md#msk-chord-evidence-lookup-benchmark).
+
+Discovery briefs, marketplace bidding and crowdfunding are separate research prototypes. Multi-omics, federated learning and mobile applications are unscheduled research directions. They are outside the initial offering.
+
+## Clinical validation work
+
+The engineering and study record below was assessed on August 19, 2026. Its dated statuses are retained as a record, not re-certified by this documentation update. New benchmark results do not close its clinical validation gates. Deployment requires checking each gate against current evidence.
+
+
 **Goal.** OpenOncology used by oncologists to inform real treatment decisions,
 and by patients through their clinician.
 

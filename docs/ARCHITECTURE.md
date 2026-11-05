@@ -1,12 +1,10 @@
-# System Architecture — OpenOncology
+# System architecture
 
-**Scope note.** This document describes every component in the codebase,
-marketplace and crowdfunding routes included. The product currently
-benchmarked and brought to market is the evidence-matching pipeline below:
-patient data in, genomic pipeline, AI/evidence layer, ranked drugs out.
-Marketplace, crowdfunding and custom drug discovery are implemented and
-covered by CI, but are a separate research-stage track, not the current
-product — see README.md.
+The initial product is treatment-evidence interpretation for sequencing labs, followed by hospitals without molecular tumor boards. A hosted evaluation workspace and local drug availability and affordability data are planned. See [product scope](PRODUCT_SCOPE.md).
+
+This document inventories the codebase, including experimental discovery, marketplace and crowdfunding components. Those experiments are outside the initial offering. The diagrams below describe software components, not a validated clinical or manufacturing workflow.
+
+The CHORD benchmark has its own evidence-lookup runner. It does not call the application's composite ranker. The normal application candidate path starts with the first targetable mutation; treatment-line input and integration of all alteration types still need work. See [benchmark scope](BENCHMARK.md#msk-chord-evidence-lookup-benchmark).
 
 ---
 

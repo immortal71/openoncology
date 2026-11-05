@@ -1,8 +1,10 @@
-<div align="center">
+<p align="center">
+  <img src="docs/assets/readme-banner.svg" alt="OpenOncology: drug evidence for labs and oncologists" width="100%">
+</p>
 
 # OpenOncology
 
-**An open-source tumor board: it reads a tumor's mutations and ranks the targeted drugs with evidence for them, with the source shown for every drug.**
+OpenOncology helps interpret tumor genomic findings by assembling a ranked drug shortlist with evidence sources for an oncologist to review.
 
 <p>
   <a href="https://github.com/immortal71/openoncology/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/immortal71/openoncology/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI" alt="CI"/></a>
@@ -10,440 +12,100 @@
   <img src="https://img.shields.io/badge/coverage-%E2%89%A552%25-22c55e?style=for-the-badge" alt="Backend coverage >= 52%"/>
   <a href="https://github.com/immortal71/openoncology/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License"/></a>
 </p>
-<p>
-  <a href="https://github.com/immortal71/openoncology/stargazers"><img src="https://img.shields.io/github/stars/immortal71/openoncology?style=for-the-badge&logo=github&color=f59e0b&logoColor=white" alt="Stars"/></a>
-  <a href="https://github.com/immortal71/openoncology/network/members"><img src="https://img.shields.io/github/forks/immortal71/openoncology?style=for-the-badge&logo=github&color=0ea5e9&logoColor=white" alt="Forks"/></a>
-  <a href="https://github.com/immortal71/openoncology/issues"><img src="https://img.shields.io/github/issues/immortal71/openoncology?style=for-the-badge&color=ef4444&logo=github&logoColor=white" alt="Issues"/></a>
-</p>
-<p>
-  <img src="https://img.shields.io/badge/Python-3.11-3b82f6?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11"/>
-  <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 15"/>
-  <img src="https://img.shields.io/badge/FastAPI-0.111-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready"/>
-  <img src="https://img.shields.io/badge/Hard%20Gate%20P@3-0.822-22c55e?style=for-the-badge" alt="Hard Gate P@3 0.822"/>
-</p>
 
-</div>
+[Demo](https://immortal71.github.io/openoncology/) · [Documentation](docs/README.md) · [Vision](VISION.md) · [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md)
 
----
+![OpenOncology drug-results workspace with a demonstration KRAS G12C case and an expanded evidence panel](docs/assets/evidence-review.jpg)
 
-## What is OpenOncology?
+*Actual frontend, demonstration data. The displayed scores are illustrative demo output.*
 
-OpenOncology reads a tumor's genetic report (mutations, copy number changes and gene fusions) and returns the targeted drugs that have evidence for them, ranked, with the evidence level and source next to each drug. It combines open knowledge bases (OncoKB levels, CIViC, ClinVar) and ranks the drugs for a whole patient at once, so a hospital without a molecular tumor board can see the same evidence a board would. It is a research and decision-support tool: an oncologist reviews every result. The code is MIT licensed and runs on the hospital's own servers.
+## Why it exists
 
-**Where this stands today.** The product under active benchmark is the evidence-matching step above: approved and guideline-linked drugs for a patient's mutations, ranked and cited against FDA-approved evidence. The custom drug discovery, marketplace and crowdfunding modules described later in this README live in the codebase and run in CI, but they are a separate, research-stage track — not what a hospital or lab deploys today, and not reflected in the benchmark numbers below. The near-term roadmap item is a drug availability and affordability layer next to the evidence (see [Roadmap](#roadmap)), not drug discovery.
+A tumor's genetic findings do not explain which treatment evidence matters for a patient. That interpretation takes specialist time, and many hospitals do not have a molecular tumor board.
 
-## Benchmark on real patients (MSK CHORD)
+Our first target customers are sequencing labs that already produce genomic reports but need oncology interpretation support. Hospitals without molecular tumor boards come next. Initial clinical evaluation is planned in Nepal, where drug access and cost are central to the problem.
 
-Tested on the MSK CHORD cohort (Memorial Sloan Kettering, Nature 2024). Of 5,190 patients who received a targeted drug, 2,505 had an alteration that matches that drug under its FDA label. On those 2,505:
+## What the product does
 
-| Metric | OncoKB data only | OpenOncology |
-|:--|--:|--:|
-| Patients with a prediction | 85.9% | 98.4% |
-| Exact drug the patient received, in top three | 73.7% | 83.6% |
-| Same drug class, in top three | 85.9% | 98.4% |
+- Looks up drug evidence for genomic findings and cancer context.
+- Ranks candidate drugs and provides evidence annotations and source references.
+- Produces a report for an oncologist to review, including gaps in the available information.
+- Supports self-hosting with publicly available code.
 
-Among the 2,466 patients it made a prediction for: same class in top three 100%, exact drug in top three 84.9%, exact drug at rank one 70.6%. Limits: this measures agreement with FDA labels, not proof of the best treatment; it is retrospective, on a US cohort, and does not model line of therapy. Reproduce it with [`scripts/mskchord/`](scripts/mskchord/README.md). An earlier 100% oncologist-agreement figure was circular and has been retracted: see [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).
+The repository is a research prototype. A hosted offering, local availability and affordability data, and site validation are planned. No paying customers or hospital deployments are reported. See [product scope](docs/PRODUCT_SCOPE.md) for implementation details and current limits.
 
-> The repository also contains experimental modules (custom drug discovery briefs, a pharma marketplace and a crowdfunding module). They are research prototypes, are not part of the benchmark, and are not offered to patients.
+## How a case moves through the workflow
 
----
+![Lab genomic findings become an evidence report for oncologist review and discussion with the patient](docs/assets/case-workflow.svg)
 
-## ⚠️ For Clinicians & Patients
+The current prototype accepts genomic files, including VCF. A complete lab integration remains in development. The clinical team checks the result against the patient's diagnosis and treatment history; a missing match remains a gap for expert review. See the [case walkthrough](docs/PATIENT_WALKTHROUGH.md).
 
-> **All drug rankings are sourced from FDA-approved evidence (OncoKB Levels 1–2, ClinVar, CIViC) and ranked against those tiers. Every recommendation that appears in the top-3 output is a real, named, approved therapy with a clinical evidence reference. No outputs are fabricated or hallucinated from the ranking engine.**
->
-> **Oncologist review is required before any treatment decision.** This platform surfaces evidence to support a molecular tumour board conversation — it does not replace one. Results should be treated as a structured evidence summary, not a prescription.
->
-> This software has not been submitted for FDA clearance or CE marking. It is not a registered clinical decision support system.
+## Review the evidence
 
----
+Expand a candidate to read its mechanism and evidence annotations. This short loop uses actual captures of the demonstration workspace.
 
-## Patient Journey
+![Seven-second demonstration: expand Sotorasib to inspect the evidence panel, pause to read, then return to the candidate list](docs/assets/evidence-review.gif)
 
-```mermaid
-flowchart TD
-    A(["🧬 Patient submits sample\nBiopsy + germline DNA test"]) --> B
-    B["⚡ AI Genomic Analysis\nNGS · AlphaMissense · OncoKB · OpenCRAVAT"]
-    B --> C{Targeted mutation found?}
-    C -- No --> D(["👨‍⚕️ General medicine"])
-    C -- Yes --> E["🤖 AI Drug Search\nAlphaFold + DiffDock + OpenTargets + ChEMBL"]
-    C -- Yes --> F(["💊 General medicine\nin the meantime"])
-    E --> G{"Existing drug near-match?\nDrug repurposing search"}
-    G -- Yes --> H(["✅ Option 1: Repurpose existing drug\nCheaper · goes straight to treatment"])
-    H --> M(["🏥 Patient receives treatment"])
-    G -- No --> I["🧪 Option 2: Custom drug discovery\nPlatform builds target brief from OpenTargets + ChEMBL"]
-    I --> I2["🔬 Discovery brief generated\nLead molecules · Ro5 scoring · AlphaFold structure"]
-    I2 --> J["🏭 Pharma marketplace\nManufacturers receive brief and bid on synthesis"]
-    J --> N{Can patient afford it?}
-    N -- Yes --> K(["🔬 Custom medicine manufactured\nPatient-specific mutation"])
-    N -- No --> L(["❤️ Crowdfund module\nRaise funds for custom drug"])
-    L --> K
-    K --> M
-```
+[Static evidence-review view](docs/assets/evidence-review.jpg) · [Media and capture details](docs/MEDIA.md)
 
-> The marketplace and crowdfund steps (right branch) are the experimental modules described above — research prototypes, not yet offered to patients. Today, a patient-facing run ends at the FDA-approved match, the repurposing candidate, or the discovery brief; manufacturing and funding are the roadmap for that branch.
+## Evaluation
 
----
+The current MSK CHORD evaluation uses a retrospective cohort from Memorial Sloan Kettering. The committed results cover 2,505 patients selected under the benchmark's drug-to-alteration rules.
 
-## ✅ What this platform does and does not do
+| Measure | Result |
+|:--|--:|
+| Patients with a prediction | 2,466 / 2,505 (98.4%) |
+| Exact drug received in the top three, all selected patients | 2,094 / 2,505 (83.6%) |
+| Exact drug received in the top three, patients with a prediction | 2,094 / 2,466 (84.9%) |
 
-| ✅ Does | ❌ Does not |
-|:--------|:-----------|
-| Surface FDA-approved and guideline-level drugs for known actionable variants | Replace a molecular tumour board or oncologist |
-| Rank candidates by OncoKB level, clinical trial phase, and AlphaMissense pathogenicity | Guarantee clinical efficacy for any individual patient |
-| Apply resistance gates (e.g. EGFR T790M blocks erlotinib, never ranks it positively) | Provide dosing, scheduling, or combination regimen advice |
-| Generate a structured evidence summary suitable for oncologist review | Make or support any treatment decision autonomously |
-| Escalate to custom drug discovery when no approved option matches | Bypass regulatory approval for any intervention |
-| Produce a blinded, reproducible benchmark score for scientific scrutiny | Claim peer review or regulatory clearance |
+This evaluates evidence lookup using alterations selected from received treatments. It does not validate the complete application workflow or establish clinical benefit. The [evaluation reference](docs/BENCHMARK.md#msk-chord-evidence-lookup-benchmark) explains the protocol, baseline and limits; the [research guide](docs/RESEARCH.md) separates this work from historical studies.
 
-> **On custom drug discovery:** When no repurposed drug matches, the platform generates a target-specific discovery brief from ChEMBL and OpenTargets evidence. These are early-stage research leads — not clinical candidates. Any compound emerging from this path requires full preclinical and clinical development before patient use.
+## Getting started
 
----
+For a quick look at saved research cases, open the [case explorer](https://immortal71.github.io/openoncology/). It displays benchmark outputs, not a hosted clinical service.
 
-## Quick Start (3 commands)
+To run the stack locally, install Docker with Compose, clone the repository and prepare the environment file:
 
 ```bash
 git clone https://github.com/immortal71/openoncology.git
 cd openoncology
-docker-compose up --build
+cp .env.example .env
 ```
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:3000 |
-| API | http://localhost:8000 |
-| API docs | http://localhost:8000/docs |
-
-> **OncoKB token setup (optional — improves Tier 1 coverage):**
-> 1. Register for a free academic token at https://oncokb.org/account/register
-> 2. Set `ONCOKB_API_TOKEN=<your-token>` in `.env`
-> 3. Without the token the pipeline uses a curated static evidence table (111 actionable genes, 335 gene/variant pairs as of 2026-07-20 — see `api/services/oncokb_evidence.py`)
-
-**No Docker?** See [docs/SETUP.md](docs/SETUP.md) for local Python + Node.js setup, environment variables, and Windows-specific steps.
-
----
-
-## AI Pipeline
-
-```mermaid
-flowchart LR
-    AM["AlphaMissense\npathogenicity"] --> OKB
-    OKB["OncoKB\nactionability"] --> CSMC
-    CSMC["COSMIC\nfrequency"] --> CBIO
-    CBIO["cBioPortal\ncross-study"] --> AF
-    AF["AlphaFold\nstructure"] --> DD
-    DD["DiffDock\ndocking"] --> RNK
-    RNK["Ranking\ncomposite score"] --> GPT
-    GPT["GPT-4o\nplain-English summary"]
-```
-
-The vNext ranking architecture is a multi-stage, multi-head system:
-
-> **Post-publication scope note:** This multi-head ranking architecture is active post-publication roadmap work. It is not the system described in the published paper. The paper describes the composite-score legacy ranker.
-
-1. Input interpretation
-2. Candidate generation
-3. Per-surface scoring (evidence, repurposing, discovery)
-4. Confidence and abstention head
-5. Explanation builder
-
-Legacy composite scoring remains the current baseline (DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Clinical Phase 10%, clamped to [0, 1]), but each surface is moving to dedicated scoring heads so approved therapies, repurposing leads, and discovery briefs are not forced into one opaque score.
-
----
-
-## System Architecture
-
-```mermaid
-graph TB
-    subgraph Client["🌐 Browser / Mobile"]
-        WEB["Next.js 15 App<br/>TypeScript · Tailwind · Framer Motion"]
-    end
-
-    subgraph Gateway["⚙️ API Gateway"]
-        API["FastAPI<br/>12 route modules · JWT auth"]
-        RL["Rate Limiter<br/>SlowAPI · Redis-backed"]
-        AUDIT["Audit log<br/>every PHI access"]
-    end
-
-    subgraph Workers["🔄 Celery Workers"]
-        GW["genomic_worker<br/>Nextflow · GATK · variant calling"]
-        AW["ai_worker<br/>AlphaMissense · AlphaFold · DiffDock · ranking"]
-        CDW["custom_drug_worker<br/>Discovery brief · AlphaFold structure · ChEMBL leads"]
-        NW["notify_worker<br/>Resend email"]
-        GDPR["gdpr_worker<br/>GDPR Art.17 cascade erasure"]
-    end
-
-    subgraph AI_Stack["🤖 AI / ML Stack"]
-        AM["AlphaMissense<br/>pathogenicity score"]
-        AF["AlphaFold Server<br/>protein structure"]
-        DD["DiffDock<br/>protein–ligand docking"]
-        LLM["GPT-4o<br/>plain-English summary"]
-    end
-
-    subgraph Data["💾 Data Layer"]
-        PG["PostgreSQL 16<br/>12 tables · Alembic"]
-        REDIS["Redis<br/>task queue · rate limit"]
-        MINIO["MinIO<br/>AES-256 · .vcf · .cif files"]
-    end
-
-    subgraph ExtAPIs["🔌 External APIs"]
-        ONCOKB["OncoKB"]
-        OT["OpenTargets GraphQL"]
-        CHEMBL["ChEMBL REST"]
-        COSMIC["COSMIC v3.1"]
-        CBIO["cBioPortal"]
-        STRIPE["Stripe Connect"]
-        KC["Keycloak OIDC"]
-    end
-
-    WEB -- HTTPS --> API
-    API --> RL --> AUDIT
-    API --> GW & NW & GDPR
-    GW --> AW
-    AW --> AM & AF & DD & LLM
-    AW --> CDW
-    CDW --> AF & OT & CHEMBL
-    API & Workers --> PG & REDIS & MINIO
-    API --> KC & STRIPE
-    AW --> ONCOKB & OT & CHEMBL & COSMIC & CBIO
-```
-
----
-
-## Validation Results
-
-OpenOncology is built as a pan-cancer precision oncology platform, and its evaluation framework is designed accordingly. Rather than relying on a single benchmark, the system is validated across five levels: canonical evidence cases, a blinded oncologist-reviewed holdout, retrospective real-patient cohorts, hard negative and abstention cases, and stability and drift checks.
-
-> **Post-publication status (May 2026 onwards):** The paper ([doi:10.21203/rs.3.rs-9707913/v1](https://doi.org/10.21203/rs.3.rs-9707913/v1)) has been published. All work in the `main` branch from this point forward is **post-publication development** and is not part of the published paper's claims. Paper-reported metrics (Hit@3 = 0.900, Standard P@3 = 0.508, FP = 0 on the 50-case blinded holdout) remain the authoritative published baseline. Any benchmark improvements, new cancer-context overrides, algorithm changes, or roadmap items described below reflect ongoing work **after** publication.
-
-### Output Surfaces
-
-OpenOncology exposes four output surfaces, each with a different scientific contract and validation standard.
-
-- **Evidence:** approved or guideline-linked therapies for actionable variants.
-- **Repurposing:** investigational or off-label leads with explicit uncertainty.
-- **Discovery:** early-stage research brief when no safe direct option exists.
-- **Benchmark:** reproducible metrics, failure modes, and dataset versions.
-
-### Benchmark Principles
-
-Benchmarking is designed to reward correctness, specificity, and honest abstention rather than forced coverage. Every benchmark case follows one contract with expected positive labels, explicitly disallowed labels, tumor context, and surface type. This makes it possible to measure both retrieval quality and whether unsafe or unsupported options were correctly excluded.
-
-### PRE-PUBLICATION — Blinded 50-case oncologist holdout
-
-> These numbers are **frozen**. They are the exact values reported in the preprint and cannot be retroactively changed.
-
-Results from `python scripts/blind_external_validation.py --n-cases 50 --seed 11`
-(OncoKB static fallback · no live CIViC · offline mode — see `validation_results/holdout_50_metrics.json`):
-
-| Metric | Result | Meaning |
-|:-------|:-------|:--------|
-| **Hit@3** | **0.900** | Gold-standard drug in top-3 for 90% of cases |
-| **Standard Precision@3** | **0.508** (ceiling: 0.625) | 50.8% of top-3 slots match gold standard; ceiling is 62.5% for this mixed-difficulty holdout |
-| **Normalised Precision@3** | **0.817** | Near-perfect when normalised for single-drug gold standards |
-| **False positives** | **0** (FP rate 0%) | No cases had a spurious high-confidence recommendation |
-| **Mean Reciprocal Rank** | **0.883** | Gold drug appears near the top of the ranked list on average |
-| **NDCG@3** | **0.883** | Strong ranking quality across the full holdout |
-
-Holdout covers 40 sensitivity cases (16 single-drug, 24 multi-drug) and 10 negative-control specificity cases drawn from literature-sourced tumour board reports (JCO Precision Oncology, Annals of Oncology, Nature Medicine). Full case list in `validation_results/holdout_50_results.txt`; exact per-case scoring in `blind_review_key_scoring.json`.
-
-### POST-PUBLICATION — Ongoing hard clinical gate (main branch)
-
-> These numbers reflect **current ongoing development** after the paper was published. Updated whenever the gate is run. Last run: 2026-05-29.
-
-| Metric | Value | Gate threshold | Status |
-|:-------|:------|:---------------|:-------|
-| **Standard P@3** | **0.8222** (≈ 0.822) | ≥ 0.65 | ✅ PASS |
-| **Hit@3** | **100.0%** | ≥ 90% | ✅ PASS |
-| **False positives** | **0** | ≤ 0 | ✅ PASS |
-| Cases | 83 total | — | 75 sensitivity + 8 negative controls |
+Review the credentials and service settings in the [setup guide](docs/SETUP.md#4-environment-variables), then start the stack:
 
 ```bash
-python scripts/hard_benchmark_gate.py   # verify yourself — artifact: hard_benchmark_results.json
+docker compose up --build
 ```
 
-Full methodology, metric definitions, and change log: [docs/BENCHMARK.md](docs/BENCHMARK.md)
+The web app runs at [localhost:3000](http://localhost:3000); the API reference is at [localhost:8000/docs](http://localhost:8000/docs). Setup also covers local Python/Node.js development, evidence credentials and Windows instructions. The [Vercel guide](docs/DEPLOY_VERCEL_DEMO.md) covers the demo frontend.
 
-### 100-case TCGA real-patient benchmark
+## Architecture and development
 
-Measured 2026-08-12 on a pinned cohort of 72 cases. Replay it with
-`--manifest validation_results/benchmark_cohort_72.json`. Without a manifest the
-cohort is drawn live and differs between runs, which is why `--n 100` returned
-72 cases here.
+| Component | Stack |
+|:--|:--|
+| Web workspace | Next.js, React, TypeScript |
+| API and reports | Python, FastAPI |
+| Background processing | Celery, Redis |
+| Storage | PostgreSQL, MinIO |
+| Genomic preprocessing | Nextflow |
 
-| Tier | Patients | % |
-|:-----|:---------|:--|
-| Tier 1 (FDA-approved direct match) | 10 | 13.9% |
-| Tier 2 (off-label FDA repurposing) | 31 | 43.1% |
-| Tier 3 (clinical trial match) | 11 | 15.3% |
-| No recommendation | 20 | 27.8% |
-| **Total covered** | **52** | **72.2%** |
+Source is organised under [`web/`](web/), [`api/`](api/) and [`pipeline/`](pipeline/). [Architecture](docs/ARCHITECTURE.md) covers components and data flow; [methods](docs/METHODS.md) describes the application ranker. The CHORD experiment uses a separate lookup runner.
 
-This previously read 100%. That figure counted the Tier 4 custom-design
-escalation path as covered, and custom design is now manual-only, so those
-cases report as no recommendation instead. Full explanation in
-[docs/BENCHMARK.md](docs/BENCHMARK.md).
+Contributors can run `make help`, `make lint` and `make test` in a POSIX shell, including Git Bash on Windows. See [CONTRIBUTING.md](CONTRIBUTING.md) for environment setup, separate Python test suites and scientific-review requirements. Bug reports and contributions belong in [GitHub issues](https://github.com/immortal71/openoncology/issues) and pull requests.
 
-### 200-case TCGA real-patient benchmark
+## Future expansion
 
-Measured 2026-08-12 on a pinned cohort of 142 cases. Replay it with
-`--manifest validation_results/benchmark_cohort_142.json`.
+The next product work is a hosted evaluation workspace for labs, stronger integration of genomic findings, and local drug availability and affordability beside the evidence. Independent oncologist review and prospective evaluation will guide deployment.
 
-| Tier | Patients | % |
-|:-----|:---------|:--|
-| Tier 1 (FDA-approved direct match) | 30 | 21.1% |
-| Tier 2 (off-label FDA repurposing) | 58 | 40.8% |
-| Tier 3 (clinical trial match) | 16 | 11.3% |
-| No recommendation | 38 | 26.8% |
-| **Total covered** | **104** | **73.2%** |
+After validation of the initial lab workflow, the plan is to offer hospitals a hosted workspace with support and validation at each site. Evaluation in Nepal will help establish what needs to change for resource-limited settings.
 
-The 200-patient set is intentionally harder and includes many variants with no direct approved match, which makes it useful for evaluating escalation behaviour and failure safety. This previously read 100% for the same reason as the 100-case set: the custom-design escalation path was counted as coverage.
+Multi-omics, federated learning, mobile access and discovery research are longer-term directions without a committed schedule. Discovery briefs, marketplace and crowdfunding code remain separate experiments. They are outside the initial offering and do not establish a path to manufacture a patient-specific treatment.
 
-**Benchmark artifacts** (download directly):
+Read the [Vision](VISION.md) and [expansion roadmap](docs/ROADMAP.md) for the direction, priorities and evidence needed before moving forward.
 
-| Cohort | JSON artifact |
-|:-------|:--------------|
-| 100 patients | [real_patient_benchmark_100.json](validation_results/real_patient_benchmark_100.json) |
-| 200 patients | [real_patient_benchmark_200.json](validation_results/real_patient_benchmark_200.json) |
+## License and intended use
 
-**Run it yourself:**
-```bash
-python scripts/blind_external_validation.py --n-cases 50   # 50-case blinded holdout (replicates paper)
-python scripts/hard_benchmark_gate.py                       # ongoing hard clinical gate
-python scripts/fetch_real_patients.py --n 100 --out-json validation_results/real_patient_benchmark_100.json
-python scripts/fetch_real_patients.py --n 200 --out-json validation_results/real_patient_benchmark_200.json
-```
+The code is available under the [MIT license](LICENSE). Evidence databases have their own access and licensing terms.
 
-For oncologist concordance stats and plain-language interpretation see [docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md](docs/ONCOLOGIST_CONCORDANCE_PLAIN_LANGUAGE.md).
-
----
-
-## What's Inside
-
-| Area | Details |
-|:-----|:--------|
-| **Genomics pipeline** | Nextflow · FastQC · Trimmomatic · BWA-MEM2 · GATK · OpenCRAVAT · GRCh38 |
-| **AI scoring** | AlphaMissense (3.6 GB SQLite) · AlphaFold Server · DiffDock · GPT-4o |
-| **Drug evidence** | OpenTargets GraphQL · ChEMBL REST · OncoKB · ClinVar · CIViC · COSMIC v3.1 · cBioPortal |
-| **Ranking** | DiffDock 30% + OpenTargets 25% + OncoKB 25% + AlphaMissense 10% + Phase 10% |
-| **Custom drug discovery (research-stage)** | Target-specific discovery brief · ChEMBL lead molecules · Ro5 oral-exposure scoring · scaffold/fragment library · medicinal-chemistry handoff notes |
-| **Custom drug worker (research-stage)** | Async Celery worker · AlphaFold mutation-structure generation · DrugRequest job status polling |
-| **Marketplace (experimental)** | Stripe Connect Express prototype, not offered to users |
-| **Crowdfunding (experimental)** | Stripe Elements prototype, not offered to users |
-| **Auth & access** | Keycloak OIDC/OAuth2 · roles: patient · oncologist · admin |
-| **Privacy controls** | Audit logging, data erasure and export endpoints, designed with HIPAA and GDPR in mind (not certified) |
-| **Security CI** | Weekly: pip-audit · npm audit · Bandit · Semgrep OWASP · ZAP baseline · Trivy |
-
----
-
-## Documentation
-
-| Document | Contents |
-|:---------|:--------|
-| [docs/SETUP.md](docs/SETUP.md) | Full setup: Python, Node.js, Docker, env vars, troubleshooting, Windows |
-| [docs/DEPLOY_VERCEL_DEMO.md](docs/DEPLOY_VERCEL_DEMO.md) | Deploying the public demo frontend to Vercel |
-| [docs/RUNBOOK_STAGING_DEPLOY.md](docs/RUNBOOK_STAGING_DEPLOY.md) | Full-stack staging deploy on Kubernetes (Postgres, MinIO, Keycloak, Celery) |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System components, data flow, worker roles, database schema |
-| [docs/DRUG_DECISION_LOGIC.md](docs/DRUG_DECISION_LOGIC.md) | FDA vs repurposed vs custom — three-tier decision tree |
-| [docs/REPURPOSING_ALGORITHM.md](docs/REPURPOSING_ALGORITHM.md) | Repurposing scoring, comparison with DGIdb / DrugBank / OpenTargets |
-| [docs/BENCHMARK.md](docs/BENCHMARK.md) | Pre-paper vs post-paper benchmark split, metric definitions, change log |
-| [docs/METHODS.md](docs/METHODS.md) | Full scientific methods |
-| [docs/HIPAA_COMPLIANCE.md](docs/HIPAA_COMPLIANCE.md) | Privacy controls mapped to HIPAA §164 (not a certification) |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to add evidence, run benchmarks, submit PRs |
-
----
-
-## Tech Stack
-
-| Layer | Technologies |
-|:------|:------------|
-| **Frontend** | Next.js 15 · TypeScript · Tailwind CSS · Framer Motion · React Query |
-| **Backend** | FastAPI · SQLAlchemy 2 async · Celery · Redis |
-| **Database** | PostgreSQL 16 · Alembic migrations (12 tables) |
-| **Storage & Auth** | MinIO (AES-256) · Keycloak OIDC/OAuth2 |
-| **Genomics** | Nextflow · FastQC · BWA-MEM2 · GATK · OpenCRAVAT |
-| **AI / ML** | AlphaMissense · AlphaFold Server · DiffDock · GPT-4o |
-| **Drug Databases** | OpenTargets GraphQL · ChEMBL REST · COSMIC v3.1 · OncoKB · ClinVar · CIViC |
-| **Custom Drug Discovery** | `drug_discovery.py` service · `custom_drug_worker` Celery task · Ro5 oral-exposure scoring · ChEMBL lead pipeline |
-| **Payments** | Stripe Connect Express (KYC + escrow + competitive bidding) |
-| **DevOps** | Docker Compose · Kubernetes/Helm · Prometheus · Grafana · GitHub Actions |
-
----
-
-## Roadmap
-
-| Phase | Status | Milestone |
-|:-----:|:------:|:----------|
-| **Phase 1** | ✅ | Infrastructure · FastAPI · Next.js · Nextflow pipeline |
-| **Phase 2** | ✅ | Real mutation detection · OncoKB/ClinVar/CIViC · Oncologist portal |
-| **Phase 3** | ✅ | AlphaMissense · AlphaFold · DiffDock · Drug ranking algorithm |
-| **Phase 4** | 🧪 | Experimental: pharma marketplace and crowdfunding prototypes |
-| **Phase 5** | ✅ | Kubernetes/Helm deploy · privacy controls · Security CI |
-| **Phase 5.5** | ✅ | Custom drug discovery pipeline · ChEMBL lead scoring · `custom_drug_worker` · `/custom-drug/[id]` UI |
-| **Phase 5.6** | ✅ | Blinded oncologist holdout validation · Hit@3 = 0.900 · False positives = 0 · Hard benchmark gate (P@3 ≥ 0.65) |
-| **Phase 5.7** | ✅ | Hard gate P@3 = 0.8222 (current — see Benchmark section) · Repotrectinib (NTRK) · EGFR exon20 bug fix · Drug-tier API field · CLDN18/DLL3/FOLR1 coverage · Docs restructure |
-| **Phase 5.8** | 🔜 | Drug availability, access and affordability data layer — what a tumor board weighs alongside evidence |
-| **Phase 6** | 🔜 | Multi-omics (RNA-seq, methylation) · Federated learning · Mobile app |
-| **v2 (research direction, unscheduled)** | 🔭 | De novo molecule generation · ADME/PK prediction · Custom drug synthesis planning |
-
----
-
-## Security & Privacy
-
-| Control | Implementation |
-|:--------|:---------------|
-| **Authentication** | Keycloak OIDC/OAuth2 · Role-based: `patient` · `oncologist` · `admin` |
-| **Encryption in transit** | TLS 1.3 enforced · HSTS headers in production ingress |
-| **Encryption at rest** | AES-256 on MinIO · PostgreSQL WAL encrypted |
-| **Audit logging** | `AuditMiddleware` logs every PHI access: user, path, IP, duration |
-| **Rate Limiting** | Redis-backed SlowAPI (120 req/min · strict limits on auth + upload) |
-| **GDPR Compliance** | `GET /api/me/export` (Art. 20) · `DELETE /api/me` cascade erasure (Art. 17) |
-| **Automated Security Scanning** | Weekly CI: `pip-audit` · `npm audit` · Bandit SAST · Semgrep OWASP · ZAP baseline · Trivy |
-
----
-
-## 📄 Cite This Work
-
-If you use OpenOncology in research, a clinical workflow, or a derivative project, please cite the preprint:
-
-[![DOI](https://img.shields.io/badge/DOI-10.21203%2Frs.3.rs--9707913%2Fv1-blue?style=flat-square)](https://doi.org/10.21203/rs.3.rs-9707913/v1)
-[![Research Square](https://img.shields.io/badge/Preprint-Research%20Square-orange?style=flat-square)](https://www.researchsquare.com/article/rs-9707913/v1)
-
-> **Kharel, A.** (2026). *OpenOncology: An Open-Source Framework for Evidence-Based Drug Matching and De Novo Custom Drug Discovery in Precision Oncology.* Research Square. https://doi.org/10.21203/rs.3.rs-9707913/v1
-
-```bibtex
-@misc{kharel2026openoncology,
-  title     = {OpenOncology: An Open-Source Framework for Evidence-Based
-               Drug Matching and De Novo Custom Drug Discovery in Precision Oncology},
-  author    = {Kharel, Aashish},
-  year      = {2026},
-  month     = {05},
-  publisher = {Research Square},
-  doi       = {10.21203/rs.3.rs-9707913/v1},
-  url       = {https://www.researchsquare.com/article/rs-9707913/v1},
-  note      = {Preprint -- under review}
-}
-```
-
-> **Note:** This preprint describes **OpenOncology v2**, including the two-stage escalation pipeline, crowdfunding marketplace, and the blinded 50-case oncologist holdout validation.
-
-For full paper details, abstract, and codebase-to-paper mapping see [PAPER.md](PAPER.md).
-
----
-
-## ⚠️ Disclaimer
-
-OpenOncology surfaces FDA-sourced evidence rankings to support expert clinical review. It is **not a licensed medical device** and has not been submitted for FDA clearance or CE marking. Drug rankings, toxicity estimates, and summaries are based on published evidence databases and must be interpreted by a qualified oncologist in the context of the individual patient. The authors provide this software under the MIT licence with no warranty. Any patient-facing deployment or commercial application requires independent regulatory assessment.
-
----
-
-<div align="center">
-
-[⭐ Star this repo](https://github.com/immortal71/openoncology) &nbsp;·&nbsp;
-[🐛 Report a bug](https://github.com/immortal71/openoncology/issues/new?template=bug_report.md) &nbsp;·&nbsp;
-[📖 Setup guide](docs/SETUP.md) &nbsp;·&nbsp;
-[📄 Methods](docs/METHODS.md) &nbsp;·&nbsp;
-[📊 Benchmark](docs/BENCHMARK.md)
-
-</div>
+OpenOncology is research-use software. Every result requires independent review by a qualified oncologist. It has not been submitted for FDA clearance or CE marking. Clinical deployment requires site validation and an appropriate regulatory assessment.

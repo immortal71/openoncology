@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible problem in the software or documentation.
+body:
+  - type: markdown
+    attributes:
+      value: Use synthetic examples. Do not include patient records, credentials or private information.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can we reproduce it?
+      description: Include steps and a small synthetic example where possible.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Include the commit, browser and operating system where relevant.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add relevant screenshots or sanitized error messages.

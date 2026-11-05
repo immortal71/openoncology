@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="260" viewBox="0 0 1400 260" role="img" aria-labelledby="title desc">
+  <title id="title">The lab-to-oncologist workflow</title>
+  <desc id="desc">A lab supplies genomic findings, OpenOncology assembles evidence, an oncologist reviews the report, and the clinical team decides next steps with the patient.</desc>
+  <rect width="1400" height="260" rx="16" fill="#F6F7F2"/>
+  <g stroke="#CFD8CA" fill="#FFFFFF">
+    <rect x="30" y="45" width="305" height="170" rx="10"/>
+    <rect x="375" y="45" width="305" height="170" rx="10"/>
+    <rect x="720" y="45" width="305" height="170" rx="10"/>
+    <rect x="1065" y="45" width="305" height="170" rx="10"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#24563A" font-size="16" letter-spacing="1.5">
+    <text x="53" y="80">01 / LAB</text><text x="398" y="80">02 / EVIDENCE</text>
+    <text x="743" y="80">03 / ONCOLOGIST</text><text x="1088" y="80">04 / CLINICAL TEAM</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#18291F" font-size="23" font-weight="700">
+    <text x="53" y="126">Genomic findings</text><text x="398" y="126">Evidence report</text>
+    <text x="743" y="126">Expert review</text><text x="1088" y="126">Next steps</text>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" fill="#526252" font-size="17">
+    <text x="53" y="159">Variants and cancer context</text><text x="398" y="159">Candidates, sources and gaps</text>
+    <text x="743" y="159">Clinical interpretation</text><text x="1088" y="159">Discussion with the patient</text>
+  </g>
+  <g stroke="#537A5D" stroke-width="2" fill="none"><path d="M344 130H365m-7-6 7 6-7 6"/><path d="M689 130H710m-7-6 7 6-7 6"/><path d="M1034 130H1055m-7-6 7 6-7 6"/></g>
+</svg>
