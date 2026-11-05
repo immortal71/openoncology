@@ -10,6 +10,10 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 ## Ready
 
+### Frontend documentation note, November 5
+- Added a README note explaining temporary differences between frontend experiments, website visuals and documentation. Feature documentation should track implementation, with planned features labelled. Invites mismatch reports and design feedback through the existing maintainer email. Documentation only; no feature, ranking or benchmark changes.
+- Publication: [PR #216](https://github.com/immortal71/openoncology/pull/216). README media audit and diff checks passed; merging remains manual.
+
 <!-- Populate with /groom "<objective>". Entries use this shape:
 
 ### OO-N: Consolidate design tokens into globals.css
