@@ -1,7 +1,7 @@
 const METRICS = [
-  { label: "Hit@3", value: "0.900" },
-  { label: "False Positives", value: "0%" },
-  { label: "License", value: "Open Source" },
+  { label: "Retrospective lookup benchmark", value: "MSK CHORD" },
+  { label: "Oncologist review", value: "Required" },
+  { label: "Code license", value: "MIT" },
 ];
 
 export default function CredibilityStrip() {

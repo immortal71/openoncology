@@ -178,9 +178,7 @@ function WorkspaceInner() {
             className="border px-3 py-2 mb-4 text-xs flex items-center gap-2"
             style={{ borderColor: "#D9C08A", backgroundColor: "#FAF6EA", color: "#6B4A1E" }}
           >
-            Demo mode — showing the KRAS G12C demo case. Submit a real sample or add
-            <code className="font-mono mx-1">?result_id=&lt;your submission id&gt;</code>
-            to the URL to query the live backend.
+            Demonstration case: KRAS G12C. Research use only. Every result requires oncologist review.
           </div>
         )}
 

@@ -75,12 +75,21 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 
 ## In progress
 
+
 <!-- One entry maximum. An entry stranded here means a session died mid-work;
      /standup will surface it. -->
 
 ---
 
 ## In review
+
+### Current product documentation (November 5, 2026)
+- Scope: lab interpretation first, hospitals next; hosted evaluation and local availability/affordability planned. Documentation and homepage copy only.
+- Draft presentation: product-first README, original SVG banner/workflow, real production-frontend screenshots, seven-second evidence-review GIF, Vision, Code of Conduct, contributor guide, issue forms and PR template. Skills used: find-skills, readme-blueprint-generator, documentation, humanizer, webapp-testing and video-to-gif.
+- Validation: production build passed; 46 frontend unit tests and 5 documentation/coverage consistency tests passed; relative documentation links, SVG XML, issue-form structure and media loading checked. GIF is 930x410, 7 seconds and 160,393 bytes. Visual README and Vision navigation reviewed in browser. No scientific code, scripts, data, result artifacts or PAPER.md changed.
+- Publication: [PR #214](https://github.com/immortal71/openoncology/pull/214) is open against main from `docs/yc-current-product`. Repository About description was updated separately. Commits are authored and committed by immortal71, without co-author attribution. Merging remains manual.
+- Validation: preserve ranking code, benchmark scripts, datasets, saved results and the historical published paper. Describe CHORD's treatment-conditioned input selection and separate lookup runner explicitly.
+- Scientific follow-up: reconcile the baseline protocol, review shared-map coupling and broad ground-truth rules, and evaluate the complete application without outcome-based input selection. These require scientific review rather than wording changes.
 
 <!-- Entry plus PR URL. Cleared by hand when merged. -->
 

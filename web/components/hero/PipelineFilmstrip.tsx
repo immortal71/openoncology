@@ -1,27 +1,27 @@
 const STAGES = [
   {
     num: "01",
-    tag: "VARIANT CALL",
-    title: "Actionability Check",
-    desc: "Validate clinical relevance in your cancer context. If not actionable, we state it directly.",
+    tag: "GENOMIC INPUT",
+    title: "Supply findings",
+    desc: "Start with genomic findings and cancer context. Lab integration remains in development.",
   },
   {
     num: "02",
-    tag: "DRUG RANK",
-    title: "Repurposed Options",
-    desc: "Rank already-approved candidates first — lower cost, lower risk, faster decision.",
+    tag: "EVIDENCE LOOKUP",
+    title: "Find drug evidence",
+    desc: "Look up treatment evidence for the supplied findings and record gaps in the available information.",
   },
   {
     num: "03",
-    tag: "CUSTOM BRIEF",
-    title: "Custom Discovery Brief",
-    desc: "Structure prediction, docking, and lead ranking generated only when repurposing fails.",
+    tag: "EVIDENCE REPORT",
+    title: "Review the shortlist",
+    desc: "Read the ranked candidates with their evidence sources and limitations.",
   },
   {
     num: "04",
-    tag: "SYNTHESIS",
-    title: "Manufacture + Funding",
-    desc: "Place a synthesis request and launch crowdfunding from the same case in one step.",
+    tag: "CLINICIAN REVIEW",
+    title: "Decide next steps",
+    desc: "A qualified oncologist checks the evidence in the patient's clinical context.",
   },
 ];
 

@@ -1,0 +1,22 @@
+name: Feature or documentation request
+description: Suggest an improvement to the product, workflow or documentation.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Explain who needs this and what they are trying to do.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed improvement
+      description: Describe the behavior or documentation you would find useful.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting context
+      description: Link relevant evidence or examples. Use synthetic data and omit private information.

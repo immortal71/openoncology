@@ -5,7 +5,23 @@ export default function CiteThisWork() {
   return (
     <div className="border border-white/10 bg-white/[0.02] p-6">
       <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-muted mb-3">
-        Cite this work
+        Research and evaluation
+      </p>
+      <p className="text-sm text-neutral-body leading-relaxed mb-3">
+        The MSK CHORD experiment evaluates evidence lookup using alterations
+        selected from received treatments. It does not validate the complete
+        application or establish clinical benefit.{" "}
+        <a
+          href="https://github.com/immortal71/openoncology/blob/main/docs/BENCHMARK.md#msk-chord-evidence-lookup-benchmark"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-neutral-heading underline underline-offset-2"
+        >
+          Methods and limits
+        </a>
+      </p>
+      <p className="text-xs text-neutral-muted mb-2">
+        Historical preprint covering the broader research agenda:
       </p>
       <p className="text-sm text-neutral-body leading-relaxed italic">
         Kharel, A. <span className="not-italic">OpenOncology: An Open-Source Framework for

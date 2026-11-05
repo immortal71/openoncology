@@ -36,12 +36,13 @@ export default function LandingPage() {
             {/* Headline + CTA */}
             <div>
               <p className="font-mono text-xs text-neutral-muted mb-5 tracking-wider">
-                KRAS · G12C · chr12:25398284 · COSV57014428
+                Open-source tumor evidence matching
               </p>
               <CyclingHeadline />
               <p className="mt-5 max-w-lg text-neutral-body text-base leading-relaxed">
-                Actionability check → repurposing → custom discovery brief → manufacturing.
-                A fixed clinical workflow that keeps every action linked to evidence.
+                OpenOncology brings drug evidence into one workspace for sequencing
+                labs and hospitals without a molecular tumor board. An oncologist
+                reviews the ranked shortlist and its sources.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
@@ -63,10 +64,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Credibility strip + citation ─────────────────────────
-          Part 2 (experimental) — real numbers from docs/BENCHMARK.md,
-          blinded 50-case holdout, pre-publication baseline. Citation
-          sourced from README.md's real DOI/preprint block. */}
+      {/* Research references and intended use */}
       <section className="clinical-shell py-10">
         <div className="grid md:grid-cols-[1.4fr_1fr] gap-4 items-stretch">
           <CredibilityStrip />
@@ -80,19 +78,17 @@ export default function LandingPage() {
           Goal
         </p>
         <p className="text-lg md:text-xl text-neutral-heading leading-relaxed max-w-3xl">
-          Precision oncology already works, if a hospital has genomic sequencing,
-          evidence curators, and a tumor board. Most don&apos;t. OpenOncology is the
-          same evidence-based matching logic, open and free — rank a mutation
-          against approved and repurposing candidates, cite the evidence, and say
-          plainly when nothing is actionable yet.
+          Our first customers are sequencing labs that already produce genomic
+          reports but need oncology interpretation support. Hospitals without
+          molecular tumor boards come next. The code is open source. We plan to
+          offer a hosted workspace with support and validation at each site.
         </p>
       </section>
 
-      {/* ── Pipeline filmstrip ───────────────────────────────────
-          Part 2 (experimental) — the four real workflow stages. */}
+      {/* Intended lab workflow */}
       <section className="clinical-shell py-14 border-t border-white/5">
         <p className="font-mono text-xs uppercase tracking-widest text-neutral-muted mb-8">
-          How each case moves forward
+          The report-review workflow
         </p>
         <PipelineFilmstrip />
       </section>
@@ -100,32 +96,32 @@ export default function LandingPage() {
       {/* ── Vision ───────────────────────────────────────────── */}
       <section className="clinical-shell py-14">
         <p className="font-mono text-xs uppercase tracking-widest text-neutral-muted mb-4">
-          Vision
+          What we are building next
         </p>
         <p className="text-neutral-body leading-relaxed text-base max-w-3xl mb-8">
-          Repurposing covers most cases. It won&apos;t cover all of them. When a
-          mutation has no approved or repurposing match, OpenOncology escalates to
-          structure prediction and docking, and can route a synthesis request
-          straight into open crowdfunding — so an unmatched mutation becomes a
-          queued discovery problem, not a dead end.
+          A drug can have strong evidence and still be out of reach. We plan to
+          add local availability, access and affordability beside the evidence,
+          starting with evaluation in Nepal. That layer and the hosted offering
+          are still planned. The current software is a research prototype with
+          no paying customers or hospital deployments.
         </p>
         <div className="flex flex-col gap-3 max-w-2xl">
           <div className="flex items-center gap-3">
             <span className="border border-white/15 px-4 py-2 text-sm text-neutral-body font-mono">
-              Repurposing match found
+              Drug evidence
             </span>
             <span className="text-neutral-muted">→</span>
             <span className="border border-white/15 px-4 py-2 text-sm text-neutral-muted font-mono">
-              Done
+              Oncologist review
             </span>
           </div>
           <div className="flex items-center gap-3">
             <span className="border border-white/15 px-4 py-2 text-sm text-neutral-body font-mono">
-              No match
+              Planned next
             </span>
             <span className="text-neutral-muted">→</span>
             <span className="border-2 border-white px-4 py-2 text-sm text-neutral-heading font-mono font-semibold">
-              Custom brief → crowdfunded synthesis
+              Local availability and affordability
             </span>
           </div>
         </div>
@@ -139,11 +135,9 @@ export default function LandingPage() {
               Community
             </p>
             <p className="text-neutral-body leading-relaxed text-base">
-              Built solo so far, out in the open. The validation methodology, the
-              bugs found and fixed, and the cases where results came up short are
-              all public. If you work in computational biology or oncology, or
-              want to help expand the holdout cohorts — this needs more hands
-              than one.
+              The methods, bugs and evaluation limits are public. We welcome
+              contributions from oncology and computational biology, especially
+              independent review of the evidence and the lab workflow.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <a
@@ -177,14 +171,14 @@ export default function LandingPage() {
           column, not new claims. */}
       <section className="clinical-shell py-14 border-t border-white/5">
         <p className="font-mono text-xs uppercase tracking-widest text-neutral-muted mb-8">
-          What this doesn&apos;t do yet
+          Research-use prototype
         </p>
         <div className="grid sm:grid-cols-2 gap-x-10 gap-y-5 max-w-4xl">
           {[
-            "Replace a molecular tumour board or oncologist review.",
-            "Guarantee clinical efficacy for any individual patient.",
-            "Provide dosing, scheduling, or combination regimen advice.",
-            "Claim peer review or regulatory clearance for any candidate.",
+            "Every result requires independent oncologist review.",
+            "Retrospective lookup results do not establish clinical benefit.",
+            "Patient-wide ranking and clinical-context integration need further work.",
+            "Discovery, marketplace and crowdfunding modules are separate experiments.",
           ].map((item) => (
             <div key={item} className="flex gap-3">
               <span className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-neutral-muted" />
@@ -196,7 +190,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-white/10 py-10">
         <div className="clinical-shell flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <p className="text-sm text-neutral-muted">OpenOncology — Open source precision medicine platform</p>
+          <p className="text-sm text-neutral-muted">OpenOncology: drug evidence for labs and oncologists</p>
           <p className="font-mono text-xs text-neutral-muted">
             Research-use only. Treatment decisions require a licensed oncologist.
           </p>

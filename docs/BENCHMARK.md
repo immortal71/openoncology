@@ -1,18 +1,26 @@
-# OpenOncology — Benchmark Reference
+# Benchmark reference
 
-This document is the authoritative reference for all benchmark numbers.
-There are **two distinct benchmark contexts** and they must never be conflated:
+Each result belongs to a particular runner, dataset and date. The CHORD lookup experiment, frozen 50-case holdout and ongoing hard regression gate evaluate different things.
 
-| Context | Description |
-|---------|-------------|
-| **PRE-PUBLICATION** | The blinded 50-case holdout used in the preprint. Frozen. |
-| **POST-PUBLICATION** | The ongoing hard clinical gate on main. Updated as evidence expands. |
+## MSK CHORD evidence-lookup benchmark
 
----
+The October 27, 2026 saved run has 2,505 benchmarkable patients, 2,466 predictions and 2,094 exact top-three hits. Exact top-three agreement is 83.6% across all benchmarkable patients and 84.9% among predictions. Exact-or-class top-three agreement is 98.4% and 100%, respectively. Exact top-one agreement among predictions is 70.6%.
+
+Sources: [metric summary](../validation_results/msk_chord_scored_metrics.json), [saved predictions](../validation_results/msk_chord_openoncology_run.json), [cohort](../validation_results/msk_chord_targeted_cohort.json) and [runner](../scripts/mskchord/run_openoncology_on_mskchord.py).
+
+The runner selects qualifying alterations using each patient's received treatment and the benchmark target map. It calls the evidence lookup, sorts by level and uses a CIViC fallback. It does not call the application's full composite ranker. The target map also filters CIViC candidates, uses broad any-mutation rules for several genes and omits cancer context. The runner does not apply the application's indication gate. These choices limit claims of independent, whole-profile or label-specific clinical validation.
+
+The saved OncoKB-only run has 2,151 predictions and 1,845 exact top-three hits (73.7% of all 2,505). The existing runner README describes removing CIViC and target-class filtering for the baseline, while the preprint says only CIViC changed. A reproducible baseline configuration and consistent methods description are needed before attributing the difference to CIViC alone. This documentation update does not change those saved runs or the protocol.
+
+The experiment is retrospective, uses a US academic cohort and does not model treatment line. Same-class agreement is defined by the scorer's drug groups; it does not prove that the drugs are clinically interchangeable for a given patient. See [reproduction instructions](../scripts/mskchord/README.md) and the [research write-up](../preprints/msk_chord_benchmark.md), read with these scope limits.
+
+## Latest observed hard-gate run
+
+Main CI [run 41783696590](https://github.com/immortal71/openoncology/actions/runs/41783696590), November 4, 2026, at `cdff27f`, printed standard P@3 0.801, Hit@3 100% and zero false positives. All hard-gate checks passed. The 0.8222 figures retained below belong to an older artifact snapshot, not this CI run.
 
 ## ⚠️ Integrity rules
 
-- Numbers in this file are sourced directly from gate artifacts (`hard_benchmark_results.json`) or from the published validation run (`validation_results/holdout_50_metrics.json`).  
+- Each section cites its saved artifacts or a dated CI run. Historical figures remain attributed to their original evaluation.
 - Never edit numbers here to match desired output — run the gate and copy what it prints.  
 - Never add benchmark cases by checking algorithm output first. Cases must be clinically sourced.  
 - Never expand `known_drugs` in a benchmark case to manufacture a P@3 gain.  
@@ -66,7 +74,7 @@ python scripts/hard_benchmark_gate.py
 Mode: OncoKB static fallback · offline (no live API calls required)  
 Artifact: `hard_benchmark_results.json` (updated on every gate run)
 
-### Current hard clinical gate — last run 2026-05-29
+### Historical hard-gate artifact snapshot (May 2026)
 
 | Metric | Value | Gate threshold | Status |
 |--------|-------|----------------|--------|
@@ -83,10 +91,10 @@ Artifact: `hard_benchmark_results.json` (updated on every gate run)
 |------|--------|-----------|-----------|
 | 2026-05-03 | Repotrectinib NTRK evidence; EGFR exon20ins bug fix | ~0.800 | 0.817 |
 | 2026-05-29 (early run) | FGFR2-BICC1/FGFR3-TACC3 aliases; CLDN18/DLL3/FOLR1 evidence + context overrides | 0.817 | 0.8178 |
-| 2026-05-30 (current) | Additional case/evidence updates since the 0.8178 run | 0.8178 | **0.8222** (see table above — this is the current `hard_benchmark_results.json`) |
+| 2026-05-30 | Additional case/evidence updates since the 0.8178 run | 0.8178 | **0.8222** (historical artifact snapshot; see the dated CI result above) |
 
 > The 0.817 / 0.8178 entries above are a same-week earlier snapshot, superseded by the
-> 0.8222 run now current at the top of this section. See
+> 0.8222 historical snapshot in this section. See
 > `docs/BENCHMARK_v0817_2026-05-29.md` for that snapshot's full detail (kept for
 > forensic/methodology reference, not as a current number).
 
@@ -210,7 +218,8 @@ For comparison, the previous committed artifact recorded `DIRECT_FDA` 15,
 
 ## 5-fold cross-validation (not previously cited anywhere)
 
-An additional 5-fold CV run exists at [benchmark_results.json](../benchmark_results.json)
+The historical record reports an additional 5-fold CV run in `benchmark_results.json`.
+That file is not committed in this revision, so the following figures are retained as historical claims rather than independently verified current results
 (n=60 sensitivity cases, 623 total cases including negatives): mean CV score 0.8639
 (std 0.0773), normalised P@3 = 0.9424, standard P@3 = 0.5758, Hit@3 = 0.9818, MRR =
 0.9273, FP rate = 0.0. This run was not previously referenced in any doc — flagged here

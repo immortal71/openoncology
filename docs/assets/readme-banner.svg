@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="380" viewBox="0 0 1400 380" role="img" aria-labelledby="title desc">
+  <title id="title">OpenOncology</title>
+  <desc id="desc">Drug evidence for sequencing labs and oncologists. Genomic findings connect to drug evidence and clinical review.</desc>
+  <rect width="1400" height="380" rx="18" fill="#101712"/>
+  <path d="M0 310H1400M0 311H1400" stroke="#28392D"/>
+  <g transform="translate(63 59) scale(2.1)" fill="none" stroke-linecap="round">
+    <path d="M12 2C17 3.5 17 7.5 12 11C7 14.5 7 18.5 12 21.5" stroke="#A8D5B5" stroke-width="1.5"/>
+    <path d="M12 2C7 3.5 7 7.5 12 11C17 14.5 17 18.5 12 21.5" stroke="#557A60" stroke-width="1.5"/>
+    <path d="M10.5 4.5H13.5M8.5 9H15.5M8.5 14H15.5M10.5 19H13.5" stroke="#8BB99A" stroke-width=".75"/>
+  </g>
+  <text x="128" y="90" font-family="Arial, Helvetica, sans-serif" font-size="19" letter-spacing="2.2" fill="#A8D5B5">OPEN SOURCE · EXPERT REVIEW</text>
+  <text x="64" y="178" font-family="Arial, Helvetica, sans-serif" font-size="69" font-weight="700" letter-spacing="-2.2" fill="#F5F6EF">OpenOncology</text>
+  <text x="67" y="225" font-family="Arial, Helvetica, sans-serif" font-size="25" fill="#C3CDBF">Drug evidence for labs and oncologists.</text>
+  <text x="67" y="345" font-family="Arial, Helvetica, sans-serif" font-size="15" letter-spacing="1.4" fill="#A1B29F">GENOMIC FINDINGS → EVIDENCE REPORT → ONCOLOGIST REVIEW</text>
+  <g fill="#17241B" stroke="#3D5A45">
+    <rect x="872" y="57" width="461" height="68" rx="8"/>
+    <rect x="915" y="144" width="418" height="68" rx="8"/>
+    <rect x="958" y="231" width="375" height="56" rx="8"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#DAE7D8">
+    <text x="897" y="98">01</text><text x="954" y="98">Genomic findings</text>
+    <text x="940" y="185">02</text><text x="997" y="185">Drug evidence</text>
+    <text x="983" y="266">03</text><text x="1040" y="266">Clinical review</text>
+  </g>
+  <g fill="#A8D5B5"><circle cx="1299" cy="92" r="4"/><circle cx="1299" cy="179" r="4"/><circle cx="1299" cy="260" r="4"/></g>
+</svg>
