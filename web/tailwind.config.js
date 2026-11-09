@@ -6,6 +6,9 @@ module.exports = {
     './lib/**/*.{js,ts,jsx,tsx,mdx}'
   ],
   darkMode: 'class',
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -46,8 +49,13 @@ module.exports = {
             'complete-fg': 'rgb(var(--oo-complete-fg) / <alpha-value>)',
             'failed-bg': 'rgb(var(--oo-failed-bg) / <alpha-value>)',
             'failed-fg': 'rgb(var(--oo-failed-fg) / <alpha-value>)',
+            'failed-hover': 'rgb(var(--oo-failed-hover) / <alpha-value>)',
           },
         },
+      },
+      transitionTimingFunction: {
+        'oo-out': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'oo-in-out': 'cubic-bezier(0.65, 0, 0.35, 1)',
       },
     },
   },

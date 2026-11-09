@@ -3,7 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { LogoAnimated } from "@/components/ui/logo-animated";
+import { MotionProvider } from "@/components/providers/MotionProvider";
+import { SiteNav } from "@/components/site-nav";
 import { Toaster } from "@/components/ui/toaster";
 
 // Self-hosted rather than fetched from Google at build time.
@@ -62,14 +63,12 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className={`${manrope.variable} ${plex.variable} ${plexMono.variable} font-sans bg-neutral-bg text-neutral-heading`}>
         <QueryProvider>
-          <AuthProvider>
-            <nav className="sticky top-0 z-50 border-b border-white/5 bg-neutral-bg/90 backdrop-blur-md">
-              <div className="clinical-shell h-16 flex items-center">
-                <LogoAnimated />
-              </div>
-            </nav>
-            {children}
-          </AuthProvider>
+          <MotionProvider>
+            <AuthProvider>
+              <SiteNav />
+              {children}
+            </AuthProvider>
+          </MotionProvider>
           <Toaster />
         </QueryProvider>
       </body>

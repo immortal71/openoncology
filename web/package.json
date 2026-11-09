@@ -16,6 +16,7 @@
     "banner": "npx ts-node --esm ../scripts/banner.ts"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^5.9.1",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -32,7 +33,9 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.10",
+    "gsap": "^3.15.1",
     "keycloak-js": "^25.0.0",
+    "lenis": "^1.3.27",
     "lucide-react": "^0.469.0",
     "next": "^15.5.28",
     "next-auth": "^4.24.7",

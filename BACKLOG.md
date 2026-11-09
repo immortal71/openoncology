@@ -116,6 +116,45 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: editing PAPER.md's title, abstract, or citation block — none of that should change without the same erratum process already used for the dedup-bug and circularity retractions in this file.
 - **Risk**: scientific. Touches a published DOI's framing.
 
+### OO-32: Demo labels TP53 p.Arg175His "OncoKB LEVEL_3B" while also marking it not targetable
+- **Why**: Found by the redesign's second Results-page review (2026-11-09).
+  - `web/lib/demo-data.ts` gives TP53 p.Arg175His `oncokb_level: "LEVEL_3B"` and `is_targetable: false`.
+  - An OncoKB therapeutic level of 3B means a drug has clinical evidence for that alteration in another tumour type, which contradicts "not targetable" on the same row.
+  - The reviewer did not believe OncoKB assigns R175H a therapeutic level at all.
+  - The redesigned page shows "OncoKB Level 3B · not targetable" side by side, so the contradiction is visible to clinicians.
+- **Files**: web/lib/demo-data.ts
+- **The actual decision**:
+  - check the current OncoKB annotation for TP53 R175H;
+  - set the demo's level to match it (likely none, or an oncogenicity label rather than a therapeutic level);
+  - or explain why 3B is right.
+- **Related content issue (not scientific)**: the demo's first suggested next step says "Share this report with your oncologist", but the redesigned page has no report download or share action yet.
+- **Risk**: scientific. It's an evidence level shown to users.
+
+### OO-31: Demo ranks Osimertinib (EGFR inhibitor) #3 for a KRAS G12C tumour with no EGFR variant
+- **Why**: Found by the redesign's devil's-advocate review of the Results page (2026-11-09).
+  - `web/lib/demo-data.ts` lists Osimertinib third in `DEMO_REPURPOSING`: rank_score 0.71, tier `repurposed`, sources OncoKB and ClinVar, mechanism "EGFR T790M inhibitor — included as combination therapy candidate".
+  - The demo case has KRAS p.Gly12Cys and TP53 p.Arg175His and no EGFR variant.
+  - An "OncoKB" source chip on that row reads as KRAS-specific evidence.
+  - `samples/demo_output_sample3_nsclc.json` contains no Osimertinib, so this row was written for the demo rather than produced by the ranking.
+  - An oncologist reviewing the demo will flag it first.
+- **Files**: web/lib/demo-data.ts
+- **The actual decision**: does the demo's ranked list reflect what the pipeline would actually output for this case?
+  - **If not:** regenerate the demo candidates from a real run.
+  - **If it does:** the combination-therapy rationale needs to be shown as such, and the OncoKB source on that row needs explaining.
+- **Interim**:
+  - The redesigned Results page shows the row unchanged.
+  - The collapsed row says "Approved for a different indication".
+  - The expanded row shows the approval qualifier and mechanism.
+  - `demo-data.ts` is unchanged.
+- **Risk**: scientific. It's a ranking shown to clinicians.
+
+### OO-30: Frontend demo lists DiffDock as evidence while the system's own limitations say DiffDock is not run in the demo
+- **Why**: Found during the frontend redesign (2026-11-09). `web/lib/demo-data.ts` lines 71 and 84 list `"DiffDock"` in `evidence_sources` for Sotorasib and Adagrasib, mirroring `samples/demo_output_sample3_nsclc.json`, which lists it ten times. `api/ai/ranking.py` (the limitations list, around line 705) says: "AlphaFold structure prediction and DiffDock docking are NOT run in the default demo; binding_score is absent unless the optional AI pipeline is configured." The demo therefore shows a source the product says it didn't use. Related to OO-24, which covers the paper's DiffDock and AlphaFold claims; this entry is about what the product UI displays.
+- **Files**: web/lib/demo-data.ts, samples/demo_output_sample3_nsclc.json (read-only reference), api/ai/ranking.py (guard-protected, read-only)
+- **The actual decision**: was the sample generated with the optional AI pipeline configured? If so, the demo should say so. If not, remove `"DiffDock"` from the demo's `evidence_sources`, and from the sample if it is regenerated.
+- **Interim**: the redesign's hero storyboards (`/lab/hero`) leave DiffDock out of displayed sources until this is decided. `demo-data.ts` is unchanged.
+- **Risk**: scientific. It's an evidence claim shown to users.
+
 ### OO-24: Published paper's ranking weights and AlphaFold completion claim are unsubstantiated by the repo — surface it, nothing in BACKLOG tracked it
 - **Why**: While checking the repo against the YC application (2026-11-04), re-read `docs/PAPER_VS_CURRENT_STATE.md`, an existing reconciliation doc in this repo that nothing in BACKLOG.md referenced. It already found, with git history as evidence: (1) the deployed ranking weights (`api/ai/ranking_config.py`, six signals, OncoKB 40%/DiffDock 15%/CIViC 10%) diverged from the published paper's Methods table (five signals, OncoKB 25%/DiffDock 30%, no CIViC) **before** the paper was even posted — the weight change landed 2026-05-03, the paper posted 2026-05-18; (2) the paper's claim that AlphaFold structure generation completed for 178/185 cases with the 7 failures caused by "AlphaFold Server rate limiting" cannot be reproduced from this repo: no `ALPHAFOLD_API_KEY` was ever set at any commit on any branch, and no DiffDock model directory has ever existed in the repo. This is a materially bigger issue than any README wording — it's a specific, falsifiable claim in an already-published, DOI'd paper that the code as committed cannot explain.
 - **Files**: PAPER.md, docs/PAPER_VS_CURRENT_STATE.md (read-only reference; PAPER.md is guard-protected)
