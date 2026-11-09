@@ -15,8 +15,8 @@ import { Toaster } from "@/components/ui/toaster";
 // that on backend-only dependency PRs, intermittently, so a green run proved
 // nothing and a red one meant nothing either.
 //
-// These files are in app/fonts and ship with the repo. All four families are
-// under the SIL Open Font License, which permits redistribution. See
+// These files are in app/fonts and ship with the repo. Every family is under
+// the SIL Open Font License, which permits redistribution. See
 // app/fonts/OFL.md.
 const manrope = localFont({
   src: "./fonts/Manrope-Variable.woff2",
@@ -35,10 +35,10 @@ const plex = localFont({
   display: "swap",
 });
 
-const jetbrainsMono = localFont({
-  src: "./fonts/JetBrainsMono-Variable.woff2",
+const plexMono = localFont({
+  src: "./fonts/IBMPlexMono-Variable-Latin1.woff2",
   variable: "--font-mono",
-  weight: "100 800",
+  weight: "100 700",
   display: "swap",
 });
 
@@ -60,7 +60,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${manrope.variable} ${plex.variable} ${jetbrainsMono.variable} font-[var(--font-plex)] bg-neutral-bg text-neutral-heading`}>
+      <body className={`${manrope.variable} ${plex.variable} ${plexMono.variable} font-sans bg-neutral-bg text-neutral-heading`}>
         <QueryProvider>
           <AuthProvider>
             <nav className="sticky top-0 z-50 border-b border-white/5 bg-neutral-bg/90 backdrop-blur-md">

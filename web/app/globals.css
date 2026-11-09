@@ -10,6 +10,30 @@
     --neutral-body: #C4C6C1;
     --neutral-heading: #EDEBE4;
 
+    /* OpenOncology palette A, H&E on paper. RGB channels so Tailwind opacity modifiers work. */
+    --oo-paper: 250 247 242;
+    --oo-surface: 255 255 255;
+    --oo-line: 232 225 214;
+    --oo-line-soft: 242 236 227;
+    --oo-ink: 27 22 38;
+    --oo-ink-2: 63 58 75;
+    --oo-ink-3: 94 88 107;
+    --oo-muted: 111 106 123;
+    --oo-hema: 61 44 141;
+    --oo-hema-hover: 47 33 112;
+    --oo-hema-tint: 236 233 248;
+    --oo-hema-on-dark: 169 156 240;
+    --oo-eosin: 217 102 154;
+    --oo-eosin-tint: 251 232 240;
+    --oo-queued-bg: 242 236 227;
+    --oo-queued-fg: 94 88 107;
+    --oo-analyzing-bg: 253 244 227;
+    --oo-analyzing-fg: 138 75 8;
+    --oo-complete-bg: 232 246 238;
+    --oo-complete-fg: 15 107 62;
+    --oo-failed-bg: 253 236 236;
+    --oo-failed-fg: 166 27 27;
+
     --background: 208 44% 98%;
     --foreground: 216 31% 16%;
     --muted: 210 24% 95%;
@@ -121,17 +145,3 @@
   animation: dot-drift 30s linear infinite;
 }
 
-/* ── Animated DNA logo ──────────────────────────────────────────── */
-@keyframes dna-rotate {
-  0%   { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
-}
-
-.logo-dna {
-  animation: dna-rotate 1.5s ease-in-out infinite;
-  transform-origin: center;
-}
-
-.logo-dna-wrap:hover .logo-dna {
-  animation-duration: 0.6s;
-}
