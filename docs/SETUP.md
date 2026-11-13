@@ -108,6 +108,8 @@ Copy `.env.example` to `.env` (root) and fill in the values below.
 | `RESEND_API_KEY` | Optional | Email notifications via Resend |
 | `COSMIC_EMAIL` / `COSMIC_PASSWORD` | Optional | COSMIC v3.1 download credentials |
 
+The table lists the common ones. `.env.example` documents every setting the API reads (database and Redis URLs, Keycloak client, evidence/ranking policy, bucket names and more); optional ones are commented out with their defaults.
+
 There is no single `MINIO_BUCKET` variable — bucket names are fixed in `api/config.py` (`bucket_raw`, `bucket_vcf`, `bucket_reports`, defaulting to `openoncology-raw`/`-vcf`/`-reports`) and buckets are auto-created on first upload.
 
 > **Security note:** Never commit `.env` to git. It is already in `.gitignore`. Generate `SECRET_KEY` with `python -c "import secrets; print(secrets.token_hex(32))"`.
