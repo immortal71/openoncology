@@ -7,10 +7,12 @@ import { FindingList, type Finding } from "@/components/oo/finding-list";
 import { HighlightProvider } from "@/components/oo/highlight";
 import { RevealNoScriptFallback } from "@/components/oo/reveal";
 import { StatusPill } from "@/components/oo/status-pill";
-import { displaySources } from "@/lib/evidence";
+import { displaySources, usesClinicalPhaseSignal } from "@/lib/evidence";
+import { oncoKbLevel, predictionLabel } from "@/lib/evidence-levels";
 import { parseProteinChange } from "@/lib/protein";
 import { ProteinLollipop } from "./protein-lollipop";
 import { RankLadder } from "./rank-ladder";
+import { VariantList } from "./variant-drawer";
 
 const METHODS_URL = "https://github.com/immortal71/openoncology/blob/main/docs/METHODS.md";
 const REVIEW_NOTE = "Research prototype. Oncologist review is required before any treatment decision.";
@@ -21,6 +23,8 @@ export type ResultsMutation = {
   classification?: string;
   oncokb_level?: string;
   is_targetable?: boolean;
+  alphamissense_score?: number | null;
+  evidence_lookup_status?: string | null;
 };
 
 export type ResultsData = {
@@ -44,7 +48,11 @@ export type RepurposingCandidate = {
   drug_tier?: string;
 };
 
-const levelLabel = (level?: string) => (level ? `OncoKB Level ${level.replace(/^LEVEL_/, "")}` : "No OncoKB level");
+const levelLabel = (level?: string) => oncoKbLevel(level)?.label ?? "No OncoKB level";
+const predictionNote = (classification?: string, score?: number | null) => {
+  const label = predictionLabel(classification, score);
+  return label ? `AlphaMissense: ${label.toLowerCase()}` : null;
+};
 
 function SectionTitle({ id, children, aside }: { id: string; children: React.ReactNode; aside?: React.ReactNode }) {
   return (
@@ -77,6 +85,7 @@ export function ResultsView({
     approvalStatus: c.approval_status,
     mechanism: c.mechanism,
     sources: displaySources(c),
+    phaseSignal: usesClinicalPhaseSignal(c),
   }));
   const variants = results.mutations.filter((m) => m.gene && m.hgvs);
   const targetable = variants.filter((m) => m.is_targetable);
@@ -149,7 +158,7 @@ export function ResultsView({
                 gene: m.gene as string,
                 hgvs: m.hgvs as string,
                 emphasis: m === lead,
-                note: [m.classification, levelLabel(m.oncokb_level), m.is_targetable ? "targetable" : "not targetable"].filter(Boolean).join(" · "),
+                note: [predictionNote(m.classification, m.alphamissense_score), levelLabel(m.oncokb_level), m.is_targetable ? "targetable" : "not targetable"].filter(Boolean).join(" · "),
               }))}
             />
           ) : null}
@@ -171,7 +180,7 @@ export function ResultsView({
             />
 
             <section aria-labelledby="candidates-title">
-              <SectionTitle id="candidates-title" aside="Open a row for approval, mechanism and sources">
+              <SectionTitle id="candidates-title" aside="Grouped by clinical context. Numbers are the overall rank.">
                 All ranked candidates
               </SectionTitle>
               <FindingList
@@ -179,6 +188,7 @@ export function ResultsView({
                 findings={findings}
                 caption="All ranked candidates"
                 showHeader
+                grouped
                 defaultOpenFirst
                 footer={
                   <>
@@ -207,7 +217,19 @@ export function ResultsView({
           </div>
           </HighlightProvider>
 
-          <aside className="order-3 space-y-8 lg:sticky lg:top-24 lg:order-none lg:self-start" aria-label="Next steps">
+          <aside className="order-3 space-y-8 lg:sticky lg:top-24 lg:order-none lg:self-start" aria-label="Variants and next steps">
+            <VariantList
+              cancerType={results.cancer_type}
+              variants={variants.map((m) => ({
+                gene: m.gene as string,
+                hgvs: m.hgvs as string,
+                classification: m.classification,
+                alphamissense_score: m.alphamissense_score,
+                oncokb_level: m.oncokb_level,
+                evidence_lookup_status: m.evidence_lookup_status,
+                is_targetable: m.is_targetable,
+              }))}
+            />
             {nextSteps.length > 0 ? (
               <section aria-labelledby="next-title">
                 <h2 id="next-title" className="text-[13px] font-medium text-oo-ink-3">

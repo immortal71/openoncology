@@ -29,6 +29,17 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Risk**: low
 -->
 
+### OO-37: Expose sequencing evidence and the justifying variant in the results API
+- **Why**: The redesigned Results page has a variant drawer and therapy groups, following the conventions of genomic reports. Pathologists look at VAF first: a TP53 variant near 50% raises the germline question. The drawer has to say "Not in this result" for VAF, depth, ClinVar and COSMIC, although `api/models/mutation.py` already stores `vaf`, `depth`, `clinvar_id` and `cosmic_id`. Drug rows also can't say which variant and OncoKB level justify them, so in a multi-variant case a Level 1 drug's alteration is unclear.
+- **Files**: api/routes/results.py (serialisers around lines 104, 227, 332 and 387), api/tests for the results routes, web/lib/api.ts types, web/components/results/variant-drawer.tsx
+- **Acceptance**:
+  - Each serialised mutation includes `vaf`, `depth`, `clinvar_id` and `cosmic_id` (null when absent)
+  - Route tests assert the new keys and their null behaviour
+  - The drawer shows VAF and depth when present, and links ClinVar and COSMIC by ID
+  - Separately scoped: decide whether each repurposing candidate can carry the variant and OncoKB level that justified it. That touches the ranking output, so it needs a human decision.
+- **Out of scope**: changing `api/ai/**`, ranking, or how any value is computed
+- **Risk**: low for the serialiser fields; scientific for the per-candidate justification
+
 ### OO-6: Pin the pipeline's container images by digest
 - **Why**: `pipeline/modules/*.nf` pin containers by tag (`broadinstitute/gatk:4.5.0.0`, `etal/cnvkit:0.9.10`, `docker.io/szarate/manta:1.6.0`, two biocontainers). A tag is mutable. The variant-calling validation gate asks which pipeline produced a call set, and a tag cannot answer it: the same tag six months apart is a different image and possibly different calls. `nextflow.config` now declares `gatk_version` once, so the GATK pair can no longer diverge, but neither is pinned to an immutable reference.
 - **Files**: pipeline/nextflow.config, pipeline/modules/*.nf, api/tests/test_pipeline_config.py
@@ -116,6 +127,43 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
 - **Out of scope**: editing PAPER.md's title, abstract, or citation block — none of that should change without the same erratum process already used for the dedup-bug and circularity retractions in this file.
 - **Risk**: scientific. Touches a published DOI's framing.
 
+### OO-36: AlphaMissense classes are collapsed, and unscored variants default to "uncertain"
+- **Why**: Found by the redesign's clinical re-review (2026-11-15); the code was checked.
+  - `api/workers/ai_worker.py:83-88` stores AlphaMissense's `likely_pathogenic` as `MutationClassification.pathogenic`, a class the model never outputs and a word that reads as a curated ACMG call.
+  - `api/models/mutation.py` defaults `classification` to `uncertain`, so a variant that was never scored (no protein change, model unavailable) looks as if AlphaMissense called it ambiguous.
+  - `web/lib/demo-data.ts` shows "Pathogenic" with no `alphamissense_score`.
+- **Files**: api/workers/ai_worker.py, api/models/mutation.py (plus a migration if the enum or default changes), web/lib/demo-data.ts
+- **The actual decision**: store AlphaMissense's own classes (`likely_pathogenic`, `ambiguous`, `likely_benign`), make `classification` nullable with no default, and decide what the demo should show.
+- **Interim**: the frontend shows an AlphaMissense class only when `alphamissense_score` is a number, maps `pathogenic` to "Likely pathogenic" and `uncertain` to "Ambiguous", and otherwise says "Not scored in this result". The demo therefore shows "Not scored".
+- **Risk**: scientific. It's a pathogenicity label shown to clinicians.
+
+### OO-35: `classify_drug_tier` can label an unconfirmed or unapproved drug as approved
+- **Why**: Found by the redesign's clinical-patterns review (2026-11-15); the code was checked.
+  - `api/ai/ranking.py:190-192`: Level 1/2 evidence with unknown approval status still returns `fda_approved`, so the UI's "FDA approved" badge can assert an approval nobody confirmed.
+  - `api/ai/ranking.py:195-196`: `"approved" in _approval_str` also matches "not approved" and "unapproved", which would put an unapproved drug in the `repurposed` tier ("approved for a different indication").
+- **Files**: api/ai/ranking.py (protected), plus the ranking tests.
+- **The actual decision**: whether Level 1/2 drugs with unknown approval need their own tier (for example `level_1_2_unconfirmed`), and a word-boundary or negation-aware approval check. Tier labels feed the benchmark, so the gate must be re-run.
+- **Interim**: the redesigned Results page names the first group "OncoKB Level 1–2 (standard care)" with the note "Approval status as reported on each row", and hides the per-row tier pill when grouped. The approval line on each row still comes from `approval_status`.
+- **Risk**: scientific. It's on the ranking path.
+
+### OO-34: Landing page evaluation section shows no metric
+- **Why**: Two redesign reviews (2026-11-09 and 2026-11-15) flagged that the landing's "How it's evaluated, and what that doesn't show" section gives a caveat and a link, but no number, sample size or denominator.
+- **Files**: web/app/lab/landing/page.tsx (the `#evidence` section); source figures in docs/BENCHMARK.md.
+- **The actual decision**: which locked metric, if any, the public page may state, with its n and caveat (for example MSK CHORD evidence-lookup Hit@3 or P@3). The headline claims still need the owner's sign-off, so no agent should pick a number.
+- **Interim**: the section is titled as an evaluation method, not as results, so it doesn't promise numbers it can't show.
+- **Risk**: scientific. It's a public claim about the product.
+
+### OO-33: KRAS G12C test fixture and demo sample carry G12V coordinates or cDNA
+- **Why**: Found by the redesign's round-3 devil's-advocate review (2026-11-09), and checked against the repo.
+  - `test-fixtures/dna_sample_kras_g12c.vcf` has `12 25398284 C A` annotated `HGVS_C=c.34G>T;HGVS_P=p.Gly12Cys`. KRAS is on the minus strand: on GRCh37, 25398284 C>A is c.35G>T (p.Gly12Val), and c.34G>T (p.Gly12Cys) is 25398285 C>A.
+  - The repo's own `samples/real/*.vcf` files label 25398284 C>A as G12V.
+  - `samples/demo_output_sample3_nsclc.json` contains both `c.34G>T` and `c.35G>T` next to p.Gly12Cys. c.35G>T is G12V.
+  - Whatever reads POS/REF/ALT gets G12V, while whatever reads the INFO annotation gets G12C. Annotation tools that re-derive the protein change (for example VEP) will disagree with the fixture label.
+- **Files**: test-fixtures/dna_sample_kras_g12c.vcf, samples/demo_output_sample3_nsclc.json (`test-fixtures/**` is protected).
+- **The actual decision**: correct POS to 25398285 (or change the label to G12V), check whether any test or benchmark depends on the current record, and fix the c.35G>T entries in the sample JSON.
+- **Interim**: the redesigned landing page shows only the fixture's annotation fields (GENE, HGVS_C, HGVS_P), not its coordinates.
+- **Risk**: scientific. It's the canonical demo variant.
+
 ### OO-32: Demo labels TP53 p.Arg175His "OncoKB LEVEL_3B" while also marking it not targetable
 - **Why**: Found by the redesign's second Results-page review (2026-11-09).
   - `web/lib/demo-data.ts` gives TP53 p.Arg175His `oncokb_level: "LEVEL_3B"` and `is_targetable: false`.
@@ -137,6 +185,8 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
   - An "OncoKB" source chip on that row reads as KRAS-specific evidence.
   - `samples/demo_output_sample3_nsclc.json` contains no Osimertinib, so this row was written for the demo rather than produced by the ranking.
   - An oncologist reviewing the demo will flag it first.
+  - Round-2 landing review (2026-11-09) added two points. ClinVar is variant-pathogenicity evidence, not drug evidence, so it can't support a drug's rank. The row carries `opentargets_score: 0.61` while `evidence_sources` omits OpenTargets, so the score and the source list disagree and the UI can't show that score.
+  - The row now also appears in the landing page hero, the first thing a visitor sees.
 - **Files**: web/lib/demo-data.ts
 - **The actual decision**: does the demo's ranked list reflect what the pipeline would actually output for this case?
   - **If not:** regenerate the demo candidates from a real run.

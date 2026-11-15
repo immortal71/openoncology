@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { motion, useInView, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { EASE_OUT } from "@/lib/motion";
@@ -95,6 +95,7 @@ function Row({ v }: { v: LollipopVariant }) {
 
 export function ProteinLollipop({ variants, className }: { variants: LollipopVariant[]; className?: string }) {
   const listRef = useRef<HTMLUListElement>(null);
+  const titleId = useId();
   const inView = useInView(listRef, { once: true, amount: 0.3 });
   if (variants.length === 0) return null;
   const sources = Array.from(
@@ -106,9 +107,9 @@ export function ProteinLollipop({ variants, className }: { variants: LollipopVar
     )
   );
   return (
-    <section aria-labelledby="protein-title" className={cn("rounded-[10px] border border-oo-line bg-oo-surface px-5 py-4", className)}>
+    <section aria-labelledby={titleId} data-section="protein" className={cn("rounded-[10px] border border-oo-line bg-oo-surface px-5 py-4", className)}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 id="protein-title" className="text-[13px] font-medium text-oo-ink-3">
+        <h2 id={titleId} className="text-[13px] font-medium text-oo-ink-3">
           Variant positions on the protein
         </h2>
         {sources.length > 0 ? <p className="text-[12px] text-oo-ink-3">Residue numbers from {sources.join(", ")}</p> : null}

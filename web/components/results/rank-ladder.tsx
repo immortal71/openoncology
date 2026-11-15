@@ -48,10 +48,10 @@ function Rung({ item, rank }: { item: Scored; rank: number }) {
       </motion.div>
       <div
         className={cn(
-          "absolute top-1/2 -translate-y-1/2 whitespace-nowrap text-[12.5px] transition-colors duration-150",
+          "absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-sm bg-oo-surface px-1 text-[12.5px] transition-colors duration-150",
           rank === 1 || active ? "font-semibold text-oo-ink" : "text-oo-ink-2"
         )}
-        style={labelLeft ? { right: `calc(${100 - x}% + 12px)` } : { left: `calc(${x}% + 12px)` }}
+        style={labelLeft ? { right: `calc(${100 - x}% + 8px)` } : { left: `calc(${x}% + 8px)` }}
       >
         <span className="mr-1.5 font-mono text-[11px] text-oo-ink-3">{rank}</span>
         {item.name}
@@ -90,7 +90,7 @@ export function RankLadder({ items, context, className }: { items: LadderItem[];
         </div>
 
         <div aria-hidden="true" ref={trackRef}>
-          <motion.div className="space-y-1" initial="hidden" animate={inView ? "show" : "hidden"} variants={ladderVariants}>
+          <motion.div className="-mx-2.5 space-y-1 overflow-x-clip px-2.5" initial="hidden" animate={inView ? "show" : "hidden"} variants={ladderVariants}>
             {scored.map((item, i) => (
               <Rung key={item.id} item={item} rank={i + 1} />
             ))}

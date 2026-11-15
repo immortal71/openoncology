@@ -9,6 +9,7 @@ import { parseApproval } from "@/lib/approval";
 import { ScoreBar } from "./score-bar";
 import { highlightHandlers, useHighlightStore, useIsHighlighted } from "./highlight";
 import { ApprovalLine, SourceBadges, TierPill } from "./clinical";
+import { groupByTier, tierInfo, type TherapyGroup } from "@/lib/therapy-groups";
 
 export type Finding = {
   id: string;
@@ -18,19 +19,30 @@ export type Finding = {
   approvalStatus: string | null | undefined;
   mechanism: string | null | undefined;
   sources: string[];
+  phaseSignal?: boolean;
+  rank?: number;
 };
 
 const GRID = "grid-cols-[1.5rem_minmax(0,1fr)_auto] md:grid-cols-[1.5rem_minmax(0,1fr)_8.5rem_11.5rem_1.25rem]";
-const TIER_LABELS: Record<string, string> = { fda_approved: "FDA approved", repurposed: "Repurposed" };
 
-const FindingRow = React.memo(function FindingRow({ finding, rank, defaultOpen }: { finding: Finding; rank: number; defaultOpen: boolean }) {
+const FindingRow = React.memo(function FindingRow({
+  finding,
+  rank,
+  defaultOpen,
+  showTier = true,
+}: {
+  finding: Finding;
+  rank: number;
+  defaultOpen: boolean;
+  showTier?: boolean;
+}) {
   const [open, setOpen] = React.useState(defaultOpen);
   const reduce = useReducedMotion();
   const panelId = React.useId();
   const store = useHighlightStore();
   const active = useIsHighlighted(finding.id);
   const approval = parseApproval(finding.approvalStatus);
-  const tierLabel = finding.tier ? TIER_LABELS[finding.tier] : undefined;
+  const tierLabel = tierInfo(finding.tier).badge;
   const showApproval = Boolean(approval.qualifier) || approval.label !== tierLabel;
 
   return (
@@ -52,11 +64,22 @@ const FindingRow = React.memo(function FindingRow({ finding, rank, defaultOpen }
         <span className="font-mono text-[12px] tabular-nums text-oo-ink-3">{rank}</span>
         <span className="min-w-0">
           <span className="block truncate text-[15px] font-semibold text-oo-ink">{finding.name}</span>
-          {approval.differentIndication ? <span className="block text-[12px] text-oo-ink-3">Approved for a different indication</span> : null}
+          {approval.differentIndication ? (
+            <span className="block text-[12px] text-oo-ink-3">Approved for a different indication</span>
+          ) : !showTier ? (
+            <span className="block text-[12px] text-oo-ink-3">{approval.label}</span>
+          ) : null}
         </span>
         <span className="col-start-2 flex items-center justify-between gap-3 md:contents">
-          <TierPill tier={finding.tier} className="justify-self-start" />
+          {showTier ? (
+            <TierPill tier={finding.tier} className="justify-self-start" />
+          ) : (
+            <span aria-hidden="true" className="text-[12px] text-oo-ink-3 md:invisible">
+              Evidence score
+            </span>
+          )}
           <span className="md:justify-self-end">
+            <span className="sr-only">Evidence score </span>
             <ScoreBar score={finding.score} />
           </span>
         </span>
@@ -89,7 +112,7 @@ const FindingRow = React.memo(function FindingRow({ finding, rank, defaultOpen }
             >
               {showApproval ? <ApprovalLine status={finding.approvalStatus} /> : null}
               {finding.mechanism ? <p className="max-w-[68ch] text-[14px] leading-relaxed text-oo-ink-2">{finding.mechanism}</p> : null}
-              <SourceBadges sources={finding.sources} />
+              <SourceBadges sources={finding.sources} phaseSignal={finding.phaseSignal} />
             </motion.div>
           </motion.div>
         ) : null}
@@ -98,12 +121,48 @@ const FindingRow = React.memo(function FindingRow({ finding, rank, defaultOpen }
   );
 });
 
+function FindingGroup({
+  group,
+  grouped,
+  caption,
+  defaultOpenId,
+}: {
+  group: TherapyGroup<Finding & { rank: number }>;
+  grouped: boolean;
+  caption: string;
+  defaultOpenId?: string;
+}) {
+  const headingId = React.useId();
+  const resistance = group.key === "resistance_mechanism";
+  return (
+    <section aria-labelledby={grouped ? headingId : undefined} className="border-b border-oo-line last:border-b-0">
+      {grouped ? (
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-0.5 bg-oo-paper px-4 py-2 md:flex md:flex-wrap">
+          <h3 id={headingId} className={cn("text-[13px] font-semibold", resistance ? "text-oo-status-failed-fg" : "text-oo-ink")}>
+            {group.heading}
+          </h3>
+          {group.note ? <span className="col-span-2 row-start-2 text-[12px] text-oo-ink-3 md:col-auto md:row-auto">{group.note}</span> : null}
+          <span className="col-start-2 row-start-1 whitespace-nowrap font-mono text-[11.5px] text-oo-ink-3 md:ml-auto">
+            {group.items.length} {group.items.length === 1 ? "drug" : "drugs"}
+          </span>
+        </div>
+      ) : null}
+      <ul aria-label={grouped ? undefined : caption} className="divide-y divide-oo-line-soft">
+        {group.items.map((f) => (
+          <FindingRow key={f.id} finding={f} rank={f.rank} defaultOpen={f.id === defaultOpenId} showTier={!grouped} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export function FindingList({
   findings,
   caption,
   empty,
   defaultOpenFirst = false,
   showHeader = false,
+  grouped = false,
   footer,
   className,
 }: {
@@ -112,26 +171,30 @@ export function FindingList({
   empty: React.ReactNode;
   defaultOpenFirst?: boolean;
   showHeader?: boolean;
+  grouped?: boolean;
   footer?: React.ReactNode;
   className?: string;
 }) {
   if (findings.length === 0) return <>{empty}</>;
+  const ranked = findings.map((f, i) => ({ ...f, rank: f.rank ?? i + 1 }));
+  const groups: TherapyGroup<Finding & { rank: number }>[] = grouped
+    ? groupByTier(ranked)
+    : [{ ...tierInfo(null), heading: caption, note: null, items: ranked }];
+  const firstId = ranked[0]?.id;
   return (
     <div className={cn("overflow-hidden rounded-[10px] border border-oo-line bg-oo-surface", className)}>
       {showHeader ? (
         <div aria-hidden="true" className={cn("hidden h-9 items-center gap-x-3 border-b border-oo-line px-4 text-[12px] font-medium text-oo-ink-3 md:grid", GRID)}>
           <span>#</span>
           <span>Drug</span>
-          <span>Tier</span>
+          <span>{grouped ? null : "Tier"}</span>
           <span className="justify-self-end pr-1">Evidence score</span>
           <span />
         </div>
       ) : null}
-      <ul aria-label={caption} className="divide-y divide-oo-line-soft">
-        {findings.map((f, i) => (
-          <FindingRow key={f.id} finding={f} rank={i + 1} defaultOpen={defaultOpenFirst && i === 0} />
-        ))}
-      </ul>
+      {groups.map((g) => (
+        <FindingGroup key={g.key} group={g} grouped={grouped} caption={caption} defaultOpenId={defaultOpenFirst ? firstId : undefined} />
+      ))}
       {footer ? <div className="border-t border-oo-line px-4 py-3 text-[13px] text-oo-ink-3">{footer}</div> : null}
     </div>
   );

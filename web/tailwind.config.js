@@ -11,6 +11,9 @@ module.exports = {
   },
   theme: {
     extend: {
+      screens: {
+        scene: { raw: '(min-width: 1024px) and (min-height: 860px) and (prefers-reduced-motion: no-preference)' },
+      },
       fontFamily: {
         sans: ['var(--font-plex)', 'IBM Plex Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'IBM Plex Mono', 'ui-monospace', 'monospace'],

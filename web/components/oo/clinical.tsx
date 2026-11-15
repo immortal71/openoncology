@@ -1,39 +1,48 @@
-import { Check, Clock, ShieldCheck } from "lucide-react";
+import { Ban, Check, Clock, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { parseApproval } from "@/lib/approval";
-
-const TIER_LABEL: Record<string, string> = {
-  fda_approved: "FDA approved",
-  repurposed: "Repurposed",
-};
+import { tierInfo } from "@/lib/therapy-groups";
 
 export function TierPill({ tier, className }: { tier: string | null | undefined; className?: string }) {
-  const label = tier ? (TIER_LABEL[tier] ?? tier.replace(/_/g, " ")) : "Unclassified";
-  const approved = tier === "fda_approved";
+  const info = tierInfo(tier);
+  const approved = info.key === "fda_approved";
+  const resistance = info.key === "resistance_mechanism";
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[12px] font-medium",
-        approved ? "border border-oo-line bg-oo-surface text-oo-ink" : "bg-oo-line-soft text-oo-ink-3",
+        approved
+          ? "border border-oo-line bg-oo-surface text-oo-ink"
+          : resistance
+            ? "bg-oo-status-failed-bg text-oo-status-failed-fg"
+            : "bg-oo-line-soft text-oo-ink-3",
         className
       )}
     >
       {approved ? <Check size={12} aria-hidden="true" /> : null}
-      {label}
+      {resistance ? <Ban size={12} aria-hidden="true" /> : null}
+      {info.badge}
     </span>
   );
 }
 
-export function SourceBadges({ sources, className }: { sources: string[]; className?: string }) {
-  if (sources.length === 0) return <span className={cn("text-[13px] text-oo-ink-3", className)}>No named sources</span>;
+export function SourceBadges({ sources, phaseSignal = false, className }: { sources: string[]; phaseSignal?: boolean; className?: string }) {
+  const note = phaseSignal ? <span className="text-[12.5px] text-oo-ink-3">Score also weighs the drug&apos;s clinical phase</span> : null;
   return (
-    <ul className={cn("flex flex-wrap gap-1.5", className)} aria-label="Evidence sources">
-      {sources.map((s) => (
-        <li key={s} className="rounded-md border border-oo-line bg-oo-surface px-2 py-0.5 font-mono text-[12px] text-oo-ink-2">
-          {s}
-        </li>
-      ))}
-    </ul>
+    <div className={cn("flex flex-wrap items-center gap-x-3 gap-y-1.5", className)}>
+      {sources.length === 0 ? (
+        <span className="text-[13px] text-oo-ink-3">No named sources</span>
+      ) : (
+        <ul className="flex flex-wrap gap-1.5" aria-label="Evidence sources">
+          {sources.map((s) => (
+            <li key={s} className="rounded-md border border-oo-line bg-oo-surface px-2 py-0.5 font-mono text-[12px] text-oo-ink-2">
+              {s}
+            </li>
+          ))}
+        </ul>
+      )}
+      {note}
+    </div>
   );
 }
 

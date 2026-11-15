@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseApproval } from "@/lib/approval";
-import { displaySources } from "@/lib/evidence";
+import { displaySources, usesClinicalPhaseSignal } from "@/lib/evidence";
 
 describe("parseApproval", () => {
   it("reads a bare approval", () => {
@@ -30,10 +30,15 @@ describe("parseApproval", () => {
 });
 
 describe("displaySources", () => {
-  it("drops sources pending review and formats the rest", () => {
+  it("drops sources pending review and derived signals, and formats the rest", () => {
     expect(
       displaySources({ evidence_sources: ["OncoKB", "OpenTargets", "DiffDock", "ClinicalPhase"], opentargets_score: 0.9 })
-    ).toEqual(["OncoKB", "OpenTargets assoc. 0.90", "Clinical phase"]);
+    ).toEqual(["OncoKB", "OpenTargets assoc. 0.90"]);
+  });
+
+  it("reports when the clinical-phase signal contributed", () => {
+    expect(usesClinicalPhaseSignal({ evidence_sources: ["OncoKB", "ClinicalPhase"] })).toBe(true);
+    expect(usesClinicalPhaseSignal({ evidence_sources: ["OncoKB", "ClinVar"] })).toBe(false);
   });
 
   it("leaves OpenTargets unscored when there is no score", () => {
