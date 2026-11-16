@@ -71,13 +71,13 @@ function Row({ v }: { v: LollipopVariant }) {
         <motion.div
           data-reveal="grow-y"
           variants={stickVariants}
-          className={cn("absolute top-[14px] h-[30px] w-[2px]", v.emphasis ? "bg-oo-eosin" : "bg-oo-ink-3")}
+          className={cn("absolute top-[14px] h-[30px] w-[2px]", v.emphasis ? "bg-[#69518C]" : "bg-oo-ink-3")}
           style={{ left: `calc(${x}% - 1px)`, originY: 1 }}
         />
         <motion.div
           data-reveal="pop"
           variants={headVariants}
-          className={cn("absolute top-[7px] h-[14px] w-[14px] rounded-full ring-4", v.emphasis ? "bg-oo-eosin ring-oo-eosin-tint" : "bg-oo-ink-3 ring-oo-line-soft")}
+          className={cn("absolute top-[7px] h-[14px] w-[14px] rounded-full ring-4", v.emphasis ? "bg-[#69518C] ring-[#EEE8F5]" : "bg-oo-ink-3 ring-oo-line-soft")}
           style={{ left: `calc(${x}% - 7px)` }}
         />
         <div

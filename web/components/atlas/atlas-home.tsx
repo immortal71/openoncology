@@ -9,14 +9,14 @@ import { useGSAP } from "@gsap/react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { EvidenceRibbon, type ThreadNode } from "@/components/atlas/evidence-ribbon";
-import { ProductShot, type ShotCase } from "@/components/atlas/product-shot";
+import { ProductShot, type ShotData } from "@/components/atlas/product-shot";
 import { StepVisual, type StepVisualData } from "@/components/atlas/step-visuals";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 
 export type AtlasData = {
   demoHref: string;
-  shot: ShotCase;
+  shot: ShotData;
   steps: StepVisualData;
   heroNodes: ThreadNode[];
   compactNodes: ThreadNode[];
@@ -92,8 +92,8 @@ function Workflow({ data }: { data: StepVisualData }) {
   const reduce = useReducedMotion();
   const current = STEPS[active];
   return (
-    <div className="mt-12 grid gap-10 lg:mt-14 lg:grid-cols-12 lg:items-center lg:gap-6">
-      <ol className="border-b border-[#E2DEE6] lg:col-span-5">
+    <div className="mt-12 grid gap-10 lg:mt-14 lg:grid-cols-12 lg:items-start lg:gap-6">
+      <ol className="min-w-0 border-b border-[#E2DEE6] lg:col-span-5">
         {STEPS.map((s, i) => {
           const open = active === i;
           return (
@@ -114,7 +114,7 @@ function Workflow({ data }: { data: StepVisualData }) {
                     transition={reduce ? { duration: 0 } : { duration: 0.2, ease: EASE }}
                     className="overflow-hidden"
                   >
-                    <p className="pb-6 pr-4 text-[16px] leading-[1.6] text-[#625E68] sm:pl-9">{s.body}</p>
+                    <p className="max-w-[48ch] pb-6 pr-4 text-[16px] leading-[1.6] text-[#625E68] sm:pl-9">{s.body}</p>
                     <div className="pb-8 lg:hidden">
                       <StepVisual kind={s.key} caption={s.caption} value={s.value} data={data} />
                     </div>
@@ -125,7 +125,7 @@ function Workflow({ data }: { data: StepVisualData }) {
           );
         })}
       </ol>
-      <div className="relative hidden h-[400px] lg:col-span-6 lg:col-start-7 lg:block">
+      <div className="relative hidden h-[384px] lg:col-span-6 lg:col-start-7 lg:block">
         <AnimatePresence initial={false}>
           <motion.div
             key={current.key}
@@ -135,7 +135,7 @@ function Workflow({ data }: { data: StepVisualData }) {
             exit={reduce ? undefined : { opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
           >
-            <StepVisual kind={current.key} caption={current.caption} value={current.value} data={data} className="h-full" />
+            <StepVisual kind={current.key} caption={current.caption} value={current.value} data={data} className="max-w-[540px]" />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -227,7 +227,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
       </section>
 
-      <section id="product" aria-labelledby="proof-title" className={`scroll-mt-[96px] ${section}`}>
+      <section id="product" aria-labelledby="proof-title" className="scroll-mt-[96px] py-14 lg:py-20">
         <div className={wrap}>
           <Rise>
             <Eyebrow>Inside the demo</Eyebrow>
@@ -236,7 +236,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             </h2>
           </Rise>
         </div>
-        <div className="mx-auto mt-8 w-full max-w-[1280px] px-5 md:px-10 lg:mt-10">
+        <div className="mx-auto mt-8 w-full max-w-[1240px] px-5 md:px-10 lg:mt-10">
           <ProductShot data={data.shot} />
         </div>
         <div className={`${wrap} mt-8 grid gap-4 lg:grid-cols-12 lg:gap-6`}>

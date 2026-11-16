@@ -75,8 +75,11 @@ function MobileMenu({ links }: { links: typeof NAV_LINKS }) {
 const linkClass =
   "rounded-md px-1 py-1 text-[14px] text-oo-ink-2 transition-colors duration-150 hover:text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-oo-hema";
 
+const APP_ROUTES = ["/lab/results"];
+
 export function SiteNav() {
   const pathname = usePathname() ?? "";
+  if (APP_ROUTES.includes(pathname)) return null;
   const dark = DARK_ROUTES.includes(pathname);
   const light = !dark && REDESIGNED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const marketing = MARKETING_ROUTES.includes(pathname);
