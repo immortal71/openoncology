@@ -30,7 +30,7 @@ const CTA_LABEL = "View the demo case";
 
 const wrap = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const h2 = "text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] text-[#221E2B] sm:text-[36px] lg:text-[40px]";
-const eyebrow = "font-mono text-[12px] uppercase tracking-[0.14em] text-[#615B69]";
+const label = "text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#615B69]";
 const section = "py-14 lg:py-20";
 const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#584493]";
 const primaryBtn = `group inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[#221E2B] px-5 text-[15px] font-medium text-[#F7F5F0] transition-colors duration-150 hover:bg-[#3A3446] ${focus}`;
@@ -48,6 +48,18 @@ function Rise({ children, className, delay = 0 }: { children: React.ReactNode; c
     >
       {children}
     </motion.div>
+  );
+}
+
+function Eyebrow({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <p className={`flex items-center gap-2.5 text-[13.5px] font-medium ${dark ? "text-[#F7F5F0]/80" : "text-[#221E2B]"}`}>
+      <span aria-hidden="true" className="flex items-center">
+        <span className={`h-[1.5px] w-5 ${dark ? "bg-[#B9A8EC]" : "bg-[#584493]"}`} />
+        <span className={`h-[7px] w-[7px] rounded-full ${dark ? "bg-[#B9A8EC]" : "bg-[#584493]"}`} />
+      </span>
+      {children}
+    </p>
   );
 }
 
@@ -99,12 +111,12 @@ function Workflow({ data }: { data: StepVisualData }) {
                     initial={{ height: 0 }}
                     animate={{ height: "auto" }}
                     exit={{ height: 0 }}
-                    transition={reduce ? { duration: 0 } : { duration: 0.24, ease: EASE }}
+                    transition={reduce ? { duration: 0 } : { duration: 0.2, ease: EASE }}
                     className="overflow-hidden"
                   >
                     <p className="pb-6 pr-4 text-[16px] leading-[1.6] text-[#615B69] sm:pl-9">{s.body}</p>
                     <div className="pb-8 lg:hidden">
-                      <StepVisual kind={s.key} caption={s.caption} value={s.value} data={data} className="h-[320px] sm:h-[360px]" />
+                      <StepVisual kind={s.key} caption={s.caption} value={s.value} data={data} />
                     </div>
                   </motion.div>
                 ) : null}
@@ -113,15 +125,15 @@ function Workflow({ data }: { data: StepVisualData }) {
           );
         })}
       </ol>
-      <div className="relative hidden h-[460px] lg:col-span-6 lg:col-start-7 lg:block">
+      <div className="relative hidden h-[400px] lg:col-span-6 lg:col-start-7 lg:block">
         <AnimatePresence initial={false}>
           <motion.div
             key={current.key}
             className="absolute inset-0"
-            initial={reduce ? false : { opacity: 0, scale: 1.03 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={reduce ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.55, ease: EASE }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
           >
             <StepVisual kind={current.key} caption={current.caption} value={current.value} data={data} className="h-full" />
           </motion.div>
@@ -165,12 +177,12 @@ export function AtlasHome({ data }: { data: AtlasData }) {
       <section aria-labelledby="hero-title" className="relative overflow-hidden">
         <div data-art className="pointer-events-none absolute inset-y-0 left-[50%] right-0 hidden lg:block">
           <EvidenceRibbon layout="hero" nodes={data.heroNodes} className="absolute inset-0" />
-          <p className="absolute bottom-6 left-0 font-mono text-[11px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
+          <p className="absolute bottom-6 left-0 text-[12.5px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
         </div>
         <div className={`${wrap} relative flex flex-col justify-center pb-7 pt-10 lg:min-h-[calc(100svh-64px)] lg:max-h-[820px] lg:pb-14 lg:pt-16`}>
           <div className="max-w-[500px]">
             <p data-hero-in className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[#615B69]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#C2417A]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#584493]" />
               <a href={METHODS_URL} target="_blank" rel="noreferrer" className={`underline decoration-[#615B69]/40 underline-offset-4 hover:decoration-[#221E2B] ${focus}`}>
                 Research prototype
               </a>
@@ -200,7 +212,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
         <div className="relative h-[250px] lg:hidden">
           <EvidenceRibbon layout="compact" nodes={data.compactNodes} threads={110} className="absolute inset-0" />
-          <p className="absolute left-5 top-2 font-mono text-[10.5px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
+          <p className="absolute left-5 top-2 text-[12.5px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
         </div>
       </section>
 
@@ -217,33 +229,30 @@ export function AtlasHome({ data }: { data: AtlasData }) {
 
       <section id="product" aria-labelledby="proof-title" className={`scroll-mt-[88px] ${section}`}>
         <div className={wrap}>
-          <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
-            <div className="lg:col-span-7">
-              <p className={eyebrow}>Inside the demo</p>
-              <h2 id="proof-title" className="mt-4 text-[32px] font-semibold leading-[1.12] tracking-[-0.04em] sm:text-[40px] lg:text-[48px] lg:leading-[1.08]">
-                See why a candidate appears.
-              </h2>
-            </div>
-            <p className="max-w-[30rem] text-[17px] leading-[1.6] text-[#615B69] lg:col-span-4 lg:col-start-9">
-              Select a candidate to see its matched terms, evidence level and which source information this demo result does and doesn&apos;t store.
-            </p>
+          <Rise>
+            <Eyebrow>Inside the demo</Eyebrow>
+            <h2 id="proof-title" className={`mt-4 ${h2}`}>
+              See why a candidate appears.
+            </h2>
           </Rise>
         </div>
         <div className="mx-auto mt-8 w-full max-w-[1264px] px-5 md:px-8 lg:mt-10">
           <ProductShot data={data.shot} />
-          <p className="mt-6 px-2 text-[12.5px] text-[#615B69] md:px-0">
-            Values from the demo case output · research prototype, not a real patient.{" "}
-            <Link href={data.demoHref} className={`text-[#221E2B] underline underline-offset-4 ${focus}`}>
-              Open the case
-            </Link>
+        </div>
+        <div className={`${wrap} mt-8 grid gap-4 lg:grid-cols-12 lg:gap-6`}>
+          <p className="max-w-[34rem] text-[17px] leading-[1.6] text-[#615B69] lg:col-span-7">
+            Pick a candidate to see what it was matched on, its evidence level and which source information this result does and doesn&apos;t store.
+          </p>
+          <p className="text-[14px] leading-[1.6] text-[#615B69] lg:col-span-4 lg:col-start-9">
+            Values from the demo case output. Research prototype, not a real patient.
           </p>
         </div>
       </section>
 
-      <section aria-labelledby="audience-title" className={`border-t border-[#DCD7DF] ${section}`}>
+      <section aria-labelledby="audience-title" className="border-t border-[#DCD7DF] py-12 lg:py-16">
         <div className={wrap}>
           <Rise>
-            <p className={eyebrow}>Who it&apos;s for</p>
+            <Eyebrow>Who it&apos;s for</Eyebrow>
             <h2 id="audience-title" className={`mt-4 max-w-[20ch] ${h2}`}>
               One case, two teams.
             </h2>
@@ -265,9 +274,9 @@ export function AtlasHome({ data }: { data: AtlasData }) {
                 items: ["Evidence read in the tumor's context", "Where each evidence level came from, or that it wasn't recorded", "The decision stays with the oncologist"],
               },
             ].map((a, i) => (
-              <Rise key={a.id} delay={i * 0.08} className={`py-10 ${i === 1 ? "border-t border-[#DCD7DF] md:border-l md:border-t-0 md:pl-12" : "md:pr-12"}`}>
+              <Rise key={a.id} delay={i * 0.08} className={`py-8 ${i === 1 ? "border-t border-[#DCD7DF] md:border-l md:border-t-0 md:pl-12" : "md:pr-12"}`}>
                 <div id={a.id} className="scroll-mt-[88px]">
-                  <p className={eyebrow}>{a.k}</p>
+                  <p className={label}>{a.k}</p>
                   <h3 className="mt-4 text-[24px] font-semibold leading-[1.2] tracking-[-0.03em] text-[#221E2B] sm:text-[26px]">{a.t}</h3>
                   <p className="mt-4 max-w-[30rem] text-[16.5px] leading-[1.6] text-[#615B69]">{a.d}</p>
                   <ul className="mt-7 border-b border-[#DCD7DF]">
@@ -289,7 +298,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         <div className={wrap}>
           <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
             <div className="lg:col-span-6">
-              <p className={eyebrow}>How it works</p>
+              <Eyebrow>How it works</Eyebrow>
               <h2 id="how-title" className={`mt-4 ${h2}`}>
                 What goes in, what comes out, who decides.
               </h2>
@@ -306,7 +315,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         <div className={wrap}>
           <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
             <div className="lg:col-span-6">
-              <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-[#F7F5F0]/55">Methods, limits and source code</p>
+              <Eyebrow dark>Methods, limits and source code</Eyebrow>
               <h2 id="methods-title" className="mt-4 text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] sm:text-[36px] lg:text-[40px]">
                 Built to be inspected.
               </h2>
@@ -340,7 +349,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
       <section aria-labelledby="faq-title" className={section}>
         <div className={wrap}>
           <Rise>
-            <p className={eyebrow}>Questions</p>
+            <Eyebrow>Questions</Eyebrow>
             <h2 id="faq-title" className={`mt-4 ${h2}`}>
               Plain answers.
             </h2>
@@ -396,7 +405,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
               { h: "Methods & source", l: [["Methods", METHODS_URL], ["GitHub", REPO_URL], ["MIT license", `${REPO_URL}/blob/main/LICENSE`]] },
             ].map((g) => (
               <div key={g.h}>
-                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#F7F5F0]/45">{g.h}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]/50">{g.h}</p>
                 <ul className="mt-4 space-y-2.5">
                   {g.l.map(([t, href]) => (
                     <li key={t}>

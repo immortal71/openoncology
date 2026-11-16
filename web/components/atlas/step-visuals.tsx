@@ -2,36 +2,27 @@ import { Backdrop, WindowBar, type ShotCandidate } from "@/components/atlas/prod
 
 export type VcfExcerpt = { title: string; columns: string[]; rows: string[][]; highlight: number };
 
-const lift = "shadow-[0_1px_2px_rgb(34_30_43/0.06),0_30px_60px_-28px_rgb(34_30_43/0.32)]";
-const mono = "font-mono uppercase tracking-[0.12em]";
+const surface = "shadow-[0_0_0_1px_rgb(34_30_43/0.07),0_1px_2px_rgb(34_30_43/0.04),0_16px_32px_-20px_rgb(34_30_43/0.18)]";
+const muted = "text-[#6B6573]";
 
-function Frame({ title, children, className }: { title: string; children: React.ReactNode; className?: string }) {
+function Frame({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className={`overflow-hidden rounded-[12px] bg-white ring-1 ring-[#221E2B]/[0.08] ${lift} ${className ?? ""}`}>
+    <div className={`overflow-hidden rounded-[10px] bg-white ${surface}`}>
       <WindowBar title={title} />
       {children}
     </div>
   );
 }
 
-function Plate({ caption, value }: { caption: string; value: string }) {
-  return (
-    <div className={`absolute bottom-4 left-4 rounded-[10px] bg-white px-4 py-3 ring-1 ring-[#221E2B]/[0.06] ${lift}`}>
-      <p className={`text-[10.5px] text-[#615B69] ${mono}`}>{caption}</p>
-      <p className="mt-0.5 text-[15px] font-semibold tracking-[-0.01em] text-[#221E2B]">{value}</p>
-    </div>
-  );
-}
-
 function InputVisual({ vcf }: { vcf: VcfExcerpt }) {
   return (
-    <Frame title={vcf.title} className="absolute left-5 right-[-24px] top-6 sm:left-8 sm:top-[15%]">
-      <div className="overflow-hidden px-4 py-4">
+    <Frame title={vcf.title}>
+      <div className="px-3 py-3">
         <table className="w-full border-collapse font-mono text-[12.5px]">
           <thead>
-            <tr className="text-left text-[#8A8492]">
+            <tr className={`text-left ${muted}`}>
               {vcf.columns.map((c) => (
-                <th key={c} className="pb-2 pr-4 font-normal">
+                <th key={c} className="px-2 pb-2 font-normal">
                   {c}
                 </th>
               ))}
@@ -41,9 +32,9 @@ function InputVisual({ vcf }: { vcf: VcfExcerpt }) {
             {vcf.rows.map((r, i) => {
               const on = i === vcf.highlight;
               return (
-                <tr key={r.join("-")} className={on ? "bg-[#EEE9F5] text-[#221E2B]" : "text-[#8A8492]"}>
+                <tr key={r.join("-")} className={on ? "bg-[#EEE9F5] text-[#221E2B]" : muted}>
                   {r.map((v, j) => (
-                    <td key={j} className={`py-2 pr-4 ${j === 0 ? "pl-2" : ""} ${on && j === 0 ? "shadow-[inset_3px_0_0_#584493]" : ""}`}>
+                    <td key={j} className={`px-2 py-2.5 ${j === 0 ? "rounded-l-[6px]" : ""} ${j === r.length - 1 ? "rounded-r-[6px]" : ""}`}>
                       {v}
                     </td>
                   ))}
@@ -59,27 +50,25 @@ function InputVisual({ vcf }: { vcf: VcfExcerpt }) {
 
 function OutputVisual({ candidates, more, group }: { candidates: ShotCandidate[]; more: string; group: string }) {
   return (
-    <Frame title="Ranked candidates" className="absolute left-5 right-5 top-6 sm:left-8 sm:right-[-24px] sm:top-[15%]">
-      <div className="px-5 py-4">
-        <p className={`text-[10.5px] text-[#8A8492] ${mono}`}>{group}</p>
-        <ul className="mt-2">
+    <Frame title="Ranked candidates">
+      <div className="px-3 py-3">
+        <p className={`flex justify-between px-3 pb-1.5 text-[12.5px] ${muted}`}>
+          <span>{group}</span>
+          <span>Score</span>
+        </p>
+        <ul>
           {candidates.map((c, i) => (
-            <li key={c.name} className={`relative flex items-center gap-4 rounded-[7px] px-3 py-3 ${i === 0 ? "bg-[#EEE9F5]" : ""}`}>
-              {i === 0 ? <span className="absolute inset-y-2.5 left-0 w-[3px] rounded-full bg-[#584493]" /> : null}
-              <span className="w-4 font-mono text-[12px] text-[#8A8492]">{i + 1}</span>
+            <li key={c.name} className={`flex min-h-[46px] items-center gap-3 rounded-[6px] px-3 ${i === 0 ? "bg-[#EEE9F5]" : ""}`}>
+              <span className={`w-3 font-mono text-[12px] ${i === 0 ? "text-[#584493]" : muted}`}>{i + 1}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-semibold text-[#221E2B]">{c.name}</span>
-                <span className="block truncate text-[12.5px] text-[#615B69]">{c.mechanism.split(" — ")[0]}</span>
+                <span className="block text-[14.5px] font-semibold text-[#221E2B]">{c.name}</span>
+                <span className={`block truncate text-[12.5px] ${muted}`}>{c.mechanism}</span>
               </span>
-              <span className="hidden h-1 w-16 overflow-hidden rounded-full bg-[#EFECF1] sm:block">
-                <span className="block h-full rounded-full bg-[#584493]/45" style={{ width: `${c.score * 100}%` }} />
-              </span>
-              <span className="font-mono text-[11.5px] text-[#8A8492]">{c.score.toFixed(2)}</span>
+              <span className="font-mono text-[12.5px] text-[#221E2B]">{c.score.toFixed(2)}</span>
             </li>
           ))}
         </ul>
-        <p className="mt-2 border-t border-[#EFECF1] px-3 pt-2.5 text-[12.5px] text-[#8A8492]">{more}</p>
-        <p className="mt-3 px-3 text-[11.5px] text-[#8A8492]">Score orders candidates within this case. It is not a response probability.</p>
+        <p className={`mt-2 px-3 text-[12.5px] ${muted}`}>{more}</p>
       </div>
     </Frame>
   );
@@ -87,14 +76,14 @@ function OutputVisual({ candidates, more, group }: { candidates: ShotCandidate[]
 
 function ReviewVisual({ checks }: { checks: { k: string; v: string }[] }) {
   return (
-    <Frame title="Before any treatment decision" className="absolute left-5 right-5 top-6 sm:left-8 sm:right-[-24px] sm:top-[15%]">
-      <ul className="px-5 py-3">
+    <Frame title="Before any treatment decision">
+      <ul className="px-4 py-1">
         {checks.map((c) => (
-          <li key={c.k} className="flex gap-3 border-b border-[#EFECF1] py-3 last:border-b-0">
+          <li key={c.k} className="flex gap-3 border-b border-[#EEECEF] py-3 last:border-b-0">
             <span aria-hidden="true" className="mt-[3px] h-3.5 w-3.5 shrink-0 rounded-full border-[1.5px] border-[#C9C3CF]" />
             <span>
               <span className="block text-[14px] font-medium text-[#221E2B]">{c.k}</span>
-              <span className="block text-[12.5px] text-[#615B69]">{c.v}</span>
+              <span className={`block text-[12.5px] ${muted}`}>{c.v}</span>
             </span>
           </li>
         ))}
@@ -113,13 +102,16 @@ export type StepVisualData = {
 
 export function StepVisual({ kind, caption, value, data, className }: { kind: "variant" | "evidence" | "review"; caption: string; value: string; data: StepVisualData; className?: string }) {
   return (
-    <Backdrop className={className}>
+    <Backdrop className={`flex flex-col justify-center gap-5 p-5 sm:p-8 ${className ?? ""}`}>
       <div aria-hidden="true">
         {kind === "variant" ? <InputVisual vcf={data.vcf} /> : null}
         {kind === "evidence" ? <OutputVisual candidates={data.candidates} more={data.more} group={data.group} /> : null}
         {kind === "review" ? <ReviewVisual checks={data.checks} /> : null}
       </div>
-      <Plate caption={caption} value={value} />
+      <div className="flex items-baseline gap-3 px-1">
+        <span className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#615B69]">{caption}</span>
+        <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#221E2B]">{value}</span>
+      </div>
     </Backdrop>
   );
 }

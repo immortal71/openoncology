@@ -56,7 +56,7 @@ function spine(layout: Layout, w: number, h: number): Curve {
 
 function threadCurve(layout: Layout, w: number, h: number, from: Pt): Curve {
   if (layout === "compact") return [from, { x: from.x - w * 0.25, y: from.y + h * 0.05 }, { x: w * 0.3, y: h * 0.5 }, { x: w * 0.08, y: h * 0.78 }];
-  return [from, { x: from.x - w * 0.3, y: from.y - h * 0.04 }, { x: w * 0.12, y: h * 0.52 }, { x: w * 0.1, y: h * 0.8 }];
+  return [from, { x: from.x - w * 0.3, y: from.y + h * 0.03 }, { x: w * 0.32, y: h * 0.38 }, { x: w * 0.1, y: h * 0.4 }];
 }
 
 function curvePath(c: Curve) {
@@ -81,7 +81,7 @@ export function EvidenceRibbon({
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const threadPath = useRef<SVGPathElement>(null);
-  const [geo, setGeo] = useState<{ w: number; h: number; d: string; nodes: (Pt & ThreadNode & { side: "left" | "right" })[] } | null>(null);
+  const [geo, setGeo] = useState<{ w: number; h: number; d: string; nodes: (Pt & ThreadNode & { side: "start" | "mid" | "end" })[] } | null>(null);
 
   useEffect(() => {
     const el = box.current;
@@ -143,7 +143,7 @@ export function EvidenceRibbon({
           else ctx.lineTo(q.x, q.y);
         }
         const edge = 1 - Math.abs(u) * 1.2;
-        ctx.globalAlpha = Math.max(0.08, sd.a * (0.45 + 0.55 * edge)) * (tone === "dark" ? 1.2 : 1);
+        ctx.globalAlpha = Math.max(0.08, sd.a * (0.45 + 0.55 * edge)) * (tone === "dark" ? 1.2 : 0.78);
         ctx.lineWidth = sd.lw;
         ctx.stroke();
       }
@@ -167,7 +167,7 @@ export function EvidenceRibbon({
         w,
         h,
         d: curvePath(tc),
-        nodes: nodes.slice(0, fr.length).map((nd, i) => ({ ...nd, ...bez(tc, fr[i]), side: i === 0 ? "left" : "right" })),
+        nodes: nodes.slice(0, fr.length).map((nd, i) => ({ ...nd, ...bez(tc, fr[i]), side: i === 0 ? "start" : i === fr.length - 1 ? "end" : "mid" })),
       });
       draw();
     };
@@ -211,18 +211,18 @@ export function EvidenceRibbon({
       <canvas ref={canvas} aria-hidden="true" className="absolute inset-0" />
       {thread && geo ? (
         <svg aria-hidden="true" className="absolute inset-0 overflow-visible" width={geo.w} height={geo.h} viewBox={`0 0 ${geo.w} ${geo.h}`}>
-          <path ref={threadPath} d={geo.d} fill="none" stroke="#C2417A" strokeWidth="1.75" strokeLinecap="round" />
+          <path ref={threadPath} d={geo.d} fill="none" stroke="#584493" strokeWidth="2" strokeLinecap="round" />
         </svg>
       ) : null}
       {geo
         ? geo.nodes.map((n) => (
             <div key={n.label} data-node className="absolute" style={{ left: n.x, top: n.y }}>
-              <span className="absolute -left-[5px] -top-[5px] h-2.5 w-2.5 rounded-full bg-[#C2417A] ring-[3px] ring-[#F7F5F0]" />
+              <span className="absolute -left-[6px] -top-[6px] h-3 w-3 rounded-full bg-[#584493] ring-[3px] ring-[#F7F5F0]" />
               <span
-                className={`absolute top-3 whitespace-nowrap [text-shadow:0_0_6px_#F7F5F0,0_0_2px_#F7F5F0] ${n.side === "left" ? "right-4 text-right" : "left-0"}`}
+                className={`absolute whitespace-nowrap [text-shadow:0_0_8px_#F7F5F0,0_0_3px_#F7F5F0] ${n.side === "start" ? "bottom-3 right-8 text-right" : n.side === "mid" ? "right-2 top-4 text-right" : layout === "hero" ? "bottom-4 left-0" : "left-0 top-4"}`}
               >
-                <span className="block font-mono text-[10.5px] uppercase tracking-[0.14em] text-[#615B69]">{n.label}</span>
-                <span className={`block text-[15px] font-semibold tracking-[-0.015em] ${n.accent ? "text-[#584493]" : "text-[#221E2B]"}`}>{n.value}</span>
+                <span className="block text-[13px] font-medium text-[#615B69]">{n.label}</span>
+                <span className={`block text-[18px] font-semibold tracking-[-0.02em] ${n.accent ? "text-[#584493]" : "text-[#221E2B]"}`}>{n.value}</span>
               </span>
             </div>
           ))

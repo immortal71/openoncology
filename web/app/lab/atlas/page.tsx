@@ -5,7 +5,7 @@ import { AtlasHome } from "@/components/atlas/atlas-home";
 import { parseApproval } from "@/lib/approval";
 import { atlasSans } from "@/lib/atlas-font";
 import { DEMO_REPURPOSING, DEMO_RESULTS } from "@/lib/demo-data";
-import { displaySources } from "@/lib/evidence";
+import { DERIVED_SIGNALS, SOURCES_PENDING_REVIEW, displaySources } from "@/lib/evidence";
 import { oncoKbLevel } from "@/lib/evidence-levels";
 import { parseProteinChange } from "@/lib/protein";
 
@@ -29,6 +29,9 @@ export default function AtlasPage() {
     chembl: c.chembl_id,
     matched: c.matched_terms,
     signals: displaySources(c),
+    hidden: c.evidence_sources
+      .filter((src) => SOURCES_PENDING_REVIEW.has(src) || DERIVED_SIGNALS.has(src))
+      .map((src) => ({ name: src, reason: SOURCES_PENDING_REVIEW.has(src) ? "pending review" : "derived signal" })),
     score: c.rank_score ?? 0,
   });
   const approved = ranked.filter((c) => c.drug_tier === "fda_approved").map(toShot);
@@ -48,6 +51,14 @@ export default function AtlasPage() {
           shot: {
             title: `${lead.gene} ${short}`,
             tumor: DEMO_RESULTS.cancer_type,
+            demoHref: "/lab/results",
+            variants: DEMO_RESULTS.mutations.map((m) => ({
+              gene: m.gene,
+              hgvs: m.hgvs,
+              short: parseProteinChange(m.hgvs)?.short ?? m.hgvs,
+              level: oncoKbLevel(m.oncokb_level)?.label ?? "No OncoKB level",
+              targetable: m.is_targetable,
+            })),
             level: { label: level?.label ?? "No OncoKB level", meaning: level?.meaning ?? "" },
             candidates: approved,
             more: more,
