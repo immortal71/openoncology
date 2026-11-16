@@ -3,7 +3,7 @@ import { Backdrop, WindowBar, type ShotCandidate } from "@/components/atlas/prod
 export type VcfExcerpt = { title: string; columns: string[]; rows: string[][]; highlight: number };
 
 const surface = "shadow-[0_0_0_1px_rgb(34_30_43/0.07),0_1px_2px_rgb(34_30_43/0.04),0_16px_32px_-20px_rgb(34_30_43/0.18)]";
-const muted = "text-[#6B6573]";
+const muted = "text-[#625E68]";
 
 function Frame({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -32,7 +32,7 @@ function InputVisual({ vcf }: { vcf: VcfExcerpt }) {
             {vcf.rows.map((r, i) => {
               const on = i === vcf.highlight;
               return (
-                <tr key={r.join("-")} className={on ? "bg-[#EEE9F5] text-[#221E2B]" : muted}>
+                <tr key={r.join("-")} className={on ? "bg-[#EEE8F5] text-[#24212B]" : muted}>
                   {r.map((v, j) => (
                     <td key={j} className={`px-2 py-2.5 ${j === 0 ? "rounded-l-[6px]" : ""} ${j === r.length - 1 ? "rounded-r-[6px]" : ""}`}>
                       {v}
@@ -58,13 +58,13 @@ function OutputVisual({ candidates, more, group }: { candidates: ShotCandidate[]
         </p>
         <ul>
           {candidates.map((c, i) => (
-            <li key={c.name} className={`flex min-h-[46px] items-center gap-3 rounded-[6px] px-3 ${i === 0 ? "bg-[#EEE9F5]" : ""}`}>
-              <span className={`w-3 font-mono text-[12px] ${i === 0 ? "text-[#584493]" : muted}`}>{i + 1}</span>
+            <li key={c.name} className={`flex min-h-[46px] items-center gap-3 rounded-[6px] px-3 ${i === 0 ? "bg-[#EEE8F5]" : ""}`}>
+              <span className={`w-3 font-mono text-[12px] ${i === 0 ? "text-[#69518C]" : muted}`}>{i + 1}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[14.5px] font-semibold text-[#221E2B]">{c.name}</span>
+                <span className="block text-[14.5px] font-semibold text-[#24212B]">{c.name}</span>
                 <span className={`block truncate text-[12.5px] ${muted}`}>{c.mechanism}</span>
               </span>
-              <span className="font-mono text-[12.5px] text-[#221E2B]">{c.score.toFixed(2)}</span>
+              <span className="font-mono text-[12.5px] text-[#24212B]">{c.score.toFixed(2)}</span>
             </li>
           ))}
         </ul>
@@ -79,10 +79,10 @@ function ReviewVisual({ checks }: { checks: { k: string; v: string }[] }) {
     <Frame title="Before any treatment decision">
       <ul className="px-4 py-1">
         {checks.map((c) => (
-          <li key={c.k} className="flex gap-3 border-b border-[#EEECEF] py-3 last:border-b-0">
+          <li key={c.k} className="flex gap-3 border-b border-[#E2DEE6] py-3 last:border-b-0">
             <span aria-hidden="true" className="mt-[3px] h-3.5 w-3.5 shrink-0 rounded-full border-[1.5px] border-[#C9C3CF]" />
             <span>
-              <span className="block text-[14px] font-medium text-[#221E2B]">{c.k}</span>
+              <span className="block text-[14px] font-medium text-[#24212B]">{c.k}</span>
               <span className={`block text-[12.5px] ${muted}`}>{c.v}</span>
             </span>
           </li>
@@ -109,8 +109,8 @@ export function StepVisual({ kind, caption, value, data, className }: { kind: "v
         {kind === "review" ? <ReviewVisual checks={data.checks} /> : null}
       </div>
       <div className="flex items-baseline gap-3 px-1">
-        <span className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#615B69]">{caption}</span>
-        <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#221E2B]">{value}</span>
+        <span className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#625E68]">{caption}</span>
+        <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#24212B]">{value}</span>
       </div>
     </Backdrop>
   );

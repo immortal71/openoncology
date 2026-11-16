@@ -80,11 +80,21 @@ export function SiteNav() {
   const dark = DARK_ROUTES.includes(pathname);
   const light = !dark && REDESIGNED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const marketing = MARKETING_ROUTES.includes(pathname);
-  const link = dark ? linkClass.replace("text-oo-ink-2", "text-white/65").replace("hover:text-oo-ink", "hover:text-white") : linkClass;
+  const atlas = pathname === "/lab/atlas";
+  const link = dark
+    ? linkClass.replace("text-oo-ink-2", "text-white/65").replace("hover:text-oo-ink", "hover:text-white")
+    : atlas
+      ? linkClass.replace("text-oo-ink-2", "text-[#625E68]").replace("hover:text-oo-ink", "hover:text-[#24212B]")
+      : linkClass;
 
   return (
     <nav className={cn("sticky top-0 z-50 border-b", dark ? "border-white/10 bg-[#0C0A12]/90 backdrop-blur" : light ? "border-oo-line bg-oo-paper" : "border-white/10 bg-neutral-bg")}>
-      <div className={cn("flex h-16 items-center justify-between gap-6", marketing ? "mx-auto max-w-[1200px] px-5 md:px-8" : "clinical-shell")}>
+      <div
+        className={cn(
+          "flex h-16 items-center justify-between gap-6",
+          marketing ? (atlas ? "mx-auto max-w-[1280px] px-5 md:px-10 lg:h-[72px]" : "mx-auto max-w-[1200px] px-5 md:px-8") : "clinical-shell"
+        )}
+      >
         <LogoAnimated tone={light ? "light" : "dark"} />
         {marketing ? (
           <div className="flex items-center gap-3 md:gap-5">
@@ -120,7 +130,9 @@ export function SiteNav() {
                 "inline-flex h-9 items-center rounded-md border px-4 text-[14px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema",
                 dark
                   ? "border-white/15 bg-white/[0.04] text-white hover:bg-white/10"
-                  : "border-oo-line bg-oo-surface text-oo-ink shadow-[0_1px_2px_rgb(27_22_38/0.06)] hover:border-oo-ink-3/40 hover:bg-oo-paper"
+                  : atlas
+                    ? "rounded-[8px] border-transparent bg-[#25202F] text-[#F7F5F0] hover:bg-[#3A3446]"
+                    : "border-oo-line bg-oo-surface text-oo-ink shadow-[0_1px_2px_rgb(27_22_38/0.06)] hover:border-oo-ink-3/40 hover:bg-oo-paper"
               )}
             >
               <span className="sm:hidden">Demo</span>

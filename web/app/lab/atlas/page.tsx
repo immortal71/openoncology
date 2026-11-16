@@ -36,7 +36,7 @@ export default function AtlasPage() {
   });
   const approved = ranked.filter((c) => c.drug_tier === "fda_approved").map(toShot);
   const rest = ranked.length - approved.length;
-  const more = rest ? `${rest} more candidate${rest > 1 ? "s" : ""} in a different indication` : "No other candidates";
+  const more = rest ? `${rest} more in a different indication` : "No other candidates";
   const others = DEMO_RESULTS.mutations
     .filter((m) => m !== lead)
     .map((m) => `${m.gene} ${m.hgvs}`)
@@ -51,6 +51,7 @@ export default function AtlasPage() {
           shot: {
             title: `${lead.gene} ${short}`,
             tumor: DEMO_RESULTS.cancer_type,
+            tumorShort: "NSCLC",
             demoHref: "/lab/results",
             variants: DEMO_RESULTS.mutations.map((m) => ({
               gene: m.gene,
@@ -81,9 +82,9 @@ export default function AtlasPage() {
             ],
           },
           heroNodes: [
-            { label: "Variant", value: `${lead.gene} ${short}` },
-            { label: "Evidence level", value: level?.label ?? "No OncoKB level" },
-            { label: "Candidate · rank 1", value: top.drug_name, accent: true },
+            { label: "Variant", value: `${lead.gene} ${short}`, href: "#product", view: "variants" },
+            { label: "Evidence level", value: level?.label ?? "No OncoKB level", href: "#product", view: "sources" },
+            { label: "Candidate · rank 1", value: top.drug_name, accent: true, href: "#product", view: "candidates" },
           ],
           compactNodes: [
             { label: "Variant", value: `${lead.gene} ${short}` },

@@ -28,13 +28,13 @@ const SOURCES = ["OncoKB", "CIViC", "ClinVar", "OpenTargets", "ChEMBL", "AlphaMi
 const EASE = [0.22, 1, 0.36, 1] as const;
 const CTA_LABEL = "View the demo case";
 
-const wrap = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
-const h2 = "text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] text-[#221E2B] sm:text-[36px] lg:text-[40px]";
-const label = "text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#615B69]";
-const section = "py-14 lg:py-20";
-const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#584493]";
-const primaryBtn = `group inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[#221E2B] px-5 text-[15px] font-medium text-[#F7F5F0] transition-colors duration-150 hover:bg-[#3A3446] ${focus}`;
-const textLink = `inline-flex items-center gap-1 text-[15px] font-medium text-[#221E2B] underline decoration-[#221E2B]/25 underline-offset-[5px] transition-colors duration-150 hover:decoration-[#221E2B] ${focus}`;
+const wrap = "mx-auto w-full max-w-[1280px] px-5 md:px-10";
+const h2 = "text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] text-[#24212B] sm:text-[36px] lg:text-[38px] lg:leading-[44px]";
+const label = "text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#625E68]";
+const section = "py-14 lg:py-24";
+const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#69518C]";
+const primaryBtn = `group inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#25202F] px-6 text-[15px] font-medium leading-[20px] text-[#F7F5F0] transition-colors duration-150 hover:bg-[#3A3446] ${focus}`;
+const textLink = `inline-flex items-center gap-1 text-[15px] font-medium text-[#24212B] underline decoration-[#24212B]/25 underline-offset-[5px] transition-colors duration-150 hover:decoration-[#24212B] ${focus}`;
 
 function Rise({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reduce = useReducedMotion();
@@ -53,10 +53,10 @@ function Rise({ children, className, delay = 0 }: { children: React.ReactNode; c
 
 function Eyebrow({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
-    <p className={`flex items-center gap-2.5 text-[13.5px] font-medium ${dark ? "text-[#F7F5F0]/80" : "text-[#221E2B]"}`}>
+    <p className={`flex items-center gap-2.5 text-[13.5px] font-medium ${dark ? "text-[#F7F5F0]/80" : "text-[#24212B]"}`}>
       <span aria-hidden="true" className="flex items-center">
-        <span className={`h-[1.5px] w-5 ${dark ? "bg-[#B9A8EC]" : "bg-[#584493]"}`} />
-        <span className={`h-[7px] w-[7px] rounded-full ${dark ? "bg-[#B9A8EC]" : "bg-[#584493]"}`} />
+        <span className={`h-[1.5px] w-5 ${dark ? "bg-[#B9A8EC]" : "bg-[#69518C]"}`} />
+        <span className={`h-[7px] w-[7px] rounded-full ${dark ? "bg-[#B9A8EC]" : "bg-[#69518C]"}`} />
       </span>
       {children}
     </p>
@@ -93,15 +93,15 @@ function Workflow({ data }: { data: StepVisualData }) {
   const current = STEPS[active];
   return (
     <div className="mt-12 grid gap-10 lg:mt-14 lg:grid-cols-12 lg:items-center lg:gap-6">
-      <ol className="border-b border-[#DCD7DF] lg:col-span-5">
+      <ol className="border-b border-[#E2DEE6] lg:col-span-5">
         {STEPS.map((s, i) => {
           const open = active === i;
           return (
-            <li key={s.key} className="border-t border-[#DCD7DF]">
+            <li key={s.key} className="border-t border-[#E2DEE6]">
               <h3>
                 <button type="button" aria-expanded={open} aria-controls={`step-${s.key}`} onClick={() => setActive(i)} className={`flex w-full items-baseline gap-4 py-5 text-left ${focus}`}>
-                  <span className={`font-mono text-[12px] ${open ? "text-[#584493]" : "text-[#615B69]"}`}>0{i + 1}</span>
-                  <span className={`text-[20px] font-semibold tracking-[-0.02em] transition-colors duration-150 ${open ? "text-[#221E2B]" : "text-[#615B69] hover:text-[#221E2B]"}`}>{s.title}</span>
+                  <span className={`font-mono text-[12px] ${open ? "text-[#69518C]" : "text-[#625E68]"}`}>0{i + 1}</span>
+                  <span className={`text-[20px] font-semibold tracking-[-0.02em] transition-colors duration-150 ${open ? "text-[#24212B]" : "text-[#625E68] hover:text-[#24212B]"}`}>{s.title}</span>
                 </button>
               </h3>
               <AnimatePresence initial={false}>
@@ -114,7 +114,7 @@ function Workflow({ data }: { data: StepVisualData }) {
                     transition={reduce ? { duration: 0 } : { duration: 0.2, ease: EASE }}
                     className="overflow-hidden"
                   >
-                    <p className="pb-6 pr-4 text-[16px] leading-[1.6] text-[#615B69] sm:pl-9">{s.body}</p>
+                    <p className="pb-6 pr-4 text-[16px] leading-[1.6] text-[#625E68] sm:pl-9">{s.body}</p>
                     <div className="pb-8 lg:hidden">
                       <StepVisual kind={s.key} caption={s.caption} value={s.value} data={data} />
                     </div>
@@ -173,17 +173,17 @@ export function AtlasHome({ data }: { data: AtlasData }) {
   );
 
   return (
-    <div ref={root} className="bg-[#F7F5F0] font-[family-name:var(--font-atlas)] text-[#221E2B] antialiased">
+    <div ref={root} className="bg-[#F7F5F0] font-[family-name:var(--font-atlas)] text-[#24212B] antialiased">
       <section aria-labelledby="hero-title" className="relative overflow-hidden">
         <div data-art className="pointer-events-none absolute inset-y-0 left-[50%] right-0 hidden lg:block">
           <EvidenceRibbon layout="hero" nodes={data.heroNodes} className="absolute inset-0" />
-          <p className="absolute bottom-6 left-0 text-[12.5px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
+          <p className="absolute bottom-6 left-0 text-[12px] leading-[18px] text-[#625E68]">Illustrative evidence pathway · demo case</p>
         </div>
-        <div className={`${wrap} relative flex flex-col justify-center pb-7 pt-10 lg:min-h-[calc(100svh-64px)] lg:max-h-[820px] lg:pb-14 lg:pt-16`}>
-          <div className="max-w-[500px]">
-            <p data-hero-in className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[#615B69]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#584493]" />
-              <a href={METHODS_URL} target="_blank" rel="noreferrer" className={`underline decoration-[#615B69]/40 underline-offset-4 hover:decoration-[#221E2B] ${focus}`}>
+        <div className={`${wrap} pointer-events-none relative flex flex-col justify-center pb-7 pt-10 lg:h-[calc(100svh-72px)] lg:max-h-[720px] lg:min-h-[600px] lg:py-12`}>
+          <div className="pointer-events-auto max-w-[560px] lg:w-[46%]">
+            <p data-hero-in className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[#625E68]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
+              <a href={METHODS_URL} target="_blank" rel="noreferrer" className={`underline decoration-[#625E68]/40 underline-offset-4 hover:decoration-[#24212B] ${focus}`}>
                 Research prototype
               </a>
               <span aria-hidden="true" className="hidden sm:inline">
@@ -193,16 +193,16 @@ export function AtlasHome({ data }: { data: AtlasData }) {
               <span aria-hidden="true">·</span>
               <span>Oncologist review required</span>
             </p>
-            <h1 id="hero-title" ref={headline} className="mt-6 text-balance text-[42px] font-semibold leading-[1.06] tracking-[-0.045em] sm:text-[56px] lg:text-[60px] lg:leading-[1.05] xl:text-[68px] xl:leading-[1.04]">
+            <h1 id="hero-title" ref={headline} className="mt-6 text-balance text-[42px] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[56px] lg:text-[64px] lg:leading-[68px]">
               Drug evidence, connected to the tumor.
             </h1>
-            <p data-hero-in className="mt-6 max-w-[29rem] text-[17px] leading-[1.55] text-[#615B69] lg:text-[18.5px]">
+            <p data-hero-in className="mt-6 max-w-[30rem] text-[17px] leading-[1.55] text-[#625E68] lg:text-[18px] lg:leading-[28px]">
               For sequencing labs and hospital oncology teams reviewing tumor variants, drug candidates and their supporting evidence.
             </p>
             <div data-hero-in className="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
               <Link href={data.demoHref} className={primaryBtn}>
                 {CTA_LABEL}
-                <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <a href={METHODS_URL} target="_blank" rel="noreferrer" className={textLink}>
                 Read the methods <ArrowUpRight size={15} aria-hidden="true" />
@@ -212,14 +212,14 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
         <div className="relative h-[250px] lg:hidden">
           <EvidenceRibbon layout="compact" nodes={data.compactNodes} threads={110} className="absolute inset-0" />
-          <p className="absolute left-5 top-2 text-[12.5px] text-[#615B69]">Illustrative evidence pathway · demo case</p>
+          <p className="absolute left-5 top-2 text-[12.5px] text-[#625E68]">Illustrative evidence pathway · demo case</p>
         </div>
       </section>
 
-      <section aria-label="Evidence sources" className="border-y border-[#DCD7DF]">
+      <section aria-label="Evidence sources" className="border-y border-[#E2DEE6]">
         <div className={`${wrap} flex flex-col gap-3 py-6 md:flex-row md:items-center md:justify-between`}>
-          <p className="text-[13px] text-[#615B69]">Evidence providers the prototype draws on</p>
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[13px] text-[#221E2B]/75">
+          <p className="text-[13px] text-[#625E68]">Evidence providers the prototype draws on</p>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[13px] text-[#24212B]/75">
             {SOURCES.map((s) => (
               <li key={s}>{s}</li>
             ))}
@@ -227,7 +227,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
       </section>
 
-      <section id="product" aria-labelledby="proof-title" className={`scroll-mt-[88px] ${section}`}>
+      <section id="product" aria-labelledby="proof-title" className={`scroll-mt-[96px] ${section}`}>
         <div className={wrap}>
           <Rise>
             <Eyebrow>Inside the demo</Eyebrow>
@@ -236,28 +236,28 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             </h2>
           </Rise>
         </div>
-        <div className="mx-auto mt-8 w-full max-w-[1264px] px-5 md:px-8 lg:mt-10">
+        <div className="mx-auto mt-8 w-full max-w-[1280px] px-5 md:px-10 lg:mt-10">
           <ProductShot data={data.shot} />
         </div>
         <div className={`${wrap} mt-8 grid gap-4 lg:grid-cols-12 lg:gap-6`}>
-          <p className="max-w-[34rem] text-[17px] leading-[1.6] text-[#615B69] lg:col-span-7">
+          <p className="max-w-[34rem] text-[17px] leading-[1.6] text-[#625E68] lg:col-span-7">
             Pick a candidate to see what it was matched on, its evidence level and which source information this result does and doesn&apos;t store.
           </p>
-          <p className="text-[14px] leading-[1.6] text-[#615B69] lg:col-span-4 lg:col-start-9">
+          <p className="text-[14px] leading-[1.6] text-[#625E68] lg:col-span-4 lg:col-start-9">
             Values from the demo case output. Research prototype, not a real patient.
           </p>
         </div>
       </section>
 
-      <section aria-labelledby="audience-title" className="border-t border-[#DCD7DF] py-12 lg:py-16">
+      <section aria-labelledby="audience-title" className="border-t border-[#E2DEE6] py-12 lg:py-[72px]">
         <div className={wrap}>
           <Rise>
-            <Eyebrow>Who it&apos;s for</Eyebrow>
+            <p className={label}>Who it&apos;s for</p>
             <h2 id="audience-title" className={`mt-4 max-w-[20ch] ${h2}`}>
               One case, two teams.
             </h2>
           </Rise>
-          <div className="mt-12 grid border-t border-[#221E2B] md:grid-cols-2">
+          <div className="mt-10 grid border-t border-[#E2DEE6] md:grid-cols-2">
             {[
               {
                 id: "labs",
@@ -274,15 +274,15 @@ export function AtlasHome({ data }: { data: AtlasData }) {
                 items: ["Evidence read in the tumor's context", "Where each evidence level came from, or that it wasn't recorded", "The decision stays with the oncologist"],
               },
             ].map((a, i) => (
-              <Rise key={a.id} delay={i * 0.08} className={`py-8 ${i === 1 ? "border-t border-[#DCD7DF] md:border-l md:border-t-0 md:pl-12" : "md:pr-12"}`}>
-                <div id={a.id} className="scroll-mt-[88px]">
+              <Rise key={a.id} delay={i * 0.08} className={`py-8 ${i === 1 ? "border-t border-[#E2DEE6] md:border-l md:border-t-0 md:pl-12" : "md:pr-12"}`}>
+                <div id={a.id} className="scroll-mt-[96px]">
                   <p className={label}>{a.k}</p>
-                  <h3 className="mt-4 text-[24px] font-semibold leading-[1.2] tracking-[-0.03em] text-[#221E2B] sm:text-[26px]">{a.t}</h3>
-                  <p className="mt-4 max-w-[30rem] text-[16.5px] leading-[1.6] text-[#615B69]">{a.d}</p>
-                  <ul className="mt-7 border-b border-[#DCD7DF]">
+                  <h3 className="mt-4 text-[24px] font-semibold leading-[1.2] tracking-[-0.03em] text-[#24212B] sm:text-[26px]">{a.t}</h3>
+                  <p className="mt-4 max-w-[30rem] text-[16.5px] leading-[1.6] text-[#625E68]">{a.d}</p>
+                  <ul className="mt-7 border-b border-[#E2DEE6]">
                     {a.items.map((it) => (
-                      <li key={it} className="flex gap-3 border-t border-[#DCD7DF] py-3 text-[15px] text-[#221E2B]">
-                        <span aria-hidden="true" className="mt-[10px] h-px w-3 shrink-0 bg-[#221E2B]" />
+                      <li key={it} className="flex gap-3 border-t border-[#E2DEE6] py-3 text-[15px] text-[#24212B]">
+                        <span aria-hidden="true" className="mt-[8px] h-[5px] w-[5px] shrink-0 rounded-full bg-[#B5B0BA]" />
                         {it}
                       </li>
                     ))}
@@ -294,16 +294,16 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
       </section>
 
-      <section id="how-it-works" aria-labelledby="how-title" className={`scroll-mt-[88px] border-t border-[#DCD7DF] ${section}`}>
+      <section id="how-it-works" aria-labelledby="how-title" className={`scroll-mt-[96px] border-t border-[#E2DEE6] ${section}`}>
         <div className={wrap}>
           <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
             <div className="lg:col-span-6">
-              <Eyebrow>How it works</Eyebrow>
+              <p className={label}>How it works</p>
               <h2 id="how-title" className={`mt-4 ${h2}`}>
                 What goes in, what comes out, who decides.
               </h2>
             </div>
-            <p className="max-w-[30rem] text-[17px] leading-[1.6] text-[#615B69] lg:col-span-5 lg:col-start-8">
+            <p className="max-w-[30rem] text-[17px] leading-[1.6] text-[#625E68] lg:col-span-5 lg:col-start-8">
               From the file your lab already has to a shortlist an oncologist can check line by line.
             </p>
           </Rise>
@@ -311,11 +311,11 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
       </section>
 
-      <section id="methods" aria-labelledby="methods-title" className={`scroll-mt-[88px] bg-[#211D2A] text-[#F7F5F0] ${section}`}>
+      <section id="methods" aria-labelledby="methods-title" className="scroll-mt-[96px] bg-[#25202F] py-16 text-[#F7F5F0] lg:py-28">
         <div className={wrap}>
           <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
             <div className="lg:col-span-6">
-              <Eyebrow dark>Methods, limits and source code</Eyebrow>
+              <p className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]/60">Methods, limits and source code</p>
               <h2 id="methods-title" className="mt-4 text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] sm:text-[36px] lg:text-[40px]">
                 Built to be inspected.
               </h2>
@@ -335,7 +335,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
                 <a href={href} target="_blank" rel="noreferrer" className="group block py-7 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F5F0]">
                   <span className="flex items-center justify-between gap-4">
                     <span className="text-[18px] font-semibold tracking-[-0.02em]">{t}</span>
-                    <ArrowUpRight size={18} aria-hidden="true" className="text-[#B9A9FF] transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    <ArrowUpRight size={18} aria-hidden="true" className="text-[#B9A8EC] transition-colors duration-150 group-hover:text-[#F7F5F0]" />
                   </span>
                   <span className="mt-2 block text-[14.5px] leading-relaxed text-[#F7F5F0]/60">{d}</span>
                 </a>
@@ -346,26 +346,26 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         </div>
       </section>
 
-      <section aria-labelledby="faq-title" className={section}>
+      <section aria-labelledby="faq-title" className="py-14 lg:py-20">
         <div className={wrap}>
           <Rise>
-            <Eyebrow>Questions</Eyebrow>
+            <p className={label}>Questions</p>
             <h2 id="faq-title" className={`mt-4 ${h2}`}>
               Plain answers.
             </h2>
           </Rise>
           <dl className="mt-12 grid gap-x-12 md:grid-cols-2">
             {FAQ.map((f) => (
-              <div key={f.q} className="border-t border-[#DCD7DF] py-6">
-                <dt className="text-[17px] font-semibold tracking-[-0.01em] text-[#221E2B]">{f.q}</dt>
-                <dd className="mt-2 max-w-[34rem] text-[15.5px] leading-[1.6] text-[#615B69]">{f.a}</dd>
+              <div key={f.q} className="border-t border-[#E2DEE6] py-6">
+                <dt className="text-[17px] font-semibold tracking-[-0.01em] text-[#24212B]">{f.q}</dt>
+                <dd className="mt-2 max-w-[34rem] text-[15.5px] leading-[1.6] text-[#625E68]">{f.a}</dd>
               </div>
             ))}
           </dl>
         </div>
       </section>
 
-      <section aria-labelledby="close-title" className="bg-[#211D2A] text-[#F7F5F0]">
+      <section aria-labelledby="close-title" className="bg-[#25202F] text-[#F7F5F0]">
         <div className="relative overflow-hidden">
           <EvidenceRibbon layout="closing" tone="dark" threads={120} thread={false} className="pointer-events-none absolute inset-y-0 left-[50%] right-0 hidden md:block" />
           <div className={`${wrap} relative py-24 lg:py-32`}>
@@ -375,10 +375,10 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
               <Link
                 href={data.demoHref}
-                className="group inline-flex h-12 items-center gap-2 rounded-md bg-[#F7F5F0] px-5 text-[15px] font-medium text-[#211D2A] transition-colors duration-150 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F5F0]"
+                className="group inline-flex h-12 items-center gap-2 rounded-md bg-[#F7F5F0] px-5 text-[15px] font-medium text-[#25202F] transition-colors duration-150 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F5F0]"
               >
                 {CTA_LABEL}
-                <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <a
                 href={METHODS_URL}
