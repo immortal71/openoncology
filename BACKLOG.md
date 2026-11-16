@@ -120,6 +120,17 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
 
+### OO-38: `test-fixtures/dna_sample_kras_g12c.vcf` coordinates look wrong and mix genome builds
+- **Why**: Flagged by the marketing-page design review (2026-11-16) and not yet verified against a reference genome.
+  - KRAS line `12:25398284 C>A` with `HGVS_P=p.Gly12Cys`: on GRCh37, c.34G>T (G12C) is reported at 25398285, and 25398284 C>A would be c.35G>T (G12V).
+  - TP53 line `17:7673803` with `p.Arg175His`: this looks like a GRCh38 codon-273 position, not R175H.
+  - NRAS line `1:115256529 C>A` with `p.Gln61Lys`: the reference base and position look inconsistent with Q61K.
+  - The header declares no build, and the positions appear to mix GRCh37 and GRCh38.
+- **Files**: test-fixtures/dna_sample_kras_g12c.vcf, plus whatever tests read it (guard-protected, do not route around the hook)
+- **The actual decision**: confirm each position against GRCh37/GRCh38, pick one build, add a `##reference=` header, and check whether any test or the demo pipeline depends on the current positions. Also decide whether a KRAS G12C plus NRAS Q61K co-occurrence belongs in a sample meant to look realistic.
+- **Interim**: the `/lab/atlas` marketing page no longer shows the fixture. It shows only GENE, HGVS_P and the protein change for the two variants in the demo result.
+- **Risk**: scientific. It's a sample input that people can load and read.
+
 ### OO-23: PAPER.md title/abstract frame discovery as co-equal to evidence matching; YC pitch does not
 - **Why**: Asked (2026-11-04) to check the GitHub docs against the YC W27 application for drift. README.md has now been edited to lead with evidence matching as the current product and mark custom drug discovery/marketplace/crowdfunding as a separate research-stage track (see the "Where this stands today" line under "What is OpenOncology?" and the Roadmap table). PAPER.md cannot be brought into line the same way: its title is "...Evidence-Based Drug Matching **and** De Novo Custom Drug Discovery...", giving the two equal billing, and it mirrors an already-published Research Square DOI abstract (10.21203/rs.3.rs-9707913/v1) that the file itself flags as not to be silently edited.
 - **Files**: PAPER.md (guard-protected, do not route around the hook)

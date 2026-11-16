@@ -126,11 +126,13 @@ function FindingGroup({
   grouped,
   caption,
   defaultOpenId,
+  openAll = false,
 }: {
   group: TherapyGroup<Finding & { rank: number }>;
   grouped: boolean;
   caption: string;
   defaultOpenId?: string;
+  openAll?: boolean;
 }) {
   const headingId = React.useId();
   const resistance = group.key === "resistance_mechanism";
@@ -149,7 +151,7 @@ function FindingGroup({
       ) : null}
       <ul aria-label={grouped ? undefined : caption} className="divide-y divide-oo-line-soft">
         {group.items.map((f) => (
-          <FindingRow key={f.id} finding={f} rank={f.rank} defaultOpen={f.id === defaultOpenId} showTier={!grouped} />
+          <FindingRow key={f.id} finding={f} rank={f.rank} defaultOpen={openAll || f.id === defaultOpenId} showTier={!grouped} />
         ))}
       </ul>
     </section>
@@ -163,6 +165,7 @@ export function FindingList({
   defaultOpenFirst = false,
   showHeader = false,
   grouped = false,
+  defaultOpenAll = false,
   footer,
   className,
 }: {
@@ -172,6 +175,7 @@ export function FindingList({
   defaultOpenFirst?: boolean;
   showHeader?: boolean;
   grouped?: boolean;
+  defaultOpenAll?: boolean;
   footer?: React.ReactNode;
   className?: string;
 }) {
@@ -193,7 +197,14 @@ export function FindingList({
         </div>
       ) : null}
       {groups.map((g) => (
-        <FindingGroup key={g.key} group={g} grouped={grouped} caption={caption} defaultOpenId={defaultOpenFirst ? firstId : undefined} />
+        <FindingGroup
+          key={g.key}
+          group={g}
+          grouped={grouped}
+          caption={caption}
+          defaultOpenId={defaultOpenFirst ? firstId : undefined}
+          openAll={defaultOpenAll}
+        />
       ))}
       {footer ? <div className="border-t border-oo-line px-4 py-3 text-[13px] text-oo-ink-3">{footer}</div> : null}
     </div>

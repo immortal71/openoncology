@@ -8,7 +8,8 @@ import { LogoAnimated } from "@/components/ui/logo-animated";
 import { cn } from "@/lib/utils";
 
 const REDESIGNED_PREFIXES = ["/lab"];
-const MARKETING_ROUTES = ["/lab/landing"];
+const MARKETING_ROUTES = ["/lab/landing", "/lab/hero-a", "/lab/hero-b", "/lab/hero-c", "/lab/direction-a", "/lab/direction-b", "/lab/site", "/lab/atlas"];
+const DARK_ROUTES = ["/lab/hero-a"];
 const GITHUB_URL = "https://github.com/immortal71/openoncology";
 const METHODS_URL = "https://github.com/immortal71/openoncology/blob/main/docs/METHODS.md";
 
@@ -19,7 +20,15 @@ const NAV_LINKS = [
   { href: GITHUB_URL, label: "GitHub", external: true },
 ];
 
-function MobileMenu() {
+const ATLAS_LINKS = [
+  { href: "#how-it-works", label: "How it works", external: false },
+  { href: "#labs", label: "For labs", external: false },
+  { href: "#hospitals", label: "For hospitals", external: false },
+  { href: METHODS_URL, label: "Methods", external: true },
+  { href: GITHUB_URL, label: "GitHub", external: true },
+];
+
+function MobileMenu({ links }: { links: typeof NAV_LINKS }) {
   return (
     <Dialog.Root>
       <Dialog.Trigger
@@ -42,7 +51,7 @@ function MobileMenu() {
           </div>
           <Dialog.Description className="sr-only">Site sections and links</Dialog.Description>
           <ul className="divide-y divide-oo-line-soft">
-            {NAV_LINKS.map((l) => (
+            {links.map((l) => (
               <li key={l.label}>
                 <Dialog.Close asChild>
                   <a
@@ -68,38 +77,56 @@ const linkClass =
 
 export function SiteNav() {
   const pathname = usePathname() ?? "";
-  const light = REDESIGNED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const dark = DARK_ROUTES.includes(pathname);
+  const light = !dark && REDESIGNED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const marketing = MARKETING_ROUTES.includes(pathname);
+  const link = dark ? linkClass.replace("text-oo-ink-2", "text-white/65").replace("hover:text-oo-ink", "hover:text-white") : linkClass;
 
   return (
-    <nav className={cn("sticky top-0 z-50 border-b", light ? "border-oo-line bg-oo-paper" : "border-white/10 bg-neutral-bg")}>
+    <nav className={cn("sticky top-0 z-50 border-b", dark ? "border-white/10 bg-[#0C0A12]/90 backdrop-blur" : light ? "border-oo-line bg-oo-paper" : "border-white/10 bg-neutral-bg")}>
       <div className={cn("flex h-16 items-center justify-between gap-6", marketing ? "mx-auto max-w-[1200px] px-5 md:px-8" : "clinical-shell")}>
         <LogoAnimated tone={light ? "light" : "dark"} />
         {marketing ? (
           <div className="flex items-center gap-3 md:gap-5">
             <div className="hidden items-center gap-6 md:flex">
-              <a href="#how-it-works" className={linkClass}>
+              <a href="#how-it-works" className={link}>
                 How it works
               </a>
-              <a href="#evidence" className={linkClass}>
-                Evidence
-              </a>
-              <a href={METHODS_URL} target="_blank" rel="noreferrer" className={linkClass}>
+              {pathname === "/lab/atlas" ? (
+                <>
+                  <a href="#labs" className={link}>
+                    For labs
+                  </a>
+                  <a href="#hospitals" className={link}>
+                    For hospitals
+                  </a>
+                </>
+              ) : (
+                <a href="#evidence" className={link}>
+                  Evidence
+                </a>
+              )}
+              <a href={METHODS_URL} target="_blank" rel="noreferrer" className={link}>
                 Methods
               </a>
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className={cn(linkClass, "inline-flex items-center gap-1.5")}>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" className={cn(link, "inline-flex items-center gap-1.5")}>
                 <Github size={16} aria-hidden="true" />
                 GitHub
               </a>
             </div>
             <Link
               href="/lab/results"
-              className="inline-flex h-9 items-center rounded-md border border-oo-line bg-oo-surface px-4 text-[14px] font-medium text-oo-ink shadow-[0_1px_2px_rgb(27_22_38/0.06)] transition-colors duration-150 hover:border-oo-ink-3/40 hover:bg-oo-paper focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema"
+              className={cn(
+                "inline-flex h-9 items-center rounded-md border px-4 text-[14px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema",
+                dark
+                  ? "border-white/15 bg-white/[0.04] text-white hover:bg-white/10"
+                  : "border-oo-line bg-oo-surface text-oo-ink shadow-[0_1px_2px_rgb(27_22_38/0.06)] hover:border-oo-ink-3/40 hover:bg-oo-paper"
+              )}
             >
               <span className="sm:hidden">Demo</span>
               <span className="hidden sm:inline">View the demo case</span>
             </Link>
-            <MobileMenu />
+            <MobileMenu links={pathname === "/lab/atlas" ? ATLAS_LINKS : NAV_LINKS} />
           </div>
         ) : null}
       </div>

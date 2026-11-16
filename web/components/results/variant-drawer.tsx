@@ -72,7 +72,7 @@ function LookupValue({ state, cancerType }: { state: LookupState; cancerType?: s
   return <>No level, and the lookup status was not recorded</>;
 }
 
-function VariantDetail({ variant, cancerType }: { variant: DrawerVariant; cancerType?: string }) {
+export function VariantDetail({ variant, cancerType }: { variant: DrawerVariant; cancerType?: string }) {
   const change = parseProteinChange(variant.hgvs);
   const ref = PROTEIN_REFERENCE[variant.gene.toUpperCase()];
   const domain = change ? domainAt(variant.gene, change.position) : null;
