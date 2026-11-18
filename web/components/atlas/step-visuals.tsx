@@ -52,9 +52,9 @@ function InputVisual({ vcf }: { vcf: VcfExcerpt }) {
   );
 }
 
-function OutputVisual({ candidates, more, group, evidence }: { candidates: WsCandidate[]; more: string; group: string; evidence: string }) {
+function OutputVisual({ candidates, more, group, evidence, variant }: { candidates: WsCandidate[]; more: string; group: string; evidence: string; variant: string }) {
   return (
-    <Frame title="Ranked candidates">
+    <Frame title={`Ranked candidates · ${variant}`}>
       <div className="px-3 pb-3 pt-2">
         <p className={`flex justify-between px-3 pb-1.5 pt-1 ${label}`}>
           <span>{group}</span>
@@ -81,12 +81,16 @@ function OutputVisual({ candidates, more, group, evidence }: { candidates: WsCan
   );
 }
 
-function ReviewVisual({ checks }: { checks: { k: string; v: string; missing?: boolean }[] }) {
+function ReviewVisual({ checks, variant }: { checks: Check[]; variant: string }) {
   return (
-    <Frame title="Before any treatment decision">
-      <dl className="px-5 py-1">
+    <Frame title={`Before any treatment decision · ${variant}`}>
+      <dl className="px-3 py-2">
         {checks.map((c) => (
-          <div key={c.k} className="grid grid-cols-[96px_minmax(0,1fr)] gap-3 border-b sm:grid-cols-[150px_minmax(0,1fr)] sm:gap-4 border-[#E2DEE6] py-3 last:border-b-0">
+          <div
+            key={c.k}
+            className={`relative grid grid-cols-[96px_minmax(0,1fr)] gap-3 rounded-[6px] px-2 py-2.5 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-4 ${c.focus ? "bg-[#EEE8F5]" : "border-b border-[#E2DEE6] last:border-b-0"}`}
+          >
+            {c.focus ? <span aria-hidden="true" className="absolute inset-y-2 left-0 w-[2px] rounded-full bg-[#69518C]" /> : null}
             <dt className="text-[13px] text-[#625E68]">{c.k}</dt>
             <dd className="flex items-start gap-2 text-[13.5px] text-[#24212B]">
               {c.missing ? <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#AD7629]" /> : null}
@@ -99,33 +103,50 @@ function ReviewVisual({ checks }: { checks: { k: string; v: string; missing?: bo
   );
 }
 
+type Check = { k: string; v: string; missing?: boolean; focus?: boolean };
+
 export type StepVisualData = {
+  variant: string;
   vcf: VcfExcerpt;
   candidates: WsCandidate[];
   more: string;
   group: string;
   evidence: string;
-  checks: { k: string; v: string; missing?: boolean }[];
+  checks: Check[];
 };
+
+export type StepKind = "variant" | "evidence" | "review";
 
 function Backdrop({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={`relative overflow-hidden rounded-[16px] bg-[#EFECE6] ${className ?? ""}`}>{children}</div>;
 }
 
-export function StepVisual({ kind, caption, value, data, className }: { kind: "variant" | "evidence" | "review"; caption: string; value: string; data: StepVisualData; className?: string }) {
+export function StepContent({ kind, data }: { kind: StepKind; data: StepVisualData }) {
+  return (
+    <div aria-hidden="true">
+      {kind === "variant" ? <InputVisual vcf={data.vcf} /> : null}
+      {kind === "evidence" ? <OutputVisual candidates={data.candidates} more={data.more} group={data.group} evidence={data.evidence} variant={data.variant} /> : null}
+      {kind === "review" ? <ReviewVisual checks={data.checks} variant={data.variant} /> : null}
+    </div>
+  );
+}
+
+export function StepStage({ caption, value, children, className }: { caption: string; value: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={className}>
-      <Backdrop className="h-[340px] p-6">
-        <div aria-hidden="true">
-          {kind === "variant" ? <InputVisual vcf={data.vcf} /> : null}
-          {kind === "evidence" ? <OutputVisual candidates={data.candidates} more={data.more} group={data.group} evidence={data.evidence} /> : null}
-          {kind === "review" ? <ReviewVisual checks={data.checks} /> : null}
-        </div>
-      </Backdrop>
+      <Backdrop className="h-[340px] p-6">{children}</Backdrop>
       <p className="mt-3 flex items-baseline gap-3 px-1">
         <span className={label}>{caption}</span>
         <span className="text-[15px] font-medium text-[#24212B]">{value}</span>
       </p>
     </div>
+  );
+}
+
+export function StepVisual({ kind, caption, value, data, className }: { kind: StepKind; caption: string; value: string; data: StepVisualData; className?: string }) {
+  return (
+    <StepStage caption={caption} value={value} className={className}>
+      <StepContent kind={kind} data={data} />
+    </StepStage>
   );
 }

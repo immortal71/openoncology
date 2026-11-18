@@ -2,12 +2,19 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
 import { groupByTier } from "@/lib/therapy-groups";
 import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
 import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts";
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+function Block({ title, stacked, children }: { title: string; stacked: boolean; children: React.ReactNode }) {
+  if (stacked)
+    return (
+      <section className="mt-5 first:mt-0">
+        <h4 className={label}>{title}</h4>
+        <div className="mt-1.5 max-w-[560px]">{children}</div>
+      </section>
+    );
   return (
     <section className="mt-6 grid gap-1.5 first:mt-0 lg:grid-cols-[120px_minmax(0,1fr)] lg:gap-6">
       <h4 className={`${label} leading-[24px]`}>{title}</h4>
@@ -19,6 +26,13 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: WsCase; c: WsCandidate; compact: boolean; onSources: () => void; headRef?: React.Ref<HTMLParagraphElement> }) {
   const tie = ws.nearTies.find((t) => t.name === c.name || t.above === c.name);
   const applies = levelApplies(c, ws.lead);
+  const approvalNote = c.approval.qualifier ? `indication: ${c.approval.qualifier}` : "indication not specified in this result";
+  const identifier = c.chembl ? (
+    <a href={`https://www.ebi.ac.uk/chembl/compound_report_card/${encodeURIComponent(c.chembl)}/`} target="_blank" rel="noreferrer" className={`inline-flex items-center gap-1 text-[13.5px] leading-[22px] ${linkText}`}>
+      <span className="font-mono text-[12.5px]">{c.chembl}</span> ChEMBL record <ArrowUpRight size={13} aria-hidden="true" />
+      <span className="sr-only">(opens in a new tab)</span>
+    </a>
+  ) : null;
   return (
     <Fade key={c.id}>
       <p className={label}>Selected candidate</p>
@@ -29,30 +43,31 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
         {ws.title} · {ws.tumor}
       </p>
       <div className={`mt-4 border-t ${line} pt-5`}>
-        <Block title="Why it appears">
-          <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.heading}</p>
+        <Block title="Why it appears" stacked={compact}>
           {applies && ws.lead?.level ? (
-            <p className={`mt-1 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>
-              {ws.lead.name}: {ws.lead.level.label}. {ws.lead.level.meaning}
-            </p>
-          ) : c.tierInfo.note ? (
-            <p className={`mt-1 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{c.tierInfo.note}.</p>
-          ) : null}
+            <>
+              <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>
+                {ws.lead.level.label} · {ws.lead.name}
+              </p>
+              <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{ws.lead.level.meaning}</p>
+            </>
+          ) : (
+            <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.note ?? c.tierInfo.heading}</p>
+          )}
           {c.matched.length ? (
-            <p className={`mt-1.5 text-[14px] leading-[21px] ${ink}`}>
+            <p className={`mt-1 text-[14px] leading-[21px] ${ink}`}>
               <span className={muted}>Matched on </span>
               {c.matched.join(", ")}
             </p>
           ) : null}
         </Block>
-        <Block title="Approval">
-          <p className={`text-[14px] leading-[24px] ${ink}`}>
-            {c.approval.label} <span className={muted}>(as reported)</span>
+        <Block title="Approval" stacked={compact}>
+          <p className={`text-[14px] leading-[22px] ${ink}`}>
+            {c.approval.label}, as reported <span className={muted}>· {approvalNote}</span>
           </p>
-          <p className={`text-[13.5px] leading-[20px] ${muted}`}>{c.approval.qualifier ? `Indication: ${c.approval.qualifier}` : "Indication not specified in this result"}</p>
         </Block>
         {compact ? null : (
-          <Block title="Ranking">
+          <Block title="Ranking" stacked={false}>
             <p className={`text-[14px] leading-[24px] ${ink}`}>
               <span className="font-mono tabular-nums">{c.score !== null ? c.score.toFixed(2) : "No score"}</span>
               <span className={muted}>
@@ -68,8 +83,8 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
             ) : null}
           </Block>
         )}
-        <Block title="Sources">
-          <p className={`text-[14px] leading-[24px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
+        <Block title="Sources" stacked={compact}>
+          <p className={`text-[14px] leading-[22px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
           <p className="mt-1 text-[14px] leading-[21px]">
             <Missing>Exact lookup record not stored in this result</Missing>
           </p>
@@ -77,25 +92,29 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
             Inspect sources <ArrowRight size={14} aria-hidden="true" />
           </button>
         </Block>
-        <Block title="Mechanism">
-          <p className={`text-[13.5px] leading-[24px] ${ink}`}>
-            {c.mechanism ?? <span className={muted}>Not reported</span>}
-            {compact && c.chembl ? (
-              <span className="whitespace-nowrap">
-                {" "}
-                <span className={`px-1 ${muted}`}>·</span> <span className={`font-mono text-[12px] ${muted}`}>{c.chembl}</span>
-              </span>
+        {compact ? (
+          <details className={`group mt-5 border-t ${line} pt-3`}>
+            <summary className={`inline-flex cursor-pointer list-none items-center gap-1.5 text-[13.5px] [&::-webkit-details-marker]:hidden ${linkText}`}>
+              Mechanism and identifiers
+              <ChevronDown size={14} aria-hidden="true" className="transition-transform duration-150 group-open:rotate-180" />
+            </summary>
+            <div className="mt-2 max-w-[560px] space-y-1">
+              <p className={`text-[13.5px] leading-[21px] ${ink}`}>{c.mechanism ?? <span className={muted}>Mechanism not reported</span>}</p>
+              {identifier}
+            </div>
+          </details>
+        ) : (
+          <>
+            <Block title="Mechanism" stacked={false}>
+              <p className={`text-[13.5px] leading-[24px] ${ink}`}>{c.mechanism ?? <span className={muted}>Not reported</span>}</p>
+            </Block>
+            {identifier ? (
+              <Block title="Identifiers" stacked={false}>
+                {identifier}
+              </Block>
             ) : null}
-          </p>
-        </Block>
-        {!compact && c.chembl ? (
-          <Block title="Identifiers">
-            <a href={`https://www.ebi.ac.uk/chembl/compound_report_card/${encodeURIComponent(c.chembl)}/`} target="_blank" rel="noreferrer" className={`inline-flex items-center gap-1 text-[13.5px] leading-[24px] ${linkText}`}>
-              <span className="font-mono text-[12.5px]">{c.chembl}</span> ChEMBL record <ArrowUpRight size={13} aria-hidden="true" />
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-          </Block>
-        ) : null}
+          </>
+        )}
       </div>
     </Fade>
   );
@@ -109,6 +128,7 @@ export function CandidatesView({
   onSources,
   compact = false,
   caseHref,
+  threadIn = false,
 }: {
   ws: WsCase;
   list: WsCandidate[];
@@ -117,6 +137,7 @@ export function CandidatesView({
   onSources: () => void;
   compact?: boolean;
   caseHref?: string;
+  threadIn?: boolean;
 }) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const box = useRef<HTMLDivElement>(null);
@@ -129,7 +150,7 @@ export function CandidatesView({
   const col = compact ? 256 : 280;
   const gutter = compact ? 24 : 28;
   const rest = ws.candidates.filter((x) => !list.some((y) => y.id === x.id));
-  const restNote = rest.length ? (rest.every((x) => x.approval.differentIndication) ? `${rest.length} more in a different indication` : `${rest.length} more in the full case`) : null;
+  const restNote = rest.length ? `Showing ${list.length} of ${ws.candidates.length} · ${rest.length} more ${rest.every((x) => x.approval.differentIndication) ? "in a different indication" : "in the full case"}` : null;
   const ties = ws.nearTies.filter((t) => list.some((x) => x.name === t.name) && list.some((x) => x.name === t.above));
 
   const move = (i: number) => {
@@ -175,16 +196,18 @@ export function CandidatesView({
       const dir = b < a ? -1 : 1;
       const rad = Math.min(6, Math.abs(b - a) / 2);
       const d =
-        Math.abs(b - a) < 1
-          ? `M${start} ${a} H${end}`
-          : `M${start} ${a} H${x - rad} Q${x} ${a} ${x} ${a + dir * rad} V${b - dir * rad} Q${x} ${b} ${x + rad} ${b} H${end}`;
+        threadIn && b > 6 && a - b > 12
+          ? `M${x} 0 V${a - 6} Q${x} ${a} ${x - 6} ${a} H${start} M${x} ${b - 6} Q${x} ${b} ${x + 6} ${b} H${end}`
+          : Math.abs(b - a) < 1
+            ? `M${start} ${a} H${end}`
+            : `M${start} ${a} H${x - rad} Q${x} ${a} ${x} ${a + dir * rad} V${b - dir * rad} Q${x} ${b} ${x + rad} ${b} H${end}`;
       setLink({ w: bx.width, h: bx.height, d, start, end, a, b });
     };
     measure();
     const ro = new ResizeObserver(measure);
     if (box.current) ro.observe(box.current);
     return () => ro.disconnect();
-  }, [c, col, gutter, compact]);
+  }, [c, col, gutter, compact, threadIn]);
 
   if (!c) return null;
 
@@ -197,16 +220,17 @@ export function CandidatesView({
             pathLength={1}
             fill="none"
             stroke="#69518C"
-            strokeWidth="1.5"
+            strokeWidth="1.75"
             strokeLinecap="round"
             strokeLinejoin="round"
             style={{ strokeDasharray: 1, strokeDashoffset: revealed ? 0 : 1 }}
             className="motion-safe:[transition:d_150ms_ease-out,stroke-dashoffset_600ms_ease-out]"
           />
-          <circle cx={link.start} cy={link.a} r="2.75" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:cy_150ms_ease-out,opacity_200ms_ease-out]" />
-          <circle cx={link.end} cy={link.b} r="2.75" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:opacity_200ms_ease-out_450ms]" />
+          <circle cx={link.start} cy={link.a} r="3" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:cy_150ms_ease-out,opacity_200ms_ease-out]" />
+          <circle cx={link.end} cy={link.b} r="3" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:opacity_200ms_ease-out_450ms]" />
         </svg>
       ) : null}
+      {threadIn ? <span data-thread-in aria-hidden="true" className="pointer-events-none absolute top-0 hidden h-px w-px lg:block" style={{ left: col + gutter / 2 }} /> : null}
       <div className={`flex flex-col border-b ${line} p-4 lg:border-b-0 lg:border-r lg:py-5`}>
         <p id={`${ws.id}-cand-label`} className={`flex items-center justify-between border-b ${line} px-3 pb-2 ${label}`}>
           <span>Ranked candidates</span>
@@ -265,12 +289,12 @@ export function CandidatesView({
             {ties.map((t) => `${t.name} is within ${NEAR_TIE} of ${t.above}`).join("; ")}. Treat as a near-tie.
           </p>
         ) : null}
-        <p className={`mt-3 px-3 text-[12px] leading-[17px] ${muted}`}>Scores order candidates within this case. They are not response probabilities.</p>
         {caseHref ? (
-          <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-5 hidden items-center gap-1.5 self-start px-3 text-[13.5px] lg:inline-flex ${linkText}`}>
+          <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-2 hidden items-center gap-1.5 self-start px-3 text-[13.5px] lg:inline-flex ${linkText}`}>
             Open the full case <ArrowRight size={14} aria-hidden="true" />
           </Link>
         ) : null}
+        <p className={`mt-4 px-3 text-[12px] leading-[17px] ${muted}`}>Scores order candidates within this case. They are not response probabilities.</p>
       </div>
       <div className="p-5 lg:py-5 lg:pl-14 lg:pr-6">
         <CandidateDetail ws={ws} c={c} compact={compact} onSources={onSources} headRef={head} />

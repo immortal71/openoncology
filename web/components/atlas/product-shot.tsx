@@ -46,7 +46,7 @@ export function ProductShot({ data }: { data: ShotData }) {
     () => {
       const mm = gsap.matchMedia();
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-shot]", { y: 28, opacity: 0, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: root.current, start: "top 85%", once: true } });
+        gsap.from("[data-shot]", { opacity: 0, duration: 0.9, ease: "power2.out", delay: 0.2, scrollTrigger: { trigger: root.current, start: "top 95%", once: true } });
       });
     },
     { scope: root }
@@ -55,7 +55,7 @@ export function ProductShot({ data }: { data: ShotData }) {
   if (!current) return null;
 
   const views: [ViewKey, React.ReactNode][] = [
-    ["candidates", <CandidatesView key="c" ws={ws} list={list} activeId={current.id} onSelect={select} onSources={toSources} compact caseHref={caseHref} />],
+    ["candidates", <CandidatesView key="c" ws={ws} list={list} activeId={current.id} onSelect={select} onSources={toSources} compact caseHref={caseHref} threadIn />],
     ["variants", <VariantsView key="v" ws={ws} compact />],
     ["sources", <SourcesView key="s" ws={ws} c={current} compact />],
     ["gaps", <GapsView key="g" ws={ws} compact />],

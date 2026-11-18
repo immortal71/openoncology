@@ -95,7 +95,7 @@ export function SiteNav() {
       <div
         className={cn(
           "flex h-16 items-center justify-between gap-6",
-          marketing ? (atlas ? "mx-auto max-w-[1280px] px-5 md:px-10 lg:h-[72px]" : "mx-auto max-w-[1200px] px-5 md:px-8") : "clinical-shell"
+          marketing ? (atlas ? "mx-auto max-w-[1280px] px-5 md:px-10" : "mx-auto max-w-[1200px] px-5 md:px-8") : "clinical-shell"
         )}
       >
         <LogoAnimated tone={light ? "light" : "dark"} />

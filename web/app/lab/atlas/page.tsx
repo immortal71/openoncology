@@ -34,6 +34,7 @@ export default function AtlasPage() {
           demoHref: CASE_HREF,
           shot: { ws, list, caseHref: CASE_HREF },
           steps: {
+            variant: ws.title,
             vcf: {
               title: "Variant calls (VCF) · demo case",
               columns: ["GENE", "HGVS_P", "PROTEIN"],
@@ -45,7 +46,7 @@ export default function AtlasPage() {
             group: `${top?.approval.label ?? "Candidates"} · ${ws.title}`,
             evidence: `${levelLabel} · matched on ${top?.matched.join(", ") ?? ""}`,
             checks: [
-              { k: "Context", v: `${ws.title} · ${ws.tumor}` },
+              { k: "Context", v: `${ws.title} · ${ws.tumor}`, focus: true },
               { k: "Evidence level", v: levelLabel },
               { k: "Source record", v: "Not stored in this demo result", missing: true },
               { k: "Unresolved", v: unresolved.join(", "), missing: true },
@@ -55,7 +56,6 @@ export default function AtlasPage() {
           heroNodes: [
             { label: "Variant", value: ws.title, href: "#product", view: "variants" },
             { label: "Evidence level", value: levelLabel, href: "#product", view: "sources" },
-            { label: "Candidate · rank 1", value: top?.name ?? "No candidate", accent: true, href: "#product", view: "candidates" },
           ],
           compactNodes: [
             { label: "Variant", value: ws.title },
