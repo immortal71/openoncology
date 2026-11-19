@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronRight, CircleDashed, Database, Dna, FileText, Layers } from "lucide-react";
+import { ChevronRight, CircleDashed, Database, Dna, FileText, Layers, Search } from "lucide-react";
 import type { WsCase } from "@/lib/workspace";
 
 export const ink = "text-[#24212B]";
@@ -68,6 +68,8 @@ export function Sidebar({
   width = "lg:w-[180px]",
   sticky = false,
   footer,
+  query,
+  onQuery,
 }: {
   ws: WsCase;
   view: ViewKey;
@@ -77,6 +79,9 @@ export function Sidebar({
   width?: string;
   sticky?: boolean;
   footer?: React.ReactNode;
+  /** Omit both to hide the search box entirely (e.g. the compact marketing embed). */
+  query?: string;
+  onQuery?: (v: string) => void;
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const move = (i: number) => {
@@ -91,6 +96,20 @@ export function Sidebar({
           <p className={`text-[13.5px] font-semibold ${ink}`}>{ws.title}</p>
           <p className={`text-[12.5px] ${muted}`}>{ws.tumorShort ?? ws.tumor}</p>
         </div>
+        {onQuery ? (
+          <div className="hidden px-2 pb-3 lg:block">
+            <label className={`flex items-center gap-2 rounded-[6px] border ${line} bg-white px-2.5 py-[7px] focus-within:border-[#69518C]`}>
+              <Search size={14} aria-hidden="true" className="shrink-0 text-[#8F899A]" />
+              <input
+                type="search"
+                value={query ?? ""}
+                onChange={(e) => onQuery(e.target.value)}
+                placeholder="Search candidates"
+                className={`w-full min-w-0 bg-transparent text-[13px] ${ink} placeholder:text-[#8F899A] focus:outline-none`}
+              />
+            </label>
+          </div>
+        ) : null}
         <p className={`hidden px-2 pb-1.5 text-[12px] font-medium lg:block ${muted}`}>Review</p>
         <div role="tablist" aria-label="Case sections" aria-orientation="vertical" className="grid grid-cols-4 lg:flex lg:flex-col lg:gap-0.5">
           {VIEWS.map((v, i) => {
@@ -116,7 +135,7 @@ export function Sidebar({
                     move(keys[e.key]);
                   }
                 }}
-                className={`relative flex min-h-[52px] flex-col items-center justify-center gap-1 text-[12.5px] transition-colors duration-100 lg:h-11 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2.5 lg:rounded-[6px] lg:px-2 lg:text-[14px] ${
+                className={`relative flex min-h-[52px] flex-col items-center justify-center gap-1 text-[12.5px] transition-[color,background-color,transform] duration-100 active:scale-[0.96] lg:h-11 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2.5 lg:rounded-[6px] lg:px-2 lg:text-[14px] ${
                   on ? `font-medium ${ink} lg:bg-[#ECEAEF]` : `${muted} hover:text-[#24212B] lg:hover:bg-[#F1EFF3]`
                 } ${focus}`}
               >
@@ -156,6 +175,39 @@ export function Missing({ children, tone = "amber" }: { children: React.ReactNod
       <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${tone === "amber" ? "bg-[#AD7629]" : "bg-[#B5B0BA]"}`} />
       <span>{children}</span>
     </span>
+  );
+}
+
+/** Non-compact detail panels only. Renders a sequence of labeled facts as a connecting
+    spine instead of flat rows, echoing the thread motif the marketing page already uses
+    for the same variant → evidence → drug relationship. */
+export function Spine({ children }: { children: React.ReactNode }) {
+  return (
+    <ol className="relative mt-1 flex flex-col">
+      <span aria-hidden="true" className="absolute bottom-3 left-[5px] top-3 w-[1.5px] bg-[#69518C]/25" />
+      {children}
+    </ol>
+  );
+}
+
+export function SpineStep({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <li className="relative flex gap-4 py-3 first:pt-0 last:pb-0">
+      <span aria-hidden="true" className="relative z-10 mt-[3px] h-[11px] w-[11px] shrink-0 rounded-full border-2 border-[#F7F5F0] bg-[#69518C]" />
+      <div className="grid min-w-0 flex-1 gap-1 lg:grid-cols-[118px_minmax(0,1fr)] lg:gap-5">
+        <h4 className={`${label} whitespace-nowrap leading-[22px]`}>{title}</h4>
+        <div className="min-w-0 max-w-[600px]">{children}</div>
+      </div>
+    </li>
+  );
+}
+
+export function StatTile({ label: l, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white px-4 py-3">
+      <p className={label}>{l}</p>
+      {children}
+    </div>
   );
 }
 

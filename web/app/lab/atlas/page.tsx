@@ -35,7 +35,7 @@ export default function AtlasPage() {
       <LenisScroll />
       <AtlasHome
         data={{
-          demoHref: CASE_HREF,
+          demoHref: "/submit",
           shot: { ws, list, caseHref: CASE_HREF },
           steps: {
             variant: ws.title,

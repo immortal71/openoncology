@@ -1,14 +1,16 @@
 "use client";
 import { Suspense } from "react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useSearchParams, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Upload, FileText, Dna, CheckCircle, AlertCircle, FlaskConical } from "lucide-react";
 import { api } from "@/lib/api";
-import { DEMO_ID } from "@/lib/demo-data";
+import { atlasSans } from "@/lib/atlas-font";
+import { focus, ink, line, muted, surface } from "@/components/workspace/parts";
 
 const schema = z.object({
   cancer_type: z.string().min(2, "Please specify the cancer type").max(128),
@@ -31,6 +33,79 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+const primaryBtn = `inline-flex h-12 w-full items-center justify-center gap-2 rounded-[8px] bg-[#25202F] px-6 text-[15px] font-medium text-[#F7F5F0] transition-[background-color,transform] duration-150 hover:bg-[#3A3446] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 ${focus}`;
+const cardField = `w-full rounded-[8px] border ${line} bg-white px-4 py-3 text-[14px] ${ink} placeholder:text-[#625E68] transition-colors duration-150 focus:border-[#69518C] focus:outline-none ${focus}`;
+
+function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+      {children}
+    </motion.div>
+  );
+}
+
+function Steps({ active }: { active: 0 | 1 | 2 }) {
+  const steps = ["Upload", "Analysis", "Results"] as const;
+  return (
+    <ol className="flex items-center gap-0">
+      {steps.map((step, i) => (
+        <li key={step} className="flex flex-1 items-center last:flex-none">
+          <div className="flex flex-col items-center gap-1.5">
+            <span
+              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full font-mono text-[12px] font-medium ${
+                i < active ? "bg-[#69518C] text-white" : i === active ? "bg-[#69518C] text-white" : `border ${line} bg-white text-[#625E68]`
+              }`}
+            >
+              {i + 1}
+            </span>
+            <span className={`text-[12.5px] font-medium ${i === active ? ink : muted}`}>{step}</span>
+          </div>
+          {i < steps.length - 1 ? <span aria-hidden="true" className={`mx-3 mb-5 h-px flex-1 ${i < active ? "bg-[#69518C]" : "bg-[#E2DEE6]"}`} /> : null}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Dropzone({ label: title, hint, icon: Icon, file, accept, onFile, error, accessibleName }: { label: string; hint: string; icon: typeof FileText; file?: File; accept: string; onFile: (f: File) => void; error?: string; accessibleName: string }) {
+  const id = useId();
+  return (
+    <div>
+      <p id={`${id}-title`} className={`mb-1.5 block text-[13px] font-medium ${ink}`}>
+        {title}
+      </p>
+      <label
+        htmlFor={id}
+        className={`group flex h-36 w-full cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed ${
+          error ? "border-[#C9776A]" : "border-[#B5B0BA] hover:border-[#69518C]"
+        } bg-[#FAF9F7] transition-colors duration-150 hover:bg-[#F6F5F8] focus-within:border-[#69518C] focus-within:ring-2 focus-within:ring-[#69518C] focus-within:ring-offset-2`}
+      >
+        <span className="mb-2 grid h-10 w-10 place-items-center rounded-[8px] bg-[#ECEAEF] transition-colors duration-150 group-hover:bg-[#EEE8F5]">
+          <Icon size={20} aria-hidden="true" className="text-[#69518C]" />
+        </span>
+        <span className={`px-3 text-center text-[13.5px] font-medium ${ink}`}>{file ? file.name : "Click or drag to upload"}</span>
+        {!file ? <span className={`mt-1 text-[12px] ${muted}`}>{hint}</span> : null}
+        <input
+          id={id}
+          type="file"
+          accept={accept}
+          className="sr-only"
+          aria-labelledby={`${id}-title`}
+          aria-label={accessibleName}
+          aria-describedby={error ? `${id}-error` : undefined}
+          onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
+        />
+      </label>
+      {error ? (
+        <p id={`${id}-error`} className="mt-1 text-[12.5px] text-[#9E4A3A]">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 function SubmitPageInner() {
   const searchParams = useSearchParams();
@@ -72,203 +147,110 @@ function SubmitPageInner() {
 
   if (status === "success") {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="clinical-surface p-10 max-w-md w-full text-center shadow-xl shadow-cyan-900/10"
-        >
-          <CheckCircle className="text-green-500 mx-auto mb-4" size={56} />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Sample submitted!</h2>
-          <p className="text-gray-600 text-sm mb-6">
-            Initial mutation check and repurposed-drug triage usually appear in minutes for
-            VCF/document uploads. Full deep analysis (especially raw FASTQ/BAM pipelines) can
-            take several hours, depending on file size and compute queue.
-          </p>
-          <p className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-500 mb-6">
-            Submission ID: {submissionId}
-          </p>
-          <a
-            href={`/results/${submissionId}`}
-            className="block w-full bg-cyan-700 text-white py-3 rounded-xl font-semibold hover:bg-cyan-600 transition-colors"
-          >
-            Track Status
-          </a>
-        </motion.div>
+      <main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] font-[family-name:var(--font-atlas)] ${ink}`}>
+        <div className="flex min-h-screen items-center justify-center p-6">
+          <Rise className={`w-full max-w-md rounded-[12px] border ${line} bg-white p-8 text-center ${surface}`}>
+            <CheckCircle className="mx-auto mb-4 text-[#4F7D5A]" size={48} aria-hidden="true" />
+            <h2 className={`text-[22px] font-semibold ${ink}`}>Sample submitted.</h2>
+            <p className={`mt-2 text-[14px] leading-[21px] ${muted}`}>
+              Initial mutation check and repurposed-drug triage usually appear in minutes for VCF/document uploads. Full deep analysis (especially raw FASTQ/BAM pipelines) can take several
+              hours, depending on file size and compute queue.
+            </p>
+            <p className={`mt-5 rounded-[8px] border ${line} bg-[#FAF9F7] p-3 font-mono text-[12.5px] ${muted}`}>Submission ID: {submissionId}</p>
+            <Link href={`/submit/analysis?id=${submissionId}`} className={`${primaryBtn} mt-5`}>
+              Track status <Upload size={16} aria-hidden="true" />
+            </Link>
+          </Rise>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen py-10 px-6">
-      <div className="max-w-2xl mx-auto">
-        {/* 3-step progress indicator */}
-        <div className="flex items-center gap-0 mb-8">
-          {["Upload", "Analysis", "Results"].map((step, i) => (
-            <div key={step} className="flex items-center flex-1">
-              <div className="flex flex-col items-center">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
-                  i === 0 ? "border-cyan-600 bg-cyan-600 text-white" : "border-slate-300 dark:border-slate-600 text-slate-400"
-                }`}>
-                  {i + 1}
-                </div>
-                <span className={`text-xs mt-1 font-medium ${
-                  i === 0 ? "text-cyan-600" : "text-slate-400"
-                }`}>{step}</span>
-              </div>
-              {i < 2 && (
-                <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700 mx-2 mb-4" />
-              )}
-            </div>
-          ))}
-        </div>
+    <main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] font-[family-name:var(--font-atlas)] ${ink}`}>
+      <div className="mx-auto max-w-[640px] px-6 py-10">
+        <Steps active={0} />
 
-        <div className="clinical-surface p-7 md:p-9">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-3xl font-[var(--font-manrope)] font-extrabold text-slate-900 dark:text-slate-100 mb-2">Submit Your Sample</h1>
-            <p className="text-slate-600 dark:text-slate-400 mb-5">
-              Upload your case files to start the mutation pathway: actionable check,
-              repurposed-drug search, custom-drug brief generation, and funding support when needed.
+        <div className={`mt-8 rounded-[12px] border ${line} bg-white p-7 md:p-9 ${surface}`}>
+          <Rise>
+            <h1 className="text-balance text-[28px] font-semibold leading-[1.15] tracking-[-0.03em]">Submit your sample.</h1>
+            <p className={`mt-2 text-[15px] leading-[22px] ${muted}`}>
+              Upload your case files to start the mutation pathway: actionable check, repurposed-drug search, custom-drug brief generation, and funding support when needed.
             </p>
-          </motion.div>
+          </Rise>
 
-        {/* Demo banner */}
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 rounded-r-xl border border-slate-700/60 bg-slate-800/50 p-4 flex flex-col sm:flex-row sm:items-center gap-3"
-            style={{ borderLeft: '4px solid rgb(6 182 212)' }}
-          >
-            <FlaskConical className="shrink-0 text-cyan-400" size={20} />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">Try a live demo</p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                See a full KRAS G12C · Non-Small Cell Lung Cancer case — Sotorasib ranked #1 (OncoKB Level 1).
-              </p>
+          <AnimatePresence>
+            <Rise className={`mt-6 flex flex-col gap-3 rounded-[10px] border ${line} bg-[#FAF9F7] p-4 sm:flex-row sm:items-center`}>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] bg-[#EEE8F5]">
+                <FlaskConical size={18} aria-hidden="true" className="text-[#69518C]" />
+              </span>
+              <div className="flex-1">
+                <p className={`text-[14px] font-semibold ${ink}`}>Try a live demo</p>
+                <p className={`mt-0.5 text-[13px] leading-[19px] ${muted}`}>See a full KRAS G12C · Non-Small Cell Lung Cancer case — Sotorasib ranked #1 (OncoKB Level 1).</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push(`/submit/analysis?demo=true`)}
+                className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border ${line} bg-white px-4 text-[13.5px] font-medium ${ink} transition-colors duration-150 hover:bg-[#F6F5F8] ${focus}`}
+              >
+                View demo results <Upload size={14} aria-hidden="true" className="rotate-90" />
+              </button>
+            </Rise>
+          </AnimatePresence>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-6">
+            <div>
+              <label className={`mb-1.5 block text-[13px] font-medium ${ink}`}>Cancer type</label>
+              <input {...register("cancer_type")} placeholder="e.g. Lung adenocarcinoma, Breast cancer, Glioblastoma" className={cardField} />
+              {errors.cancer_type ? <p className="mt-1 text-[12.5px] text-[#9E4A3A]">{errors.cancer_type.message}</p> : null}
             </div>
-            <button
-              type="button"
-              onClick={() => router.push(`/results/${DEMO_ID}?demo=true`)}
-              className="shrink-0 rounded-md bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 active:bg-cyan-800 transition-colors font-mono"
-            >
-              View demo results →
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Dropzone label="Biopsy report · max 50 MB" hint="PDF · JPG · TXT · DOC" icon={FileText} file={biopsyFile} accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json" onFile={(f) => setValue("biopsy_file", f)} error={errors.biopsy_file?.message as string} accessibleName="Biopsy report file" />
+              <Dropzone label="DNA / genomic file · max 500 MB" hint="VCF · FASTQ · BAM · GZ" icon={Dna} file={dnaFile} accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json" onFile={(f) => setValue("dna_file", f)} error={errors.dna_file?.message as string} accessibleName="DNA or genomic file" />
+            </div>
+
+            <p className={`text-[12.5px] leading-[19px] ${muted}`}>
+              By submitting, you consent to OpenOncology storing your files encrypted for analysis purposes. You can delete your data at any time from your dashboard. We never share
+              identifiable data without your explicit consent.
+            </p>
+
+            <p className={`rounded-[8px] border ${line} bg-[#FAF9F7] p-3 text-[12.5px] leading-[19px] ${muted}`}>
+              If Keycloak login is unavailable in your local environment, the app now supports a local demo-auth fallback so you can still test submissions.
+            </p>
+
+            {status === "error" ? (
+              <div className="flex items-center gap-2 rounded-[8px] border border-[#D9B8AE] bg-[#FBF1EE] p-4">
+                <AlertCircle size={18} aria-hidden="true" className="shrink-0 text-[#9E4A3A]" />
+                <p className="text-[13.5px] text-[#9E4A3A]">{errorMsg}</p>
+              </div>
+            ) : null}
+
+            <button type="submit" disabled={status === "uploading"} className={primaryBtn}>
+              <Upload size={17} aria-hidden="true" />
+              {status === "uploading" ? "Uploading & encrypting..." : "Submit sample"}
             </button>
-          </motion.div>
-        </AnimatePresence>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-7">
-          {/* Cancer Type */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Cancer type
-            </label>
-            <input
-              {...register("cancer_type")}
-              placeholder="e.g. Lung adenocarcinoma, Breast cancer, Glioblastoma"
-              className="w-full border border-slate-700 bg-slate-800/50 text-slate-100 rounded-xl px-4 py-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 focus:shadow-[0_0_0_3px_rgba(6,182,212,0.15)] transition-all"
-            />
-            {errors.cancer_type && (
-              <p className="text-red-500 text-xs mt-1">{errors.cancer_type.message}</p>
-            )}
-          </div>
-
-{/* File uploads — side-by-side on desktop */}
-          <div className="grid md:grid-cols-2 gap-5">
-            {/* Biopsy File */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Biopsy report
-                <span className="ml-1.5 text-xs font-normal text-slate-400">max 50 MB</span>
-              </label>
-              <label className="group flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-cyan-500 dark:hover:border-cyan-500 hover:bg-cyan-50/30 dark:hover:bg-cyan-950/20 transition-all bg-slate-50/50 dark:bg-slate-800/30">
-                <div className="mb-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 p-2.5 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 transition-colors">
-                  <FileText className="text-cyan-600 dark:text-cyan-400" size={26} />
-                </div>
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 text-center px-3">
-                  {biopsyFile ? biopsyFile.name : "Click or drag to upload"}
-                </span>
-                {!biopsyFile && (
-                  <span className="text-xs text-slate-400 mt-1">PDF · JPG · TXT · DOC</span>
-                )}
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json"
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && setValue("biopsy_file", e.target.files[0])}
-                />
-              </label>
-              {errors.biopsy_file && (
-                <p className="text-red-500 text-xs mt-1">{errors.biopsy_file.message as string}</p>
-              )}
-            </div>
-
-            {/* DNA File */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                DNA / genomic file
-                <span className="ml-1.5 text-xs font-normal text-slate-400">max 500 MB</span>
-              </label>
-              <label className="group flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-cyan-500 dark:hover:border-cyan-500 hover:bg-cyan-50/30 dark:hover:bg-cyan-950/20 transition-all bg-slate-50/50 dark:bg-slate-800/30">
-                <div className="mb-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/50 p-2.5 group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900/50 transition-colors">
-                  <Dna className="text-cyan-600 dark:text-cyan-400" size={26} />
-                </div>
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 text-center px-3">
-                  {dnaFile ? dnaFile.name : "Click or drag to upload"}
-                </span>
-                {!dnaFile && (
-                  <div className="flex gap-1.5 mt-2 flex-wrap justify-center">
-                    {["VCF", "FASTQ", "BAM", "GZ"].map((ext) => (
-                      <span key={ext} className="font-mono text-[10px] font-bold bg-slate-700 text-cyan-300 px-1.5 py-0.5 rounded border border-slate-600">{ext}</span>
-                    ))}
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json"
-                  className="hidden"
-                  onChange={(e) => e.target.files?.[0] && setValue("dna_file", e.target.files[0])}
-                />
-              </label>
-              {errors.dna_file && (
-                <p className="text-red-500 text-xs mt-1">{errors.dna_file.message as string}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Consent notice */}
-          <p className="text-xs text-slate-500 leading-relaxed">
-            By submitting, you consent to OpenOncology storing your files encrypted for
-            analysis purposes. You can delete your data at any time from your dashboard.
-            We never share identifiable data without your explicit consent.
-          </p>
-
-          <p className="text-xs text-cyan-800 leading-relaxed bg-cyan-50 border border-cyan-100 rounded-lg p-3">
-            If Keycloak login is unavailable in your local environment, the app now supports a local demo-auth fallback so you can still test submissions.
-          </p>
-
-          {status === "error" && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl p-4">
-              <AlertCircle className="text-red-500 shrink-0" size={18} />
-              <p className="text-red-600 text-sm">{errorMsg}</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={status === "uploading"}
-            className="w-full bg-cyan-700 text-white py-3.5 rounded-xl text-base font-bold hover:bg-cyan-600 active:bg-cyan-800 hover:shadow-lg hover:shadow-cyan-900/30 shadow-md shadow-cyan-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-          >
-            <Upload size={18} />
-            {status === "uploading" ? "Uploading & encrypting..." : "Submit Sample"}
-          </button>
-        </form>
+          </form>
         </div>
+
+        {isDemo ? (
+          <p className={`mt-4 text-center text-[12.5px] ${muted}`}>
+            Arrived from early access?{" "}
+            <button type="button" onClick={() => router.push(`/submit/analysis?demo=true`)} className="font-medium text-[#69518C] underline-offset-4 hover:underline">
+              Skip straight to the demo case
+            </button>
+            .
+          </p>
+        ) : null}
       </div>
     </main>
   );
 }
 
 export default function SubmitPage() {
-  return <Suspense fallback={null}><SubmitPageInner /></Suspense>;
+  return (
+    <Suspense fallback={null}>
+      <SubmitPageInner />
+    </Suspense>
+  );
 }

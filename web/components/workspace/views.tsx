@@ -3,9 +3,29 @@
 import { useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { ProteinLollipop } from "@/components/results/protein-lollipop";
-import { VariantDetail } from "@/components/results/variant-drawer";
-import { GAP_LABELS, sourceRow, type GapState, type WsCandidate, type WsCase } from "@/lib/workspace";
-import { Fade, focus, ink, label, line, linkText, Missing, muted, Th, ViewHeading } from "./parts";
+import { domainAt, parseProteinChange, PROTEIN_REFERENCE } from "@/lib/protein";
+import { GAP_LABELS, sourceRow, type GapState, type WsCandidate, type WsCase, type WsVariant } from "@/lib/workspace";
+import { Fade, focus, ink, label, line, linkText, Missing, muted, Spine, SpineStep, StatTile, Th, ViewHeading } from "./parts";
+
+const NOT_IN_RESULT = ["Allele fraction (VAF)", "Read depth", "ClinVar review status", "COSMIC count"];
+
+function LookupDetail({ v, cancerType }: { v: WsVariant; cancerType: string }) {
+  const l = v.lookup;
+  if (l.kind === "level")
+    return (
+      <>
+        <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{l.level.label}</p>
+        <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{l.level.meaning}</p>
+        <p className={`mt-1 text-[12.5px] ${muted}`}>
+          Tumour type in this result: {cancerType}. {l.source ? `Source: ${l.source}.` : "Lookup source not recorded for this result."}
+        </p>
+      </>
+    );
+  if (l.kind === "checked_none") return <p className={`text-[14px] ${ink}`}>Checked, no OncoKB level (source: {l.source})</p>;
+  if (l.kind === "not_attempted") return <p className={`text-[14px] ${muted}`}>Not checked: no protein change to look up</p>;
+  if (l.kind === "unavailable") return <p className="text-[14px] font-medium text-[#9E4A3A]">Lookup failed. Absence of a level here means nothing.</p>;
+  return <p className={`text-[14px] ${muted}`}>No level, and the lookup status was not recorded</p>;
+}
 
 const pad = "p-5 lg:px-8 lg:py-5";
 
@@ -181,24 +201,101 @@ export function VariantsView({ ws, compact = false }: { ws: WsCase; compact?: bo
               </div>
             </div>
             {current ? (
-              <div aria-live="polite" className="min-w-0 max-w-[620px]">
+              <div aria-live="polite" className="min-w-0">
                 <Fade key={current.key}>
-                  <p className={`text-[20px] font-semibold leading-[28px] tracking-[-0.02em] ${ink}`}>{current.name}</p>
-                  <p className={`mb-4 text-[14px] ${muted}`}>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <p className={`text-[20px] font-semibold leading-[28px] tracking-[-0.02em] ${ink}`}>{current.name}</p>
+                    {current.level ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EEE8F5] px-2.5 py-1 text-[12.5px] font-medium leading-none text-[#4A3870]">
+                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
+                        {current.level.label}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className={`mt-0.5 text-[14px] ${muted}`}>
                     {current.hgvs} · {ws.tumor}
                   </p>
-                  <VariantDetail
-                    cancerType={ws.tumor}
-                    variant={{
-                      gene: current.gene,
-                      hgvs: current.hgvs,
-                      classification: current.classification,
-                      alphamissense_score: current.alphamissense,
-                      oncokb_level: current.level?.code ?? null,
-                      evidence_lookup_status: current.lookupStatus,
-                      is_targetable: current.targetable,
-                    }}
-                  />
+
+                  <div className={`mt-4 grid grid-cols-3 gap-px overflow-hidden rounded-[8px] border ${line} bg-[#E2DEE6]`}>
+                    <StatTile label="Evidence">
+                      <p className={`mt-1 text-[15px] font-semibold leading-[20px] ${ink}`}>{current.level?.label ?? "No level"}</p>
+                    </StatTile>
+                    <StatTile label="Targetable">
+                      <p className={`mt-1 text-[15px] font-semibold leading-[20px] ${ink}`}>{current.targetable === null ? "Not reported" : current.targetable ? "Yes" : "No"}</p>
+                    </StatTile>
+                    <StatTile label="AlphaMissense">
+                      <p className={`mt-1 text-[15px] font-semibold leading-[20px] ${ink}`}>
+                        {current.prediction ?? "Not scored"}
+                        {typeof current.alphamissense === "number" ? <span className="ml-1 font-mono text-[12px] font-normal text-[#625E68]">{current.alphamissense.toFixed(2)}</span> : null}
+                      </p>
+                    </StatTile>
+                  </div>
+
+                  <Spine>
+                    <SpineStep title="Evidence level">
+                      <LookupDetail v={current} cancerType={ws.tumor} />
+                    </SpineStep>
+                    <SpineStep title="Pathogenicity">
+                      {current.prediction ? (
+                        <>
+                          <p className={`text-[14px] ${ink}`}>{current.prediction}</p>
+                          <p className={`mt-0.5 text-[12.5px] ${muted}`}>Computational prediction, not a curated classification.</p>
+                        </>
+                      ) : (
+                        <p className={`text-[14px] ${muted}`}>Not scored in this result</p>
+                      )}
+                    </SpineStep>
+                    <SpineStep title="Protein">
+                      {(() => {
+                        const change = parseProteinChange(current.hgvs);
+                        const ref = PROTEIN_REFERENCE[current.gene.toUpperCase()];
+                        const domain = change ? domainAt(current.gene, change.position) : null;
+                        return (
+                          <p className={`text-[14px] leading-[22px] ${ink}`}>
+                            <span className="font-mono">{current.hgvs}</span>
+                            {change ? (
+                              <span className={muted}>
+                                {" "}
+                                · residue {change.position}
+                                {ref ? ` of ${ref.length}` : ""}
+                                {domain ? `, in the ${domain}` : ref ? ", outside annotated domains" : ""}
+                              </span>
+                            ) : null}
+                            {ref ? <span className={muted}> · {ref.source}</span> : null}
+                          </p>
+                        );
+                      })()}
+                    </SpineStep>
+                    <SpineStep title="Not supplied">
+                      <p className="text-[14px] leading-[22px]">
+                        <Missing>{NOT_IN_RESULT.join(", ")}</Missing>
+                      </p>
+                    </SpineStep>
+                    <SpineStep title="Look it up">
+                      <div className="flex flex-wrap gap-2">
+                        {parseProteinChange(current.hgvs) ? (
+                          <a
+                            href={`https://www.oncokb.org/gene/${encodeURIComponent(current.gene)}/${encodeURIComponent(parseProteinChange(current.hgvs)!.short)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className={`inline-flex items-center gap-1 rounded-[6px] border ${line} px-2.5 py-1 text-[13px] font-medium ${ink} transition-colors duration-150 hover:bg-[#F6F5F8] ${focus}`}
+                          >
+                            OncoKB <ArrowUpRight size={13} aria-hidden="true" />
+                            <span className="sr-only">(opens in a new tab)</span>
+                          </a>
+                        ) : null}
+                        <a
+                          href={`https://www.ncbi.nlm.nih.gov/clinvar/?term=${encodeURIComponent(`${current.gene}[gene] ${current.hgvs}`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex items-center gap-1 rounded-[6px] border ${line} px-2.5 py-1 text-[13px] font-medium ${ink} transition-colors duration-150 hover:bg-[#F6F5F8] ${focus}`}
+                        >
+                          ClinVar <ArrowUpRight size={13} aria-hidden="true" />
+                          <span className="sr-only">(opens in a new tab)</span>
+                        </a>
+                      </div>
+                    </SpineStep>
+                  </Spine>
                 </Fade>
               </div>
             ) : null}

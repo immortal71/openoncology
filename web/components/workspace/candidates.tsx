@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { groupByTier } from "@/lib/therapy-groups";
 import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
-import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts";
+import { Fade, focus, ink, label, line, linkText, Missing, muted, Spine, SpineStep, StatTile } from "./parts";
 
 function Block({ title, stacked, children }: { title: string; stacked: boolean; children: React.ReactNode }) {
   if (stacked)
@@ -16,8 +16,8 @@ function Block({ title, stacked, children }: { title: string; stacked: boolean; 
       </section>
     );
   return (
-    <section className="mt-6 grid gap-1.5 first:mt-0 lg:grid-cols-[120px_minmax(0,1fr)] lg:gap-6">
-      <h4 className={`${label} leading-[24px]`}>{title}</h4>
+    <section className="mt-4 grid gap-1 first:mt-0 lg:grid-cols-[120px_minmax(0,1fr)] lg:gap-5">
+      <h4 className={`${label} leading-[22px]`}>{title}</h4>
       <div className="min-w-0 max-w-[600px]">{children}</div>
     </section>
   );
@@ -53,57 +53,40 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
       <p className={`mt-0.5 text-[14px] leading-[21px] ${muted}`}>
         {ws.title} · {ws.tumor}
       </p>
-      <div className={`mt-4 border-t ${line} pt-5`}>
-        <Block title="Why it appears" stacked={compact}>
-          {applies && ws.lead?.level ? (
-            <>
-              <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>
-                {ws.lead.level.label} · {ws.lead.name}
-              </p>
-              <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{ws.lead.level.meaning}</p>
-            </>
-          ) : (
-            <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.note ?? c.tierInfo.heading}</p>
-          )}
-          {c.matched.length ? (
-            <p className={`mt-1 text-[14px] leading-[21px] ${ink}`}>
-              <span className={muted}>Matched on </span>
-              {c.matched.join(", ")}
-            </p>
-          ) : null}
-        </Block>
-        <Block title="Approval" stacked={compact}>
-          <p className={`text-[14px] leading-[22px] ${ink}`}>
-            {c.approval.label}, as reported <span className={muted}>· {approvalNote}</span>
-          </p>
-        </Block>
-        {compact ? null : (
-          <Block title="Ranking" stacked={false}>
-            <p className={`text-[14px] leading-[24px] ${ink}`}>
-              <span className="font-mono tabular-nums">{c.score !== null ? c.score.toFixed(2) : "No score"}</span>
-              <span className={muted}>
-                {" "}
-                · rank {c.rank} of {ws.candidates.length}
-              </span>
-            </p>
-            <p className={`text-[13.5px] leading-[20px] ${muted}`}>Ranks candidates within this case. It is not a response probability.</p>
-            {tie ? (
-              <p className={`mt-1 text-[13.5px] leading-[20px] ${ink}`}>
-                {tie.name} scores within {NEAR_TIE} of {tie.above}: treat the pair as a near-tie.
+      {compact ? (
+        <div className={`mt-4 border-t ${line} pt-5`}>
+          <Block title="Why it appears" stacked>
+            {applies && ws.lead?.level ? (
+              <>
+                <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>
+                  {ws.lead.level.label} · {ws.lead.name}
+                </p>
+                <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{ws.lead.level.meaning}</p>
+              </>
+            ) : (
+              <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.note ?? c.tierInfo.heading}</p>
+            )}
+            {c.matched.length ? (
+              <p className={`mt-1 text-[14px] leading-[21px] ${ink}`}>
+                <span className={muted}>Matched on </span>
+                {c.matched.join(", ")}
               </p>
             ) : null}
           </Block>
-        )}
-        <Block title="Sources" stacked={compact}>
-          <p className={`text-[14px] leading-[22px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
-          <p className="mt-1 text-[14px] leading-[21px]">
-            <Missing>Exact lookup record not stored in this result</Missing>
-          </p>
-          <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-[44px] ${linkText}`}>
-            Inspect sources <ArrowRight size={14} aria-hidden="true" />
-          </button>
-        </Block>
-        {compact ? (
+          <Block title="Approval" stacked>
+            <p className={`text-[14px] leading-[22px] ${ink}`}>
+              {c.approval.label}, as reported <span className={muted}>· {approvalNote}</span>
+            </p>
+          </Block>
+          <Block title="Sources" stacked>
+            <p className={`text-[14px] leading-[22px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
+            <p className="mt-1 text-[14px] leading-[21px]">
+              <Missing>Exact lookup record not stored in this result</Missing>
+            </p>
+            <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-[44px] ${linkText}`}>
+              Inspect sources <ArrowRight size={14} aria-hidden="true" />
+            </button>
+          </Block>
           <details className={`group mt-5 border-t ${line} pt-3`}>
             <summary className={`inline-flex min-h-[44px] cursor-pointer list-none items-center gap-1.5 text-[13.5px] [&::-webkit-details-marker]:hidden ${linkText}`}>
               Mechanism and identifiers
@@ -114,19 +97,77 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
               {identifier}
             </div>
           </details>
-        ) : (
-          <>
-            <Block title="Mechanism" stacked={false}>
-              <p className={`text-[13.5px] leading-[24px] ${ink}`}>{c.mechanism ?? <span className={muted}>Not reported</span>}</p>
-            </Block>
-            {identifier ? (
-              <Block title="Identifiers" stacked={false}>
-                {identifier}
-              </Block>
+        </div>
+      ) : (
+        <div className={`mt-4 border-t ${line} pt-5`}>
+          <div className={`grid grid-cols-3 gap-px overflow-hidden rounded-[8px] border ${line} bg-[#E2DEE6]`}>
+            <StatTile label="Score">
+              <p className={`mt-1 font-mono text-[22px] font-semibold leading-none tabular-nums ${ink}`}>{c.score !== null ? c.score.toFixed(2) : "—"}</p>
+            </StatTile>
+            <StatTile label="Rank">
+              <p className={`mt-1 text-[22px] font-semibold leading-none ${ink}`}>
+                {c.rank}
+                <span className={`ml-1 text-[13px] font-normal ${muted}`}>of {ws.candidates.length}</span>
+              </p>
+            </StatTile>
+            <StatTile label="Evidence">
+              <p className={`mt-1.5 text-[15px] font-semibold leading-[20px] ${ink}`}>{applies && ws.lead?.level ? ws.lead.level.label : (c.tierInfo.badge ?? "—")}</p>
+            </StatTile>
+          </div>
+          <p className={`mt-2 text-[12.5px] leading-[18px] ${muted}`}>
+            Ranks candidates within this case. It is not a response probability.
+            {tie ? (
+              <>
+                {" "}
+                {tie.name} scores within {NEAR_TIE} of {tie.above}: treat the pair as a near-tie.
+              </>
             ) : null}
-          </>
-        )}
-      </div>
+          </p>
+          <Spine>
+            <SpineStep title="Why it appears">
+              {applies && ws.lead?.level ? (
+                <>
+                  <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>
+                    {ws.lead.level.label} · {ws.lead.name}
+                  </p>
+                  <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{ws.lead.level.meaning}</p>
+                </>
+              ) : (
+                <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.note ?? c.tierInfo.heading}</p>
+              )}
+              {c.matched.length ? (
+                <p className={`mt-1 text-[14px] leading-[21px] ${ink}`}>
+                  <span className={muted}>Matched on </span>
+                  {c.matched.join(", ")}
+                </p>
+              ) : null}
+            </SpineStep>
+            <SpineStep title="Approval">
+              <p className={`text-[14px] leading-[22px] ${ink}`}>
+                {c.approval.label}, as reported <span className={muted}>· {approvalNote}</span>
+              </p>
+            </SpineStep>
+            <SpineStep title="Side effects">
+              <p className="text-[14px] leading-[22px]">
+                <Missing>Not supplied in this result — no adverse-event source is wired into the ranking pipeline yet</Missing>
+              </p>
+            </SpineStep>
+            <SpineStep title="Sources">
+              <p className={`text-[14px] leading-[22px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
+              <p className="mt-1 text-[14px] leading-[21px]">
+                <Missing>Exact lookup record not stored in this result</Missing>
+              </p>
+              <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-[44px] ${linkText}`}>
+                Inspect sources <ArrowRight size={14} aria-hidden="true" />
+              </button>
+            </SpineStep>
+            <SpineStep title="Mechanism">
+              <p className={`text-[13.5px] leading-[24px] ${ink}`}>{c.mechanism ?? <span className={muted}>Not reported</span>}</p>
+            </SpineStep>
+            {identifier ? <SpineStep title="Identifiers">{identifier}</SpineStep> : null}
+          </Spine>
+        </div>
+      )}
     </Fade>
   );
 }
@@ -205,7 +246,7 @@ export function CandidatesView({
       const x = threadIn ? col - 0.5 : col + gutter / 2;
       const end = h.left - bx.left - 10;
       const dir = b < a ? -1 : 1;
-      const rad = Math.min(6, Math.abs(b - a) / 2);
+      const rad = Math.min(16, Math.abs(b - a) / 2);
       const d =
         threadIn && b > 6 && a - b > 12
           ? `M${x} 0 V${bx.height} M${x} ${a - 6} Q${x} ${a} ${x - 6} ${a} H${start} M${x} ${b - 6} Q${x} ${b} ${x + 6} ${b} H${end}`
@@ -281,7 +322,7 @@ export function CandidatesView({
                           move(i - 1);
                         }
                       }}
-                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-colors duration-100 ${
+                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-[background-color,transform] duration-100 active:scale-[0.96] ${
                         on ? "bg-[#EEE8F5]" : "hover:bg-[#F6F5F8] active:bg-[#EFEDF2]"
                       } ${focus}`}
                     >

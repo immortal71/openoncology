@@ -6,7 +6,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { EvidenceRibbon, type ThreadNode } from "@/components/atlas/evidence-ribbon";
 import { ProductShot, type ShotData } from "@/components/atlas/product-shot";
@@ -40,39 +39,26 @@ const SOURCES = [
   { name: "ChEMBL", kind: "Drug records" },
   { name: "AlphaMissense", kind: "Missense prediction" },
 ];
-const EASE = [0.22, 1, 0.36, 1] as const;
-const CTA_LABEL = "View the demo case";
+const CTA_LABEL = "Get early access";
 
 const wrap = "mx-auto w-full max-w-[1280px] px-5 md:px-10";
 const h2 = "text-balance text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] text-[#24212B] sm:text-[36px] lg:text-[40px] lg:leading-[46px]";
 const label = "text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#625E68]";
 const aside = "max-w-[30rem] text-pretty text-[17px] leading-[1.6] text-[#4A4652] lg:col-span-5 lg:col-start-7";
 const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#69518C]";
-const primaryBtn = `group inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#25202F] px-6 text-[15px] font-medium leading-[20px] text-[#F7F5F0] transition-colors duration-150 hover:bg-[#3A3446] ${focus}`;
+const primaryBtn = `group inline-flex h-12 items-center justify-center gap-2 rounded-[8px] bg-[#25202F] px-6 text-[15px] font-medium leading-[20px] text-[#F7F5F0] transition-[background-color,transform] duration-150 hover:bg-[#3A3446] active:scale-[0.96] ${focus}`;
 const textLink = `inline-flex min-h-[44px] items-center gap-1 text-[15px] font-medium text-[#24212B] underline decoration-[#24212B]/25 underline-offset-[5px] transition-colors duration-150 hover:decoration-[#24212B] ${focus}`;
 const newTab = <span className="sr-only">(opens in a new tab)</span>;
 
-function Rise({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.8, ease: EASE, delay }}
-    >
-      {children}
-    </motion.div>
-  );
+function Rise({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <div className={className}>{children}</div>;
 }
 
-function SectionHead({ id, kicker, title, children, dark = false, wide = false }: { id: string; kicker: string; title: React.ReactNode; children?: React.ReactNode; dark?: boolean; wide?: boolean }) {
+function SectionHead({ id, title, children, dark = false, wide = false }: { id: string; title: React.ReactNode; children?: React.ReactNode; dark?: boolean; wide?: boolean }) {
   return (
     <Rise className="grid gap-5 lg:grid-cols-12 lg:items-end lg:gap-6">
       <div className={wide ? "lg:col-span-7" : "lg:col-span-6"}>
-        <p className={dark ? "text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]/70" : label}>{kicker}</p>
-        <h2 id={id} className={`mt-4 ${dark ? h2.replace("text-[#24212B]", "text-[#F7F5F0]") : h2}`}>
+        <h2 id={id} className={dark ? h2.replace("text-[#24212B]", "text-[#F7F5F0]") : h2}>
           {title}
         </h2>
       </div>
@@ -335,8 +321,8 @@ export function AtlasHome({ data }: { data: AtlasData }) {
     <div ref={root} className="relative bg-[#F7F5F0] font-[family-name:var(--font-atlas)] text-[#24212B] antialiased">
       <div ref={story} className="relative overflow-hidden">
         <section aria-labelledby="hero-title" className="relative">
-          <div ref={art} data-art className="pointer-events-none absolute inset-y-0 left-[50%] right-0 hidden [mask-image:linear-gradient(to_bottom,#000_62%,transparent_96%)] lg:block">
-            <EvidenceRibbon layout="hero" trace={false} className="absolute inset-0" />
+          <div ref={art} data-art className="pointer-events-none absolute inset-y-0 left-[56%] right-0 hidden [mask-image:linear-gradient(to_bottom,transparent,#000_10%,#000_58%,transparent_94%)] lg:block">
+            <EvidenceRibbon layout="hero" threads={56} weight={0.6} trace={false} className="absolute inset-0" />
           </div>
           <div className={`${wrap} pointer-events-none absolute inset-x-0 bottom-3 hidden justify-end lg:flex`}>
             <p className="text-[12px] leading-[18px] text-[#625E68]">Illustrative evidence pathway · demo case</p>
@@ -410,7 +396,6 @@ export function AtlasHome({ data }: { data: AtlasData }) {
         <div className={wrap}>
           <SectionHead
             id="how-title"
-            kicker="How it works"
             wide
             title={
               <>
@@ -425,16 +410,14 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-6">
             <Rise className="h-full min-w-0">
               <article id="labs" className="flex h-full min-w-0 scroll-mt-[88px] flex-col rounded-[14px] outline-offset-[10px] target:outline target:outline-2 target:outline-[#69518C]">
-                <p className={label}>For sequencing labs</p>
-                <h3 className="mt-3 text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What to add to the next run.</h3>
+                <h3 className="text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What your lab&apos;s next sequencing run should add.</h3>
                 <p className="mt-2 max-w-[46ch] text-[15.5px] leading-[1.6] text-[#4A4652]">The same calls as step 1, with the fields this result doesn&apos;t carry left visibly empty.</p>
                 <FieldsCard vcf={data.steps.vcf} missing={data.labFacts} />
               </article>
             </Rise>
-            <Rise delay={0.08} className="h-full min-w-0">
+            <Rise className="h-full min-w-0">
               <article id="hospitals" className="flex h-full min-w-0 scroll-mt-[88px] flex-col rounded-[14px] outline-offset-[10px] target:outline target:outline-2 target:outline-[#69518C]">
-                <p className={label}>For hospital oncology teams</p>
-                <h3 className="mt-3 text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What to check before acting.</h3>
+                <h3 className="text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What your hospital team checks before acting.</h3>
                 <p className="mt-2 max-w-[46ch] text-[15.5px] leading-[1.6] text-[#4A4652]">Evidence that wasn&apos;t recorded or assessed, ending at the person who decides.</p>
                 <CheckRail rows={data.clinicFacts} more={data.clinicMore} />
               </article>
@@ -445,7 +428,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
 
       <section id="methods" data-dark aria-labelledby="methods-title" className="scroll-mt-[88px] bg-[#25202F] py-16 text-[#F7F5F0] lg:py-24">
         <div className={wrap}>
-          <SectionHead id="methods-title" kicker="Methods, limits and source code" title="Every ranking follows a published rule." dark wide>
+          <SectionHead id="methods-title" title="Every ranking follows a published rule." dark wide>
             Drugs are grouped by their OncoKB level, then ranked within the group by a weighted evidence score. The figure shows the mapping; its limits follow, starting with: not clinically validated.
           </SectionHead>
           <Rise>
@@ -481,9 +464,8 @@ export function AtlasHome({ data }: { data: AtlasData }) {
       <section data-quiet aria-labelledby="faq-title" className="py-16 lg:py-24">
         <div className={`${wrap} grid gap-8 lg:grid-cols-12 lg:gap-6`}>
           <Rise className="lg:sticky lg:top-28 lg:col-span-5 lg:self-start">
-            <p className={label}>FAQ</p>
-            <h2 id="faq-title" className={`mt-4 ${h2}`}>
-              Before you trust it.
+            <h2 id="faq-title" className={h2}>
+              <span className="sr-only">FAQ: </span>Before you trust it.
             </h2>
             <dl className="mt-8 max-w-[22rem] divide-y divide-[#E2DEE6] border-y border-[#E2DEE6] text-[14px]">
               {[
@@ -517,7 +499,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           </div>
           <ClosingThread wrap={closing} art={closingArt} target={closingCta} />
           <div className={`${wrap} relative py-20 lg:py-28`}>
-            <p className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]/70">Demo case · KRAS G12C, non-small cell lung cancer</p>
+            <p className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]/70">Illustrative case · KRAS G12C, non-small cell lung cancer</p>
             <h2 id="close-title" className="mt-5 max-w-[760px] text-balance text-[40px] font-semibold leading-[1.03] tracking-[-0.04em] sm:text-[56px] lg:text-[68px]">
               Follow the evidence from variant to drug.
             </h2>
@@ -526,7 +508,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
                 ref={closingCta}
                 data-spine-dock=""
                 href={data.demoHref}
-                className="group inline-flex h-12 items-center gap-2 rounded-[8px] bg-[#B9A8EC] px-6 text-[15px] font-semibold text-[#25202F] transition-colors duration-150 hover:bg-[#CFC2F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F5F0]"
+                className="group inline-flex h-12 items-center gap-2 rounded-[8px] bg-[#B9A8EC] px-6 text-[15px] font-semibold text-[#25202F] transition-[background-color,transform] duration-150 hover:bg-[#CFC2F5] active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F7F5F0]"
               >
                 {CTA_LABEL}
                 <ArrowRight size={16} aria-hidden="true" />
@@ -560,7 +542,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             <p className="mt-3 max-w-[22rem] text-[13.5px] leading-relaxed text-[#F7F5F0]/70">Open-source tumor evidence matching for sequencing labs and hospital oncology teams.</p>
           </div>
           {[
-            { h: "Product", l: [["Demo case", data.demoHref, false], ["How it works", "#how-it-works", false]] },
+            { h: "Product", l: [["Get early access", data.demoHref, false], ["How it works", "#how-it-works", false]] },
             { h: "Audiences", l: [["For sequencing labs", "#labs", false], ["For hospital teams", "#hospitals", false]] },
             { h: "Methods & source", l: [["Methods", METHODS_URL, true], ["GitHub", REPO_URL, true], ["Report an issue", `${REPO_URL}/issues`, true], ["MIT license", `${REPO_URL}/blob/main/LICENSE`, true]] },
           ].map((g) => (

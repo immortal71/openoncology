@@ -86,6 +86,7 @@ export function EvidenceRibbon({
   thread = true,
   trace: showTrace = true,
   tone = "light",
+  weight = 1,
 }: {
   layout?: Layout;
   nodes?: ThreadNode[];
@@ -94,6 +95,8 @@ export function EvidenceRibbon({
   thread?: boolean;
   trace?: boolean;
   tone?: "light" | "dark";
+  /** Scales the ribbon's rendered footprint and thread opacity (1 = full size) without changing the spine geometry that StoryThread/ClosingThread anchor to. */
+  weight?: number;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -133,7 +136,7 @@ export function EvidenceRibbon({
       ctx.clearRect(0, 0, w, h);
       const c = spine(layout, w, h);
       const pinch = bez(c, PINCH_T);
-      const base = Math.min(w, h) * (layout === "compact" ? 0.5 : layout === "hero" ? 0.46 : 0.32);
+      const base = Math.min(w, h) * (layout === "compact" ? 0.5 : layout === "hero" ? 0.46 : 0.32) * weight;
       const grad = ctx.createLinearGradient(0, 0, 0, h);
       grad.addColorStop(0, UPPER);
       grad.addColorStop(Math.min(0.9, Math.max(0.1, pinch.y / h)), CONVERGE);
@@ -179,7 +182,7 @@ export function EvidenceRibbon({
         const sd = seeds[k];
         strand(u, k, sd.j);
         const edge = 1 - Math.abs(u) * 1.2;
-        ctx.globalAlpha = (0.28 + sd.a * 0.18) * (0.5 + 0.5 * Math.max(0, edge)) * soften * (tone === "dark" ? 1.3 : 1);
+        ctx.globalAlpha = (0.28 + sd.a * 0.18) * (0.5 + 0.5 * Math.max(0, edge)) * soften * (tone === "dark" ? 1.3 : 1) * weight;
         ctx.lineWidth = sd.lw;
         ctx.stroke();
       }
@@ -240,7 +243,7 @@ export function EvidenceRibbon({
       st?.kill();
       cancelAnimationFrame(raf);
     };
-  }, [layout, threads, nodes, tone, thread, showTrace]);
+  }, [layout, threads, nodes, tone, thread, showTrace, weight]);
 
   useEffect(() => {
     const p = trace.current;

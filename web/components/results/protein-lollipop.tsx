@@ -1,9 +1,7 @@
 "use client";
 
-import { useId, useRef } from "react";
-import { motion, useInView, type Variants } from "framer-motion";
+import { useId } from "react";
 import { cn } from "@/lib/utils";
-import { EASE_OUT } from "@/lib/motion";
 import { PROTEIN_REFERENCE, domainAt, parseProteinChange } from "@/lib/protein";
 
 export type LollipopVariant = {
@@ -11,13 +9,6 @@ export type LollipopVariant = {
   hgvs: string;
   emphasis?: boolean;
   note?: string;
-};
-
-const listVariants: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const stickVariants: Variants = { hidden: { scaleY: 0 }, show: { scaleY: 1, transition: { duration: 0.3, ease: EASE_OUT } } };
-const headVariants: Variants = {
-  hidden: { scale: 0.6, opacity: 0 },
-  show: { scale: 1, opacity: 1, transition: { delay: 0.18, duration: 0.2, ease: [0.4, 0, 0.2, 1] } },
 };
 
 function pct(position: number, length: number) {
@@ -68,15 +59,11 @@ function Row({ v }: { v: LollipopVariant }) {
           </div>
         ))}
         <div className="absolute inset-x-0 top-[44px] h-px bg-oo-ink-3/40" />
-        <motion.div
-          data-reveal="grow-y"
-          variants={stickVariants}
+        <div
           className={cn("absolute top-[14px] h-[30px] w-[2px]", v.emphasis ? "bg-[#69518C]" : "bg-oo-ink-3")}
-          style={{ left: `calc(${x}% - 1px)`, originY: 1 }}
+          style={{ left: `calc(${x}% - 1px)` }}
         />
-        <motion.div
-          data-reveal="pop"
-          variants={headVariants}
+        <div
           className={cn("absolute top-[7px] h-[14px] w-[14px] rounded-full ring-4", v.emphasis ? "bg-[#69518C] ring-[#EEE8F5]" : "bg-oo-ink-3 ring-oo-line-soft")}
           style={{ left: `calc(${x}% - 7px)` }}
         />
@@ -94,9 +81,7 @@ function Row({ v }: { v: LollipopVariant }) {
 }
 
 export function ProteinLollipop({ variants, className }: { variants: LollipopVariant[]; className?: string }) {
-  const listRef = useRef<HTMLUListElement>(null);
   const titleId = useId();
-  const inView = useInView(listRef, { once: true, amount: 0.3 });
   if (variants.length === 0) return null;
   const sources = Array.from(
     new Set(
@@ -114,17 +99,11 @@ export function ProteinLollipop({ variants, className }: { variants: LollipopVar
         </h2>
         {sources.length > 0 ? <p className="text-[12px] text-oo-ink-3">Residue numbers from {sources.join(", ")}</p> : null}
       </div>
-      <motion.ul
-        ref={listRef}
-        className="mt-1 divide-y divide-oo-line-soft"
-        initial="hidden"
-        animate={inView ? "show" : "hidden"}
-        variants={listVariants}
-      >
+      <ul className="mt-1 divide-y divide-oo-line-soft">
         {variants.map((v) => (
           <Row key={`${v.gene}-${v.hgvs}`} v={v} />
         ))}
-      </motion.ul>
+      </ul>
     </section>
   );
 }

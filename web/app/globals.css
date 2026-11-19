@@ -155,3 +155,33 @@
   [data-reveal="scale-x"] { transform: scaleX(var(--sx)) !important; }
   [data-reveal="slide"] { transform: translateX(var(--x)) !important; }
 }
+
+/* ── Evidence workspace: theme browser-default surfaces so the page reads as
+   built, not assembled — selection colour and the scrollbar track/thumb. */
+.oo-workspace ::selection {
+  background: #DCD2F7;
+  color: #25202F;
+}
+
+.oo-workspace {
+  scrollbar-color: #D9D4DE transparent;
+  scrollbar-width: thin;
+}
+
+.oo-workspace ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.oo-workspace ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.oo-workspace ::-webkit-scrollbar-thumb {
+  background: #D9D4DE;
+  border-radius: 999px;
+}
+
+.oo-workspace ::-webkit-scrollbar-thumb:hover {
+  background: #B5AEC0;
+}

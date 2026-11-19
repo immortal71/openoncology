@@ -7,7 +7,7 @@ import { Github, Menu, X } from "lucide-react";
 import { LogoAnimated } from "@/components/ui/logo-animated";
 import { cn } from "@/lib/utils";
 
-const REDESIGNED_PREFIXES = ["/lab"];
+const REDESIGNED_PREFIXES = ["/lab", "/submit"];
 const MARKETING_ROUTES = ["/lab/landing", "/lab/hero-a", "/lab/hero-b", "/lab/hero-c", "/lab/direction-a", "/lab/direction-b", "/lab/site", "/lab/atlas"];
 const DARK_ROUTES = ["/lab/hero-a"];
 const GITHUB_URL = "https://github.com/immortal71/openoncology";
