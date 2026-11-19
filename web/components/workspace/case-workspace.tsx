@@ -98,15 +98,28 @@ export function CaseWorkspace({
               <div className={`mt-6 hidden space-y-2 border-t ${line} px-2 pt-4 lg:block`}>
                 {ws.status ? (
                   <span role="status" className="block">
-                    <StatusPill status={ws.status} />
+                    <span className={`mb-1 block text-[12px] ${muted}`}>Analysis</span>
+                    {ws.status === "complete" || ws.status === "completed" ? (
+                      <span className="flex items-center gap-1.5 text-[13px] font-medium text-[#24212B]">
+                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
+                        Complete
+                      </span>
+                    ) : (
+                      <StatusPill status={ws.status} />
+                    )}
                   </span>
                 ) : null}
                 {ws.reviewed !== null ? <ReviewState reviewed={ws.reviewed} /> : null}
-                <p className={`text-[11.5px] leading-snug ${muted}`}>
-                  Research prototype.
-                  <br />
-                  Needs oncologist review.
-                </p>
+                {ws.reviewed !== true ? (
+                  <div className="pt-1">
+                    <span className={`mb-1 block text-[12px] ${muted}`}>Oncologist sign-off</span>
+                    <span className="flex items-center gap-1.5 text-[13px] font-medium text-[#24212B]">
+                      <span aria-hidden="true" className="h-2 w-2 rounded-full border-[1.5px] border-[#69518C] bg-white" />
+                      Pending
+                    </span>
+                  </div>
+                ) : null}
+                <p className={`text-[12px] leading-snug ${muted}`}>Research prototype, not a medical device.</p>
               </div>
             }
           />
@@ -143,7 +156,7 @@ export function CaseWorkspace({
             ) : null}
             {ws.nextSteps.length ? (
               <div>
-                <h2 className={label}>Suggested next steps</h2>
+                <h2 className={label}>Points to raise at clinical review</h2>
                 <ol className={`mt-2 border-t ${line}`}>
                   {ws.nextSteps.map((s, i) => (
                     <li key={s} className={`flex gap-3 border-b ${line} py-2.5 text-[14px] leading-[21px] ${ink}`}>
@@ -152,6 +165,7 @@ export function CaseWorkspace({
                     </li>
                   ))}
                 </ol>
+                <p className={`mt-2 text-[12px] ${muted}`}>Demo text, not a recommendation.</p>
               </div>
             ) : null}
           </section>

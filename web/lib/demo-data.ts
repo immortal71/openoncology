@@ -14,10 +14,10 @@ export const DEMO_RESULTS = {
   summary:
     "Analysis identified 2 variant(s) in KRAS, TP53. Top repurposing candidate: Sotorasib (OncoKB Level 1). Cancer type: Non-Small Cell Lung Cancer.",
   plain_language_summary:
-    "Your tumour carries a KRAS G12C mutation — a well-characterised actionable driver in lung cancer. Two FDA-approved targeted therapies (Sotorasib and Adagrasib) are ranked as top candidates. Oncologist review is required before any treatment decision.",
+    "This tumor carries a KRAS G12C mutation — a well-characterized actionable driver in lung cancer. Two FDA-approved targeted therapies (Sotorasib and Adagrasib) are ranked as top candidates. Oncologist review is required before any treatment decision.",
   patient_summary: {
     explanation:
-      "Your tumour carries a KRAS G12C mutation. Two approved drugs are known to target this specific mutation in non-small cell lung cancer.",
+      "This tumor carries a KRAS G12C mutation. Two approved drugs are known to target this specific mutation in non-small cell lung cancer.",
     top_drugs: [
       {
         drug_name: "Sotorasib (Lumakras)",
@@ -31,7 +31,7 @@ export const DEMO_RESULTS = {
       },
     ],
     what_next: [
-      "Share this report with your oncologist or molecular tumour board",
+      "Share this report with your oncologist or molecular tumor board",
       "Ask about clinical trials combining KRAS inhibitors with SHP2 or mTOR inhibitors",
       "Request full genomic profiling if only partial VCF available",
     ],
@@ -63,7 +63,7 @@ export const DEMO_REPURPOSING = {
   candidates: [
     {
       drug_name: "Sotorasib",
-      chembl_id: "CHEMBL4523582",
+      chembl_id: "CHEMBL4535757",
       approval_status: "FDA Approved",
       mechanism: "Covalent KRAS G12C inhibitor — locks the protein in inactive GDP-bound state",
       opentargets_score: 0.9,
@@ -76,7 +76,7 @@ export const DEMO_REPURPOSING = {
     },
     {
       drug_name: "Adagrasib",
-      chembl_id: "CHEMBL4741767",
+      chembl_id: "CHEMBL4594350",
       approval_status: "FDA Approved",
       mechanism: "Irreversible KRAS G12C inhibitor with CNS penetration",
       opentargets_score: 0.88,

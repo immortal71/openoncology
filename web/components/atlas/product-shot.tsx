@@ -65,11 +65,10 @@ export function ProductShot({ data }: { data: ShotData }) {
     <div ref={root}>
       <div data-shot className={`overflow-hidden rounded-[12px] bg-white ${surface}`}>
         <Bar
-          dark
           crumb={
             <>
-              <Mark />
-              <span className="hidden text-[#F7F5F0]/70 sm:inline">Cases</span>
+              <Mark dark={false} />
+              <span className={`hidden sm:inline ${muted}`}>Cases</span>
             </>
           }
           title={`${ws.title} · evidence review`}
@@ -77,17 +76,29 @@ export function ProductShot({ data }: { data: ShotData }) {
         />
         <div className="flex flex-col lg:flex-row">
           <Sidebar
+            width="lg:w-[164px]"
             ws={ws}
             view={view}
             onChange={setView}
             id={ID}
             count={counts(ws, current.sources.length)}
             footer={
-              <p className={`mt-auto hidden px-2 pt-6 text-[11.5px] leading-snug lg:block ${muted}`}>
-                Research prototype.
-                <br />
-                Needs oncologist review.
-              </p>
+              <dl className="mt-6 hidden space-y-2.5 border-t border-[#E2DEE6] px-2 pt-4 text-[12.5px] leading-[17px] lg:block">
+                <div>
+                  <dt className={muted}>Analysis</dt>
+                  <dd className="mt-0.5 flex items-center gap-1.5 font-medium text-[#24212B]">
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
+                    Complete
+                  </dd>
+                </div>
+                <div>
+                  <dt className={muted}>Oncologist sign-off</dt>
+                  <dd className="mt-0.5 flex items-center gap-1.5 font-medium text-[#24212B]">
+                    <span aria-hidden="true" className="h-2 w-2 rounded-full border-[1.5px] border-[#69518C] bg-white" />
+                    Pending
+                  </dd>
+                </div>
+              </dl>
             }
           />
           <div role="tabpanel" id={`${ID}-panel`} aria-labelledby={`${ID}-tab-${view}`} className="grid min-w-0 flex-1">

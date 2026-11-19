@@ -1,12 +1,12 @@
 export type OncoKbLevel = { code: string; label: string; short: string; meaning: string; resistance: boolean; recognised: boolean };
 
 const LEVELS: Record<string, { meaning: string; resistance: boolean }> = {
-  "1": { meaning: "FDA-recognised biomarker predicting response to an FDA-approved drug in this tumour type.", resistance: false },
-  "2": { meaning: "Standard-care biomarker, recommended by NCCN or other expert panels, predicting response to an FDA-approved drug in this tumour type.", resistance: false },
-  "3A": { meaning: "Compelling clinical evidence that the biomarker predicts response to a drug in this tumour type.", resistance: false },
-  "3B": { meaning: "Standard-care or investigational biomarker predicting response to a drug in another tumour type.", resistance: false },
+  "1": { meaning: "FDA-recognized biomarker predicting response to an FDA-approved drug in this tumor type.", resistance: false },
+  "2": { meaning: "Standard-care biomarker, recommended by NCCN or other expert panels, predicting response to an FDA-approved drug in this tumor type.", resistance: false },
+  "3A": { meaning: "Compelling clinical evidence that the biomarker predicts response to a drug in this tumor type.", resistance: false },
+  "3B": { meaning: "Standard-care or investigational biomarker predicting response to a drug in another tumor type.", resistance: false },
   "4": { meaning: "Compelling biological evidence that the biomarker predicts response to a drug.", resistance: false },
-  R1: { meaning: "Standard-care biomarker predicting resistance to an FDA-approved drug in this tumour type.", resistance: true },
+  R1: { meaning: "Standard-care biomarker predicting resistance to an FDA-approved drug in this tumor type.", resistance: true },
   R2: { meaning: "Compelling clinical evidence that the biomarker predicts resistance to a drug.", resistance: true },
 };
 

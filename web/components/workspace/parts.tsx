@@ -8,7 +8,7 @@ import type { WsCase } from "@/lib/workspace";
 export const ink = "text-[#24212B]";
 export const muted = "text-[#625E68]";
 export const line = "border-[#E2DEE6]";
-export const label = "text-[11.5px] font-medium uppercase tracking-[0.06em] text-[#625E68]";
+export const label = "text-[12px] font-medium uppercase tracking-[0.06em] text-[#625E68]";
 export const focus = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#69518C]";
 export const linkText = `rounded-[4px] font-medium text-[#69518C] underline-offset-4 hover:text-[#523E70] hover:underline ${focus}`;
 export const surface = "border border-[#E2DEE6] shadow-[0_8px_24px_rgba(36,33,43,0.06)]";
@@ -91,7 +91,7 @@ export function Sidebar({
           <p className={`text-[13.5px] font-semibold ${ink}`}>{ws.title}</p>
           <p className={`text-[12.5px] ${muted}`}>{ws.tumorShort ?? ws.tumor}</p>
         </div>
-        <p className={`hidden px-2 pb-1.5 text-[11.5px] font-medium lg:block ${muted}`}>Review</p>
+        <p className={`hidden px-2 pb-1.5 text-[12px] font-medium lg:block ${muted}`}>Review</p>
         <div role="tablist" aria-label="Case sections" aria-orientation="vertical" className="grid grid-cols-4 lg:flex lg:flex-col lg:gap-0.5">
           {VIEWS.map((v, i) => {
             const on = v.key === view;
@@ -116,14 +116,20 @@ export function Sidebar({
                     move(keys[e.key]);
                   }
                 }}
-                className={`relative flex min-h-[52px] flex-col items-center justify-center gap-1 text-[12.5px] transition-colors duration-100 lg:h-9 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2.5 lg:rounded-[6px] lg:px-2 lg:text-[14px] ${
+                className={`relative flex min-h-[52px] flex-col items-center justify-center gap-1 text-[12.5px] transition-colors duration-100 lg:h-11 lg:min-h-0 lg:flex-row lg:justify-start lg:gap-2.5 lg:rounded-[6px] lg:px-2 lg:text-[14px] ${
                   on ? `font-medium ${ink} lg:bg-[#ECEAEF]` : `${muted} hover:text-[#24212B] lg:hover:bg-[#F1EFF3]`
                 } ${focus}`}
               >
                 {on ? <span aria-hidden="true" className="absolute inset-x-4 bottom-0 h-[2px] rounded-full bg-[#69518C] lg:hidden" /> : null}
                 <Icon size={16} strokeWidth={1.8} aria-hidden="true" className={on ? "text-[#69518C]" : "text-[#8F899A]"} />
                 {v.label}
-                <span className={`ml-auto hidden font-mono text-[11.5px] tabular-nums lg:inline ${muted}`}>{count[v.key]}</span>
+                <span
+                  className={`ml-auto hidden font-mono text-[12px] tabular-nums lg:inline ${
+                    v.key === "gaps" && count.gaps > 0 ? "rounded-[4px] bg-[#F5EBDB] px-1.5 py-px font-medium text-[#7A4F14]" : "text-[#4F4A57]"
+                  }`}
+                >
+                  {count[v.key]}
+                </span>
               </button>
             );
           })}

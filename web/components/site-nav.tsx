@@ -33,7 +33,7 @@ function MobileMenu({ links }: { links: typeof NAV_LINKS }) {
     <Dialog.Root>
       <Dialog.Trigger
         aria-label="Open menu"
-        className="inline-grid h-9 w-9 place-items-center rounded-md border border-oo-line bg-oo-surface text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema md:hidden"
+        className="inline-grid h-11 w-11 place-items-center rounded-md border border-oo-line bg-oo-surface text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema md:hidden"
       >
         <Menu size={17} aria-hidden="true" />
       </Dialog.Trigger>
@@ -73,7 +73,7 @@ function MobileMenu({ links }: { links: typeof NAV_LINKS }) {
 }
 
 const linkClass =
-  "rounded-md px-1 py-1 text-[14px] text-oo-ink-2 transition-colors duration-150 hover:text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-oo-hema";
+  "inline-flex h-10 items-center rounded-md px-1 text-[14px] text-oo-ink-2 transition-colors duration-150 hover:text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-oo-hema";
 
 const APP_ROUTES = ["/lab/results"];
 
@@ -91,13 +91,18 @@ export function SiteNav() {
       : linkClass;
 
   return (
-    <nav className={cn("sticky top-0 z-50 border-b", dark ? "border-white/10 bg-[#0C0A12]/90 backdrop-blur" : light ? "border-oo-line bg-oo-paper" : "border-white/10 bg-neutral-bg")}>
+    <nav aria-label="Primary" className={cn("sticky top-0 z-50 border-b", dark ? "border-white/10 bg-[#0C0A12]/90 backdrop-blur" : light ? "border-oo-line bg-oo-paper" : "border-white/10 bg-neutral-bg")}>
       <div
         className={cn(
           "flex h-16 items-center justify-between gap-6",
           marketing ? (atlas ? "mx-auto max-w-[1280px] px-5 md:px-10" : "mx-auto max-w-[1200px] px-5 md:px-8") : "clinical-shell"
         )}
       >
+        {atlas ? (
+          <a href="#main" className="sr-only rounded-md bg-[#25202F] px-3 py-2 text-[14px] font-medium text-[#F7F5F0] focus:not-sr-only focus:absolute focus:left-5 focus:top-[72px] md:focus:left-[max(40px,calc((100vw-1280px)/2+40px))] focus:z-[60]">
+            Skip to content
+          </a>
+        ) : null}
         <LogoAnimated tone={light ? "light" : "dark"} />
         {marketing ? (
           <div className="flex items-center gap-3 md:gap-5">
@@ -121,16 +126,18 @@ export function SiteNav() {
               )}
               <a href={METHODS_URL} target="_blank" rel="noreferrer" className={link}>
                 Methods
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
               <a href={GITHUB_URL} target="_blank" rel="noreferrer" className={cn(link, "inline-flex items-center gap-1.5")}>
                 <Github size={16} aria-hidden="true" />
                 GitHub
+                <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </div>
             <Link
               href="/lab/results"
               className={cn(
-                "inline-flex h-9 items-center rounded-md border px-4 text-[14px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema",
+                "inline-flex h-11 items-center rounded-md border px-4 text-[14px] font-medium transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oo-hema",
                 dark
                   ? "border-white/15 bg-white/[0.04] text-white hover:bg-white/10"
                   : atlas

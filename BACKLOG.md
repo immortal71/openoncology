@@ -120,6 +120,13 @@ Sections are ordered by pipeline position. `/next` pulls from the top of
      Risk: scientific. This section is the safety valve. When it grows, that is
      the system working, not failing. -->
 
+### OO-39: Wrong ChEMBL ID (and likely wrong SMILES) for sotorasib in the backend lookup table
+- **Why**: Found by the marketing-page clinical review (2026-11-18) and checked against ChEMBL. Sotorasib is CHEMBL4535757, but `api/services/chembl.py:177` maps it to CHEMBL4523582, and the SMILES on that line does not look like sotorasib's structure (ChEMBL's is `C=CC(=O)N1CCN(c2nc(=O)n(-c3c(C)ccnc3C(C)C)c3nc(-c4c(O)cccc4F)c(F)cc23)[C@@H](C)C1`). The same wrong ID appears in `validation_results/kras_g12c_real_output.json` and `docs/design/data-inventory.md`. The web demo also had adagrasib as CHEMBL4741767; ChEMBL lists it as CHEMBL4594350.
+- **Files**: api/services/chembl.py, validation_results/kras_g12c_real_output.json (guard-protected, do not route around the hook), docs/design/data-inventory.md
+- **The actual decision**: correct the ID and SMILES in the fallback table, check every other entry in that table against ChEMBL, and decide whether the stored validation output should be regenerated or annotated.
+- **Interim**: `web/lib/demo-data.ts` now uses CHEMBL4535757 and CHEMBL4594350, so the demo's ChEMBL links resolve to the right compounds.
+- **Risk**: scientific. Wrong identifiers and structures can feed docking and any downstream lookup.
+
 ### OO-38: `test-fixtures/dna_sample_kras_g12c.vcf` coordinates look wrong and mix genome builds
 - **Why**: Flagged by the marketing-page design review (2026-11-16) and not yet verified against a reference genome.
   - KRAS line `12:25398284 C>A` with `HGVS_P=p.Gly12Cys`: on GRCh37, c.34G>T (G12C) is reported at 25398285, and 25398284 C>A would be c.35G>T (G12V).

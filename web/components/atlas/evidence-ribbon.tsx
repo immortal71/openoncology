@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowDownRight } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +11,7 @@ export type Pt = { x: number; y: number };
 type Curve = [Pt, Pt, Pt, Pt];
 type Layout = "hero" | "compact" | "closing";
 
-export type ThreadNode = { label: string; value: string; accent?: boolean; href?: string; view?: string };
+export type ThreadNode = { label: string; value: string; accent?: boolean; href?: string; view?: string; step?: number; sub?: string };
 
 const NO_NODES: ThreadNode[] = [];
 const UPPER = "#8270A4";
@@ -67,7 +68,7 @@ export function pinchPoint(w: number, h: number): Pt {
 }
 
 function threadCurve(layout: Layout, w: number, h: number, from: Pt): Curve {
-  if (layout === "compact") return [from, { x: from.x - w * 0.25, y: from.y + h * 0.05 }, { x: w * 0.3, y: h * 0.5 }, { x: w * 0.08, y: h * 0.78 }];
+  if (layout === "compact") return [from, { x: from.x - w * 0.25, y: from.y + h * 0.05 }, { x: w * 0.36, y: h * 0.5 }, { x: w * 0.24, y: h * 0.8 }];
   return [from, { x: from.x - w * 0.3, y: from.y + h * 0.03 }, { x: w * 0.32, y: h * 0.38 }, { x: w * 0.1, y: h * 0.4 }];
 }
 
@@ -178,7 +179,7 @@ export function EvidenceRibbon({
         const sd = seeds[k];
         strand(u, k, sd.j);
         const edge = 1 - Math.abs(u) * 1.2;
-        ctx.globalAlpha = (0.22 + sd.a * 0.16) * (0.5 + 0.5 * Math.max(0, edge)) * soften * (tone === "dark" ? 1.3 : 1);
+        ctx.globalAlpha = (0.28 + sd.a * 0.18) * (0.5 + 0.5 * Math.max(0, edge)) * soften * (tone === "dark" ? 1.3 : 1);
         ctx.lineWidth = sd.lw;
         ctx.stroke();
       }
@@ -251,8 +252,7 @@ export function EvidenceRibbon({
     p.style.strokeDashoffset = `${len * (1 - t)}`;
   }, [geo, layout]);
 
-  const place = (side: "start" | "mid" | "end") =>
-    side === "start" ? "bottom-[14px] right-6 text-right" : side === "mid" ? "right-0 top-[14px] text-right" : layout === "hero" ? "bottom-[14px] left-0" : "left-0 top-[14px]";
+  const place = (side: "start" | "mid" | "end") => (side === "start" ? "left" : side === "mid" ? "top" : layout === "compact" ? "top" : "right");
 
   return (
     <div ref={box} className={className}>
@@ -268,21 +268,32 @@ export function EvidenceRibbon({
   );
 }
 
-export function NodeMark({ node, at, ring, place, hot, onHot }: { node: ThreadNode; at: Pt; ring: boolean; place: string; hot: boolean; onHot: (on: boolean) => void }) {
-  const dot = ring ? "-left-[8px] -top-[8px] h-4 w-4 border-[3px] border-[#F7F5F0] bg-[#69518C]" : "-left-[3px] -top-[3px] h-[6px] w-[6px] bg-[#69518C]";
+const LEADER: Record<"left" | "right" | "top" | "below", { line: string; box: string }> = {
+  left: { line: "right-[10px] top-0 h-px w-6", box: "right-[38px] top-1/2 -translate-y-1/2 items-end text-right" },
+  right: { line: "left-[6px] top-0 h-px w-8", box: "left-[42px] top-1/2 -translate-y-1/2 items-start text-left" },
+  top: { line: "bottom-[6px] left-0 h-4 w-px", box: "bottom-[26px] left-1/2 -translate-x-1/2 items-center text-center" },
+  below: { line: "left-0 top-[6px] h-4 w-px", box: "left-1/2 top-[26px] -translate-x-1/2 items-center text-center" },
+};
+
+export function NodeMark({ node, at, ring, place, hot, onHot }: { node: ThreadNode; at: Pt; ring: boolean; place: "left" | "right" | "top" | "below"; hot: boolean; onHot: (on: boolean) => void }) {
+  const dot = ring ? "-left-[8px] -top-[8px] h-4 w-4 border-[3px] border-[#F7F5F0] bg-[#69518C]" : "-left-[4px] -top-[4px] h-2 w-2 border-[1.5px] border-[#F7F5F0] bg-[#69518C]";
+  const side = LEADER[place];
   const body = (
     <>
       <span aria-hidden="true" className={`absolute rounded-full transition-transform duration-150 ${dot} ${hot ? "scale-125" : ""}`} />
-      <span className={`absolute whitespace-nowrap ${place}`}>
-        <span className="block text-[12px] leading-[18px] text-[#625E68]">{node.label}</span>
-        <span className={`block text-[17px] font-medium leading-[24px] tracking-[-0.01em] ${node.accent ? "text-[#69518C]" : "text-[#24212B]"}`}>
-          <span className={node.href ? "decoration-[#69518C]/50 decoration-1 underline-offset-[5px] group-hover:underline group-focus-visible:underline" : ""}>{node.value}</span>
-          {node.href ? (
-            <span aria-hidden="true" className="ml-1.5 inline-block text-[15px] text-[#69518C] opacity-60 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
-              →
-            </span>
-          ) : null}
+      <span aria-hidden="true" className={`absolute bg-[#69518C]/45 ${side.line}`} />
+      <span
+        className={`absolute flex flex-col whitespace-nowrap rounded-[6px] bg-[#F7F5F0]/90 px-2 py-1 backdrop-blur-[2px] group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-1 group-focus-visible:outline-[#69518C] ${side.box}`}
+      >
+        <span className="font-mono text-[12px] uppercase leading-[16px] tracking-[0.06em] text-[#5B5566]">
+          {node.step ? <span className="mr-2 text-[#69518C]">0{node.step}</span> : null}
+          {node.label}
         </span>
+        <span className={`mt-0.5 inline-flex items-center gap-1 text-[16px] font-semibold leading-[22px] tracking-[-0.01em] ${node.accent ? "text-[#523E70]" : "text-[#24212B]"}`}>
+          <span className={node.href ? `underline-offset-[5px] ${hot ? "underline decoration-[#69518C]" : ""}` : ""}>{node.value}</span>
+          {node.href ? <ArrowDownRight size={15} strokeWidth={2} aria-hidden="true" className={`shrink-0 transition-[color,transform] duration-150 ${hot ? "translate-x-px translate-y-px text-[#69518C]" : "text-[#523E70]/85"}`} /> : null}
+        </span>
+        {node.sub ? <span className="mt-0.5 font-mono text-[12.5px] leading-[16px] tracking-[0.02em] text-[#4A4652]">{node.sub}</span> : null}
       </span>
     </>
   );
@@ -296,8 +307,8 @@ export function NodeMark({ node, at, ring, place, hot, onHot }: { node: ThreadNo
       onMouseLeave={() => onHot(false)}
       onFocus={() => onHot(true)}
       onBlur={() => onHot(false)}
-      aria-label={`${node.label}: ${node.value}. Open in the demo`}
-      className="group pointer-events-auto absolute block h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[#69518C]"
+      aria-label={`${node.label}: ${node.value}. Show in the product panel below`}
+      className="group pointer-events-auto absolute block h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full outline-none"
       style={{ left: at.x, top: at.y }}
     >
       <span className="absolute left-1/2 top-1/2">{body}</span>

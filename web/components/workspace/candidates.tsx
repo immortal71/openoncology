@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
 import { groupByTier } from "@/lib/therapy-groups";
 import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
 import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts";
@@ -10,9 +10,9 @@ import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts
 function Block({ title, stacked, children }: { title: string; stacked: boolean; children: React.ReactNode }) {
   if (stacked)
     return (
-      <section className="mt-5 first:mt-0">
-        <h4 className={label}>{title}</h4>
-        <div className="mt-1.5 max-w-[560px]">{children}</div>
+      <section className="mt-4 grid gap-1 first:mt-0 sm:grid-cols-[124px_minmax(0,1fr)] sm:gap-4">
+        <h4 className={`${label} sm:leading-[22px]`}>{title}</h4>
+        <div className="min-w-0 max-w-[560px]">{children}</div>
       </section>
     );
   return (
@@ -26,19 +26,30 @@ function Block({ title, stacked, children }: { title: string; stacked: boolean; 
 export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: WsCase; c: WsCandidate; compact: boolean; onSources: () => void; headRef?: React.Ref<HTMLParagraphElement> }) {
   const tie = ws.nearTies.find((t) => t.name === c.name || t.above === c.name);
   const applies = levelApplies(c, ws.lead);
-  const approvalNote = c.approval.qualifier ? `indication: ${c.approval.qualifier}` : "indication not specified in this result";
+  const approvalNote = c.approval.qualifier ? `indication: ${c.approval.qualifier}` : "indication not stored in this result";
   const identifier = c.chembl ? (
-    <a href={`https://www.ebi.ac.uk/chembl/compound_report_card/${encodeURIComponent(c.chembl)}/`} target="_blank" rel="noreferrer" className={`inline-flex items-center gap-1 text-[13.5px] leading-[22px] ${linkText}`}>
-      <span className="font-mono text-[12.5px]">{c.chembl}</span> ChEMBL record <ArrowUpRight size={13} aria-hidden="true" />
-      <span className="sr-only">(opens in a new tab)</span>
-    </a>
+    <span className="inline-flex flex-wrap items-center gap-x-3 text-[13.5px] leading-[22px]">
+      <span className={`font-mono text-[12.5px] ${ink}`}>{c.chembl}</span>
+      <a href={`https://www.ebi.ac.uk/chembl/compound_report_card/${encodeURIComponent(c.chembl)}/`} target="_blank" rel="noreferrer" className={`inline-flex items-center gap-1 ${linkText}`}>
+        ChEMBL record <ArrowUpRight size={13} aria-hidden="true" />
+        <span className="sr-only">(opens in a new tab)</span>
+      </a>
+    </span>
   ) : null;
   return (
     <Fade key={c.id}>
       <p className={label}>Selected candidate</p>
-      <p ref={headRef} className={`mt-1 text-[26px] font-semibold leading-[32px] tracking-[-0.025em] ${ink}`}>
-        {c.name}
-      </p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <p ref={headRef} className={`text-[26px] font-semibold leading-[32px] tracking-[-0.025em] ${ink}`}>
+          {c.name}
+        </p>
+        {applies && ws.lead?.level ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EEE8F5] px-2.5 py-1 text-[12.5px] font-medium leading-none text-[#4A3870]">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
+            {ws.lead.level.label}
+          </span>
+        ) : null}
+      </div>
       <p className={`mt-0.5 text-[14px] leading-[21px] ${muted}`}>
         {ws.title} · {ws.tumor}
       </p>
@@ -75,7 +86,7 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
                 · rank {c.rank} of {ws.candidates.length}
               </span>
             </p>
-            <p className={`text-[13.5px] leading-[20px] ${muted}`}>Orders candidates within this case. It is not a response probability.</p>
+            <p className={`text-[13.5px] leading-[20px] ${muted}`}>Ranks candidates within this case. It is not a response probability.</p>
             {tie ? (
               <p className={`mt-1 text-[13.5px] leading-[20px] ${ink}`}>
                 {tie.name} scores within {NEAR_TIE} of {tie.above}: treat the pair as a near-tie.
@@ -88,13 +99,13 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
           <p className="mt-1 text-[14px] leading-[21px]">
             <Missing>Exact lookup record not stored in this result</Missing>
           </p>
-          <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-0 lg:pt-1 ${linkText}`}>
+          <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-[44px] ${linkText}`}>
             Inspect sources <ArrowRight size={14} aria-hidden="true" />
           </button>
         </Block>
         {compact ? (
           <details className={`group mt-5 border-t ${line} pt-3`}>
-            <summary className={`inline-flex cursor-pointer list-none items-center gap-1.5 text-[13.5px] [&::-webkit-details-marker]:hidden ${linkText}`}>
+            <summary className={`inline-flex min-h-[44px] cursor-pointer list-none items-center gap-1.5 text-[13.5px] [&::-webkit-details-marker]:hidden ${linkText}`}>
               Mechanism and identifiers
               <ChevronDown size={14} aria-hidden="true" className="transition-transform duration-150 group-open:rotate-180" />
             </summary>
@@ -147,10 +158,10 @@ export function CandidatesView({
   const groups = groupByTier(list);
   const order = groups.flatMap((g) => g.items);
   const c = list.find((x) => x.id === activeId) ?? order[0];
-  const col = compact ? 256 : 280;
+  const col = compact ? 300 : 280;
   const gutter = compact ? 24 : 28;
   const rest = ws.candidates.filter((x) => !list.some((y) => y.id === x.id));
-  const restNote = rest.length ? `Showing ${list.length} of ${ws.candidates.length} · ${rest.length} more ${rest.every((x) => x.approval.differentIndication) ? "in a different indication" : "in the full case"}` : null;
+  const restNote = rest.length ? `+${rest.length} in the full case: ${rest.map((x) => (x.approval.differentIndication ? `${x.name}, different indication` : x.name)).join("; ")}` : null;
   const ties = ws.nearTies.filter((t) => list.some((x) => x.name === t.name) && list.some((x) => x.name === t.above));
 
   const move = (i: number) => {
@@ -191,13 +202,13 @@ export function CandidatesView({
         return;
       }
       const start = r.right - bx.left + 6;
-      const x = col + gutter / 2;
+      const x = threadIn ? col - 0.5 : col + gutter / 2;
       const end = h.left - bx.left - 10;
       const dir = b < a ? -1 : 1;
       const rad = Math.min(6, Math.abs(b - a) / 2);
       const d =
         threadIn && b > 6 && a - b > 12
-          ? `M${x} 0 V${a - 6} Q${x} ${a} ${x - 6} ${a} H${start} M${x} ${b - 6} Q${x} ${b} ${x + 6} ${b} H${end}`
+          ? `M${x} 0 V${bx.height} M${x} ${a - 6} Q${x} ${a} ${x - 6} ${a} H${start} M${x} ${b - 6} Q${x} ${b} ${x + 6} ${b} H${end}`
           : Math.abs(b - a) < 1
             ? `M${start} ${a} H${end}`
             : `M${start} ${a} H${x - rad} Q${x} ${a} ${x} ${a + dir * rad} V${b - dir * rad} Q${x} ${b} ${x + rad} ${b} H${end}`;
@@ -212,7 +223,7 @@ export function CandidatesView({
   if (!c) return null;
 
   return (
-    <div ref={box} className={`relative grid lg:h-full ${compact ? "lg:grid-cols-[256px_minmax(0,1fr)]" : "lg:grid-cols-[280px_minmax(0,1fr)]"}`}>
+    <div ref={box} className={`relative grid lg:h-full ${compact ? "lg:grid-cols-[300px_minmax(0,1fr)]" : "lg:grid-cols-[280px_minmax(0,1fr)]"}`}>
       {link ? (
         <svg aria-hidden="true" className="pointer-events-none absolute left-0 top-0 hidden overflow-visible lg:block" width={link.w} height={link.h}>
           <path
@@ -230,11 +241,15 @@ export function CandidatesView({
           <circle cx={link.end} cy={link.b} r="3" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:opacity_200ms_ease-out_450ms]" />
         </svg>
       ) : null}
-      {threadIn ? <span data-thread-in aria-hidden="true" className="pointer-events-none absolute top-0 hidden h-px w-px lg:block" style={{ left: col + gutter / 2 }} /> : null}
+      {threadIn ? <span data-thread-in aria-hidden="true" className="pointer-events-none absolute top-0 hidden h-px w-px lg:block" style={{ left: col - 0.5 }} /> : null}
       <div className={`flex flex-col border-b ${line} p-4 lg:border-b-0 lg:border-r lg:py-5`}>
         <p id={`${ws.id}-cand-label`} className={`flex items-center justify-between border-b ${line} px-3 pb-2 ${label}`}>
           <span>Ranked candidates</span>
-          <span>Score</span>
+          <span className="inline-flex items-center gap-1" title="Ranks candidates within this case; not a response probability">
+            Score
+            <Info size={12} aria-hidden="true" className="text-[#8F899A]" />
+            <span className="sr-only">: ranks candidates within this case, not a response probability</span>
+          </span>
         </p>
         <div role="radiogroup" aria-labelledby={`${ws.id}-cand-label`} className="mt-1">
           {groups.map((g) => (
@@ -244,7 +259,8 @@ export function CandidatesView({
                 {g.items.map((cand) => {
                   const on = cand.id === c.id;
                   const i = order.indexOf(cand);
-                  const sub = cand.approval.differentIndication ? "Approved for a different indication" : cand.approval.label !== cand.tierInfo.badge ? cand.approval.label : null;
+                  const tieWith = ties.find((x) => x.name === cand.name);
+                  const sub = tieWith ? `Near-tie, within ${NEAR_TIE}` : cand.approval.differentIndication ? "Approved for a different indication" : cand.approval.label !== cand.tierInfo.badge ? cand.approval.label : null;
                   return (
                     <button
                       key={cand.id}
@@ -265,17 +281,18 @@ export function CandidatesView({
                           move(i - 1);
                         }
                       }}
-                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-colors duration-100 ${
+                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-colors duration-100 ${
                         on ? "bg-[#EEE8F5]" : "hover:bg-[#F6F5F8] active:bg-[#EFEDF2]"
                       } ${focus}`}
                     >
                       {on ? <span aria-hidden="true" className="absolute inset-y-2.5 left-0 w-[2px] rounded-full bg-[#69518C]" /> : null}
-                      <span className={`font-mono text-[12px] tabular-nums ${on ? "text-[#69518C]" : "text-[#8F899A]"}`}>{cand.rank}</span>
+                      <span className={`font-mono text-[12px] tabular-nums ${on ? "text-[#69518C]" : "text-[#625E68]"}`}>{cand.rank}</span>
                       <span className="min-w-0">
                         <span className={`block text-[15px] font-medium leading-[22px] ${ink}`}>{cand.name}</span>
                         {sub ? <span className={`block text-[12.5px] leading-[18px] ${muted}`}>{sub}</span> : null}
                       </span>
-                      <span className={`font-mono text-[13px] tabular-nums ${on ? ink : muted}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>
+                      <span className={`font-mono text-[13px] tabular-nums ${ink}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>
+                      {on ? <span aria-hidden="true" /> : <ChevronRight size={13} aria-hidden="true" className="text-[#8F899A] transition-transform duration-150 group-hover:translate-x-0.5" />}
                     </button>
                   );
                 })}
@@ -283,24 +300,19 @@ export function CandidatesView({
             </div>
           ))}
         </div>
-        {restNote ? <p className={`mt-3 px-3 text-[12.5px] leading-[18px] ${muted}`}>{restNote}</p> : null}
-        {!compact && ties.length ? (
-          <p className={`mt-3 px-3 text-[12.5px] leading-[18px] ${ink}`}>
-            {ties.map((t) => `${t.name} is within ${NEAR_TIE} of ${t.above}`).join("; ")}. Treat as a near-tie.
-          </p>
-        ) : null}
+        <p className={`mt-2 px-3 text-[12.5px] leading-[18px] ${muted}`}>Scores rank candidates; they are not response probabilities.</p>
+        {restNote ? <p className={`mt-2 px-3 text-[12.5px] leading-[18px] ${muted}`}>{restNote}</p> : null}
         {caseHref ? (
-          <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-2 hidden items-center gap-1.5 self-start px-3 text-[13.5px] lg:inline-flex ${linkText}`}>
-            Open the full case <ArrowRight size={14} aria-hidden="true" />
+          <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-3 hidden min-h-[44px] items-center gap-1.5 self-start px-3 text-[13.5px] lg:inline-flex ${linkText}`}>
+            View the demo case <ArrowRight size={14} aria-hidden="true" />
           </Link>
         ) : null}
-        <p className={`mt-4 px-3 text-[12px] leading-[17px] ${muted}`}>Scores order candidates within this case. They are not response probabilities.</p>
       </div>
       <div className="p-5 lg:py-5 lg:pl-14 lg:pr-6">
         <CandidateDetail ws={ws} c={c} compact={compact} onSources={onSources} headRef={head} />
         {caseHref ? (
           <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-3 inline-flex min-h-[44px] items-center gap-1.5 text-[14px] lg:hidden ${linkText}`}>
-            Open the full case <ArrowRight size={15} aria-hidden="true" />
+            View the demo case <ArrowRight size={15} aria-hidden="true" />
           </Link>
         ) : null}
       </div>
