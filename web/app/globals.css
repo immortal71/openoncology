@@ -92,8 +92,21 @@
   h1,
   h2,
   h3 {
+    text-wrap: balance;
     letter-spacing: -0.02em;
   }
+}
+
+@layer base {
+  html { scroll-padding-top: 5rem; }
+  ::selection { background: #ded5ef; color: #25202f; }
+  :where(button, a, input, textarea, select, summary):focus-visible {
+    outline: 2px solid #9678ba;
+    outline-offset: 3px;
+  }
+  :where(input, textarea) { caret-color: currentColor; }
+  :where(td, .data-mono) { font-variant-numeric: tabular-nums; }
+  a { text-underline-offset: 0.18em; }
 }
 
 @keyframes cursor-blink {
@@ -184,4 +197,11 @@
 
 .oo-workspace ::-webkit-scrollbar-thumb:hover {
   background: #B5AEC0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-dots, .cursor-blink { animation: none; }
+  ::view-transition-old(*), ::view-transition-new(*), ::view-transition-group(*) {
+    animation-duration: 0s;
+  }
 }

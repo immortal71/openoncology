@@ -1,4 +1,5 @@
 "use client";
+import { SubmissionSteps } from "@/components/submission-steps";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -23,28 +24,11 @@ function Rise({ children, className }: { children: React.ReactNode; className?: 
   );
 }
 
-function Steps() {
-  const items = ["Upload", "Analysis", "Results"] as const;
-  return (
-    <ol className="flex items-center gap-0">
-      {items.map((step, i) => (
-        <li key={step} className="flex flex-1 items-center last:flex-none">
-          <div className="flex flex-col items-center gap-1.5">
-            <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full font-mono text-[12px] font-medium ${i <= 1 ? "bg-[#69518C] text-white" : `border ${line} bg-white text-[#625E68]`}`}>{i + 1}</span>
-            <span className={`text-[12.5px] font-medium ${i === 1 ? ink : muted}`}>{step}</span>
-          </div>
-          {i < items.length - 1 ? <span aria-hidden="true" className={`mx-3 mb-5 h-px flex-1 ${i < 1 ? "bg-[#69518C]" : "bg-[#E2DEE6]"}`} /> : null}
-        </li>
-      ))}
-    </ol>
-  );
-}
-
 function Spinner() {
   return (
     <span aria-hidden="true" className="relative grid h-14 w-14 shrink-0 place-items-center">
       <span className="absolute inset-0 rounded-full border-2 border-[#E2DEE6]" />
-      <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-[#69518C]" style={{ animationDuration: "900ms" }} />
+      <span className="absolute inset-0 motion-safe:animate-spin rounded-full border-2 border-transparent border-t-[#69518C]" style={{ animationDuration: "900ms" }} />
       <Dna size={20} className="text-[#69518C]" />
     </span>
   );
@@ -64,7 +48,7 @@ function DemoAnalysis() {
   }, [step, router]);
 
   return (
-    <Rise className={`rounded-[12px] border ${line} bg-white p-8 text-center ${surface}`}>
+    <Rise className={`rounded-[24px] border ${line} bg-white p-6 text-center sm:p-8 ${surface}`}>
       <div className="mx-auto mb-5 flex justify-center">
         <Spinner />
       </div>
@@ -129,7 +113,7 @@ function RealAnalysis({ id }: { id: string }) {
 
   if (status === "failed") {
     return (
-      <Rise className={`rounded-[12px] border border-[#D9B8AE] bg-[#FBF1EE] p-8 text-center`}>
+      <Rise className={`rounded-[24px] border border-[#D9B8AE] bg-[#FBF1EE] p-6 text-center sm:p-8`}>
         <AlertCircle size={36} aria-hidden="true" className="mx-auto mb-3 text-[#9E4A3A]" />
         <h1 className="text-[20px] font-semibold text-[#7A3326]">Analysis failed</h1>
         <p className="mt-2 text-[14px] leading-[21px] text-[#9E4A3A]">{failMsg}</p>
@@ -142,7 +126,7 @@ function RealAnalysis({ id }: { id: string }) {
 
   if (stalled) {
     return (
-      <Rise className={`rounded-[12px] border border-[#E6D3AE] bg-[#FBF4E6] p-8 text-center`}>
+      <Rise className={`rounded-[24px] border border-[#E6D3AE] bg-[#FBF4E6] p-6 text-center sm:p-8`}>
         <AlertCircle size={36} aria-hidden="true" className="mx-auto mb-3 text-[#7A4F14]" />
         <h1 className="text-[20px] font-semibold text-[#7A4F14]">Still {STATUS_LABEL[status].toLowerCase()}</h1>
         <p className="mt-2 text-[14px] leading-[21px] text-[#7A4F14]">
@@ -157,7 +141,7 @@ function RealAnalysis({ id }: { id: string }) {
   }
 
   return (
-    <Rise className={`rounded-[12px] border ${line} bg-white p-8 text-center ${surface}`}>
+    <Rise className={`rounded-[24px] border ${line} bg-white p-6 text-center sm:p-8 ${surface}`}>
       <div className="mx-auto mb-5 flex justify-center">
         <Spinner />
       </div>
@@ -168,7 +152,7 @@ function RealAnalysis({ id }: { id: string }) {
       <p className={`mt-2 text-[14px] leading-[21px] ${muted}`}>
         Initial mutation check and repurposed-drug triage usually appear in minutes. This page checks status every few seconds — you can safely close it and come back.
       </p>
-      <p className={`mt-5 rounded-[8px] border ${line} bg-[#FAF9F7] p-3 font-mono text-[12.5px] ${muted}`}>Submission ID: {id}</p>
+      <p className={`mt-5 rounded-[8px] border ${line} bg-[#FAF9F7] break-all p-3 font-mono text-[12.5px] ${muted}`}>Submission ID: {id}</p>
     </Rise>
   );
 }
@@ -180,15 +164,15 @@ function AnalysisInner() {
 
   return (
     <main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] font-[family-name:var(--font-atlas)] ${ink}`}>
-      <div className="mx-auto max-w-[640px] px-6 py-10">
-        <Steps />
-        <div className="mt-8">
+      <div className="mx-auto max-w-[800px] px-4 py-5 sm:px-6">
+        <SubmissionSteps active={1} />
+        <div className="mt-5">
           {isDemo ? (
             <DemoAnalysis />
           ) : id ? (
             <RealAnalysis id={id} />
           ) : (
-            <Rise className={`rounded-[12px] border ${line} bg-white p-8 text-center ${surface}`}>
+            <Rise className={`rounded-[24px] border ${line} bg-white p-6 text-center sm:p-8 ${surface}`}>
               <Sparkles size={32} aria-hidden="true" className="mx-auto mb-3 text-[#69518C]" />
               <h1 className={`text-[20px] font-semibold ${ink}`}>No submission to analyze</h1>
               <p className={`mt-2 text-[14px] leading-[21px] ${muted}`}>Submit a sample first, or try the demo case from there.</p>

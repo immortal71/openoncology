@@ -43,22 +43,22 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
           <span aria-hidden="true">·</span>
           {c.approval.label}
         </p>
-        <h2 ref={headRef} tabIndex={-1} className="mt-2 break-words text-[32px] font-semibold leading-[1.12] tracking-[-0.045em] text-[#24212B] outline-none sm:text-[38px]">{c.name}</h2>
+        <h2 ref={headRef} tabIndex={-1} className="mt-2 break-words text-[32px] font-semibold leading-[1.12] tracking-[-0.035em] text-[#24212B] outline-none sm:text-[38px]">{c.name}</h2>
         <p className="mt-2 max-w-[62ch] text-[14px] leading-[22px] text-[#625E68]">{c.mechanism ?? "Mechanism not reported"}</p>
-        <section className="mt-6 border-y border-[#DCD7DF] py-5" aria-label="Matching evidence">
+        <section className="mt-5 border-y border-[#DCD7DF] py-4" aria-label="Matching evidence">
           <h3 className="text-[17px] font-semibold tracking-[-0.025em]">Why it appears</h3>
           {c.matched.length ? <div className="mt-3 flex flex-wrap items-baseline gap-2">
             <span className="mr-1 text-[13px] text-[#625E68]">Matched terms</span>
             {c.matched.map((term) => <span key={term} className="rounded-[4px] border border-[#E3DFE6] bg-[#FAF9FB] px-2 py-1 font-mono text-[12px] text-[#453C52]">{term}</span>)}
           </div> : <p className="mt-2 text-[14px] text-[#625E68]">Matched terms were not supplied.</p>}
-          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
-            <p className="flex items-center gap-2 text-[13px] text-[#514C59]"><Database size={15} aria-hidden="true" />{c.sources.join(" · ") || "No sources listed"}</p>
-            <button type="button" onClick={onSources} className={`inline-flex min-h-[40px] items-center gap-2 rounded-[6px] bg-[#342B40] px-3.5 text-[13px] font-medium text-white hover:bg-[#493B57] ${focus}`}>Inspect sources <ArrowRight size={14} aria-hidden="true" /></button>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg bg-[#F7F5F8] px-3 py-2">
+            <p className="flex items-center gap-2 text-[13px] text-[#514C59]"><Database size={15} aria-hidden="true" /><span>{c.sources.join(" · ") || "No sources listed"}<span className="block text-xs leading-5 text-[#625E68]">Exact citations were not stored.</span></span></p>
+            <button type="button" onClick={onSources} className={`inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-[13px] font-semibold text-[#513B70] hover:bg-[#EBE5F1] ${focus}`}>Inspect sources <ArrowRight size={14} aria-hidden="true" /></button>
           </div>
         </section>
         <dl className="divide-y divide-[#E9E6EA] text-[13.5px] leading-[21px]">
           <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Approval</dt><dd>{c.approval.label} <span className={muted}>· {approvalNote}</span></dd></div>
-          <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Source records</dt><dd>Exact citations were not stored.</dd></div>
+
           <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Side effects</dt><dd>Not supplied in this result</dd></div>
           {identifier ? <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Identifier</dt><dd>{identifier}</dd></div> : null}
         </dl>
@@ -248,7 +248,7 @@ export function CandidatesView({
       ) : null}
       {threadIn ? <span data-thread-in aria-hidden="true" className="pointer-events-none absolute top-0 hidden h-px w-px lg:block" style={{ left: col - 0.5 }} /> : null}
       <div className={`${!compact && mobileDetail ? "hidden lg:flex" : "flex"} flex-col border-b ${line} p-4 lg:border-b-0 lg:border-r lg:py-5`}>
-        {!compact ? <label className="mb-4 flex h-10 items-center gap-2 rounded-[6px] border border-[#DCD7DF] bg-[#FAF9F7] px-3 focus-within:border-[#69518C]">
+        {!compact ? <label className="mb-4 flex h-10 items-center gap-2 rounded-[6px] border border-[#DCD7DF] bg-[#FAF9F7] px-3 focus-within:border-[#69518C] focus-within:ring-2 focus-within:ring-[#69518C]/30">
           <Search size={15} aria-hidden="true" className={muted} />
           <input type="search" aria-label="Search candidates" placeholder="Search candidates" value={search} onChange={(event) => {
             const value = event.target.value;
@@ -296,14 +296,14 @@ export function CandidatesView({
                           move(i - 1);
                         }
                       }}
-                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-[background-color,transform] duration-100 active:scale-[0.96] ${
+                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-[background-color,transform] duration-100 motion-safe:active:scale-[0.99] ${
                         on ? "bg-[#EEE8F5]" : "hover:bg-[#F6F5F8] active:bg-[#EFEDF2]"
                       } ${focus}`}
                     >
                       {on ? <span aria-hidden="true" className="absolute inset-y-2.5 left-0 w-[2px] rounded-full bg-[#69518C]" /> : null}
                       <span className={`font-mono text-[12px] tabular-nums ${on ? "text-[#69518C]" : "text-[#625E68]"}`}>{cand.rank}</span>
                       <span className="min-w-0">
-                        <span className={`block text-[15px] font-medium leading-[22px] ${ink}`}>{cand.name}</span>
+                        <span className={`block break-words text-[15px] font-medium leading-[22px] ${ink}`}>{cand.name}</span>
                         {sub ? <span className={`block text-[12.5px] leading-[18px] ${muted}`}>{sub}</span> : null}
                       </span>
                       <span className={`font-mono text-[13px] tabular-nums ${ink}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>

@@ -592,3 +592,11 @@ number and was confirmed untouched.
 - Revised the Submit form hierarchy to put the cancer type and required files before the demo link.
 - Polished the Submit header, nested corners and file controls, including selected-file feedback.
 - Grouped the required case files into two upload rows. Verified genomic file selection and replacement at mobile and desktop widths.
+- Applied shared typography, keyboard-focus, reduced-motion and control refinements, and aligned the analysis screen with case intake.
+- Unified the upload and analysis progress indicator and respected reduced motion during analysis.
+- Removed the demo results link below the Submit form.
+- Polished the candidate inspector and placed citation availability beside the provider names and source inspection action.
+- Refined variant selection, provider column alignment and gap filter states across the results workspace.
+- Replaced the variant sidebar with an inline variant selector above the full-width inspector.
+- Replaced the inline variant selector with an initially collapsed comparison table and inline evidence disclosures.
+- Refined the Atlas hero reading order and condensed its mobile demo pathway.

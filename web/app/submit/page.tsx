@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { SubmissionSteps } from "@/components/submission-steps";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,29 +44,6 @@ function Rise({ children, className }: { children: React.ReactNode; className?: 
     <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
       {children}
     </motion.div>
-  );
-}
-
-function Steps({ active }: { active: 0 | 1 | 2 }) {
-  const steps = ["Upload", "Analysis", "Results"] as const;
-  return (
-    <ol className="flex items-center gap-0">
-      {steps.map((step, i) => (
-        <li key={step} className="flex flex-1 items-center last:flex-none">
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full font-mono text-[12px] font-medium ${
-                i < active ? "bg-[#69518C] text-white" : i === active ? "bg-[#69518C] text-white" : `border ${line} bg-white text-[#625E68]`
-              }`}
-            >
-              {i + 1}
-            </span>
-            <span className={`text-[12.5px] font-medium ${i === active ? ink : muted}`}>{step}</span>
-          </div>
-          {i < steps.length - 1 ? <span aria-hidden="true" className={`mx-3 h-px flex-1 ${i < active ? "bg-[#69518C]" : "bg-[#E2DEE6]"}`} /> : null}
-        </li>
-      ))}
-    </ol>
   );
 }
 
@@ -162,7 +140,7 @@ export default function SubmitPage() {
   return (
     <main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] font-[family-name:var(--font-atlas)] ${ink}`}>
       <div className="mx-auto max-w-[800px] px-4 py-5 sm:px-6">
-        <Steps active={0} />
+        <SubmissionSteps active={0} />
 
         <div className={`mt-5 overflow-hidden rounded-[24px] border ${line} bg-white shadow-[0_12px_40px_-24px_rgba(44,34,55,0.28)]`}>
           <Rise className="border-b border-[#E5E0E7] bg-[#F6F3F8] px-5 py-5 sm:px-8 sm:py-6">
@@ -213,7 +191,6 @@ export default function SubmitPage() {
           </form>
         </div>
 
-        <div className="mt-4 text-center"><Link href="/submit/analysis?demo=true" className={`text-sm text-[#69518C] underline underline-offset-4 ${focus}`}>View demo results</Link></div>
       </div>
     </main>
   );

@@ -39,12 +39,12 @@ function MobileMenu({ links }: { links: typeof NAV_LINKS }) {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 top-16 z-40 bg-oo-ink/20" />
-        <Dialog.Content className="fixed inset-x-0 top-16 z-50 border-b border-oo-line bg-oo-paper px-5 pb-6 pt-2 shadow-[0_24px_48px_-24px_rgb(27_22_38/0.3)] focus:outline-none">
+        <Dialog.Content className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-b border-oo-line bg-oo-paper px-5 pb-6 pt-2 shadow-[0_24px_48px_-24px_rgb(27_22_38/0.3)] focus:outline-none">
           <div className="flex items-center justify-between">
             <Dialog.Title className="text-[13px] font-medium text-oo-ink-3">Menu</Dialog.Title>
             <Dialog.Close
               aria-label="Close menu"
-              className="inline-grid h-9 w-9 place-items-center rounded-full text-oo-ink-2 hover:text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-oo-hema"
+              className="inline-grid h-11 w-11 place-items-center rounded-full text-oo-ink-2 hover:text-oo-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-oo-hema"
             >
               <X size={17} aria-hidden="true" />
             </Dialog.Close>
@@ -106,7 +106,7 @@ export function SiteNav() {
         <LogoAnimated tone={light ? "light" : "dark"} />
         {marketing ? (
           <div className="flex items-center gap-3 md:gap-5">
-            <div className="hidden items-center gap-6 md:flex">
+            <div className="hidden items-center gap-4 lg:gap-6 md:flex">
               <a href="#how-it-works" className={link}>
                 How it works
               </a>

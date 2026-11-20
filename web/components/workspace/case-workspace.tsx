@@ -126,7 +126,8 @@ export function CaseWorkspace({
                 <section className="px-5 py-6 sm:px-8">
                   <h2 className="text-xl font-semibold">Case sources</h2>
                   <p className="mt-1 text-sm text-[#625e68]">{providerNames.length} evidence providers across {ws.candidates.length} candidates</p>
-                  <ul aria-label="Evidence providers by candidate" className="mt-4 divide-y divide-[#e8e4ea] border-y border-[#dedadf]">
+                  <div aria-hidden="true" className="mt-4 hidden grid-cols-[minmax(145px,22%)_1fr_auto] gap-x-4 rounded-t-md bg-[#F7F5F8] px-3 py-2 text-xs font-medium text-[#625E68] sm:grid"><span>Candidate</span><span>Listed providers</span></div>
+                  <ul aria-label="Evidence providers by candidate" className="mt-4 sm:mt-0 divide-y divide-[#e8e4ea] border-y border-[#dedadf]">
                     {ws.candidates.map(c => (
                       <li key={c.id}>
                         <button

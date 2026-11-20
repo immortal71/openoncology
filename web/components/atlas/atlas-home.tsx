@@ -329,7 +329,27 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           </div>
           <div className={`${wrap} pointer-events-none relative flex flex-col justify-center pb-7 pt-10 lg:h-[clamp(470px,calc(100svh-340px),560px)] lg:pb-10 lg:pt-2`}>
             <div className="pointer-events-auto max-w-[560px] lg:w-[46%]">
-              <p data-hero-in className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-[#625E68]">
+              <h1
+                id="hero-title"
+                ref={headline}
+                className="text-balance text-[clamp(34px,9.4vw,42px)] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[56px] lg:text-[clamp(52px,7.2vh,64px)]"
+              >
+                Tumor mutations, matched to cancer drug evidence.
+              </h1>
+              <p data-hero-in className="mt-5 max-w-[32rem] text-pretty text-[17px] leading-[1.55] text-[#4A4652] lg:text-[18px] lg:leading-[28px]">
+                Sequencing labs and oncology teams can review ranked drug candidates alongside the evidence and gaps behind each match.
+              </p>
+              <div data-hero-in className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
+                <Link href={data.demoHref} className={primaryBtn}>
+                  Submit case files
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <a href={METHODS_URL} target="_blank" rel="noreferrer" className={textLink}>
+                  Read the methods <ArrowUpRight size={15} aria-hidden="true" />
+                  {newTab}
+                </a>
+              </div>
+              <p data-hero-in className="flex flex-wrap items-center mt-5 gap-x-2 gap-y-1 text-[12px] text-[#625E68]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#69518C]" />
                 <span>Research prototype</span>
                 <span aria-hidden="true" className="hidden sm:inline">
@@ -339,42 +359,22 @@ export function AtlasHome({ data }: { data: AtlasData }) {
                 <span aria-hidden="true">·</span>
                 <span>Oncologist review required</span>
               </p>
-              <h1
-                id="hero-title"
-                ref={headline}
-                className="mt-5 text-balance text-[clamp(34px,9.4vw,42px)] font-semibold leading-[1.06] tracking-[-0.035em] sm:text-[56px] lg:text-[clamp(52px,7.2vh,64px)]"
-              >
-                Tumor mutations, matched to cancer drug evidence.
-              </h1>
-              <p data-hero-in className="mt-5 max-w-[32rem] text-pretty text-[17px] leading-[1.55] text-[#4A4652] lg:text-[18px] lg:leading-[28px]">
-                Variant calls go in. A ranked shortlist comes out, with the evidence and the gaps behind every candidate. For sequencing labs and hospital oncology teams.
-              </p>
-              <div data-hero-in className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
-                <Link href={data.demoHref} className={primaryBtn}>
-                  {CTA_LABEL}
-                  <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-                <a href={METHODS_URL} target="_blank" rel="noreferrer" className={textLink}>
-                  Read the methods <ArrowUpRight size={15} aria-hidden="true" />
-                  {newTab}
-                </a>
-              </div>
             </div>
           </div>
           <div className="lg:hidden">
-            <div className="relative h-[150px] [mask-image:linear-gradient(to_bottom,#000_40%,transparent_92%)]">
-              <EvidenceRibbon layout="compact" threads={110} trace={false} className="absolute inset-0" />
+            <div className="relative h-[96px] [mask-image:linear-gradient(to_bottom,#000_40%,transparent_92%)]">
+              <EvidenceRibbon layout="compact" threads={56} trace={false} className="absolute inset-0" />
               <p className="absolute left-5 top-2 text-[12.5px] text-[#625E68]">Illustrative evidence pathway · demo case</p>
             </div>
-            <ol className="relative mx-5 -mt-6 mb-2 space-y-3 border-l-2 border-[#69518C]/50 pl-6">
+            <ol className="relative mx-5 mb-2 grid grid-cols-3 gap-x-3 border-t border-[#C8BED2] pt-3">
               {data.compactNodes.map((n, i) => (
                 <li key={n.label} className="relative">
-                  <span aria-hidden="true" className={`absolute -left-[31px] top-[5px] h-3 w-3 rounded-full border-2 border-[#F7F5F0] ${i === data.compactNodes.length - 1 ? "bg-[#69518C]" : "bg-[#8270A4]"}`} />
+                  <span aria-hidden="true" className={`absolute left-0 -top-[17px] h-2 w-2 rounded-full border-2 border-[#F7F5F0] ${i === data.compactNodes.length - 1 ? "bg-[#69518C]" : "bg-[#8270A4]"}`} />
                   <p className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#5B5566]">
                     <span className="mr-2 text-[#69518C]">0{i + 1}</span>
                     {n.label}
                   </p>
-                  <p className={`mt-0.5 text-[16px] font-semibold ${n.accent ? "text-[#523E70]" : "text-[#24212B]"}`}>{n.value}</p>
+                  <p className={`mt-1 break-words text-[14px] leading-tight font-semibold ${n.accent ? "text-[#523E70]" : "text-[#24212B]"}`}>{n.value}</p>
                 </li>
               ))}
             </ol>
@@ -495,7 +495,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
       <section data-dark aria-labelledby="close-title" className="bg-[#25202F] text-[#F7F5F0]">
         <div ref={closing} className="relative overflow-hidden">
           <div ref={closingArt} className="pointer-events-none absolute inset-y-0 left-[40%] right-0 hidden [mask-image:linear-gradient(to_bottom,transparent,#000_18%,#000_80%,transparent)] md:block">
-            <EvidenceRibbon layout="hero" tone="dark" threads={110} trace={false} className="absolute inset-0" />
+            <EvidenceRibbon layout="hero" tone="dark" threads={56} trace={false} className="absolute inset-0" />
           </div>
           <ClosingThread wrap={closing} art={closingArt} target={closingCta} />
           <div className={`${wrap} relative py-20 lg:py-28`}>
