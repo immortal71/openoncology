@@ -13,6 +13,8 @@ import SignatureCard from "@/components/SignatureCard";
 import CombinationTable from "@/components/CombinationTable";
 import SampleQCCard, { type SampleQC } from "@/components/SampleQCCard";
 import { DEMO_RESULTS, DEMO_REPURPOSING, DEMO_ID } from "@/lib/demo-data";
+import { CaseWorkspace } from "@/components/workspace/case-workspace";
+import { buildCase } from "@/lib/workspace";
 import { atlasSans } from "@/lib/atlas-font";
 import { focus, ink, line, muted, surface } from "@/components/workspace/parts";
 
@@ -43,7 +45,7 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 	const params = use(props.params);
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const isDemo = searchParams.get("demo") === "true" || params.id === DEMO_ID;
+	const isDemo = params.id === DEMO_ID;
 	const [customBusy, setCustomBusy] = useState(false);
 	const [customError, setCustomError] = useState<string | null>(null);
 	const [nearbyOpen, setNearbyOpen] = useState(false);
@@ -60,7 +62,7 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 	});
 
 	const normalizedStatus = (data?.status || "").toLowerCase();
-	const isComplete = ["complete", "completed", "done"].includes(normalizedStatus) || !data?.status;
+	const isComplete = ["complete", "completed", "done"].includes(normalizedStatus) || Boolean(data && !data.status);
 	const resultId = data?.result_id || data?.submission_id || params.id;
 
 	const repurposingQuery = useQuery<any>({
@@ -138,7 +140,8 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 		);
 	}
 
-	if (!isComplete) {
+	if (["failed", "error"].includes(normalizedStatus)) return <main className="p-8">Analysis failed. <Link href="/submit" className="underline">Return to submission</Link></main>;
+	if (!isComplete || repurposingQuery.isLoading) {
 		return <ResultsSkeleton />;
 	}
 
@@ -164,11 +167,20 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 	const patientWhatNext: string[] = patientSummary?.what_next || [];
 
 	const pdfBase = `/api/results/${params.id}`;
+	const ws = buildCase({ ...data, mutations, submission_id: data.submission_id || params.id }, candidates, { demo: isDemo });
+
+	if (repurposingQuery.isError) {
+		return <main className="p-8">Unable to load ranked candidates. <button className="underline" onClick={() => repurposingQuery.refetch()}>Retry</button></main>;
+	}
 
 	return (
-		<main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] py-8 px-4 font-[family-name:var(--font-atlas)] ${ink}`}>
-			<div className="mx-auto max-w-5xl space-y-6">
-
+		<div className={atlasSans.variable}>
+			<CaseWorkspace key={params.id} ws={ws} backHref="/submit" backLabel="Submit" initialView={searchParams.get("view") ?? undefined} initialCandidate={searchParams.get("candidate") ?? undefined} />
+			{!isDemo && <div className={`mx-auto max-w-[1440px] space-y-4 px-4 pb-8 sm:px-9 ${ink}`}>
+				<SampleQCCard qc={sampleQC} />
+				<details className={card}>
+					<summary className="cursor-pointer font-medium">Additional reports and analyses</summary>
+					<div className="mt-5 space-y-6">
 				{/* ── Patient Summary ─────────────────────────────────── */}
 				<section className={card}>
 					<div className="flex flex-wrap items-start justify-between gap-4">
@@ -231,7 +243,7 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 				</section>
 
 				{/* Sample quality qualifies every finding below it, so it comes first. */}
-				<SampleQCCard qc={sampleQC} />
+				
 
 				<section className={card}>
 					<h2 className="mb-3 text-[17px] font-semibold">Mutations</h2>
@@ -381,7 +393,7 @@ export default function ResultsPage(props: { params: Promise<{ id: string }> }) 
 					<CombinationTable combinations={combinationQuery.data.combinations} />
 				)}
 
-			</div>
-		</main>
+			</div></details></div>}
+		</div>
 	);
 }

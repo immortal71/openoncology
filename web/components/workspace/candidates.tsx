@@ -2,10 +2,10 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, ChevronDown, ChevronRight, Info } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChevronDown, ChevronRight, Database, Info, Search, ArrowLeft } from "lucide-react";
 import { groupByTier } from "@/lib/therapy-groups";
 import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
-import { Fade, focus, ink, label, line, linkText, Missing, muted, Spine, SpineStep, StatTile } from "./parts";
+import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts";
 
 function Block({ title, stacked, children }: { title: string; stacked: boolean; children: React.ReactNode }) {
   if (stacked)
@@ -24,7 +24,6 @@ function Block({ title, stacked, children }: { title: string; stacked: boolean; 
 }
 
 export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: WsCase; c: WsCandidate; compact: boolean; onSources: () => void; headRef?: React.Ref<HTMLParagraphElement> }) {
-  const tie = ws.nearTies.find((t) => t.name === c.name || t.above === c.name);
   const applies = levelApplies(c, ws.lead);
   const approvalNote = c.approval.qualifier ? `indication: ${c.approval.qualifier}` : "indication not stored in this result";
   const identifier = c.chembl ? (
@@ -36,6 +35,36 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
       </a>
     </span>
   ) : null;
+  if (!compact) {
+    return (
+      <article className="min-w-0">
+        <p className="flex items-center gap-2 text-[12px] text-[#625E68]">
+          <span className="font-mono">Rank {c.rank} / {ws.candidates.length}</span>
+          <span aria-hidden="true">·</span>
+          {c.approval.label}
+        </p>
+        <h2 ref={headRef} tabIndex={-1} className="mt-2 break-words text-[32px] font-semibold leading-[1.12] tracking-[-0.045em] text-[#24212B] outline-none sm:text-[38px]">{c.name}</h2>
+        <p className="mt-2 max-w-[62ch] text-[14px] leading-[22px] text-[#625E68]">{c.mechanism ?? "Mechanism not reported"}</p>
+        <section className="mt-6 border-y border-[#DCD7DF] py-5" aria-label="Matching evidence">
+          <h3 className="text-[17px] font-semibold tracking-[-0.025em]">Why it appears</h3>
+          {c.matched.length ? <div className="mt-3 flex flex-wrap items-baseline gap-2">
+            <span className="mr-1 text-[13px] text-[#625E68]">Matched terms</span>
+            {c.matched.map((term) => <span key={term} className="rounded-[4px] border border-[#E3DFE6] bg-[#FAF9FB] px-2 py-1 font-mono text-[12px] text-[#453C52]">{term}</span>)}
+          </div> : <p className="mt-2 text-[14px] text-[#625E68]">Matched terms were not supplied.</p>}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+            <p className="flex items-center gap-2 text-[13px] text-[#514C59]"><Database size={15} aria-hidden="true" />{c.sources.join(" · ") || "No sources listed"}</p>
+            <button type="button" onClick={onSources} className={`inline-flex min-h-[40px] items-center gap-2 rounded-[6px] bg-[#342B40] px-3.5 text-[13px] font-medium text-white hover:bg-[#493B57] ${focus}`}>Inspect sources <ArrowRight size={14} aria-hidden="true" /></button>
+          </div>
+        </section>
+        <dl className="divide-y divide-[#E9E6EA] text-[13.5px] leading-[21px]">
+          <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Approval</dt><dd>{c.approval.label} <span className={muted}>· {approvalNote}</span></dd></div>
+          <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Source records</dt><dd>Exact citations were not stored.</dd></div>
+          <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Side effects</dt><dd>Not supplied in this result</dd></div>
+          {identifier ? <div className="grid gap-1 py-3 sm:grid-cols-[128px_1fr] sm:gap-4"><dt className={muted}>Identifier</dt><dd>{identifier}</dd></div> : null}
+        </dl>
+      </article>
+    );
+  }
   return (
     <Fade key={c.id}>
       <p className={label}>Selected candidate</p>
@@ -53,7 +82,6 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
       <p className={`mt-0.5 text-[14px] leading-[21px] ${muted}`}>
         {ws.title} · {ws.tumor}
       </p>
-      {compact ? (
         <div className={`mt-4 border-t ${line} pt-5`}>
           <Block title="Why it appears" stacked>
             {applies && ws.lead?.level ? (
@@ -98,76 +126,6 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
             </div>
           </details>
         </div>
-      ) : (
-        <div className={`mt-4 border-t ${line} pt-5`}>
-          <div className={`grid grid-cols-3 gap-px overflow-hidden rounded-[8px] border ${line} bg-[#E2DEE6]`}>
-            <StatTile label="Score">
-              <p className={`mt-1 font-mono text-[22px] font-semibold leading-none tabular-nums ${ink}`}>{c.score !== null ? c.score.toFixed(2) : "—"}</p>
-            </StatTile>
-            <StatTile label="Rank">
-              <p className={`mt-1 text-[22px] font-semibold leading-none ${ink}`}>
-                {c.rank}
-                <span className={`ml-1 text-[13px] font-normal ${muted}`}>of {ws.candidates.length}</span>
-              </p>
-            </StatTile>
-            <StatTile label="Evidence">
-              <p className={`mt-1.5 text-[15px] font-semibold leading-[20px] ${ink}`}>{applies && ws.lead?.level ? ws.lead.level.label : (c.tierInfo.badge ?? "—")}</p>
-            </StatTile>
-          </div>
-          <p className={`mt-2 text-[12.5px] leading-[18px] ${muted}`}>
-            Ranks candidates within this case. It is not a response probability.
-            {tie ? (
-              <>
-                {" "}
-                {tie.name} scores within {NEAR_TIE} of {tie.above}: treat the pair as a near-tie.
-              </>
-            ) : null}
-          </p>
-          <Spine>
-            <SpineStep title="Why it appears">
-              {applies && ws.lead?.level ? (
-                <>
-                  <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>
-                    {ws.lead.level.label} · {ws.lead.name}
-                  </p>
-                  <p className={`mt-0.5 max-w-[56ch] text-[14px] leading-[21px] ${muted}`}>{ws.lead.level.meaning}</p>
-                </>
-              ) : (
-                <p className={`text-[16px] font-medium leading-[24px] ${ink}`}>{c.tierInfo.note ?? c.tierInfo.heading}</p>
-              )}
-              {c.matched.length ? (
-                <p className={`mt-1 text-[14px] leading-[21px] ${ink}`}>
-                  <span className={muted}>Matched on </span>
-                  {c.matched.join(", ")}
-                </p>
-              ) : null}
-            </SpineStep>
-            <SpineStep title="Approval">
-              <p className={`text-[14px] leading-[22px] ${ink}`}>
-                {c.approval.label}, as reported <span className={muted}>· {approvalNote}</span>
-              </p>
-            </SpineStep>
-            <SpineStep title="Side effects">
-              <p className="text-[14px] leading-[22px]">
-                <Missing>Not supplied in this result — no adverse-event source is wired into the ranking pipeline yet</Missing>
-              </p>
-            </SpineStep>
-            <SpineStep title="Sources">
-              <p className={`text-[14px] leading-[22px] ${ink}`}>{c.sources.length ? c.sources.join(" · ") : "No verified source on this row"}</p>
-              <p className="mt-1 text-[14px] leading-[21px]">
-                <Missing>Exact lookup record not stored in this result</Missing>
-              </p>
-              <button type="button" onClick={onSources} className={`mt-1 inline-flex min-h-[44px] items-center gap-1 text-[13.5px] lg:min-h-[44px] ${linkText}`}>
-                Inspect sources <ArrowRight size={14} aria-hidden="true" />
-              </button>
-            </SpineStep>
-            <SpineStep title="Mechanism">
-              <p className={`text-[13.5px] leading-[24px] ${ink}`}>{c.mechanism ?? <span className={muted}>Not reported</span>}</p>
-            </SpineStep>
-            {identifier ? <SpineStep title="Identifiers">{identifier}</SpineStep> : null}
-          </Spine>
-        </div>
-      )}
     </Fade>
   );
 }
@@ -178,6 +136,7 @@ export function CandidatesView({
   activeId,
   onSelect,
   onSources,
+  openDetail = false,
   compact = false,
   caseHref,
   threadIn = false,
@@ -187,6 +146,7 @@ export function CandidatesView({
   activeId: string;
   onSelect: (id: string) => void;
   onSources: () => void;
+  openDetail?: boolean;
   compact?: boolean;
   caseHref?: string;
   threadIn?: boolean;
@@ -196,10 +156,16 @@ export function CandidatesView({
   const head = useRef<HTMLParagraphElement>(null);
   const [link, setLink] = useState<{ w: number; h: number; d: string; start: number; end: number; a: number; b: number } | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const groups = groupByTier(list);
+  const [search, setSearch] = useState("");
+  const [mobileDetail, setMobileDetail] = useState(openDetail);
+  useEffect(() => {
+    if (mobileDetail) head.current?.focus({ preventScroll: true });
+  }, [mobileDetail]);
+  const filtered = search.trim() ? list.filter((item) => item.name.toLowerCase().includes(search.trim().toLowerCase())) : list;
+  const groups = groupByTier(filtered);
   const order = groups.flatMap((g) => g.items);
-  const c = list.find((x) => x.id === activeId) ?? order[0];
-  const col = compact ? 300 : 280;
+  const c = filtered.find((x) => x.id === activeId) ?? order[0];
+  const col = compact ? 300 : 320;
   const gutter = compact ? 24 : 28;
   const rest = ws.candidates.filter((x) => !list.some((y) => y.id === x.id));
   const restNote = rest.length ? `+${rest.length} in the full case: ${rest.map((x) => (x.approval.differentIndication ? `${x.name}, different indication` : x.name)).join("; ")}` : null;
@@ -238,10 +204,6 @@ export function CandidatesView({
       const h = head.current.getBoundingClientRect();
       const a = r.top - bx.top + r.height / 2;
       const b = h.top - bx.top + h.height / 2;
-      if (!compact && Math.abs(a - b) > 220) {
-        setLink(null);
-        return;
-      }
       const start = r.right - bx.left + 6;
       const x = threadIn ? col - 0.5 : col + gutter / 2;
       const end = h.left - bx.left - 10;
@@ -258,15 +220,17 @@ export function CandidatesView({
     measure();
     const ro = new ResizeObserver(measure);
     if (box.current) ro.observe(box.current);
+    if (head.current) ro.observe(head.current);
+    if (c && refs.current[c.id]) ro.observe(refs.current[c.id]!);
     return () => ro.disconnect();
-  }, [c, col, gutter, compact, threadIn]);
+  }, [c, col, gutter, compact, threadIn, search, mobileDetail]);
 
-  if (!c) return null;
+
 
   return (
-    <div ref={box} className={`relative grid lg:h-full ${compact ? "lg:grid-cols-[300px_minmax(0,1fr)]" : "lg:grid-cols-[280px_minmax(0,1fr)]"}`}>
-      {link ? (
-        <svg aria-hidden="true" className="pointer-events-none absolute left-0 top-0 hidden overflow-visible lg:block" width={link.w} height={link.h}>
+    <div ref={box} className={`relative grid lg:h-full ${compact ? "lg:grid-cols-[300px_minmax(0,1fr)]" : "lg:grid-cols-[320px_minmax(0,1fr)]"}`}>
+      {link && c ? (
+        <svg aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-[1] hidden overflow-visible lg:block" width={link.w} height={link.h}>
           <path
             d={link.d}
             pathLength={1}
@@ -275,15 +239,24 @@ export function CandidatesView({
             strokeWidth="1.75"
             strokeLinecap="round"
             strokeLinejoin="round"
-            style={{ strokeDasharray: 1, strokeDashoffset: revealed ? 0 : 1 }}
+            style={compact ? { strokeDasharray: 1, strokeDashoffset: revealed ? 0 : 1 } : undefined}
             className="motion-safe:[transition:d_150ms_ease-out,stroke-dashoffset_600ms_ease-out]"
           />
-          <circle cx={link.start} cy={link.a} r="3" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:cy_150ms_ease-out,opacity_200ms_ease-out]" />
-          <circle cx={link.end} cy={link.b} r="3" fill="#69518C" opacity={revealed ? 1 : 0} className="motion-safe:[transition:opacity_200ms_ease-out_450ms]" />
+          <circle cx={link.start} cy={link.a} r="3" fill="#69518C" opacity={!compact || revealed ? 1 : 0} className="motion-safe:[transition:cy_150ms_ease-out,opacity_200ms_ease-out]" />
+          <circle cx={link.end} cy={link.b} r="3" fill="#69518C" opacity={!compact || revealed ? 1 : 0} className="motion-safe:[transition:opacity_200ms_ease-out_450ms]" />
         </svg>
       ) : null}
       {threadIn ? <span data-thread-in aria-hidden="true" className="pointer-events-none absolute top-0 hidden h-px w-px lg:block" style={{ left: col - 0.5 }} /> : null}
-      <div className={`flex flex-col border-b ${line} p-4 lg:border-b-0 lg:border-r lg:py-5`}>
+      <div className={`${!compact && mobileDetail ? "hidden lg:flex" : "flex"} flex-col border-b ${line} p-4 lg:border-b-0 lg:border-r lg:py-5`}>
+        {!compact ? <label className="mb-4 flex h-10 items-center gap-2 rounded-[6px] border border-[#DCD7DF] bg-[#FAF9F7] px-3 focus-within:border-[#69518C]">
+          <Search size={15} aria-hidden="true" className={muted} />
+          <input type="search" aria-label="Search candidates" placeholder="Search candidates" value={search} onChange={(event) => {
+            const value = event.target.value;
+            setSearch(value);
+            const matches = list.filter((item) => item.name.toLowerCase().includes(value.trim().toLowerCase()));
+            if (matches[0] && !matches.some((item) => item.id === activeId)) onSelect(matches[0].id);
+          }} className="min-w-0 flex-1 bg-transparent text-[13px] outline-none" />
+        </label> : null}
         <p id={`${ws.id}-cand-label`} className={`flex items-center justify-between border-b ${line} px-3 pb-2 ${label}`}>
           <span>Ranked candidates</span>
           <span className="inline-flex items-center gap-1" title="Ranks candidates within this case; not a response probability">
@@ -298,10 +271,11 @@ export function CandidatesView({
               <p className={`px-3 pb-1 pt-1 text-[12.5px] font-medium leading-[18px] ${muted}`}>{g.heading}</p>
               <div className="space-y-0.5">
                 {g.items.map((cand) => {
-                  const on = cand.id === c.id;
+                  const on = cand.id === c?.id;
                   const i = order.indexOf(cand);
-                  const tieWith = ties.find((x) => x.name === cand.name);
-                  const sub = tieWith ? `Near-tie, within ${NEAR_TIE}` : cand.approval.differentIndication ? "Approved for a different indication" : cand.approval.label !== cand.tierInfo.badge ? cand.approval.label : null;
+                  const tieWith = ties.find((x) => x.name === cand.name || (!compact && x.above === cand.name));
+                  const peer = tieWith?.name === cand.name ? tieWith.above : tieWith?.name;
+                  const sub = tieWith ? (compact ? `Near-tie, within ${NEAR_TIE}` : `Near-tie with ${peer}`) : cand.approval.differentIndication ? "Approved for a different indication" : cand.approval.label !== cand.tierInfo.badge ? cand.approval.label : null;
                   return (
                     <button
                       key={cand.id}
@@ -312,7 +286,7 @@ export function CandidatesView({
                       role="radio"
                       aria-checked={on}
                       tabIndex={on ? 0 : -1}
-                      onClick={() => onSelect(cand.id)}
+                      onClick={() => { onSelect(cand.id); if (!compact && !window.matchMedia("(min-width: 1024px)").matches) setMobileDetail(true); }}
                       onKeyDown={(e) => {
                         if (e.key === "ArrowDown" || e.key === "ArrowRight") {
                           e.preventDefault();
@@ -333,7 +307,7 @@ export function CandidatesView({
                         {sub ? <span className={`block text-[12.5px] leading-[18px] ${muted}`}>{sub}</span> : null}
                       </span>
                       <span className={`font-mono text-[13px] tabular-nums ${ink}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>
-                      {on ? <span aria-hidden="true" /> : <ChevronRight size={13} aria-hidden="true" className="text-[#8F899A] transition-transform duration-150 group-hover:translate-x-0.5" />}
+                      {on && compact ? <span aria-hidden="true" /> : <ChevronRight size={13} aria-hidden="true" className={`text-[#8F899A] ${on ? "lg:invisible" : ""}`} />}
                     </button>
                   );
                 })}
@@ -341,22 +315,27 @@ export function CandidatesView({
             </div>
           ))}
         </div>
+        {!c ? <div className="px-3 py-5 text-[14px]">
+          <p>No candidates match this search.</p>
+          <button type="button" className={`min-h-10 ${linkText}`} onClick={() => setSearch("")}>Clear search</button>
+        </div> : null}
         <p className={`mt-2 px-3 text-[12.5px] leading-[18px] ${muted}`}>Scores rank candidates; they are not response probabilities.</p>
-        {restNote ? <p className={`mt-2 px-3 text-[12.5px] leading-[18px] ${muted}`}>{restNote}</p> : null}
-        {caseHref ? (
+        {compact && restNote ? <p className={`mt-2 px-3 text-[12.5px] leading-[18px] ${muted}`}>{restNote}</p> : null}
+        {caseHref && c ? (
           <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-3 hidden min-h-[44px] items-center gap-1.5 self-start px-3 text-[13.5px] lg:inline-flex ${linkText}`}>
             View the demo case <ArrowRight size={14} aria-hidden="true" />
           </Link>
         ) : null}
       </div>
-      <div className="p-5 lg:py-5 lg:pl-14 lg:pr-6">
+      {c ? <div className={`min-w-0 p-5 lg:block lg:pl-14 ${compact ? "lg:py-5 lg:pr-6" : "lg:py-6 lg:pr-9"} ${!compact && !mobileDetail ? "hidden" : ""}`}>
+        {!compact ? <button type="button" onClick={() => { setMobileDetail(false); requestAnimationFrame(() => refs.current[c.id]?.focus()); }} className={`mb-4 inline-flex min-h-10 items-center gap-2 text-[13px] lg:hidden ${linkText}`}><ArrowLeft size={14} />Ranked candidates</button> : null}
         <CandidateDetail ws={ws} c={c} compact={compact} onSources={onSources} headRef={head} />
-        {caseHref ? (
+        {caseHref && c ? (
           <Link href={`${caseHref}?candidate=${encodeURIComponent(c.id)}`} className={`mt-3 inline-flex min-h-[44px] items-center gap-1.5 text-[14px] lg:hidden ${linkText}`}>
             View the demo case <ArrowRight size={15} aria-hidden="true" />
           </Link>
         ) : null}
-      </div>
+      </div> : null}
     </div>
   );
 }

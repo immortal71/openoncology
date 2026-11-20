@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import { AlertCircle, ArrowLeft, Dna, Sparkles } from "lucide-react";
+import { DEMO_ID } from "@/lib/demo-data";
 import { api } from "@/lib/api";
 import { normalizeStatus, STATUS_LABEL, type SubmissionStatus } from "@/lib/status";
 import { atlasSans } from "@/lib/atlas-font";
@@ -55,7 +56,7 @@ function DemoAnalysis() {
 
   useEffect(() => {
     if (step >= DEMO_STEPS.length - 1) {
-      const t = setTimeout(() => router.push("/lab/results"), 650);
+      const t = setTimeout(() => router.push(`/results/${DEMO_ID}?demo=true`), 650);
       return () => clearTimeout(t);
     }
     const t = setTimeout(() => setStep((s) => s + 1), 650);

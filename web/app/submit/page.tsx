@@ -1,13 +1,13 @@
 "use client";
-import { Suspense } from "react";
+
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useSearchParams, useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Upload, FileText, Dna, CheckCircle, AlertCircle, FlaskConical } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Upload, FileText, Dna, CheckCircle, AlertCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import { atlasSans } from "@/lib/atlas-font";
 import { focus, ink, line, muted, surface } from "@/components/workspace/parts";
@@ -52,7 +52,7 @@ function Steps({ active }: { active: 0 | 1 | 2 }) {
     <ol className="flex items-center gap-0">
       {steps.map((step, i) => (
         <li key={step} className="flex flex-1 items-center last:flex-none">
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
             <span
               className={`grid h-7 w-7 shrink-0 place-items-center rounded-full font-mono text-[12px] font-medium ${
                 i < active ? "bg-[#69518C] text-white" : i === active ? "bg-[#69518C] text-white" : `border ${line} bg-white text-[#625E68]`
@@ -62,42 +62,38 @@ function Steps({ active }: { active: 0 | 1 | 2 }) {
             </span>
             <span className={`text-[12.5px] font-medium ${i === active ? ink : muted}`}>{step}</span>
           </div>
-          {i < steps.length - 1 ? <span aria-hidden="true" className={`mx-3 mb-5 h-px flex-1 ${i < active ? "bg-[#69518C]" : "bg-[#E2DEE6]"}`} /> : null}
+          {i < steps.length - 1 ? <span aria-hidden="true" className={`mx-3 h-px flex-1 ${i < active ? "bg-[#69518C]" : "bg-[#E2DEE6]"}`} /> : null}
         </li>
       ))}
     </ol>
   );
 }
 
-function Dropzone({ label: title, hint, icon: Icon, file, accept, onFile, error, accessibleName }: { label: string; hint: string; icon: typeof FileText; file?: File; accept: string; onFile: (f: File) => void; error?: string; accessibleName: string }) {
+function Dropzone({ label: title, limit, hint, icon: Icon, file, accept, onFile, error, accessibleName }: { label: string; limit: string; hint: string; icon: typeof FileText; file?: File; accept: string; onFile: (f: File) => void; error?: string; accessibleName: string }) {
   const id = useId();
   return (
-    <div>
-      <p id={`${id}-title`} className={`mb-1.5 block text-[13px] font-medium ${ink}`}>
-        {title}
-      </p>
-      <label
-        htmlFor={id}
-        className={`group flex h-36 w-full cursor-pointer flex-col items-center justify-center rounded-[10px] border border-dashed ${
-          error ? "border-[#C9776A]" : "border-[#B5B0BA] hover:border-[#69518C]"
-        } bg-[#FAF9F7] transition-colors duration-150 hover:bg-[#F6F5F8] focus-within:border-[#69518C] focus-within:ring-2 focus-within:ring-[#69518C] focus-within:ring-offset-2`}
-      >
-        <span className="mb-2 grid h-10 w-10 place-items-center rounded-[8px] bg-[#ECEAEF] transition-colors duration-150 group-hover:bg-[#EEE8F5]">
-          <Icon size={20} aria-hidden="true" className="text-[#69518C]" />
-        </span>
-        <span className={`px-3 text-center text-[13.5px] font-medium ${ink}`}>{file ? file.name : "Click or drag to upload"}</span>
-        {!file ? <span className={`mt-1 text-[12px] ${muted}`}>{hint}</span> : null}
+    <div className="px-4 py-3">
+      <div className="flex items-center gap-3">
+        <Icon size={18} aria-hidden="true" className="shrink-0 text-[#69518C]" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">{title}</p>
+          <p id={`${id}-hint`} className={`text-xs leading-5 ${muted}`}>{hint} · {limit}</p>
+          {file && <p className="break-all text-sm text-[#513C68]" aria-live="polite">{file.name}</p>}
+        </div>
+        <label htmlFor={id} className="relative inline-flex min-h-10 shrink-0 cursor-pointer items-center rounded-lg border border-[#D6D0DB] bg-white px-3 text-sm font-medium hover:bg-[#F6F3F8] focus-within:ring-2 focus-within:ring-[#69518C]">
+          {file ? "Replace" : "Choose file"}
         <input
           id={id}
           type="file"
           accept={accept}
           className="sr-only"
-          aria-labelledby={`${id}-title`}
+          aria-required="true"
           aria-label={accessibleName}
-          aria-describedby={error ? `${id}-error` : undefined}
+          aria-invalid={Boolean(error)} aria-describedby={error ? `${id}-hint ${id}-error` : `${id}-hint`}
           onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
         />
       </label>
+      </div>
       {error ? (
         <p id={`${id}-error`} className="mt-1 text-[12.5px] text-[#9E4A3A]">
           {error}
@@ -107,10 +103,7 @@ function Dropzone({ label: title, hint, icon: Icon, file, accept, onFile, error,
   );
 }
 
-function SubmitPageInner() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const isDemo = searchParams.get("demo") === "true";
+export default function SubmitPage() {
   const [status, setStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
@@ -168,56 +161,43 @@ function SubmitPageInner() {
 
   return (
     <main className={`${atlasSans.variable} min-h-screen bg-[#F7F5F0] font-[family-name:var(--font-atlas)] ${ink}`}>
-      <div className="mx-auto max-w-[640px] px-6 py-10">
+      <div className="mx-auto max-w-[800px] px-4 py-5 sm:px-6">
         <Steps active={0} />
 
-        <div className={`mt-8 rounded-[12px] border ${line} bg-white p-7 md:p-9 ${surface}`}>
-          <Rise>
-            <h1 className="text-balance text-[28px] font-semibold leading-[1.15] tracking-[-0.03em]">Submit your sample.</h1>
+        <div className={`mt-5 overflow-hidden rounded-[24px] border ${line} bg-white shadow-[0_12px_40px_-24px_rgba(44,34,55,0.28)]`}>
+          <Rise className="border-b border-[#E5E0E7] bg-[#F6F3F8] px-5 py-5 sm:px-8 sm:py-6">
+            <h1 className="text-balance text-[30px] sm:text-[36px] font-semibold leading-[1.15] tracking-[-0.03em]">Submit case files</h1>
             <p className={`mt-2 text-[15px] leading-[22px] ${muted}`}>
-              Upload your case files to start the mutation pathway: actionable check, repurposed-drug search, custom-drug brief generation, and funding support when needed.
+              Enter the cancer type and attach both files to start analysis.
             </p>
           </Rise>
 
-          <AnimatePresence>
-            <Rise className={`mt-6 flex flex-col gap-3 rounded-[10px] border ${line} bg-[#FAF9F7] p-4 sm:flex-row sm:items-center`}>
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[8px] bg-[#EEE8F5]">
-                <FlaskConical size={18} aria-hidden="true" className="text-[#69518C]" />
-              </span>
-              <div className="flex-1">
-                <p className={`text-[14px] font-semibold ${ink}`}>Try a live demo</p>
-                <p className={`mt-0.5 text-[13px] leading-[19px] ${muted}`}>See a full KRAS G12C · Non-Small Cell Lung Cancer case — Sotorasib ranked #1 (OncoKB Level 1).</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push(`/submit/analysis?demo=true`)}
-                className={`inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-[8px] border ${line} bg-white px-4 text-[13.5px] font-medium ${ink} transition-colors duration-150 hover:bg-[#F6F5F8] ${focus}`}
-              >
-                View demo results <Upload size={14} aria-hidden="true" className="rotate-90" />
-              </button>
-            </Rise>
-          </AnimatePresence>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-6">
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 p-5 sm:p-8">
             <div>
-              <label className={`mb-1.5 block text-[13px] font-medium ${ink}`}>Cancer type</label>
-              <input {...register("cancer_type")} placeholder="e.g. Lung adenocarcinoma, Breast cancer, Glioblastoma" className={cardField} />
+              <label htmlFor="cancer-type" className={`mb-1.5 block text-[13px] font-medium ${ink}`}>Cancer type</label>
+              <input id="cancer-type" {...register("cancer_type")} placeholder="e.g. Lung adenocarcinoma" className={cardField} />
               {errors.cancer_type ? <p className="mt-1 text-[12.5px] text-[#9E4A3A]">{errors.cancer_type.message}</p> : null}
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Dropzone label="Biopsy report · max 50 MB" hint="PDF · JPG · TXT · DOC" icon={FileText} file={biopsyFile} accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json" onFile={(f) => setValue("biopsy_file", f)} error={errors.biopsy_file?.message as string} accessibleName="Biopsy report file" />
-              <Dropzone label="DNA / genomic file · max 500 MB" hint="VCF · FASTQ · BAM · GZ" icon={Dna} file={dnaFile} accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json" onFile={(f) => setValue("dna_file", f)} error={errors.dna_file?.message as string} accessibleName="DNA or genomic file" />
+            <fieldset className="min-w-0"><legend className="mb-2 text-sm font-medium">Required case files</legend><div className="divide-y divide-[#E4DFE7] rounded-[14px] border border-[#DBD7DE] bg-[#FBFAF8]">
+              <Dropzone label="Biopsy report" limit="Max 50 MB" hint="PDF · JPG · TXT · DOC" icon={FileText} file={biopsyFile} accept=".pdf,.jpg,.jpeg,.png,.txt,.doc,.docx,.rtf,.xml,.json" onFile={(f) => setValue("biopsy_file", f, { shouldValidate: true })} error={errors.biopsy_file?.message as string} accessibleName="Biopsy report file" />
+              <Dropzone label="Genomic file" limit="Max 500 MB" hint="VCF · FASTQ · BAM" icon={Dna} file={dnaFile} accept=".vcf,.fastq,.bam,.gz,.fq,.txt,.csv,.tsv,.xml,.json" onFile={(f) => setValue("dna_file", f, { shouldValidate: true })} error={errors.dna_file?.message as string} accessibleName="DNA or genomic file" />
             </div>
+              <details className="mt-2 text-xs text-[#625E68]">
+                <summary className="w-fit cursor-pointer rounded py-1 text-[#513C68] focus-visible:outline-2">Supported formats</summary>
+                <p className="mt-1">Biopsy report: PDF, JPG, JPEG, PNG, TXT, DOC, DOCX, RTF, XML or JSON.</p>
+                <p className="mt-1">Genomic file: VCF, FASTQ, FQ, BAM, TXT, CSV, TSV, XML or JSON. The uploader also accepts gzip-compressed genomic files (.gz).</p>
+              </details>
+            </fieldset>
 
             <p className={`text-[12.5px] leading-[19px] ${muted}`}>
               By submitting, you consent to OpenOncology storing your files encrypted for analysis purposes. You can delete your data at any time from your dashboard. We never share
               identifiable data without your explicit consent.
             </p>
 
-            <p className={`rounded-[8px] border ${line} bg-[#FAF9F7] p-3 text-[12.5px] leading-[19px] ${muted}`}>
-              If Keycloak login is unavailable in your local environment, the app now supports a local demo-auth fallback so you can still test submissions.
-            </p>
+
 
             {status === "error" ? (
               <div className="flex items-center gap-2 rounded-[8px] border border-[#D9B8AE] bg-[#FBF1EE] p-4">
@@ -226,31 +206,15 @@ function SubmitPageInner() {
               </div>
             ) : null}
 
-            <button type="submit" disabled={status === "uploading"} className={primaryBtn}>
+            <button type="submit" disabled={status === "uploading"} className={`${primaryBtn} sm:ml-auto sm:flex sm:w-auto`}>
               <Upload size={17} aria-hidden="true" />
               {status === "uploading" ? "Uploading & encrypting..." : "Submit sample"}
             </button>
           </form>
         </div>
 
-        {isDemo ? (
-          <p className={`mt-4 text-center text-[12.5px] ${muted}`}>
-            Arrived from early access?{" "}
-            <button type="button" onClick={() => router.push(`/submit/analysis?demo=true`)} className="font-medium text-[#69518C] underline-offset-4 hover:underline">
-              Skip straight to the demo case
-            </button>
-            .
-          </p>
-        ) : null}
+        <div className="mt-4 text-center"><Link href="/submit/analysis?demo=true" className={`text-sm text-[#69518C] underline underline-offset-4 ${focus}`}>View demo results</Link></div>
       </div>
     </main>
-  );
-}
-
-export default function SubmitPage() {
-  return (
-    <Suspense fallback={null}>
-      <SubmitPageInner />
-    </Suspense>
   );
 }

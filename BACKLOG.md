@@ -585,3 +585,10 @@ representation the badge carries (the URL-escaped `%E2%89%A5` segment and the AS
 `>=` alt text). The `0.625` Precision@3 ceiling elsewhere in the docs is an unrelated
 number and was confirmed untouched.
 
+
+### Results workspace revision, November 20
+- Redesigned the four /lab/results views on redesign/phase-0. The review workspace has a case header, keyboard-accessible tabs, searchable candidate inspector, protein track, source ledger, gap filters, and candidate PDF export. Browser checks covered desktop and mobile layouts.
+
+- Revised the Submit form hierarchy to put the cancer type and required files before the demo link.
+- Polished the Submit header, nested corners and file controls, including selected-file feedback.
+- Grouped the required case files into two upload rows. Verified genomic file selection and replacement at mobile and desktop widths.

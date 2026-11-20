@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
+import { NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
 
 const MARGIN = 48;
 const WIDTH = 595.28 - MARGIN * 2; // A4 width in points, minus margins
@@ -37,23 +37,17 @@ export function downloadCaseReport(ws: WsCase, c: WsCandidate) {
   if (ws.demo) line("Demo case · not a real patient", 10, { color: [158, 74, 58], gap: 2 });
   line("Research prototype, not a medical device. Every result needs oncologist review.", 9.5, { color: [98, 94, 104], gap: 18 });
 
-  const applies = levelApplies(c, ws.lead);
-  const evidenceLabel = applies && ws.lead?.level ? ws.lead.level.label : (c.tierInfo.badge ?? "—");
-
   line(`Selected candidate: ${c.name}`, 15, { bold: true, gap: 2 });
   line(`${ws.title} · ${ws.tumor}`, 10.5, { color: [98, 94, 104], gap: 10 });
 
-  line(`Score ${c.score !== null ? c.score.toFixed(2) : "—"}   ·   Rank ${c.rank} of ${ws.candidates.length}   ·   Evidence ${evidenceLabel}`, 11, { bold: true, gap: 4 });
+  line(`Score ${c.score !== null ? c.score.toFixed(2) : "—"}   ·   Rank ${c.rank} of ${ws.candidates.length}`, 11, { bold: true, gap: 4 });
   const tie = ws.nearTies.find((t) => t.name === c.name || t.above === c.name);
   let rankingNote = "Ranks candidates within this case. It is not a response probability.";
   if (tie) rankingNote += ` ${tie.name} scores within ${NEAR_TIE} of ${tie.above}: treat the pair as a near-tie.`;
   line(rankingNote, 9.5, { color: [98, 94, 104], gap: 16 });
 
-  const whyItAppears =
-    applies && ws.lead?.level
-      ? `${ws.lead.level.label} · ${ws.lead.name}. ${ws.lead.level.meaning}${c.matched.length ? ` Matched on ${c.matched.join(", ")}.` : ""}`
-      : `${c.tierInfo.note ?? c.tierInfo.heading}${c.matched.length ? ` Matched on ${c.matched.join(", ")}.` : ""}`;
-  section("Why it appears", whyItAppears);
+  section("Why it appears", [c.tierInfo.heading, ...c.matched].join(" · "));
+  if (ws.lead?.level) section("Variant evidence", `${ws.lead.name} · ${ws.lead.level.label}. Candidate-specific evidence record not stored.`);
 
   const approvalNote = c.approval.qualifier ? `indication: ${c.approval.qualifier}` : "indication not stored in this result";
   section("Approval", `${c.approval.label}, as reported · ${approvalNote}`);
@@ -66,7 +60,7 @@ export function downloadCaseReport(ws: WsCase, c: WsCandidate) {
 
   if (c.chembl) section("Identifiers", c.chembl);
 
-  line("Oncologist sign-off: Pending", 10.5, { bold: true, gap: 2 });
+  line(`Oncologist review: ${ws.reviewed === null ? "Not recorded" : ws.reviewed ? "Reviewed" : "Pending"}`, 10.5, { bold: true, gap: 2 });
   line(`Generated ${new Date().toLocaleString()} from the on-screen result. Not a stored clinical document.`, 8.5, { color: [143, 137, 153], gap: 0 });
 
   const safeTitle = ws.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase();

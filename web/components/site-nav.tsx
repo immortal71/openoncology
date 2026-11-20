@@ -79,7 +79,7 @@ const APP_ROUTES = ["/lab/results"];
 
 export function SiteNav() {
   const pathname = usePathname() ?? "";
-  if (APP_ROUTES.includes(pathname)) return null;
+  if (APP_ROUTES.includes(pathname) || pathname.startsWith("/results/")) return null;
   const dark = DARK_ROUTES.includes(pathname);
   const light = !dark && REDESIGNED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const marketing = MARKETING_ROUTES.includes(pathname);
