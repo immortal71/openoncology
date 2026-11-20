@@ -7,6 +7,8 @@ import { groupByTier } from "@/lib/therapy-groups";
 import { levelApplies, NEAR_TIE, type WsCandidate, type WsCase } from "@/lib/workspace";
 import { Fade, focus, ink, label, line, linkText, Missing, muted } from "./parts";
 
+const candidateColumns = "grid grid-cols-[20px_minmax(0,1fr)_40px_12px] items-center gap-x-2 px-3";
+
 function Block({ title, stacked, children }: { title: string; stacked: boolean; children: React.ReactNode }) {
   if (stacked)
     return (
@@ -36,22 +38,65 @@ export function CandidateDetail({ ws, c, compact, onSources, headRef }: { ws: Ws
     </span>
   ) : null;
   if (!compact) {
+    const matchedTerms = new Set(c.matched.map(term => term.trim().toUpperCase()));
+    const matches = ws.variants.filter(v => matchedTerms.has(v.name.toUpperCase()));
+    const peers = ws.nearTies.flatMap(tie => tie.name === c.name ? [tie.above] : tie.above === c.name ? [tie.name] : []);
+    const comparisonPeers = ws.candidates.filter(item => item.id !== c.id && peers.includes(item.name));
+    const evidenceRow = "grid gap-1 border-b border-[#E9E6EA] py-3 sm:grid-cols-[128px_minmax(0,1fr)] sm:gap-4";
     return (
       <article className="min-w-0">
-        <p className="flex items-center gap-2 text-[12px] text-[#625E68]">
-          <span className="font-mono">Rank {c.rank} / {ws.candidates.length}</span>
-          <span aria-hidden="true">·</span>
-          {c.approval.label}
+        <h2 ref={headRef} tabIndex={-1} className="break-words text-[32px] font-semibold leading-[1.12] tracking-[-0.035em] text-[#24212B] outline-none sm:text-[38px]">{c.name}</h2>
+        <p className="mt-1 flex flex-wrap items-baseline gap-x-2 text-sm">
+          <span className={muted}>{matches.length ? "Matched variant" + (matches.length > 1 ? "s" : "") : "Case context"}</span>
+          <span className="font-medium">{matches.map(v => v.name).join(", ") || ws.title}</span>
+          <span className={muted}>· {ws.tumor}</span>
         </p>
-        <h2 ref={headRef} tabIndex={-1} className="mt-2 break-words text-[32px] font-semibold leading-[1.12] tracking-[-0.035em] text-[#24212B] outline-none sm:text-[38px]">{c.name}</h2>
-        <p className="mt-2 max-w-[62ch] text-[14px] leading-[22px] text-[#625E68]">{c.mechanism ?? "Mechanism not reported"}</p>
-        <section className="mt-5 border-y border-[#DCD7DF] py-4" aria-label="Matching evidence">
+        <p className="mt-1.5 max-w-[62ch] text-[14px] leading-[22px] text-[#625E68]">{c.mechanism ?? "Mechanism not reported"}</p>
+        {comparisonPeers.length > 0 && <details key={c.id} className="group mt-4 border-y border-[#DED8E3]">
+          <summary className={`flex min-h-11 cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 py-2 text-sm [&::-webkit-details-marker]:hidden ${focus}`}>
+            <span className="text-[#625E68]">Near-tie</span>
+            <span className="font-medium">Compare with {comparisonPeers.map(peer => peer.name).join(", ")}</span>
+            <ChevronDown size={15} aria-hidden="true" className="ml-auto text-[#69518C] group-open:rotate-180" />
+          </summary>
+          {comparisonPeers.map(peer => {
+            const pair = [c, peer];
+            return (
+              <table key={peer.id} aria-label={pair.map(item => item.name).join(" and ")} className="w-full table-fixed text-left text-xs leading-5 sm:text-sm">
+                <thead className="text-[#302B36]"><tr><th scope="col" className="w-[23%] px-2 text-left text-xs font-normal text-[#625E68] sm:px-4">Candidate</th>
+                  {pair.map(item => <th key={item.id} scope="col" className="break-words px-2 py-2 align-top text-sm font-semibold leading-tight sm:px-3"><span className="mb-1 block text-xs font-normal text-[#625E68]">Rank {item.rank}</span>{item.name}</th>)}
+                </tr></thead>
+                <tbody className="[&_tr]:border-t [&_tr]:border-[#E6E0E8] [&_th]:px-2 [&_th]:py-2 [&_th]:font-medium [&_th]:text-[#625E68] [&_td]:break-words [&_td]:px-2 [&_td]:py-2 sm:[&_td]:px-3">
+                  <tr><th scope="row">Case score</th>{pair.map(item => <td key={item.id} className="font-mono tabular-nums">{item.score?.toFixed(2) ?? "Unrecorded"}</td>)}</tr>
+                  <tr><th scope="row">Approval</th>{pair.map(item => <td key={item.id}>{item.approval.label}<span className="block text-xs text-[#625E68]">{item.approval.qualifier ?? "Indication not recorded"}</span></td>)}</tr>
+                  <tr><th scope="row">Matched terms</th>{pair.map(item => <td key={item.id}>{item.matched.join(" · ") || "Not supplied"}</td>)}</tr>
+                  <tr><th scope="row">Sources</th>{pair.map(item => <td key={item.id}>{item.sources.join(" · ") || "None listed"}</td>)}</tr>
+                </tbody>
+              </table>
+            );
+          })}
+          <p className="border-t border-[#E6E0E8] bg-[#FBFAF8] px-3 py-2 text-xs leading-5 text-[#625E68]">Scores rank candidates within this case. They are not response probabilities.</p>
+        </details>}
+        <section className="mt-7 border-y border-[#DCD7DF] py-4" aria-label="Matching evidence">
           <h3 className="text-[17px] font-semibold tracking-[-0.025em]">Why it appears</h3>
+          <dl className="mt-1 text-[13.5px] leading-[21px]">
+            <div className={evidenceRow}>
+              <dt className={muted}>Case ranking</dt>
+              <dd><strong>{c.rank} of {ws.candidates.length}</strong> · {c.score === null ? "Score not recorded" : `Score ${c.score.toFixed(2)}`}
+                <p className={muted}>Scores rank candidates within this case. They are not response probabilities.</p>
+
+              </dd>
+            </div>
+            <div className={evidenceRow}>
+              <dt className={muted}>Variant evidence</dt>
+              <dd>{matches.length ? matches.map(v => <p key={v.key}>{v.name} · {v.level?.label ?? "Level not recorded"}</p>) : "No variant-specific level linked to this candidate."}</dd>
+            </div>
+          </dl>
           {c.matched.length ? <div className="mt-3 flex flex-wrap items-baseline gap-2">
             <span className="mr-1 text-[13px] text-[#625E68]">Matched terms</span>
             {c.matched.map((term) => <span key={term} className="rounded-[4px] border border-[#E3DFE6] bg-[#FAF9FB] px-2 py-1 font-mono text-[12px] text-[#453C52]">{term}</span>)}
           </div> : <p className="mt-2 text-[14px] text-[#625E68]">Matched terms were not supplied.</p>}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg bg-[#F7F5F8] px-3 py-2">
+          <h4 className={`mt-4 text-[13px] ${muted}`}>Source records</h4>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-lg bg-[#F7F5F8] px-3 py-2">
             <p className="flex items-center gap-2 text-[13px] text-[#514C59]"><Database size={15} aria-hidden="true" /><span>{c.sources.join(" · ") || "No sources listed"}<span className="block text-xs leading-5 text-[#625E68]">Exact citations were not stored.</span></span></p>
             <button type="button" onClick={onSources} className={`inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-[13px] font-semibold text-[#513B70] hover:bg-[#EBE5F1] ${focus}`}>Inspect sources <ArrowRight size={14} aria-hidden="true" /></button>
           </div>
@@ -257,10 +302,10 @@ export function CandidatesView({
             if (matches[0] && !matches.some((item) => item.id === activeId)) onSelect(matches[0].id);
           }} className="min-w-0 flex-1 bg-transparent text-[13px] outline-none" />
         </label> : null}
-        <p id={`${ws.id}-cand-label`} className={`flex items-center justify-between border-b ${line} px-3 pb-2 ${label}`}>
-          <span>Ranked candidates</span>
-          <span className="inline-flex items-center gap-1" title="Ranks candidates within this case; not a response probability">
-            Score
+        <p id={`${ws.id}-cand-label`} className={`${candidateColumns} border-b ${line} pb-2 ${label}`}>
+          <span className="col-span-2">Ranked candidates</span>
+          <span className="contents" title="Ranks candidates within this case; not a response probability">
+            <span className="justify-self-end">Score</span>
             <Info size={12} aria-hidden="true" className="text-[#8F899A]" />
             <span className="sr-only">: ranks candidates within this case, not a response probability</span>
           </span>
@@ -296,7 +341,7 @@ export function CandidatesView({
                           move(i - 1);
                         }
                       }}
-                      className={`relative grid min-h-[48px] w-full grid-cols-[16px_minmax(0,1fr)_auto_12px] items-center gap-3 rounded-[6px] px-3 py-1.5 text-left transition-[background-color,transform] duration-100 motion-safe:active:scale-[0.99] ${
+                      className={`relative ${candidateColumns} min-h-[48px] w-full rounded-[6px] py-1.5 text-left transition-[background-color,transform] duration-100 motion-safe:active:scale-[0.99] ${
                         on ? "bg-[#EEE8F5]" : "hover:bg-[#F6F5F8] active:bg-[#EFEDF2]"
                       } ${focus}`}
                     >
@@ -306,7 +351,7 @@ export function CandidatesView({
                         <span className={`block break-words text-[15px] font-medium leading-[22px] ${ink}`}>{cand.name}</span>
                         {sub ? <span className={`block text-[12.5px] leading-[18px] ${muted}`}>{sub}</span> : null}
                       </span>
-                      <span className={`font-mono text-[13px] tabular-nums ${ink}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>
+                      <span className={`justify-self-end font-mono text-[13px] tabular-nums ${ink}`}>{cand.score !== null ? cand.score.toFixed(2) : "–"}</span>
                       {on && compact ? <span aria-hidden="true" /> : <ChevronRight size={13} aria-hidden="true" className={`text-[#8F899A] ${on ? "lg:invisible" : ""}`} />}
                     </button>
                   );

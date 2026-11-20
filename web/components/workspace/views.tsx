@@ -92,7 +92,7 @@ export function SourcesView({ ws, c, compact = false }: { ws: WsCase; c: WsCandi
             {c.sources.map(source => {
               const row = sourceRow(source, c, null);
               return (
-                <li key={source} className="grid min-w-0 gap-x-4 gap-y-1 py-4 text-[13px] md:px-3 md:grid-cols-[1.15fr_1.1fr_1fr_1fr] md:items-baseline">
+                <li key={source} className="grid min-w-0 gap-x-4 gap-y-1 px-3 py-3 text-[13px] md:grid-cols-[1.15fr_1.1fr_1fr_1fr] md:items-baseline">
                   <span className="flex items-center gap-2.5 text-[15px] font-semibold"><Database size={15} className="text-[#776C84]" aria-hidden="true" />{row.name}</span>
                   <span className={body}>{row.provides}</span>
                   <span className="mt-2 font-mono text-[13px] md:mt-0"><span className="font-sans text-[#625E68] md:hidden">Recorded value · </span>{row.value}</span>
@@ -212,12 +212,12 @@ export function VariantsView({ ws, compact = false }: { ws: WsCase; compact?: bo
       <h2 className={sectionTitle}>Tumor variants</h2>
       {ws.variants.length === 0 ? <p className={body}>No protein alteration was supplied for review.</p> : (
         <table aria-label="Tumor variants" className="mt-4 w-full border-collapse text-left text-[13px]">
-          <thead className={`border-b ${line}`}>
+          <thead className="border-b border-[#DCD7DF] bg-[#F7F5F8] text-xs font-medium text-[#625E68] [&_th]:px-3 [&_th]:py-2 [&_th]:font-medium">
             <tr>
-              <Th>Variant</Th>
-              <Th className="hidden md:table-cell">Protein change</Th>
-              <Th>Recorded evidence</Th>
-              <Th className="hidden md:table-cell">Targetability in this result</Th>
+              <th scope="col">Variant</th>
+              <th scope="col" className="hidden md:table-cell">Protein change</th>
+              <th scope="col">Recorded evidence</th>
+              <th scope="col" className="hidden md:table-cell">Targetability in this result</th>
             </tr>
           </thead>
           {ws.variants.map(v => {
@@ -225,16 +225,16 @@ export function VariantsView({ ws, compact = false }: { ws: WsCase; compact?: bo
             return (
               <tbody key={v.key} className={`border-b ${line}`}>
                 <tr className={open ? "bg-[#F4F0F7]" : ""}>
-                  <th scope="row" className="pr-2">
+                  <th scope="row" className="px-3">
                     <button type="button" aria-expanded={open} onClick={() => setSelected(open ? null : v.key)}
-                      className={`inline-flex min-h-11 items-center gap-2 rounded px-1 text-left font-semibold text-[#513B70] hover:underline ${focus}`}>
+                      className={`inline-flex min-h-11 items-center gap-2 rounded text-left font-semibold text-[#513B70] hover:underline ${focus}`}>
                       <ChevronRight size={14} aria-hidden="true" className={`shrink-0 motion-safe:transition-transform ${open ? "rotate-90" : ""}`} />
                       <span className="[overflow-wrap:anywhere]">{v.name}</span>
                     </button>
                   </th>
-                  <td className="hidden break-all pr-3 font-mono md:table-cell">{v.hgvs}</td>
-                  <td>{v.level?.label ?? "See lookup status"}</td>
-                  <td className="hidden md:table-cell">{v.targetable === null ? "Not recorded" : v.targetable ? "Targetable" : "Not targetable"}</td>
+                  <td className="hidden break-all px-3 font-mono md:table-cell">{v.hgvs}</td>
+                  <td className="px-3">{v.level?.label ?? "See lookup status"}</td>
+                  <td className="hidden px-3 md:table-cell">{v.targetable === null ? "Not recorded" : v.targetable ? "Targetable" : "Not targetable"}</td>
                 </tr>
                 {open && <tr><td colSpan={4}><VariantInspector v={v} ws={ws} /></td></tr>}
               </tbody>
@@ -284,10 +284,10 @@ export function GapsView({ ws, compact = false }: { ws: WsCase; compact?: boolea
           </button>
         ))}
       </div>
-      <div className="divide-y divide-[#E2DEE6] border-t border-[#DCD7DF]">
+      <div className="divide-y divide-[#DCD7DF] border-t border-[#DCD7DF]">
         {visible.map(group => (
-          <section key={group.state} className="grid gap-x-5 py-4 sm:grid-cols-[136px_minmax(0,1fr)]">
-            <h3 className={`mb-2 flex items-baseline gap-2 text-[13px] font-semibold ${group.state === "lookup_failed" ? "text-[#855B18]" : ink}`}>{GAP_LABELS[group.state]}<span className="font-mono text-[11px] font-normal text-[#625E68]">{group.items.length}</span></h3>
+          <section key={group.state} className="grid gap-x-5 px-3 py-3 sm:grid-cols-[136px_minmax(0,1fr)]">
+            <h3 className={`mb-2 flex items-baseline gap-2 text-xs font-medium ${group.state === "lookup_failed" ? "text-[#855B18]" : ink}`}>{GAP_LABELS[group.state]}<span className="font-mono text-[11px] font-normal text-[#625E68]">{group.items.length}</span></h3>
             <ul className="divide-y divide-[#EBE8EC]">
               {group.items.map(g => <li key={`${g.item}-${g.scope}`} className="grid gap-x-5 gap-y-1 py-2.5 first:pt-0 last:pb-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
                 <div><span className="block text-[13px] font-medium">{g.item}</span><span className="break-words text-xs text-[#625E68]">{g.scope ?? "Case"}</span></div>

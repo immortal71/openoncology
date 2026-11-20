@@ -600,3 +600,8 @@ number and was confirmed untouched.
 - Replaced the variant sidebar with an inline variant selector above the full-width inspector.
 - Replaced the inline variant selector with an initially collapsed comparison table and inline evidence disclosures.
 - Refined the Atlas hero reading order and condensed its mobile demo pathway.
+- Aligned the candidate score column and inspector spacing; matched evidence table headers, insets and dividers.
+- Grouped candidate and tumor context, scoped variant evidence to matching terms, and placed ranking interpretation and near-ties beside the selected score.
+- Show near-tied candidates side by side in the inspector with their recorded scores, matched terms and sources.
+- Made near-tied candidates the opening comparison in the inspector, with paired drug headings and indication qualifiers above individual findings.
+- Restored the selected candidate as the inspector heading and moved the near-tie comparison into a compact disclosure.
