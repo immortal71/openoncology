@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 185 780 295" font-family="Inter, Arial, sans-serif">
+  <defs>
+    <linearGradient id="stone" x2="100%" y2="100%"><stop stop-color="#77717f"/><stop offset="1" stop-color="#47424f"/></linearGradient>
+    <linearGradient id="lilac"><stop stop-color="#e9dcff"/><stop offset="1" stop-color="#b8a0df"/></linearGradient>
+    <filter id="shadow" x="-50%" y="-60%" width="220%" height="300%"><feDropShadow dx="7" dy="68" stdDeviation="12" flood-opacity=".25"/></filter>
+    <filter id="contact" x="-40%" y="-40%" width="200%" height="220%"><feDropShadow dx="3" dy="8" stdDeviation="4" flood-color="#302538" flood-opacity=".22"/></filter>
+  </defs>
+  <g transform="translate(52 382)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">10</text>
+  </g>
+  <g transform="translate(130 370)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">11</text>
+  </g>
+  <g transform="translate(208 265)" filter="url(#shadow)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#lilac)" stroke="#eee5ff"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#8468ac"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#a58bc6"/>
+    <text x="45" y="24" fill="#2b2039" font-size="17">12</text>
+  </g>
+  <g transform="translate(286 346)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">13</text>
+  </g>
+  <g transform="translate(364 334)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">14</text>
+  </g>
+  <g transform="translate(442 322)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">15</text>
+  </g>
+  <g transform="translate(520 310)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">16</text>
+  </g>
+  <g transform="translate(598 298)" filter="url(#contact)">
+    <path d="M0 0l68 -11 48 42 -68 11z" fill="url(#stone)" stroke="#827a8c"/>
+    <path d="M0 0l48 42v27L0 27z" fill="#37333f"/>
+    <path d="M48 42l68 -11v27l-68 11z" fill="#514a5b"/>
+    <text x="45" y="24" fill="#f7f3ff" font-size="17">17</text>
+  </g>
+</svg>

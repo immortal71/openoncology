@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -9,8 +10,8 @@ import { useGSAP } from "@gsap/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { EvidenceRibbon, type ThreadNode } from "@/components/atlas/evidence-ribbon";
 import { ProductShot, type ShotData } from "@/components/atlas/product-shot";
-import { StepContent, type StepVisualData } from "@/components/atlas/step-visuals";
-import { CarryLines, ClosingThread, PageSpine, StoryThread } from "@/components/atlas/story-thread";
+import type { StepVisualData } from "@/components/atlas/step-visuals";
+import { ClosingThread, PageSpine, StoryThread } from "@/components/atlas/story-thread";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 
@@ -88,43 +89,25 @@ const STEPS = [
   },
 ] as const;
 
-function Workflow({ data }: { data: StepVisualData }) {
-  const panel = useRef<HTMLDivElement>(null);
+function Workflow() {
   return (
-    <Rise className="mt-12 lg:mt-16">
-      <div
-        ref={panel}
-        className="relative overflow-hidden rounded-[14px] border border-[#E2DEE6] bg-white shadow-[0_1px_2px_rgba(37,32,47,0.06),0_12px_32px_rgba(37,32,47,0.06)]"
-      >
-        <div className="flex items-center justify-between gap-4 border-b border-[#E2DEE6] px-5 py-3 text-[13px]">
-          <span className="truncate font-medium text-[#24212B]">{data.variant} · from variant calls to clinical review</span>
-          <span className="hidden shrink-0 rounded-full border border-[#E2DEE6] px-2.5 py-0.5 text-[12px] text-[#625E68] sm:inline">Demo case</span>
-        </div>
-        <ol className="grid lg:grid-cols-3">
-          {STEPS.map((s, i) => (
-            <li key={s.key} className={`flex min-w-0 flex-col p-6 lg:p-7 ${i > 0 ? "border-t border-[#E2DEE6] lg:border-l lg:border-t-0" : ""}`}>
-              <div className="flex items-center gap-3">
-                <span
-                  aria-hidden="true"
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#69518C] font-mono text-[12px] font-medium text-white"
-                >
-                  {i + 1}
-                </span>
-                <h3 className="min-w-0 flex-1 text-[19px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">
-                  <span className="sr-only">Step {i + 1}: </span>
-                  {s.title}
-                </h3>
-                <span className={`hidden shrink-0 sm:inline ${label}`}>{s.caption}</span>
-              </div>
-              <div className="-mx-3 mb-6 mt-5">
-                <StepContent kind={s.key} data={data} bare />
-              </div>
-              <p className="mt-auto max-w-[42ch] border-t border-[#E2DEE6] pt-4 text-pretty text-[14.5px] leading-[1.6] text-[#625E68]">{s.body}</p>
-            </li>
-          ))}
-        </ol>
-        <CarryLines wrap={panel} />
-      </div>
+    <Rise className="mt-12 grid items-center gap-8 lg:mt-16 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
+      <Image
+        src="/kras-g12c-panel.svg"
+        alt="KRAS G12C. Residue 12 is raised in violet among P-loop residues 10 to 17, marking the glycine-to-cysteine substitution."
+        width={780}
+        height={295}
+        unoptimized
+        className="h-auto w-full"
+      />
+      <ol className="divide-y divide-[#DCD7DF]">
+        {STEPS.map((step) => (
+          <li key={step.key} className="py-5 first:pt-0 last:pb-0">
+            <h3 className="text-[21px] font-semibold tracking-[-0.025em] text-[#24212B]">{step.title}</h3>
+            <p className="mt-2 max-w-[42ch] text-[15px] leading-relaxed text-[#625E68]">{step.body}</p>
+          </li>
+        ))}
+      </ol>
     </Rise>
   );
 }
@@ -406,7 +389,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           >
             OpenOncology checks OncoKB, CIViC, OpenTargets and its other sources for each variant, ranks the drugs it finds and writes down what it couldn&apos;t find. One case, in three steps:
           </SectionHead>
-          <Workflow data={data.steps} />
+          <Workflow />
           <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-6">
             <Rise className="h-full min-w-0">
               <article id="labs" className="flex h-full min-w-0 scroll-mt-[88px] flex-col rounded-[14px] outline-offset-[10px] target:outline target:outline-2 target:outline-[#69518C]">
