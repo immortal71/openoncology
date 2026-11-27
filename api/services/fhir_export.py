@@ -127,7 +127,7 @@ def build_diagnostic_report(
                 "coding": [
                     {
                         "system": "http://loinc.org",
-                        "code": "LA6671-7" if has_targetable else "LA6675-8",
+                        "code": "LA6668-3" if has_targetable else "LA6675-8",
                         "display": "Pathogenic" if has_targetable else "Benign/Likely benign",
                     }
                 ]
@@ -356,9 +356,9 @@ def _interpretation_coding(classification: str, oncokb_level: str) -> tuple[str,
     """Return (LOINC code, display) for clinical interpretation."""
     cl = classification.lower()
     if cl in ("pathogenic", "likely_pathogenic") or oncokb_level in ("1", "2", "3A"):
-        return "LA6671-7", "Pathogenic"
+        return "LA6668-3", "Pathogenic"
     if cl == "likely_benign":
-        return "LA6675-8", "Likely benign"
+        return "LA26334-5", "Likely benign"
     if cl == "benign":
         return "LA6675-8", "Benign"
-    return "LA6682-4", "Uncertain significance"
+    return "LA26333-7", "Uncertain significance"
