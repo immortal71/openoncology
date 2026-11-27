@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
@@ -10,12 +10,14 @@ import { useGSAP } from "@gsap/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { EvidenceRibbon, type ThreadNode } from "@/components/atlas/evidence-ribbon";
 import { ProductShot, type ShotData } from "@/components/atlas/product-shot";
+import { WorkspaceLoop } from "@/components/atlas/product-loop";
 import type { StepVisualData } from "@/components/atlas/step-visuals";
-import { ClosingThread, PageSpine, StoryThread } from "@/components/atlas/story-thread";
+import { ClosingThread, StoryThread } from "@/components/atlas/story-thread";
+import { RuleTrace, type TraceMode } from "@/components/atlas/rule-trace";
+import { CaseLoops } from "@/components/atlas/case-loops";
 
 gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 
-export type CaseFact = { k: string; v: string; missing?: boolean };
 
 export type AtlasData = {
   demoHref: string;
@@ -23,9 +25,6 @@ export type AtlasData = {
   steps: StepVisualData;
   heroNodes: ThreadNode[];
   compactNodes: ThreadNode[];
-  labFacts: CaseFact[];
-  clinicFacts: CaseFact[];
-  clinicMore: number;
   ladder: { code: string; names: string } | null;
   usedSources: string[];
 };
@@ -41,6 +40,11 @@ const SOURCES = [
   { name: "AlphaMissense", kind: "Missense prediction" },
 ];
 const CTA_LABEL = "Get early access";
+
+function heroStrands(sources: string[]) {
+  const has = (name: string) => sources.some((s) => s === name || s.startsWith(`${name} `));
+  return { used: SOURCES.filter((s) => has(s.name)).map((s) => s.name), absent: SOURCES.filter((s) => !has(s.name)).map((s) => s.name) };
+}
 
 const wrap = "mx-auto w-full max-w-[1280px] px-5 md:px-10";
 const h2 = "text-balance text-[30px] font-semibold leading-[1.1] tracking-[-0.035em] text-[#24212B] sm:text-[36px] lg:text-[40px] lg:leading-[46px]";
@@ -94,7 +98,7 @@ function Workflow() {
     <Rise className="mt-12 grid items-center gap-8 lg:mt-16 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
       <Image
         src="/kras-g12c-panel.svg"
-        alt="KRAS G12C. Residue 12 is raised in violet among P-loop residues 10 to 17, marking the glycine-to-cysteine substitution."
+        alt="KRAS G12C. The eight P-loop residues read G A C G V G K S. The raised violet C marks the glycine-to-cysteine substitution at residue 12."
         width={780}
         height={295}
         unoptimized
@@ -112,88 +116,14 @@ function Workflow() {
   );
 }
 
-function FieldsCard({ vcf, missing }: { vcf: StepVisualData["vcf"]; missing: CaseFact[] }) {
-  return (
-    <div className="mt-6 flex min-w-0 flex-col rounded-[12px] border border-[#E2DEE6] bg-white shadow-[0_1px_2px_rgba(37,32,47,0.06),0_12px_32px_rgba(37,32,47,0.06)]">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-[#E2DEE6] px-5 py-3">
-        <span className="font-mono text-[12px] uppercase tracking-[0.06em] text-[#5B5566]">Variant calls, as received</span>
-        <span className="whitespace-nowrap font-mono text-[12px] text-[#5B5566]">Demo case</span>
-      </div>
-      <div className="px-3 py-3">
-        <table className="w-full border-collapse font-mono text-[13px]">
-          <caption className="sr-only">Variant calls as received, with allele fraction and read depth missing from this result</caption>
-          <thead>
-            <tr className="text-left text-[#625E68]">
-              {[...vcf.columns, "VAF", "DEPTH"].map((c, j) => (
-                <th key={c} scope="col" className={`px-2 pb-2 pt-1 font-normal ${j === 1 ? "hidden xl:table-cell" : ""}`}>
-                  {c}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {vcf.rows.map((r, i) => (
-              <tr key={r.join("-")} data-spine-dock={i === vcf.highlight ? "" : undefined} className={i === vcf.highlight ? "font-medium text-[#24212B]" : "text-[#625E68]"}>
-                {r.map((v, j) => (
-                  <td key={j} className={`px-2 py-2.5 ${j === 1 ? "hidden xl:table-cell" : ""}`}>
-                    {v}
-                  </td>
-                ))}
-                {["VAF", "DEPTH"].map((c) => (
-                  <td key={c} className="px-1 py-1.5">
-                    <span className="block whitespace-nowrap rounded-[5px] border border-dashed border-[#B5B0BA] px-2 py-1 text-center text-[12px] font-normal text-[#625E68]">
-                      <span className="xl:hidden">missing</span>
-                      <span className="hidden xl:inline">not in result</span>
-                    </span>
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="mt-auto flex items-start gap-2 border-t border-[#E2DEE6] px-5 py-3.5 text-[13.5px] leading-[20px] text-[#24212B]">
-        <span aria-hidden="true" className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#AD7629]" />
-        <span>
-          {missing.length} fields missing: VAF and read depth aren&apos;t part of this result. Add them to the next run.
-        </span>
-      </p>
-    </div>
-  );
-}
-
-function CheckRail({ rows, more }: { rows: CaseFact[]; more: number }) {
-  return (
-    <div className="mt-6 flex flex-1 flex-col rounded-[12px] border border-[#E2DEE6] bg-white shadow-[0_1px_2px_rgba(37,32,47,0.06),0_12px_32px_rgba(37,32,47,0.06)]">
-      <p className="border-b border-[#E2DEE6] px-5 py-3 font-mono text-[12px] uppercase tracking-[0.06em] text-[#5B5566]">Before any treatment decision</p>
-      <ol className="relative flex flex-1 flex-col px-5 py-4">
-        <span aria-hidden="true" className="absolute bottom-[34px] left-[24px] top-[26px] w-[1.5px] bg-[#69518C]/35" />
-        {rows.map((r) => (
-          <li key={r.k} className="relative flex items-center gap-3 py-2">
-            <span aria-hidden="true" className="relative z-10 h-2.5 w-2.5 shrink-0 rounded-full border-2 border-white bg-[#69518C]" />
-            <span className="min-w-0 flex-1 text-[14px] text-[#24212B]">{r.k}</span>
-            <span className="shrink-0 rounded-full bg-[#ECEAEF] px-2.5 py-1 text-[12px] font-medium leading-none text-[#3A3542]">{r.v}</span>
-          </li>
-        ))}
-        {more > 0 ? <li className="py-1 pl-[22px] text-[13px] text-[#625E68]">and {more} more in the full case</li> : null}
-        <li className="relative mt-auto flex items-center gap-3 pt-3">
-          <span aria-hidden="true" className="relative z-10 h-3 w-3 shrink-0 rounded-full border-2 border-[#69518C] bg-white" />
-          <span className="min-w-0 flex-1 text-[14.5px] font-semibold text-[#24212B]">Oncologist sign-off</span>
-          <span className="shrink-0 rounded-full border border-[#B5B0BA] bg-white px-2.5 py-1 text-[12.5px] font-medium leading-none text-[#3A3542]">Pending</span>
-        </li>
-      </ol>
-    </div>
-  );
-}
-
 const LEVELS = [
-  { code: "1", group: 0 },
-  { code: "2", group: 0 },
-  { code: "3A", group: 1 },
-  { code: "3B", group: 1 },
-  { code: "4", group: 1 },
-  { code: "R1", group: 2 },
-  { code: "R2", group: 2 },
+  { code: "1", group: 0, value: "1.00" },
+  { code: "2", group: 0, value: "0.80" },
+  { code: "3A", group: 1, value: "0.60" },
+  { code: "3B", group: 1, value: "0.40" },
+  { code: "4", group: 1, value: "0.20" },
+  { code: "R1", group: 2, value: "0.10" },
+  { code: "R2", group: 2, value: "0.05" },
 ];
 const GROUPS = [
   { tier: "Standard care", note: "Ranked as approved options for this context" },
@@ -201,9 +131,15 @@ const GROUPS = [
   { tier: "Resistance", note: "Blocks the drug from ranking" },
 ];
 
-function Ladder({ mark, used: raw }: { mark: AtlasData["ladder"]; used: string[] }) {
+function Ladder({ mark, used: raw, shot }: { mark: AtlasData["ladder"]; used: string[]; shot: ShotData }) {
   const used = raw.filter((n) => SOURCES.some((s) => s.name === n));
   const at = mark ? LEVELS.findIndex((l) => l.code === mark.code) : -1;
+  const [mode, setMode] = useState<TraceMode>("level1");
+  const cases = shot.ws.candidates.map((c) => ({ name: c.name, score: c.score?.toFixed(2) ?? "—", tag: c.tier === "fda_approved" && mark ? `OncoKB Level ${mark.code}` : "Repurposing candidate" }));
+  const pair = shot.ws.nearTies[0];
+  const ia = pair ? cases.findIndex((c) => c.name === pair.above) : -1;
+  const ib = pair ? cases.findIndex((c) => c.name === pair.name) : -1;
+  const tie = ia >= 0 && ib === ia + 1 ? { at: [ia, ib] as [number, number], gap: (Number(cases[ia].score) - Number(cases[ib].score)).toFixed(2) } : null;
   return (
     <figure className="mt-14">
       <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
@@ -228,12 +164,20 @@ function Ladder({ mark, used: raw }: { mark: AtlasData["ladder"]; used: string[]
                 key={l.code}
                 className={`grid flex-1 place-items-center font-mono text-[14px] font-medium ${i > 0 ? "border-l border-[#25202F]" : ""} ${
                   l.group === 0 ? "bg-[#5E4D80] text-[#E6DEFA]" : l.group === 1 ? "bg-[#3B3350] text-[#CFC4EC]" : "bg-[#C9776A]/[0.14] font-semibold text-[#F4C7BC] shadow-[inset_0_0_0_1.5px_rgba(201,119,106,0.9)]"
-                } ${i === at ? "!bg-[#DCD2F7] !text-[#25202F] font-semibold" : ""}`}
+                } ${i === at ? "!bg-[#DCD2F7] !text-[#25202F] font-semibold" : ""} ${mode === "r1" && l.code === "R1" ? "!bg-[#C9776A]/[0.32] !shadow-[inset_0_0_0_2px_#C9776A]" : ""} transition-[background-color,box-shadow] duration-300`}
               >
                 {l.code}
               </span>
             ))}
           </div>
+          <div className="mt-2 grid grid-cols-7" aria-label="Step 1 normalised values">
+            {LEVELS.map((l) => (
+              <span key={l.code} data-ladder-value="" className="text-center font-mono text-[12px] tabular-nums text-[#C7BBF2]">
+                {l.value}
+              </span>
+            ))}
+          </div>
+          <p className="mt-1 text-right text-[12px] text-[#F7F5F0]/50">Step 1 values, as published</p>
           <div className="mt-4 grid grid-cols-7 gap-0">
             {GROUPS.map((g, i) => (
               <div key={g.tier} className={`pr-4 ${i === 0 ? "col-span-2" : i === 1 ? "col-span-3" : "col-span-2"}`}>
@@ -244,6 +188,7 @@ function Ladder({ mark, used: raw }: { mark: AtlasData["ladder"]; used: string[]
           </div>
         </div>
       </div>
+      <RuleTrace mode={mode} onMode={setMode} cases={cases} tie={tie} />
       <dl className="mt-8 grid gap-6 border-t border-[#F7F5F0]/14 pt-6 lg:grid-cols-12 lg:gap-6">
         <div className="lg:col-span-6">
           <dt className="border-l-2 border-[#F7F5F0] pl-3 text-[12.5px] font-semibold uppercase tracking-[0.06em] text-[#F7F5F0]">Not clinically validated</dt>
@@ -307,7 +252,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           <div ref={art} data-art className="pointer-events-none absolute inset-y-0 left-[56%] right-0 hidden [mask-image:linear-gradient(to_bottom,transparent,#000_10%,#000_58%,transparent_94%)] lg:block">
             <EvidenceRibbon layout="hero" threads={56} weight={0.6} trace={false} className="absolute inset-0" />
           </div>
-          <div className={`${wrap} pointer-events-none absolute inset-x-0 bottom-3 hidden justify-end lg:flex`}>
+          <div className={`${wrap} pointer-events-none absolute inset-x-0 top-5 hidden justify-end lg:flex`}>
             <p className="text-[12px] leading-[18px] text-[#625E68]">Illustrative evidence pathway · demo case</p>
           </div>
           <div className={`${wrap} pointer-events-none relative flex flex-col justify-center pb-7 pt-10 lg:h-[clamp(470px,calc(100svh-340px),560px)] lg:pb-10 lg:pt-2`}>
@@ -363,14 +308,18 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             </ol>
           </div>
         </section>
-        <StoryThread wrap={story} art={art} nodes={data.heroNodes} />
+        <StoryThread wrap={story} art={art} nodes={data.heroNodes} strands={heroStrands(data.shot.list[0]?.sources ?? [])} />
 
         <section id="product" aria-labelledby="proof-title" className="relative z-10 scroll-mt-[88px] pb-16 pt-6 lg:pb-24 lg:pt-0">
           <div className={wrap}>
-            <h2 id="proof-title" className="sr-only">
-              See why a candidate appears in the demo case
-            </h2>
-            <ProductShot data={data.shot} />
+            <div className="grid items-center gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+              <div className="max-w-[390px]">
+                <h2 id="proof-title" className="text-[32px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#24212B]">Why did Sotorasib rank first?</h2>
+                <p className="mt-5 text-[16px] leading-7 text-[#625E68]">In the KRAS G12C demo case, two candidates rank closely. Select a candidate to see the evidence behind its score.</p>
+                <Link href="/lab/results" className="mt-6 inline-block text-sm font-medium text-[#5B4381] underline underline-offset-4">Explore the demo case →</Link>
+              </div>
+              <ProductShot data={data.shot} />
+            </div>
           </div>
         </section>
       </div>
@@ -390,21 +339,14 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             OpenOncology checks OncoKB, CIViC, OpenTargets and its other sources for each variant, ranks the drugs it finds and writes down what it couldn&apos;t find. One case, in three steps:
           </SectionHead>
           <Workflow />
-          <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-6">
-            <Rise className="h-full min-w-0">
-              <article id="labs" className="flex h-full min-w-0 scroll-mt-[88px] flex-col rounded-[14px] outline-offset-[10px] target:outline target:outline-2 target:outline-[#69518C]">
-                <h3 className="text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What your lab&apos;s next sequencing run should add.</h3>
-                <p className="mt-2 max-w-[46ch] text-[15.5px] leading-[1.6] text-[#4A4652]">The same calls as step 1, with the fields this result doesn&apos;t carry left visibly empty.</p>
-                <FieldsCard vcf={data.steps.vcf} missing={data.labFacts} />
-              </article>
-            </Rise>
-            <Rise className="h-full min-w-0">
-              <article id="hospitals" className="flex h-full min-w-0 scroll-mt-[88px] flex-col rounded-[14px] outline-offset-[10px] target:outline target:outline-2 target:outline-[#69518C]">
-                <h3 className="text-balance text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-[#24212B]">What your hospital team checks before acting.</h3>
-                <p className="mt-2 max-w-[46ch] text-[15.5px] leading-[1.6] text-[#4A4652]">Evidence that wasn&apos;t recorded or assessed, ending at the person who decides.</p>
-                <CheckRail rows={data.clinicFacts} more={data.clinicMore} />
-              </article>
-            </Rise>
+          <CaseLoops ws={data.shot.ws} />
+        </div>
+      </section>
+
+            <section id="workspace" data-dark aria-labelledby="workspace-title" className="scroll-mt-[88px] bg-[#151419] py-20 lg:py-28">
+        <div className={wrap}>
+          <div className="lg:px-12">
+            <WorkspaceLoop data={data.shot} />
           </div>
         </div>
       </section>
@@ -415,7 +357,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
             Drugs are grouped by their OncoKB level, then ranked within the group by a weighted evidence score. The figure shows the mapping; its limits follow, starting with: not clinically validated.
           </SectionHead>
           <Rise>
-            <Ladder mark={data.ladder} used={data.usedSources} />
+            <Ladder mark={data.ladder} used={data.usedSources} shot={data.shot} />
           </Rise>
           <ul className="mt-12 grid border-t border-[#F7F5F0]/14 lg:grid-cols-3">
             {[
@@ -552,7 +494,7 @@ export function AtlasHome({ data }: { data: AtlasData }) {
           <p className={`${wrap} py-5 text-[13px] leading-[1.6] text-[#B9B1C9]`}>MIT license · Research prototype, not a medical device · Every result needs oncologist review · The demo is a sample case, not a real patient</p>
         </div>
       </footer>
-      <PageSpine root={root} />
+
     </div>
   );
 }

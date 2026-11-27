@@ -205,3 +205,12 @@
     animation-duration: 0s;
   }
 }
+@keyframes oo-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes oo-row-flash {
+  0% { background-color: #4b3b5c; box-shadow: inset 0 0 0 1px rgba(201, 170, 222, 0.9); }
+  100% { background-color: #302936; box-shadow: inset 0 0 0 1px rgba(201, 170, 222, 0); }
+}

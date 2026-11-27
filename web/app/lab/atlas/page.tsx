@@ -4,12 +4,12 @@ import { LenisScroll } from "@/components/marketing/lenis-scroll";
 import { AtlasHome } from "@/components/atlas/atlas-home";
 import { atlasSans } from "@/lib/atlas-font";
 import { DEMO_REPURPOSING, DEMO_RESULTS } from "@/lib/demo-data";
-import { buildCase, GAP_LABELS } from "@/lib/workspace";
+import { buildCase } from "@/lib/workspace";
 
 export const metadata: Metadata = { title: "Evidence Atlas | OpenOncology", robots: { index: false, follow: false } };
 
 const CASE_HREF = "/lab/results";
-const SEQUENCING = new Set(["Allele fraction (VAF)", "Read depth"]);
+const KRAS_G12C_ROW: Record<string, { label: string; value: string }> = { "KRAS G12C": { label: "VCF row · GRCh38", value: "chr12 25245351 C>A" } };
 
 export default function AtlasPage() {
   if (process.env.NODE_ENV === "production") notFound();
@@ -28,7 +28,6 @@ export default function AtlasPage() {
   const unresolved = ws.gaps.filter((g) => g.state === "not_supplied").map((g) => g.item);
   const leadVariant = ws.variants.find((v) => v.key === lead?.key);
   const tie = ws.nearTies[0];
-  const clinicGaps = ws.gaps.filter((g) => !SEQUENCING.has(g.item));
 
   return (
     <main id="main" className={atlasSans.variable}>
@@ -56,13 +55,10 @@ export default function AtlasPage() {
             ],
           },
           heroNodes: [
-            { step: 1, label: "Tumor variant", value: ws.title, sub: leadVariant?.hgvs, href: "#product", view: "variants" },
-            { step: 2, label: "Evidence", value: levelLabel, href: "#product", view: "sources" },
-            { step: 3, label: "Ranked drug", value: `${top?.name ?? "No candidate"} · rank 1`, sub: top?.matched.find((m) => /^[A-Z]+-\d+$/.test(m)), accent: true, href: "#product", view: "candidates" },
+            { step: 1, label: "Tumor variant", value: ws.title, sub: leadVariant?.hgvs, href: "#product", view: "variants", raw: KRAS_G12C_ROW[ws.title] },
+            { step: 2, label: "Evidence", value: levelLabel, sub: top?.sources.length ? `Sources: ${top.sources.map((x) => x.split(" ")[0]).join(", ")}` : undefined, href: "#product", view: "sources" },
+            { step: 3, label: "Ranked drug", value: `${top?.name ?? "No candidate"} · rank 1`, sub: top?.matched.find((m) => /^[A-Z]+-\d+$/.test(m)), accent: true, href: top ? `#shot-row-${top.id}` : "#product", view: "candidates", pick: top?.id },
           ],
-          labFacts: ws.gaps.filter((g) => SEQUENCING.has(g.item)).map((g) => ({ k: g.item, v: g.note, missing: true })),
-          clinicFacts: clinicGaps.slice(0, 4).map((g) => ({ k: g.scope ? `${g.item} · ${g.scope}` : g.item, v: GAP_LABELS[g.state] })),
-          clinicMore: Math.max(0, clinicGaps.length - 4),
           usedSources: [...new Set(DEMO_REPURPOSING.candidates.flatMap((c) => c.evidence_sources))],
           ladder: lead?.level ? { code: lead.level.code, names: list.map((c) => c.name).join(", ") } : null,
           compactNodes: [

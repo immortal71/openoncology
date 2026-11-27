@@ -11,7 +11,7 @@ export type Pt = { x: number; y: number };
 type Curve = [Pt, Pt, Pt, Pt];
 type Layout = "hero" | "compact" | "closing";
 
-export type ThreadNode = { label: string; value: string; accent?: boolean; href?: string; view?: string; step?: number; sub?: string };
+export type ThreadNode = { label: string; value: string; accent?: boolean; href?: string; view?: string; step?: number; sub?: string; pick?: string; raw?: { label: string; value: string } };
 
 const NO_NODES: ThreadNode[] = [];
 const UPPER = "#8270A4";
@@ -271,16 +271,63 @@ export function EvidenceRibbon({
   );
 }
 
-const LEADER: Record<"left" | "right" | "top" | "below", { line: string; box: string }> = {
+const LEADER: Record<Place, { line: string; box: string }> = {
   left: { line: "right-[10px] top-0 h-px w-6", box: "right-[38px] top-1/2 -translate-y-1/2 items-end text-right" },
   right: { line: "left-[6px] top-0 h-px w-8", box: "left-[42px] top-1/2 -translate-y-1/2 items-start text-left" },
   top: { line: "bottom-[6px] left-0 h-4 w-px", box: "bottom-[26px] left-1/2 -translate-x-1/2 items-center text-center" },
   below: { line: "left-0 top-[6px] h-4 w-px", box: "left-1/2 top-[26px] -translate-x-1/2 items-center text-center" },
+  aboveLeft: { line: "right-[6px] -top-[6px] h-px w-3 origin-right rotate-45", box: "right-[16px] bottom-[10px] items-end text-right" },
 };
 
-export function NodeMark({ node, at, ring, place, hot, onHot }: { node: ThreadNode; at: Pt; ring: boolean; place: "left" | "right" | "top" | "below"; hot: boolean; onHot: (on: boolean) => void }) {
+export type Place = "left" | "right" | "top" | "below" | "aboveLeft";
+
+const NOISE = "ACGT0123456789";
+const RESOLVE_DELAY = 450;
+const RESOLVE_MS = 700;
+
+function useResolve(raw: string | undefined, final: string) {
+  const [state, setState] = useState<{ text: string; done: boolean }>(() =>
+    !raw || window.matchMedia("(prefers-reduced-motion: reduce)").matches ? { text: final, done: true } : { text: raw, done: false }
+  );
+  useEffect(() => {
+    if (!raw || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setState({ text: final, done: true });
+      return;
+    }
+    let frame = 0;
+    let start = 0;
+    const tick = (now: number) => {
+      if (!start) start = now;
+      const p = Math.min(1, (now - start) / RESOLVE_MS);
+      if (p >= 1) {
+        setState({ text: final, done: true });
+        return;
+      }
+      const len = Math.round(raw.length + (final.length - raw.length) * p);
+      let text = "";
+      for (let i = 0; i < len; i++) {
+        const settled = p > ((i + 1) / len) * 0.85;
+        const ch = settled ? (final[i] ?? "") : NOISE[Math.floor(Math.random() * NOISE.length)];
+        text += final[i] === " " && settled ? " " : ch;
+      }
+      setState({ text, done: false });
+      frame = requestAnimationFrame(tick);
+    };
+    const wait = window.setTimeout(() => {
+      frame = requestAnimationFrame(tick);
+    }, RESOLVE_DELAY);
+    return () => {
+      window.clearTimeout(wait);
+      cancelAnimationFrame(frame);
+    };
+  }, [raw, final]);
+  return state;
+}
+
+export function NodeMark({ node, at, ring, place, hot, onHot, onPick }: { node: ThreadNode; at: Pt; ring: boolean; place: Place; hot: boolean; onHot: (on: boolean) => void; onPick?: (id: string) => void }) {
   const dot = ring ? "-left-[8px] -top-[8px] h-4 w-4 border-[3px] border-[#F7F5F0] bg-[#69518C]" : "-left-[4px] -top-[4px] h-2 w-2 border-[1.5px] border-[#F7F5F0] bg-[#69518C]";
   const side = LEADER[place];
+  const shown = useResolve(node.raw?.value, node.value);
   const body = (
     <>
       <span aria-hidden="true" className={`absolute rounded-full transition-transform duration-150 ${dot} ${hot ? "scale-125" : ""}`} />
@@ -290,27 +337,38 @@ export function NodeMark({ node, at, ring, place, hot, onHot }: { node: ThreadNo
       >
         <span className="font-mono text-[12px] uppercase leading-[16px] tracking-[0.06em] text-[#5B5566]">
           {node.step ? <span className="mr-2 text-[#69518C]">0{node.step}</span> : null}
-          {node.label}
+          {shown.done ? node.label : node.raw?.label}
         </span>
         <span className={`mt-0.5 inline-flex items-center gap-1 text-[16px] font-semibold leading-[22px] tracking-[-0.01em] ${node.accent ? "text-[#523E70]" : "text-[#24212B]"}`}>
-          <span className={node.href ? `underline-offset-[5px] ${hot ? "underline decoration-[#69518C]" : ""}` : ""}>{node.value}</span>
+          {shown.done ? (
+            <span className={node.href ? `underline-offset-[5px] ${hot ? "underline decoration-[#69518C]" : ""}` : ""}>{node.value}</span>
+          ) : (
+            <span aria-hidden="true" className="font-mono text-[14.5px] font-medium tracking-[0.01em] text-[#4A4652]">
+              {shown.text}
+            </span>
+          )}
           {node.href ? <ArrowDownRight size={15} strokeWidth={2} aria-hidden="true" className={`shrink-0 transition-[color,transform] duration-150 ${hot ? "translate-x-px translate-y-px text-[#69518C]" : "text-[#523E70]/85"}`} /> : null}
         </span>
-        {node.sub ? <span className="mt-0.5 font-mono text-[12.5px] leading-[16px] tracking-[0.02em] text-[#4A4652]">{node.sub}</span> : null}
+        {node.sub ? <span className={`mt-0.5 font-mono text-[12.5px] leading-[16px] tracking-[0.02em] text-[#4A4652] transition-opacity duration-300 ${shown.done ? "opacity-100" : "opacity-0"}`}>{node.sub}</span> : null}
       </span>
     </>
   );
   return node.href ? (
     <a
       href={node.href}
-      onClick={() => {
+      onClick={(e) => {
+        if (node.pick && onPick) {
+          e.preventDefault();
+          onPick(node.pick);
+          return;
+        }
         if (node.view) window.dispatchEvent(new CustomEvent("atlas:view", { detail: node.view }));
       }}
       onMouseEnter={() => onHot(true)}
       onMouseLeave={() => onHot(false)}
       onFocus={() => onHot(true)}
       onBlur={() => onHot(false)}
-      aria-label={`${node.label}: ${node.value}. Show in the product panel below`}
+      aria-label={node.pick ? `${node.label}: ${node.value}. Select it in the product panel below` : `${node.label}: ${node.value}. Show in the product panel below`}
       className="group pointer-events-auto absolute block h-11 w-11 -translate-x-1/2 -translate-y-1/2 rounded-full outline-none"
       style={{ left: at.x, top: at.y }}
     >

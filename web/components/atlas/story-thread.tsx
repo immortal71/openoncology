@@ -5,7 +5,24 @@ import gsap from "gsap";
 import { NodeMark, pinchPoint, type Pt, type ThreadNode } from "@/components/atlas/evidence-ribbon";
 
 const STROKE = "#69518C";
-const EVIDENCE_AT = 0.36;
+const EVIDENCE_AT = 0.5;
+const LIFT = 34;
+const MISSING = "#AD7629";
+const STRAND_GAP = 19;
+const STRAND_MIN = 14;
+const STRAND_TOP = 30;
+const FRAY = 16;
+
+export type LinkKey = "variant" | "evidence" | "drug";
+export type LinkDetail = { key: LinkKey | null; id?: string };
+const LINK_KEYS: LinkKey[] = ["variant", "evidence", "drug"];
+
+export function sendLink(detail: LinkDetail) {
+  window.dispatchEvent(new CustomEvent<LinkDetail>("atlas:link", { detail }));
+}
+
+type Strands = { used: string[]; absent: string[] };
+type Frayed = { braids: string[]; loose: { name: string; d: string; end: Pt; hairs: string }[]; gap: number } | null;
 
 type Geo = { w: number; h: number; d: string; top: number; entry: number; start: Pt };
 
@@ -32,7 +49,7 @@ function useDraw(path: React.RefObject<SVGPathElement | null>, ready: boolean, d
           io.disconnect();
         }
       },
-      { threshold: 0.45 }
+      { threshold: 0, rootMargin: "0px 0px -15% 0px" }
     );
     io.observe(trigger.current);
     return () => {
@@ -42,11 +59,32 @@ function useDraw(path: React.RefObject<SVGPathElement | null>, ready: boolean, d
   }, [path, ready, delay, trigger, duration]);
 }
 
-export function StoryThread({ wrap, art, nodes }: { wrap: React.RefObject<HTMLElement | null>; art: React.RefObject<HTMLElement | null>; nodes: ThreadNode[] }) {
+export function StoryThread({ wrap, art, nodes, strands }: { wrap: React.RefObject<HTMLElement | null>; art: React.RefObject<HTMLElement | null>; nodes: ThreadNode[]; strands?: Strands }) {
   const path = useRef<SVGPathElement>(null);
+  const pulse = useRef<SVGGElement>(null);
+  const fray = useRef<SVGGElement>(null);
+  const [frayed, setFrayed] = useState<Frayed>(null);
+  const used = strands?.used.length ?? 0;
+  const absent = strands?.absent.join("|") ?? "";
   const [geo, setGeo] = useState<Geo | null>(null);
   const [mid, setMid] = useState<Pt | null>(null);
   const [hot, setHot] = useState<number | null>(null);
+  const drugId = nodes[2]?.pick;
+
+  useEffect(() => {
+    const onLink = (e: Event) => {
+      const { key, id } = (e as CustomEvent<LinkDetail>).detail;
+      if (!key || (key === "drug" && id !== drugId)) {
+        setHot(null);
+        return;
+      }
+      setHot(LINK_KEYS.indexOf(key));
+    };
+    window.addEventListener("atlas:link", onLink);
+    return () => window.removeEventListener("atlas:link", onLink);
+  }, [drugId]);
+
+  const link = (i: number) => (on: boolean) => sendLink(on ? { key: LINK_KEYS[i], id: i === 2 ? drugId : undefined } : { key: null });
 
   useEffect(() => {
     const root = wrap.current;
@@ -67,7 +105,7 @@ export function StoryThread({ wrap, art, nodes }: { wrap: React.RefObject<HTMLEl
       const x = a.left - o.left;
       const top = frame.getBoundingClientRect().top - o.top;
       const panel = a.top - o.top;
-      const d = `M${s.x.toFixed(1)} ${s.y.toFixed(1)} C${(s.x - (s.x - x) * 0.42).toFixed(1)} ${(s.y + 18).toFixed(1)} ${x.toFixed(1)} ${(top - (top - s.y) * 0.62).toFixed(1)} ${x.toFixed(1)} ${top.toFixed(1)} V${panel.toFixed(1)}`;
+      const d = `M${s.x.toFixed(1)} ${s.y.toFixed(1)} C${(s.x - (s.x - x) * 0.6).toFixed(1)} ${(s.y - LIFT).toFixed(1)} ${x.toFixed(1)} ${(top - (top - s.y) * 0.78).toFixed(1)} ${x.toFixed(1)} ${top.toFixed(1)} V${panel.toFixed(1)}`;
       setGeo({ w: o.width, h: o.height, d, top, entry: x, start: s });
     };
     measure();
@@ -84,15 +122,106 @@ export function StoryThread({ wrap, art, nodes }: { wrap: React.RefObject<HTMLEl
       setMid(null);
       return;
     }
-    const pt = p.getPointAtLength(p.getTotalLength() * EVIDENCE_AT);
+    const len = p.getTotalLength();
+    const pt = p.getPointAtLength(len * EVIDENCE_AT);
     setMid({ x: pt.x, y: pt.y });
-  }, [geo]);
+    const names = absent ? absent.split("|") : [];
+    const samples = Array.from({ length: 121 }, (_, i) => p.getPointAtLength(len * (EVIDENCE_AT + ((1 - EVIDENCE_AT) * i) / 120)));
+    const gap = names.length > 1 ? Math.min(STRAND_GAP, (geo.top - 12 - (pt.y + STRAND_TOP)) / (names.length - 1)) : STRAND_GAP;
+    if (!names.length || gap < STRAND_MIN) {
+      setFrayed(null);
+      return;
+    }
+    const xAt = (y: number) => (samples.find((q) => q.y >= y) ?? samples[samples.length - 1]).x;
+    let walked = 0;
+    const braids = Array.from({ length: Math.min(used, 3) }, (_, k) => {
+      const side = (k % 2 ? -1 : 1) * (3 + Math.floor(k / 2) * 3);
+      walked = 0;
+      return samples
+        .map((q, i) => {
+          const a = samples[Math.max(0, i - 1)];
+          const b = samples[Math.min(samples.length - 1, i + 1)];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const n = Math.hypot(dx, dy) || 1;
+          if (i) walked += Math.hypot(q.x - samples[i - 1].x, q.y - samples[i - 1].y);
+          const o = side * Math.min(1, walked / 36);
+          return `${i ? "L" : "M"}${(q.x - (dy / n) * o).toFixed(1)} ${(q.y + (dx / n) * o).toFixed(1)}`;
+        })
+        .join(" ");
+    });
+    const edge = Math.min(...names.map((_, i) => xAt(pt.y + STRAND_TOP + i * gap))) - 46;
+    const loose = names.map((name, i) => {
+      const y0 = pt.y + 10 + i * 7;
+      const from = samples.find((q) => q.y >= y0) ?? samples[0];
+      const end = { x: edge, y: pt.y + STRAND_TOP + i * gap };
+      const d = `M${from.x.toFixed(1)} ${from.y.toFixed(1)} C${(from.x - 4).toFixed(1)} ${(from.y + 14).toFixed(1)} ${(end.x + 22).toFixed(1)} ${end.y.toFixed(1)} ${end.x.toFixed(1)} ${end.y.toFixed(1)}`;
+      return { name, d, end, hairs: `M${end.x.toFixed(1)} ${end.y.toFixed(1)} h-${FRAY}` };
+    });
+    setFrayed({ braids, loose, gap });
+  }, [geo, used, absent]);
 
-  useDraw(path, Boolean(geo), 0.6);
+  useEffect(() => {
+    const g = fray.current;
+    if (!g || !frayed) return;
+    const lines = g.querySelectorAll<SVGPathElement>("[data-strand]");
+    const tips = g.querySelectorAll<SVGElement>("[data-tip]");
+    const tags = wrap.current?.querySelectorAll<HTMLElement>("[data-fray-tag]") ?? [];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      lines.forEach((l) => (l.style.strokeDashoffset = "0"));
+      return;
+    }
+    const tl = gsap.timeline({ delay: 0.75 });
+    tl.fromTo(lines, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.out", stagger: 0.09 })
+      .fromTo(tips, { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.06 }, "-=0.35")
+      .fromTo(tags, { opacity: 0, x: 4 }, { opacity: 1, x: 0, duration: 0.35, ease: "power2.out", stagger: 0.06 }, "<");
+    return () => {
+      tl.kill();
+    };
+  }, [frayed, wrap]);
+
+  useDraw(path, Boolean(geo), 0.1, undefined, 1.1);
 
   if (!geo) return null;
   const [variant, evidence, drug] = nodes;
   const entry = { x: geo.entry, y: geo.top - 44 };
+
+  const pick = (id: string) => {
+    const send = (instant: boolean) => window.dispatchEvent(new CustomEvent("atlas:pick", { detail: { id, instant } }));
+    const p = path.current;
+    const dot = pulse.current;
+    if (!p || !dot || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      send(true);
+      return;
+    }
+    const len = p.getTotalLength();
+    let from = 0;
+    let best = Infinity;
+    for (let i = 0; i <= 80; i++) {
+      const q = p.getPointAtLength((len * i) / 80);
+      const d = Math.hypot(q.x - entry.x, q.y - entry.y);
+      if (d < best) {
+        best = d;
+        from = i / 80;
+      }
+    }
+    const run = { t: from };
+    gsap.killTweensOf(dot);
+    gsap.set(dot, { opacity: 1 });
+    gsap.to(run, {
+      t: 1,
+      duration: 0.65,
+      ease: "power2.in",
+      onUpdate: () => {
+        const q = p.getPointAtLength(len * run.t);
+        dot.setAttribute("transform", `translate(${q.x.toFixed(1)} ${q.y.toFixed(1)})`);
+      },
+      onComplete: () => {
+        gsap.to(dot, { opacity: 0, duration: 0.3, delay: 0.05 });
+        send(false);
+      },
+    });
+  };
 
   return (
     <div className="pointer-events-none absolute inset-0 z-20 hidden lg:block">
@@ -108,10 +237,44 @@ export function StoryThread({ wrap, art, nodes }: { wrap: React.RefObject<HTMLEl
           style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
           className="transition-[stroke-width] duration-150"
         />
+        {frayed ? (
+          <g ref={fray}>
+            {frayed.braids.map((d, i) => (
+              <path key={`b${i}`} data-strand="" d={d} pathLength={1} fill="none" stroke={STROKE} strokeOpacity={0.55} strokeWidth={1} style={{ strokeDasharray: 1, strokeDashoffset: 1 }} />
+            ))}
+            {frayed.loose.map((s) => (
+              <g key={s.name}>
+                <path data-strand="" d={s.d} pathLength={1} fill="none" stroke={MISSING} strokeOpacity={0.8} strokeWidth={1} style={{ strokeDasharray: 1, strokeDashoffset: 1 }} />
+                <path data-tip="" d={s.hairs} fill="none" stroke={MISSING} strokeOpacity={0.75} strokeWidth={1} strokeDasharray="4 2.5 2.5 3 1.2 3" />
+              </g>
+            ))}
+          </g>
+        ) : null}
+        <g ref={pulse} opacity={0}>
+          <circle r={10} fill={STROKE} opacity={0.18} />
+          <circle r={4.5} fill={STROKE} stroke="#F7F5F0" strokeWidth={1.5} />
+        </g>
       </svg>
-      {variant ? <NodeMark node={variant} at={geo.start} ring place="left" hot={hot === 0} onHot={(on) => setHot(on ? 0 : null)} /> : null}
-      {evidence && mid ? <NodeMark node={evidence} at={mid} ring={false} place="below" hot={hot === 1} onHot={(on) => setHot(on ? 1 : null)} /> : null}
-      {drug ? <NodeMark node={drug} at={entry} ring={false} place="right" hot={hot === 2} onHot={(on) => setHot(on ? 2 : null)} /> : null}
+      {variant ? <NodeMark node={variant} at={geo.start} ring place="left" hot={hot === 0} onHot={link(0)} /> : null}
+      {evidence && mid ? <NodeMark node={evidence} at={mid} ring={false} place="aboveLeft" hot={hot === 1} onHot={link(1)} /> : null}
+      {frayed ? (
+        <div aria-hidden="true" className="absolute flex -translate-x-full items-center gap-4" style={{ left: frayed.loose[0].end.x - FRAY - 6, top: frayed.loose[0].end.y - frayed.gap / 2 }}>
+          <span data-fray-tag="" className="text-right font-mono text-[11.5px] uppercase leading-[16px] tracking-[0.06em] text-[#5B5566]">
+            Not in
+            <br />
+            this result
+          </span>
+          <span data-fray-tag="" className="flex flex-col items-end font-mono text-[12px] text-[#86561A]">
+            {frayed.loose.map((s) => (
+              <span key={s.name} className="whitespace-nowrap" style={{ height: frayed.gap, lineHeight: `${frayed.gap}px` }}>
+                {s.name}
+              </span>
+            ))}
+          </span>
+        </div>
+      ) : null}
+      {strands?.absent.length ? <p className="sr-only">Sources not in this result: {strands.absent.join(", ")}.</p> : null}
+      {drug ? <NodeMark node={drug} at={entry} ring={false} place="right" hot={hot === 2} onHot={link(2)} onPick={pick} /> : null}
     </div>
   );
 }
