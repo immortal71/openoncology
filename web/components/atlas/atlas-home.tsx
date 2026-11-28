@@ -13,6 +13,7 @@ import { ProductShot, type ShotData } from "@/components/atlas/product-shot";
 import { WorkspaceLoop } from "@/components/atlas/product-loop";
 import type { StepVisualData } from "@/components/atlas/step-visuals";
 import { ClosingThread, StoryThread } from "@/components/atlas/story-thread";
+import { LadderTiers } from "@/components/atlas/ladder-tiers";
 import { RuleTrace, type TraceMode } from "@/components/atlas/rule-trace";
 import { CaseLoops } from "@/components/atlas/case-loops";
 
@@ -116,24 +117,8 @@ function Workflow() {
   );
 }
 
-const LEVELS = [
-  { code: "1", group: 0, value: "1.00" },
-  { code: "2", group: 0, value: "0.80" },
-  { code: "3A", group: 1, value: "0.60" },
-  { code: "3B", group: 1, value: "0.40" },
-  { code: "4", group: 1, value: "0.20" },
-  { code: "R1", group: 2, value: "0.10" },
-  { code: "R2", group: 2, value: "0.05" },
-];
-const GROUPS = [
-  { tier: "Standard care", note: "Ranked as approved options for this context" },
-  { tier: "Weaker or off-label evidence", note: "Shown as repurposing candidates" },
-  { tier: "Resistance", note: "Blocks the drug from ranking" },
-];
-
 function Ladder({ mark, used: raw, shot }: { mark: AtlasData["ladder"]; used: string[]; shot: ShotData }) {
   const used = raw.filter((n) => SOURCES.some((s) => s.name === n));
-  const at = mark ? LEVELS.findIndex((l) => l.code === mark.code) : -1;
   const [mode, setMode] = useState<TraceMode>("level1");
   const cases = shot.ws.candidates.map((c) => ({ name: c.name, score: c.score?.toFixed(2) ?? "—", tag: c.tier === "fda_approved" && mark ? `OncoKB Level ${mark.code}` : "Repurposing candidate" }));
   const pair = shot.ws.nearTies[0];
@@ -146,47 +131,8 @@ function Ladder({ mark, used: raw, shot }: { mark: AtlasData["ladder"]; used: st
         <span className="text-[15px] font-semibold text-[#F7F5F0]">How an OncoKB level decides where a drug lands</span>
         <span className="text-[13px] text-[#F7F5F0]/60">The mapping the ranking uses, as written in the methods</span>
       </figcaption>
-      <div className="mt-4 overflow-x-auto">
-        <div className="min-w-[640px]">
-          <div className="grid h-12 grid-cols-7">
-            {at >= 0 && mark ? (
-              <div className="relative" style={{ gridColumnStart: at + 1 }}>
-                <span className="absolute bottom-2 left-0 whitespace-nowrap text-[13px] font-medium text-[#F7F5F0]">
-                  This case · <span className="text-[#DCD2F7]">{mark.names}</span>
-                </span>
-                <span aria-hidden="true" className="absolute bottom-0 left-1/2 h-2 w-px bg-[#B9A8EC]" />
-              </div>
-            ) : null}
-          </div>
-          <div data-spine-dock="" className="flex h-12 overflow-hidden rounded-[10px] border border-[#F7F5F0]/15">
-            {LEVELS.map((l, i) => (
-              <span
-                key={l.code}
-                className={`grid flex-1 place-items-center font-mono text-[14px] font-medium ${i > 0 ? "border-l border-[#25202F]" : ""} ${
-                  l.group === 0 ? "bg-[#5E4D80] text-[#E6DEFA]" : l.group === 1 ? "bg-[#3B3350] text-[#CFC4EC]" : "bg-[#C9776A]/[0.14] font-semibold text-[#F4C7BC] shadow-[inset_0_0_0_1.5px_rgba(201,119,106,0.9)]"
-                } ${i === at ? "!bg-[#DCD2F7] !text-[#25202F] font-semibold" : ""} ${mode === "r1" && l.code === "R1" ? "!bg-[#C9776A]/[0.32] !shadow-[inset_0_0_0_2px_#C9776A]" : ""} transition-[background-color,box-shadow] duration-300`}
-              >
-                {l.code}
-              </span>
-            ))}
-          </div>
-          <div className="mt-2 grid grid-cols-7" aria-label="Step 1 normalised values">
-            {LEVELS.map((l) => (
-              <span key={l.code} data-ladder-value="" className="text-center font-mono text-[12px] tabular-nums text-[#C7BBF2]">
-                {l.value}
-              </span>
-            ))}
-          </div>
-          <p className="mt-1 text-right text-[12px] text-[#F7F5F0]/50">Step 1 values, as published</p>
-          <div className="mt-4 grid grid-cols-7 gap-0">
-            {GROUPS.map((g, i) => (
-              <div key={g.tier} className={`pr-4 ${i === 0 ? "col-span-2" : i === 1 ? "col-span-3" : "col-span-2"}`}>
-                <p className="text-[15px] font-semibold text-[#F7F5F0]">{g.tier}</p>
-                <p className="mt-0.5 text-[13.5px] leading-[20px] text-[#F7F5F0]/70">{g.note}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="mt-4">
+        <LadderTiers names={mark?.names ?? ""} level={mark?.code ?? null} r1={mode === "r1"} />
       </div>
       <RuleTrace mode={mode} onMode={setMode} cases={cases} tie={tie} />
       <dl className="mt-8 grid gap-6 border-t border-[#F7F5F0]/14 pt-6 lg:grid-cols-12 lg:gap-6">
